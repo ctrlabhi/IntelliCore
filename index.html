@@ -380,7 +380,7 @@
     }
 
     /* Hamburger Button */
-    .hamburger-btn {
+    /* .hamburger-btn {
       display: none;
       flex-direction: column;
       justify-content: center;
@@ -393,6 +393,27 @@
       gap: 5px;
       padding: 8px;
       z-index: 1100;
+    } */
+
+
+
+    /* Hamburger Button - Fully Interactive */
+    .hamburger-btn {
+      display: flex !important;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      border: 1px solid var(--border-glass);
+      background: rgba(13, 20, 44, 0.75);
+      gap: 5px;
+      padding: 8px;
+      z-index: 99999 !important;
+      position: relative;
+      pointer-events: auto !important;
+      cursor: pointer;
     }
 
     .hamburger-bar {
