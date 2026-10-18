@@ -2285,6 +2285,7 @@
     <div class="mobile-drawer-header" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.1);">
         <span style="color: #fff; font-size: 18px; font-weight: 600;">Menu</span>
         <button id="closeDrawerBtn" style="background: none; border: none; color: #fff; font-size: 26px; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
+      
     </div>
     <ul class="mobile-nav-list">
       <li><a href="#about" class="mobile-nav-link">Who We Are &amp; Vision <span>&rarr;</span></a></li>
@@ -3482,15 +3483,34 @@
     (function () {
       'use strict';
       
-// Mobile Menu Close Button Functionality
-    const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+// Mobile & Desktop Menu Toggle & Close Functionality
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
     const mobileDrawer = document.getElementById('mobileDrawer');
     const mobileOverlay = document.getElementById('mobileOverlay');
+    const closeDrawerBtn = document.getElementById('closeDrawerBtn');
 
-    if (closeDrawerBtn) {
+    if (hamburgerBtn && mobileDrawer) {
+        hamburgerBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            mobileDrawer.classList.toggle('active');
+            if (mobileOverlay) mobileOverlay.classList.toggle('active');
+            hamburgerBtn.classList.toggle('open');
+        });
+    }
+
+    if (closeDrawerBtn && mobileDrawer) {
         closeDrawerBtn.addEventListener('click', function() {
-            if (mobileDrawer) mobileDrawer.classList.remove('active');
+            mobileDrawer.classList.remove('active');
             if (mobileOverlay) mobileOverlay.classList.remove('active');
+            if (hamburgerBtn) hamburgerBtn.classList.remove('open');
+        });
+    }
+
+    if (mobileOverlay && mobileDrawer) {
+        mobileOverlay.addEventListener('click', function() {
+            mobileDrawer.classList.remove('active');
+            if (mobileOverlay) mobileOverlay.classList.remove('active');
+            if (hamburgerBtn) hamburgerBtn.classList.remove('open');
         });
     }
       
