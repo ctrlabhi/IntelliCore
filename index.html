@@ -380,7 +380,7 @@
     }
 
     /* Hamburger Button */
-    /* .hamburger-btn {
+    .hamburger-btn {
       display: none;
       flex-direction: column;
       justify-content: center;
@@ -393,12 +393,12 @@
       gap: 5px;
       padding: 8px;
       z-index: 1100;
-    } */
+    }
 
 
 
     /* Hamburger Button - Fully Interactive */
-    .hamburger-btn {
+    /* .hamburger-btn {
       display: flex !important;
       flex-direction: column;
       justify-content: center;
@@ -414,7 +414,7 @@
       position: relative;
       pointer-events: auto !important;
       cursor: pointer;
-    }
+    } */
 
     .hamburger-bar {
       width: 22px;
@@ -2301,11 +2301,11 @@
   </header>
 
   <!-- MOBILE SLIDE-IN NAVIGATION DRAWER -->
-  <div class="mobile-drawer-overlay" id="mobileOverlay"></div>
+  <!-- <div class="mobile-drawer-overlay" id="mobileOverlay"></div>
   <aside class="mobile-drawer" id="mobileDrawer" aria-label="Mobile Navigation Drawer">
     <div class="mobile-drawer-header" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.1);">
         <span style="color: #fff; font-size: 18px; font-weight: 600;">Menu</span>
-        <button id="closeDrawerBtn" style="background: none; border: none; color: #fff; font-size: 26px; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
+        <button id="closeDrawerBtn" style="background: none; border: none; color: #fff; font-size: 26px; cursor: pointer; padding: 0; line-height: 1;">&times;</button> -->
       
     </div>
     <ul class="mobile-nav-list">
@@ -3504,36 +3504,36 @@
     (function () {
       'use strict';
       
-// Mobile & Desktop Menu Toggle & Close Functionality
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
-    const mobileDrawer = document.getElementById('mobileDrawer');
-    const mobileOverlay = document.getElementById('mobileOverlay');
-    const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+// // Mobile & Desktop Menu Toggle & Close Functionality
+//     const hamburgerBtn = document.getElementById('hamburgerBtn');
+//     const mobileDrawer = document.getElementById('mobileDrawer');
+//     const mobileOverlay = document.getElementById('mobileOverlay');
+//     const closeDrawerBtn = document.getElementById('closeDrawerBtn');
 
-    if (hamburgerBtn && mobileDrawer) {
-        hamburgerBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            mobileDrawer.classList.toggle('active');
-            if (mobileOverlay) mobileOverlay.classList.toggle('active');
-            hamburgerBtn.classList.toggle('open');
-        });
-    }
+//     if (hamburgerBtn && mobileDrawer) {
+//         hamburgerBtn.addEventListener('click', function(e) {
+//             e.stopPropagation();
+//             mobileDrawer.classList.toggle('active');
+//             if (mobileOverlay) mobileOverlay.classList.toggle('active');
+//             hamburgerBtn.classList.toggle('open');
+//         });
+//     }
 
-    if (closeDrawerBtn && mobileDrawer) {
-        closeDrawerBtn.addEventListener('click', function() {
-            mobileDrawer.classList.remove('active');
-            if (mobileOverlay) mobileOverlay.classList.remove('active');
-            if (hamburgerBtn) hamburgerBtn.classList.remove('open');
-        });
-    }
+//     if (closeDrawerBtn && mobileDrawer) {
+//         closeDrawerBtn.addEventListener('click', function() {
+//             mobileDrawer.classList.remove('active');
+//             if (mobileOverlay) mobileOverlay.classList.remove('active');
+//             if (hamburgerBtn) hamburgerBtn.classList.remove('open');
+//         });
+//     }
 
-    if (mobileOverlay && mobileDrawer) {
-        mobileOverlay.addEventListener('click', function() {
-            mobileDrawer.classList.remove('active');
-            if (mobileOverlay) mobileOverlay.classList.remove('active');
-            if (hamburgerBtn) hamburgerBtn.classList.remove('open');
-        });
-    }
+//     if (mobileOverlay && mobileDrawer) {
+//         mobileOverlay.addEventListener('click', function() {
+//             mobileDrawer.classList.remove('active');
+//             if (mobileOverlay) mobileOverlay.classList.remove('active');
+//             if (hamburgerBtn) hamburgerBtn.classList.remove('open');
+//         });
+//     }
       
       /* ----------------------------------------------------------------------
          1. TOP SCROLL PROGRESS INDICATOR & 3. STICKY GLASSMORPHISM HEADER
