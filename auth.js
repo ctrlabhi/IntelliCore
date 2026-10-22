@@ -227,9 +227,10 @@ document.querySelectorAll("[data-dash-view]").forEach(button => {
   });
 });
 
+
 onAuthStateChanged(auth, user => {
   if (user && modal.classList.contains("is-open")) {
-    showDashboard(user);
+    window.location.replace("dashboard.html");
   }
 });
 
