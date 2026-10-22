@@ -15,7 +15,7 @@ import {
 
 // Firebase Console se apna exact config yahan paste karo.
 const firebaseConfig = {
-  apiKey: "PASTE_YOUR_API_KEY",
+  apiKey: "AIzaSyCEhvxTrpDORuCByXDtlgNNHbpa5fnuud0",
   authDomain: "intellicore-229.firebaseapp.com",
   projectId: "intellicore-229",
   storageBucket: "intellicore-229.firebasestorage.app",
