@@ -1,0 +1,387 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, follow">
+  <meta name="theme-color" content="#071426">
+
+  <title>404 | Page Not Found - IntelliCore</title>
+  <meta name="description" content="The page you are looking for could not be found. Return to IntelliCore.">
+
+  <style>
+    :root {
+      --bg: #071426;
+      --blue: #168cff;
+      --cyan: #00d9ff;
+      --text: #f3f7ff;
+      --muted: #a7b9d4;
+      --border: rgba(34, 183, 255, 0.32);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--bg);
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100svh;
+      overflow-x: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 20px;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse at 50% 45%,
+          rgba(0, 112, 255, 0.17), transparent 52%),
+        radial-gradient(ellipse at 10% 90%,
+          rgba(0, 217, 255, 0.07), transparent 40%),
+        linear-gradient(145deg, #081426, #061122 65%, #091a31);
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      text-align: center;
+      position: relative;
+      isolation: isolate;
+    }
+
+    /* Subtle background grid */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      opacity: 0.16;
+      background-image:
+        linear-gradient(rgba(65, 148, 255, 0.09) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(65, 148, 255, 0.09) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, transparent, black, transparent);
+    }
+
+    .orb {
+      position: fixed;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: #087bff;
+      filter: blur(130px);
+      opacity: 0.15;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .orb-one {
+      top: 5%;
+      left: -150px;
+    }
+
+    .orb-two {
+      bottom: 0;
+      right: -150px;
+      background: #00d9ff;
+    }
+
+    .stars {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 12px 3px rgba(0, 217, 255, 0.45);
+      animation: twinkle 3s ease-in-out infinite alternate;
+    }
+
+    .star:nth-child(1) { top: 15%; left: 17%; }
+    .star:nth-child(2) { top: 25%; right: 16%; animation-delay: 1s; }
+    .star:nth-child(3) { bottom: 22%; left: 12%; animation-delay: 1.5s; }
+    .star:nth-child(4) { bottom: 14%; right: 18%; animation-delay: .5s; }
+    .star:nth-child(5) { top: 50%; left: 7%; animation-delay: 2s; }
+
+    .container {
+      width: 100%;
+      max-width: 660px;
+      margin: auto;
+      padding: 25px 0;
+      animation: appear 0.8s ease both;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 28px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: clamp(22px, 5vw, 29px);
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .brand-name span {
+      color: var(--cyan);
+    }
+
+    .brand-mark {
+      width: 37px;
+      height: 37px;
+      border: 2px solid var(--cyan);
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+      color: var(--cyan);
+      font-size: 22px;
+      box-shadow: 0 0 20px rgba(0, 217, 255, 0.17);
+    }
+
+    .rocket {
+      font-size: 47px;
+      display: inline-block;
+      margin: 0 0 12px;
+      filter: drop-shadow(0 0 16px rgba(0, 185, 255, 0.45));
+      transform: rotate(-12deg);
+      animation: rocketFloat 3s ease-in-out infinite;
+    }
+
+    .eyebrow {
+      margin-bottom: 8px;
+      color: #83dfff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .number {
+      font-size: clamp(115px, 30vw, 205px);
+      font-weight: 900;
+      letter-spacing: -9px;
+      line-height: 0.95;
+      margin: 0 0 12px;
+      background: linear-gradient(
+        135deg,
+        #ffffff 5%,
+        #a4efff 34%,
+        #20cfff 64%,
+        #3584ff 100%
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 8px 26px rgba(0, 137, 255, 0.17));
+    }
+
+    h1 {
+      font-size: clamp(25px, 5vw, 38px);
+      line-height: 1.2;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+    }
+
+    .description {
+      max-width: 450px;
+      margin: 16px auto 29px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.8;
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 13px;
+      width: 100%;
+      max-width: 370px;
+      margin: 0 auto;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      min-height: 54px;
+      padding: 15px 24px;
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      background: rgba(9, 25, 49, 0.78);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.7px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.25s ease,
+                  box-shadow 0.25s ease,
+                  border-color 0.25s ease;
+    }
+
+    .btn-primary {
+      color: #041326;
+      border: none;
+      background: linear-gradient(100deg, #00dcf5, #168cff 75%, #477aff);
+      box-shadow: 0 0 28px rgba(0, 162, 255, 0.2);
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      border-color: var(--cyan);
+      box-shadow: 0 8px 30px rgba(0, 153, 255, 0.19);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 8px 35px rgba(0, 194, 255, 0.32);
+    }
+
+    .footer {
+      margin-top: 35px;
+      color: #7287a5;
+      font-size: 12px;
+      line-height: 1.8;
+    }
+
+    .footer a {
+      color: #8bdfff;
+      text-decoration: none;
+    }
+
+    @keyframes rocketFloat {
+      0%, 100% { transform: translateY(0) rotate(-12deg); }
+      50% { transform: translateY(-9px) rotate(-6deg); }
+    }
+
+    @keyframes twinkle {
+      from { opacity: 0.3; transform: scale(0.75); }
+      to { opacity: 1; transform: scale(1.15); }
+    }
+
+    @keyframes appear {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 20px 22px;
+      }
+
+      .container {
+        padding: 18px 0;
+      }
+
+      .brand {
+        margin-bottom: 32px;
+      }
+
+      .number {
+        letter-spacing: -5px;
+      }
+
+      .description {
+        font-size: 15px;
+        margin: 14px auto 25px;
+      }
+
+      .btn {
+        min-height: 52px;
+      }
+
+      .footer {
+        margin-top: 28px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="orb orb-one"></div>
+  <div class="orb orb-two"></div>
+
+  <div class="stars" aria-hidden="true">
+    <span class="star"></span>
+    <span class="star"></span>
+    <span class="star"></span>
+    <span class="star"></span>
+    <span class="star"></span>
+  </div>
+
+  <main class="container">
+    <a class="brand" href="/" aria-label="IntelliCore Home">
+      <span class="brand-mark" aria-hidden="true">✦</span>
+      <span class="brand-name">Intelli<span>Core</span></span>
+    </a>
+
+    <div class="rocket" aria-hidden="true">🚀</div>
+
+    <p class="eyebrow">Oops! Something went wrong</p>
+
+    <div class="number" aria-label="404">404</div>
+
+    <h1>Page Not Found</h1>
+
+    <p class="description">
+      Looks like this page has gone off the grid.
+      The link may be incorrect or the page may have moved.
+      Let's get you back on track.
+    </p>
+
+    <div class="actions">
+      <a class="btn btn-primary" href="/">
+        TAKE ME HOME <span aria-hidden="true">→</span>
+      </a>
+
+      <button class="btn" type="button" onclick="goBack()">
+        ← GO BACK
+      </button>
+    </div>
+
+    <footer class="footer">
+      © <span id="year"></span> IntelliCore. All rights reserved.
+      <br>
+      Intelligence at the Core, Innovation at the Fore.
+    </footer>
+  </main>
+
+  <script>
+    document.getElementById("year").textContent =
+      new Date().getFullYear();
+
+    function goBack() {
+      if (window.history.length > 1 &&
+          document.referrer &&
+          new URL(document.referrer).origin === window.location.origin) {
+        window.history.back();
+      } else {
+        window.location.href = "/";
+      }
+    }
+  </script>
+</body>
+</html>
