@@ -3,7 +3,7 @@ import {
   getAuth, onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
 import {
-  collection, doc, getDocs, initializeFirestore, writeBatch
+  collection, doc, getDoc, getDocs, initializeFirestore, serverTimestamp, setDoc, writeBatch
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-functions.js";
 import { getBlob, getStorage, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-storage.js";
@@ -50,11 +50,106 @@ const labels = {
   certificates: { singular: "certificate note", plural: "Certificate Notes", subtitle: "Personal notes only; official certificate issuance and verification are not enabled.", add: "＋ Add certificate note", empty: "No certificate notes yet", emptyCopy: "Keep a personal note about a certificate. This does not issue or verify a certificate.", statuses: ["Earned", "In progress"] }
 };
 const storageKey = uid => `icWorkspaceData:${uid}`;
+const localProfileStorageKey = uid => `icLocalInternshipProfile:${uid}`;
+const firebaseProfileDraftRef = uid => doc(db, "users", uid, "profileDrafts", "current");
 const recordsCollection = uid => collection(db, "users", uid, "workspaceRecords");
 const createRecordId = () => globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 function safeRead(key, fallback) {
   try { const value = localStorage.getItem(key); return value ? JSON.parse(value) : fallback; }
   catch (error) { console.warn("A saved local workspace preference could not be read.", error); return fallback; }
+}
+function addMonthsToDate(dateString, months) {
+  const [year, month, day] = dateString.split("-").map(Number);
+  const targetMonthIndex = month - 1 + months;
+  const targetYear = year + Math.floor(targetMonthIndex / 12);
+  const targetMonth = targetMonthIndex % 12 + 1;
+  const lastDay = new Date(Date.UTC(targetYear, targetMonth, 0)).getUTCDate();
+  return `${targetYear}-${String(targetMonth).padStart(2, "0")}-${String(Math.min(day, lastDay)).padStart(2, "0")}`;
+}
+function createLocalTrainingWorkspace(user, profile) {
+  return {
+    profile: { ...profile, uid: user.uid, email: user.email || "", role: "learner", localOnly: true, mentorTracks: [] },
+    assignments: [],
+    catalog: [],
+    reviewQueue: [],
+    attendance: [],
+    activeInternship: null,
+    activeMeeting: null,
+    internDirectory: [],
+    attendanceReport: []
+  };
+}
+function createFirebaseDraftWorkspace(user, profile) {
+  const internshipStartDate = indiaDateString();
+  return {
+    profile: {
+      ...profile,
+      uid: user.uid,
+      email: user.email || "",
+      internshipStartDate,
+      internshipEndDate: addMonthsToDate(internshipStartDate, Number(profile.durationMonths)),
+      role: "learner",
+      localOnly: false,
+      profileDraft: true,
+      internshipStatus: "pending_activation",
+      mentorTracks: []
+    },
+    assignments: [],
+    catalog: [],
+    reviewQueue: [],
+    attendance: [],
+    activeInternship: null,
+    activeMeeting: null,
+    internDirectory: [],
+    attendanceReport: []
+  };
+}
+async function loadFirebaseProfileDraft(user) {
+  const snapshot = await getDoc(firebaseProfileDraftRef(user.uid));
+  if (!snapshot.exists()) return null;
+  const draft = snapshot.data();
+  if (!tracksForDashboard.includes(draft.track)
+    || !Number.isInteger(draft.durationMonths)
+    || ![1, 2, 3, 6].includes(draft.durationMonths)
+    || !["Female", "Male"].includes(draft.gender)
+    || typeof draft.displayName !== "string"
+    || draft.displayName.trim().length < 2
+    || draft.displayName.length > 80
+    || typeof draft.phone !== "string"
+    || draft.phone.length < 7
+    || draft.phone.length > 24
+    || !/^[+()0-9 .-]+$/.test(draft.phone)
+    || draft.email !== (user.email || "")) {
+    throw new Error("The saved Firebase profile draft has invalid fields. Please edit and save it again.");
+  }
+  return createFirebaseDraftWorkspace(user, draft);
+}
+async function saveFirebaseProfileDraft(user, profile) {
+  const draft = {
+    displayName: profile.displayName,
+    email: user.email || "",
+    gender: profile.gender,
+    phone: profile.phone,
+    track: profile.track,
+    durationMonths: profile.durationMonths,
+    savedAt: serverTimestamp()
+  };
+  await setDoc(firebaseProfileDraftRef(user.uid), draft);
+  return createFirebaseDraftWorkspace(user, profile);
+}
+function loadLocalTrainingWorkspace(user) {
+  const profile = safeRead(localProfileStorageKey(user.uid), null);
+  if (!profile || profile.uid !== user.uid || profile.role !== "learner"
+    || !tracksForDashboard.includes(profile.track)
+    || ![1, 2, 3, 6].includes(Number(profile.durationMonths))
+    || !["Female", "Male"].includes(profile.gender)
+    || typeof profile.displayName !== "string" || !profile.displayName.trim()
+    || typeof profile.phone !== "string" || !profile.phone.trim()
+    || !/^\d{4}-\d{2}-\d{2}$/.test(profile.internshipStartDate)
+    || !/^\d{4}-\d{2}-\d{2}$/.test(profile.internshipEndDate)) {
+    return null;
+  }
+  return createLocalTrainingWorkspace(user, profile);
 }
 async function loadRecords(user, attempt) {
   const snapshot = await getDocs(recordsCollection(user.uid));
@@ -140,7 +235,11 @@ async function connectWorkspace(user, profileSetupError = null) {
   recordsReady = false;
   $("workspaceTop").setAttribute("aria-busy", "true");
   renderAll();
-  notice("Connecting to your private workspace…");
+  notice(trainingWorkspace?.profile.profileDraft
+    ? "Your profile draft is saved in Firebase. Connecting to secure records and training…"
+    : trainingWorkspace?.profile.localOnly
+      ? "Your profile is on this device only. Connecting to secure records and training…"
+      : "Connecting to your private workspace…");
   const [recordResult, trainingResult] = await Promise.allSettled([
     withTimeout(loadRecords(user, attempt), 20000),
     profileSetupError
@@ -149,16 +248,30 @@ async function connectWorkspace(user, profileSetupError = null) {
   ]);
   if (attempt !== connectionAttempt) return;
   $("workspaceTop").setAttribute("aria-busy", "false");
+  if (trainingResult.status === "rejected") {
+    trainingWorkspace = trainingWorkspace || loadLocalTrainingWorkspace(user);
+    if (!trainingWorkspace) {
+      console.error("Training assignments could not be loaded.", trainingResult.reason);
+    }
+  }
   if (recordResult.status === "rejected") {
     connectionAttempt++;
     recordsReady = false;
     console.error("Private workspace records could not be loaded.", recordResult.reason);
-    notice("Private records could not be loaded. Check Firestore setup, your connection, and the deployed security rules.", true);
+    notice(trainingWorkspace?.profile.profileDraft
+      ? "Your profile draft is saved in Firebase. Private records and secure training could not connect."
+      : trainingWorkspace?.profile.localOnly
+        ? "Your profile is available on this device only. Private records and secure training could not connect."
+        : "Private records could not be loaded. Check Firestore setup, your connection, and the deployed security rules.", true);
   } else if (trainingResult.status === "rejected") {
-    trainingWorkspace = null;
-    console.error("Training assignments could not be loaded.", trainingResult.reason);
-    const functionName = profileSetupError ? "ensureProfile" : "getTrainingDashboard";
-    notice(`Your personal workspace loaded, but ${callableErrorNotice(trainingResult.reason, functionName)}`);
+    if (trainingWorkspace?.profile.localOnly) {
+      notice("Your profile is saved on this device only. It is not synced to your IntelliCore account.");
+    } else if (trainingWorkspace?.profile.profileDraft) {
+      notice("Your profile draft is saved in Firebase. Secure internship activation and training still need the backend service.");
+    } else {
+      const functionName = profileSetupError ? "ensureProfile" : "getTrainingDashboard";
+      notice(`Your personal workspace loaded, but ${callableErrorNotice(trainingResult.reason, functionName)}`);
+    }
   } else {
     notice("Your private workspace and training assignments are ready.");
   }
@@ -251,7 +364,11 @@ function renderProfile(user, profile = trainingWorkspace?.profile || null) {
   const name = profile?.displayName || user.displayName || (user.email || "").split("@")[0] || "IntelliCore member";
   $("icProfileName").textContent = name;
   $("icProfileEmail").textContent = user.email || "Google account";
-  $("icProfileStatus").textContent = user.emailVerified || user.providerData.some(p => p.providerId === "google.com") ? "Active" : "Verify";
+  $("icProfileStatus").textContent = profile?.profileDraft
+    ? "Saved draft"
+    : profile?.localOnly
+      ? "Device only"
+      : user.emailVerified || user.providerData.some(p => p.providerId === "google.com") ? "Active" : "Verify";
   $("icProfileInitial").textContent = name.trim().charAt(0).toUpperCase() || "I";
   const avatar = $("icProfilePhoto");
   avatar.hidden = true;
@@ -271,7 +388,9 @@ function updateProfileCompletion(user, profile = null) {
     Boolean(profile?.durationMonths)
   ];
   const completion = Math.round(requiredDetails.filter(Boolean).length / requiredDetails.length * 100);
-  $("icProfileCompletion").textContent = `${completion}%`;
+  $("icProfileCompletion").textContent = profile?.localOnly
+    ? "Device only"
+    : profile?.profileDraft ? "Firebase draft" : `${completion}%`;
   $("icProfileProgressBar").style.width = `${completion}%`;
   $("icProfileProgressBar").parentElement.setAttribute("aria-valuenow", String(completion));
 }
@@ -327,7 +446,7 @@ function renderTraining() {
   } = trainingWorkspace;
   const role = profile.role || "learner";
   const isIntern = role === "learner";
-  const hasInternshipProfile = Boolean(
+  const hasInternshipProfile = !profile.profileDraft && !profile.localOnly && Boolean(
     profile.track && profile.durationMonths && profile.internshipStartDate && profile.internshipEndDate
   );
   const hasRequiredProfile = internshipProfileComplete(profile);
@@ -364,13 +483,19 @@ function renderTraining() {
   $("icInternshipTrack").disabled = hasInternshipProfile;
   $("icInternshipForm").elements.track.disabled = hasInternshipProfile;
   $("icInternshipForm").elements.durationMonths.disabled = hasInternshipProfile;
-  $("icInternshipDialogTitle").textContent = hasInternshipProfile
+  $("icInternshipDialogTitle").textContent = profile.profileDraft
+    ? "Your saved profile draft"
+    : hasInternshipProfile
     ? "Your internship profile"
     : "Build your internship profile";
-  $("icInternshipDialogDescription").textContent = hasInternshipProfile
+  $("icInternshipDialogDescription").textContent = profile.profileDraft
+    ? "Your details are saved to your Firebase account. Secure internship activation is pending."
+    : hasInternshipProfile
     ? "Update your personal details below. Domain and duration stay fixed while your internship is active."
     : "Enter your personal details, choose your domain and duration, then save to activate your internship.";
-  $("icInternshipPeriodPreview").textContent = hasInternshipProfile
+  $("icInternshipPeriodPreview").textContent = profile.profileDraft
+    ? `Profile draft saved to Firebase. Proposed period: ${profile.internshipStartDate} through ${profile.internshipEndDate}.`
+    : hasInternshipProfile
     ? `Active from ${profile.internshipStartDate} through ${profile.internshipEndDate}. Contact HR if your domain or duration needs to change.`
     : "Your internship starts as soon as you save this profile.";
   $("icBuildProfileButton").textContent = hasRequiredProfile ? "Edit profile" : "Build your profile";
@@ -385,31 +510,56 @@ function renderTraining() {
     <div><span>Domain &amp; duration</span><strong>${escapeHtml(profile.track)} · ${escapeHtml(profile.durationMonths)} month${profile.durationMonths === 1 ? "" : "s"}</strong></div>
     <div><span>Internship period</span><strong>${escapeHtml(profile.internshipStartDate)} – ${escapeHtml(profile.internshipEndDate)}</strong></div>`;
   $("icAttendanceCount").textContent = `${attendance.length} day${attendance.length === 1 ? "" : "s"}`;
-  $("icAttendanceStatStatus").textContent = isIntern
+  $("icAttendanceStatStatus").textContent = profile.profileDraft
+    ? "Pending activation"
+    : profile.localOnly
+      ? "Not synced"
+    : isIntern
     ? hasInternshipProfile ? `${attendance.length} check-in${attendance.length === 1 ? "" : "s"}` : "Not enrolled"
     : canViewAttendance ? `${attendanceReport.length} check-ins` : "Staff view";
-  $("icAttendanceStatDetail").textContent = isIntern
+  $("icAttendanceStatDetail").textContent = profile.profileDraft
+    ? "Available after secure activation"
+    : profile.localOnly
+      ? "Available after secure profile sync"
+    : isIntern
     ? hasInternshipProfile ? "Saved check-ins in this internship" : "Build your internship profile to begin"
     : canViewAttendance ? "Open the staff attendance report" : "Attendance is managed by authorised staff";
-  $("icCheckInButton").disabled = !internshipActive || isCheckedIn;
-  $("icCheckInButton").textContent = isCheckedIn ? "Checked in today" : internshipActive ? "Check in today" : "Internship ended";
-  $("icAttendanceMessage").textContent = isCheckedIn
+  $("icCheckInButton").disabled = profile.profileDraft || profile.localOnly || !internshipActive || isCheckedIn;
+  $("icCheckInButton").textContent = profile.profileDraft
+    ? "Activation required"
+    : profile.localOnly
+      ? "Sync required"
+    : isCheckedIn ? "Checked in today" : internshipActive ? "Check in today" : "Internship ended";
+  $("icAttendanceMessage").textContent = profile.profileDraft
+    ? "Your profile draft is saved in Firebase. Secure internship activation is required before recording attendance."
+    : profile.localOnly
+      ? "This profile is saved on this device only. Sync it to your account before using attendance."
+    : isCheckedIn
     ? "Your attendance for today is saved."
     : internshipActive
       ? "Check in once on each day you attend. You can only check in during your internship dates."
       : `Your internship period ended on ${profile.internshipEndDate}. Attendance is closed.`;
   $("icAttendanceHistory").innerHTML = attendance.length
     ? attendance.map(item => `<div class="ic-attendance-row"><strong>${escapeHtml(item.attendanceDate)}</strong><span>Checked in</span></div>`).join("")
-    : '<div class="ic-activity-empty"><strong>No attendance recorded yet</strong><p>Check in on the days you attend.</p></div>';
+    : profile.profileDraft
+      ? '<div class="ic-activity-empty"><strong>Secure activation required</strong><p>Your Firebase profile draft is saved. Attendance becomes available after secure internship activation.</p></div>'
+      : profile.localOnly
+        ? '<div class="ic-activity-empty"><strong>Attendance is not synced</strong><p>Connect your secure account profile before recording attendance.</p></div>'
+      : '<div class="ic-activity-empty"><strong>No attendance recorded yet</strong><p>Check in on the days you attend.</p></div>';
 
   renderMeetingPanel(activeMeeting, role, hasInternshipProfile);
 
   if (role === "learner") {
     const approved = assignments.filter(assignment => assignment.status === "approved").length;
     const progress = assignments.length ? Math.round((approved / assignments.length) * 100) : 0;
-    $("icAssignedTrainingCount").textContent = String(assignments.length);
-    $("icTrainingProgress").textContent = `${approved} of ${assignments.length} approved`;
-    $("icInternshipProgress").textContent = `${progress}%`;
+    $("icAssignedTrainingCount").textContent = profile.profileDraft || profile.localOnly ? "—" : String(assignments.length);
+    $("icTrainingProgress").textContent = profile.profileDraft
+      ? "Pending secure activation"
+      : profile.localOnly ? "Secure assignments unavailable"
+      : `${approved} of ${assignments.length} approved`;
+    $("icInternshipProgress").textContent = profile.profileDraft
+      ? "Activation required"
+      : profile.localOnly ? "Sync required" : `${progress}%`;
   } else {
     $("icAssignedTrainingCount").textContent = "Staff";
     $("icTrainingProgress").textContent = "Manage assigned work";
@@ -417,13 +567,21 @@ function renderTraining() {
   }
   $("icTrainingTrack").textContent = profile.track
     || (role === "mentor" ? profile.mentorTracks.join(", ") || "No tracks assigned" : ["founder", "co_founder", "admin"].includes(role) ? "All tracks" : "Track pending");
-  $("icTrainingIntro").textContent = role === "learner"
+  $("icTrainingIntro").textContent = profile.profileDraft
+    ? "Your profile draft is saved in Firebase. Secure internship activation and training still need the backend service."
+    : profile.localOnly
+      ? "Profile saved on this device. Secure training data is not synced."
+    : role === "learner"
     ? profile.track
       ? `Your ${profile.track} training assignments and progress.`
       : "Build your internship profile to unlock training assignments."
     : `Signed in with ${role} access for your authorised training tracks.`;
 
-  if (!profile.track && role === "learner") {
+  if (profile.profileDraft) {
+    tasksElement.innerHTML = '<div class="ic-activity-empty"><strong>Your profile draft is saved</strong><p>Training assignments will appear after secure internship activation is available.</p></div>';
+  } else if (profile.localOnly) {
+    tasksElement.innerHTML = '<div class="ic-activity-empty"><strong>Your dashboard is ready</strong><p>Training assignments will appear after this profile is securely synced to your IntelliCore account.</p></div>';
+  } else if (!profile.track && role === "learner") {
     tasksElement.innerHTML = '<div class="ic-activity-empty"><strong>Your training track is not assigned yet</strong><p>Contact an IntelliCore administrator. Your track and tasks will appear here after assignment.</p></div>';
   } else if (!assignments.length) {
     tasksElement.innerHTML = role === "learner"
@@ -581,7 +739,13 @@ function httpsHref(value) {
   }
 }
 async function refreshTrainingWorkspace() {
-  trainingWorkspace = await callFunction("getTrainingDashboard");
+  const workspace = await callFunction("getTrainingDashboard");
+  const profileDraft = workspace.profile?.role === "learner" && !internshipProfileComplete(workspace.profile)
+    ? await loadFirebaseProfileDraft(currentUser)
+    : null;
+  trainingWorkspace = profileDraft
+    ? { ...workspace, profile: profileDraft.profile }
+    : workspace;
   renderTraining();
 }
 function renderMeetingPanel(activeMeeting, role, hasInternshipProfile) {
@@ -603,7 +767,7 @@ function renderMeetingPanel(activeMeeting, role, hasInternshipProfile) {
   $("icEndMeetButton").hidden = !canManageMeetings || !activeMeeting;
 }
 async function refreshMeetingState() {
-  if (!currentUser || !trainingWorkspace) return;
+  if (!currentUser || !trainingWorkspace || trainingWorkspace.profile.localOnly || trainingWorkspace.profile.profileDraft) return;
   try {
     const result = await callFunction("getActiveTeamMeeting");
     if (auth.currentUser?.uid !== currentUser.uid || !trainingWorkspace) return;
@@ -711,7 +875,9 @@ function renderUpcomingDeadlines() {
     .slice(0, 4);
   if (!upcoming.length) {
     target.className = "ic-activity-empty";
-    target.innerHTML = "<strong>No upcoming deadlines</strong><p>Due dates from your personal tasks and assigned training work will appear here.</p>";
+    target.innerHTML = (trainingWorkspace?.profile.localOnly || trainingWorkspace?.profile.profileDraft) && !recordsReady
+      ? "<strong>Personal deadlines are unavailable</strong><p>Connect your secure account workspace to load saved records and dates.</p>"
+      : "<strong>No upcoming deadlines</strong><p>Due dates from your personal tasks and assigned training work will appear here.</p>";
     return;
   }
   target.className = "ic-deadline-list";
@@ -723,18 +889,19 @@ function renderOnboardingChecklist() {
     return;
   }
   const verified = currentUser.emailVerified || currentUser.providerData.some(provider => provider.providerId === "google.com");
+  const localOnly = trainingWorkspace?.profile.localOnly;
+  const profileDraft = trainingWorkspace?.profile.profileDraft;
   const items = [
     { label: "Add your display name", done: Boolean(currentUser.displayName) },
     { label: "Verify your email or connect Google", done: Boolean(verified) },
-    { label: "Build your internship profile", done: Boolean(
-      trainingWorkspace?.profile.track
-      && trainingWorkspace?.profile.durationMonths
-      && trainingWorkspace?.profile.internshipStartDate
-      && trainingWorkspace?.profile.internshipEndDate
-    ) },
+    {
+      label: "Build your internship profile",
+      done: internshipProfileComplete(trainingWorkspace?.profile),
+      detail: profileDraft ? "Saved to Firebase · Pending activation" : localOnly ? "On this device only" : undefined
+    },
     { label: "Receive your first mentor-assigned task", done: Boolean(trainingWorkspace?.assignments.length) }
   ];
-  $("icOnboardingChecklist").innerHTML = items.map(item => `<div class="ic-onboarding-item"><span class="${item.done ? "is-done" : ""}" aria-hidden="true">${item.done ? "✓" : "○"}</span><span>${escapeHtml(item.label)}</span><small>${item.done ? "Done" : "To do"}</small></div>`).join("");
+  $("icOnboardingChecklist").innerHTML = items.map(item => `<div class="ic-onboarding-item"><span class="${item.done ? "is-done" : ""}" aria-hidden="true">${item.done ? "✓" : "○"}</span><span>${escapeHtml(item.label)}</span><small>${escapeHtml(item.detail || (item.done ? "Done" : "To do"))}</small></div>`).join("");
 }
 function renderAll() {
   updateCounts();
@@ -893,28 +1060,47 @@ function bindEvents() {
     const form = event.currentTarget;
     const submit = form.querySelector('[type="submit"]');
     const data = new FormData(form);
+    const formError = $("icInternshipFormError");
+    formError.hidden = true;
+    formError.textContent = "";
     submit.disabled = true;
     try {
-      const result = await callFunction("saveInternshipProfile", {
-        displayName: data.get("displayName"),
-        gender: data.get("gender"),
-        track: trainingWorkspace?.profile.track || data.get("track"),
-        durationMonths: Number(trainingWorkspace?.profile.durationMonths || data.get("durationMonths")),
-        phone: data.get("phone")
-      });
-      await currentUser.reload();
+      const previousProfile = trainingWorkspace?.profile;
+      const canEditDraftEnrollment = Boolean(previousProfile?.profileDraft || previousProfile?.localOnly);
+      const durationMonths = Number(
+        canEditDraftEnrollment ? data.get("durationMonths") : previousProfile?.durationMonths || data.get("durationMonths")
+      );
+      const startDate = previousProfile?.internshipStartDate || indiaDateString();
+      const profile = {
+        uid: currentUser.uid,
+        email: currentUser.email || "",
+        displayName: String(data.get("displayName") || "").trim(),
+        gender: String(data.get("gender") || ""),
+        phone: String(data.get("phone") || "").trim(),
+        track: canEditDraftEnrollment
+          ? String(data.get("track") || "")
+          : previousProfile?.track || String(data.get("track") || ""),
+        durationMonths,
+        internshipStartDate: startDate,
+        internshipEndDate: !canEditDraftEnrollment && previousProfile?.internshipEndDate
+          ? previousProfile.internshipEndDate
+          : addMonthsToDate(startDate, durationMonths),
+        internshipStatus: "pending_activation",
+        accountStatus: "active"
+      };
+      trainingWorkspace = await saveFirebaseProfileDraft(currentUser, profile);
+      authenticatedRole = "learner";
+      renderAll();
       $("icCancelInternshipEdit").click();
-      notice(`Your ${result.track} internship is active through ${result.endDate}.`);
-      try {
-        await refreshTrainingWorkspace();
-        renderProfile(auth.currentUser, trainingWorkspace.profile);
-      } catch (refreshError) {
-        console.error("The saved internship profile could not be refreshed.", refreshError);
-        notice("Your internship profile is saved. Refresh the dashboard to load its latest details.");
-      }
+      notice("Your profile draft is saved to Firebase. Secure internship activation is still pending.");
     } catch (error) {
-      console.error("The internship profile could not be saved.", error);
-      notice(error.message || "Could not save your internship profile.");
+      console.error("The Firebase internship profile draft could not be saved.", error);
+      const code = typeof error?.code === "string" ? error.code : "";
+      formError.textContent = code.endsWith("/permission-denied") || code === "permission-denied"
+        ? "Firebase rejected this profile draft. Deploy the updated Firestore rules, then try again."
+        : error.message || "Could not save your profile to Firebase.";
+      formError.hidden = false;
+      notice(formError.textContent);
     } finally {
       submit.disabled = false;
     }
@@ -1312,7 +1498,12 @@ onAuthStateChanged(auth, async user => {
     return;
   }
   currentUser = user;
-  trainingWorkspace = null;
+  trainingWorkspace = loadLocalTrainingWorkspace(user);
+  try {
+    trainingWorkspace = await loadFirebaseProfileDraft(user) || trainingWorkspace;
+  } catch (error) {
+    console.error("The Firebase internship profile draft could not be loaded.", error);
+  }
   meetingRefreshTimer = window.setInterval(() => void refreshMeetingState(), 20000);
   let profileSetupError = null;
   try {
@@ -1324,6 +1515,6 @@ onAuthStateChanged(auth, async user => {
     console.error("The secured account profile could not be initialised.", error);
   }
   if (auth.currentUser?.uid !== user.uid) return;
-  renderProfile(auth.currentUser);
+  renderProfile(auth.currentUser, trainingWorkspace?.profile || null);
   void connectWorkspace(user, profileSetupError);
 });

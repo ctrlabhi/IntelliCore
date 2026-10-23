@@ -1193,6 +1193,18 @@
   border-top: 1px solid rgba(89, 158, 202, .2);
   background: #071426;
 }
+.ic-workspace-page .ic-profile-form-error {
+  flex: 0 0 auto;
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 131, 131, .35);
+  border-radius: 10px;
+  background: rgba(116, 34, 47, .22);
+  color: #ffc4c4;
+  font-size: .76rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
 .ic-workspace-page .ic-workspace-welcome.is-onboarding {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
