@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#030914" />
   <title>My Workspace | IntelliCore</title>
   <meta name="description" content="Your personal IntelliCore workspace for applications, tasks, learning, and certificates." />
   <link rel="icon" type="image/png" href="favicon.png?v=3" />
@@ -10,7 +12,9 @@
   <link rel="stylesheet" href="dashboard.css" />
 </head>
 <body class="ic-workspace-page">
+  <canvas class="ic-workspace-neural-canvas" id="icWorkspaceNeuralCanvas" aria-hidden="true"></canvas>
   <div class="ic-workspace-topline"><span></span></div>
+  <a class="ic-skip-link" href="#workspaceHome">Skip to dashboard</a>
 <header class="site-header" id="siteHeader">
     <div class="container header-inner">
       <a href="index.html#top" class="brand-logo" aria-label="IntelliCore Home">
@@ -21,23 +25,18 @@
         </div>
       </a>
 
-      <nav class="desktop-nav" aria-label="Primary Navigation">
-        <a href="index.html#about" class="nav-link">Who We Are</a>
-        <a href="index.html#services" class="nav-link">IT Solutions</a>
-        <a href="index.html#vision" class="nav-link">Our Values</a>
-        <a href="index.html#journey" class="nav-link">Induction Journey</a>
-        <a href="index.html#tracks" class="nav-link">Internships</a>
-        <a href="index.html#gains" class="nav-link">What You Gain</a>
-        <a href="index.html#expectations" class="nav-link">Commitment</a>
-        <a href="index.html#team" class="nav-link">Our Team</a>
-        <a href="index.html#faq" class="nav-link">FAQ</a>
+      <nav class="desktop-nav ic-workspace-nav" aria-label="Workspace navigation">
+        <a href="#workspaceHome" class="nav-link">Overview</a>
+        <a href="#icRecordsTitle" class="nav-link">My Records</a>
+        <a href="#icProfileSettings" class="nav-link">My Profile</a>
+        <a href="index.html#tracks" class="nav-link">Opportunities</a>
       </nav>
 
       <div class="header-actions">
         <button class="contact-us-btn ic-header-logout" id="icHeaderLogout" type="button">
           Log out <span aria-hidden="true">↗</span>
         </button>
-        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle Mobile Navigation" aria-expanded="false">
+        <button class="hamburger-btn" id="hamburgerBtn" type="button" aria-label="Toggle mobile navigation" aria-controls="mobileDrawer" aria-expanded="false">
           <span class="hamburger-bar"></span>
           <span class="hamburger-bar"></span>
           <span class="hamburger-bar"></span>
@@ -47,8 +46,8 @@
   </header>
 
   <!-- MOBILE SLIDE-IN NAVIGATION DRAWER -->
-  <div class="mobile-drawer-overlay" id="mobileOverlay"></div>
-   <aside class="mobile-drawer" id="mobileDrawer" aria-label="Mobile Navigation Drawer">
+  <div class="mobile-drawer-overlay" id="mobileOverlay" aria-hidden="true"></div>
+   <aside class="mobile-drawer" id="mobileDrawer" aria-label="Mobile navigation" aria-hidden="true" inert>
      
     <div class="mobile-drawer-header">
       <div>
@@ -59,16 +58,11 @@
               aria-label="Close navigation menu" title="Close menu">&times;</button>
     </div>
     <ul class="mobile-nav-list">
-      <li><a href="index.html#about" class="mobile-nav-link">Who We Are &amp; Vision <span>&rarr;</span></a></li>
-      <li><a href="index.html#services" class="mobile-nav-link">IT Solutions &amp; Services <span>&rarr;</span></a></li>
-      <li><a href="index.html#vision" class="mobile-nav-link">Our Core Values <span>&rarr;</span></a></li>
-      <li><a href="index.html#journey" class="mobile-nav-link">9-Step Induction Journey <span>&rarr;</span></a></li>
-      <li><a href="index.html#tracks" class="mobile-nav-link">Internship Roles &amp; Tracks <span>&rarr;</span></a></li>
-      <li><a href="index.html#gains" class="mobile-nav-link">What You Will Gain <span>&rarr;</span></a></li>
-      <li><a href="index.html#expectations" class="mobile-nav-link">Your Commitment Matters <span>&rarr;</span></a></li>
-      <li><a href="index.html#team" class="mobile-nav-link">Meet Our Team <span>&rarr;</span></a></li>
-      <li><a href="index.html#faq" class="mobile-nav-link">FAQ <span>&rarr;</span></a></li>
-      <li><a href="#apply" class="mobile-nav-link">Application Portal <span>&rarr;</span></a></li>
+      <li><a href="#workspaceHome" class="mobile-nav-link">Workspace overview <span>→</span></a></li>
+      <li><a href="#icRecordsTitle" class="mobile-nav-link">My applications &amp; records <span>→</span></a></li>
+      <li><a href="#icProfileSettings" class="mobile-nav-link">Profile &amp; settings <span>→</span></a></li>
+      <li><a href="index.html#tracks" class="mobile-nav-link">Opportunities <span>→</span></a></li>
+      <li><a href="index.html#services" class="mobile-nav-link">IntelliCore services <span>→</span></a></li>
     </ul>
 
   </aside>
@@ -95,8 +89,8 @@
 
   <!-- 3. HERO SECTION (PDF SLIDE 1 + CORPORATE IT STARTUP POSITIONING) -->
   
-  <main class="ic-workspace-main" id="workspaceTop">
-    <section class="ic-workspace-hero">
+  <main class="ic-workspace-main" id="workspaceTop" aria-busy="true">
+    <section class="ic-workspace-hero" id="workspaceHome">
       <div class="ic-workspace-hero-copy">
         <div class="ic-workspace-kicker"><span class="ic-status-dot"></span> INTELLICORE WORKSPACE</div>
         <h1>Your work. Your growth.<br><span>All in one place.</span></h1>
@@ -115,18 +109,44 @@
       </div>
       <div class="ic-welcome-copy"><span class="ic-muted-label">WELCOME BACK</span><h2 id="icProfileName">Your workspace</h2><p id="icProfileEmail">Loading your account details…</p></div>
       <div class="ic-welcome-actions"><span class="ic-account-pill"><span></span> Account connected</span></div>
+      <div class="ic-profile-progress" aria-label="Account profile completeness">
+        <div><span>Account profile</span><strong id="icProfileCompletion">0%</strong></div>
+        <div class="ic-progress-track" role="progressbar" aria-label="Profile completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="icProfileProgressBar"></span></div>
+      </div>
     </section>
 
     <section class="ic-workspace-stats" aria-label="Workspace summary">
-      <article class="ic-stat-card"><div class="ic-stat-icon icon-blue">▣</div><div><span>My Applications</span><strong id="icApplicationsCount">0</strong><small>Applications tracked</small></div><span class="ic-stat-arrow">↗</span></article>
-      <article class="ic-stat-card"><div class="ic-stat-icon icon-violet">▤</div><div><span>Tasks &amp; Learning</span><strong id="icTasksCount">0</strong><small>Items assigned to you</small></div><span class="ic-stat-arrow">↗</span></article>
-      <article class="ic-stat-card"><div class="ic-stat-icon icon-amber">✧</div><div><span>Certificates</span><strong id="icCertificatesCount">0</strong><small>Certificates available</small></div><span class="ic-stat-arrow">↗</span></article>
-      <article class="ic-stat-card"><div class="ic-stat-icon icon-teal">◎</div><div><span>Profile Status</span><strong class="ic-stat-word" id="icProfileStatus">Active</strong><small>Your account overview</small></div><span class="ic-stat-arrow">↗</span></article>
+      <article class="ic-stat-card"><div class="ic-stat-icon icon-blue">▣</div><div><span>Personal Applications</span><strong id="icApplicationsCount">—</strong><small>Private records you track</small></div><span class="ic-stat-arrow">↗</span></article>
+      <article class="ic-stat-card"><div class="ic-stat-icon icon-violet">▤</div><div><span>Personal Tasks</span><strong id="icTasksCount">—</strong><small>Goals you track</small></div><span class="ic-stat-arrow">↗</span></article>
+      <article class="ic-stat-card"><div class="ic-stat-icon icon-teal">✓</div><div><span>Personal tasks completed</span><strong id="icCompletedTasksCount">—</strong><small>Completed personal goals</small></div><span class="ic-stat-arrow">↗</span></article>
+      <article class="ic-stat-card"><div class="ic-stat-icon icon-amber">✧</div><div><span>Certificate Notes</span><strong id="icCertificatesCount">—</strong><small>Personal notes, not issued certificates</small></div><span class="ic-stat-arrow">↗</span></article>
+      <article class="ic-stat-card"><div class="ic-stat-icon icon-violet">▤</div><div><span>Official assignments</span><strong class="ic-stat-word">Not connected</strong><small>Organization-managed tasks are unavailable</small></div></article>
+      <article class="ic-stat-card"><div class="ic-stat-icon icon-amber">◷</div><div><span>Attendance</span><strong class="ic-stat-word">Not connected</strong><small>No attendance service is configured</small></div></article>
+      <article class="ic-stat-card"><div class="ic-stat-icon icon-blue">↗</div><div><span>Internship progress</span><strong class="ic-stat-word">Not connected</strong><small>Verified program records are unavailable</small></div></article>
+      <article class="ic-stat-card"><div class="ic-stat-icon icon-teal">◎</div><div><span>Profile Status</span><strong class="ic-stat-word" id="icProfileStatus">—</strong><small>Your account overview</small></div><span class="ic-stat-arrow">↗</span></article>
     </section>
 
     <section class="ic-workspace-lower-grid">
-      <article class="ic-workspace-panel ic-activity-panel"><div class="ic-panel-heading"><div><span class="ic-muted-label">RECENT UPDATES</span><h3>Recent Activity</h3></div><span class="ic-panel-symbol">◷</span></div><div id="icWorkspaceActivity" class="ic-activity-empty"><span class="ic-empty-illustration">⌁</span><strong>Your journey starts here</strong><p>When applications, tasks or certificates are added to your account, they’ll appear in this workspace.</p></div></article>
-      <article class="ic-workspace-panel ic-quick-actions-panel"><div class="ic-panel-heading"><div><span class="ic-muted-label">GET STARTED</span><h3>Quick Actions</h3><p>Get started with common tasks.</p></div><span class="ic-panel-symbol">ϟ</span></div><div class="ic-quick-actions"><button type="button" class="ic-quick-action" data-workspace-view="applications"><span class="ic-quick-icon icon-blue">▣</span><span><strong>Browse Opportunities</strong><small>Explore latest internship and job openings</small></span><b>→</b></button><button type="button" class="ic-quick-action" data-workspace-view="tasks"><span class="ic-quick-icon icon-violet">▤</span><span><strong>Continue Learning</strong><small>Access your assigned learning materials</small></span><b>→</b></button><button type="button" class="ic-quick-action" data-workspace-view="certificates"><span class="ic-quick-icon icon-amber">✧</span><span><strong>View Certificates</strong><small>Check your earned certificates</small></span><b>→</b></button><button type="button" class="ic-quick-action" data-workspace-view="profile"><span class="ic-quick-icon icon-teal">◎</span><span><strong>Update Profile</strong><small>Manage your personal information</small></span><b>→</b></button></div></article>
+      <article class="ic-workspace-panel ic-activity-panel">      <div class="ic-panel-heading"><div><span class="ic-muted-label">RECENT UPDATES</span><h3>Recent Activity</h3></div><span class="ic-panel-symbol">◷</span></div><div id="icWorkspaceActivity" class="ic-activity-empty"><strong>Loading recent activity…</strong></div></article>
+      <article class="ic-workspace-panel ic-quick-actions-panel"><div class="ic-panel-heading"><div><span class="ic-muted-label">GET STARTED</span><h3>Quick Actions</h3><p>Get started with common tasks.</p></div><span class="ic-panel-symbol">ϟ</span></div>      <div class="ic-quick-actions"><a href="index.html#tracks" class="ic-quick-action"><span class="ic-quick-icon icon-blue">▣</span><span><strong>Browse Opportunities</strong><small>Explore latest internship and job openings</small></span><b>→</b></a><button type="button" class="ic-quick-action" data-workspace-view="tasks"><span class="ic-quick-icon icon-violet">▤</span><span><strong>Continue Learning</strong><small>Access your assigned learning materials</small></span><b>→</b></button><button type="button" class="ic-quick-action" data-workspace-view="certificates"><span class="ic-quick-icon icon-amber">✧</span><span><strong>View Certificates</strong><small>Check your earned certificates</small></span><b>→</b></button><button type="button" class="ic-quick-action" data-workspace-view="profile"><span class="ic-quick-icon icon-teal">◎</span><span><strong>Update Profile</strong><small>Manage your personal information</small></span><b>→</b></button></div></article>
+    </section>
+    <section class="ic-workspace-lower-grid ic-insights-grid" aria-label="Workspace details">
+      <article class="ic-workspace-panel">
+        <div class="ic-panel-heading"><div><span class="ic-muted-label">PERSONAL TRACKER</span><h3>Upcoming task deadlines</h3><p>Dates you added to your personal task list.</p></div><span class="ic-panel-symbol" aria-hidden="true">◷</span></div>
+        <div id="icUpcomingDeadlines" class="ic-activity-empty"><strong>Loading task dates…</strong></div>
+      </article>
+      <article class="ic-workspace-panel">
+        <div class="ic-panel-heading"><div><span class="ic-muted-label">GETTING STARTED</span><h3>Account checklist</h3><p>Steps based on your current account details.</p></div><span class="ic-panel-symbol" aria-hidden="true">✓</span></div>
+        <div id="icOnboardingChecklist" class="ic-onboarding-list" aria-live="polite">Loading account checklist…</div>
+      </article>
+      <article class="ic-workspace-panel ic-unavailable-panel">
+        <div class="ic-panel-heading"><div><span class="ic-muted-label">PROGRAM INFORMATION</span><h3>Internship &amp; attendance</h3><p>Program records and attendance are organization-managed.</p></div><span class="ic-panel-symbol" aria-hidden="true">◎</span></div>
+        <div class="ic-unavailable-state"><strong>Not configured for this workspace</strong><p>No internship, attendance, leave, or mentor records are connected. Contact IntelliCore for verified program information.</p></div>
+      </article>
+      <article class="ic-workspace-panel ic-unavailable-panel" id="icNotifications">
+        <div class="ic-panel-heading"><div><span class="ic-muted-label">UPDATES</span><h3>Notifications</h3><p>Account-specific alerts are not connected yet.</p></div><span class="ic-panel-symbol" aria-hidden="true">♧</span></div>
+        <div class="ic-unavailable-state"><strong>No notification service configured</strong><p>This workspace does not currently receive verified assignment, application, or certificate notifications.</p></div>
+      </article>
     </section>
     <section class="ic-records-section" aria-labelledby="icRecordsTitle">
       <div class="ic-records-heading">
@@ -134,11 +154,11 @@
         <label class="ic-record-search"><span aria-hidden="true">⌕</span><input id="icRecordSearch" type="search" placeholder="Search your records…" aria-label="Search records"></label>
       </div>
       <div class="ic-record-tabs" role="tablist" aria-label="Workspace records">
-        <button type="button" class="ic-record-tab active" data-record-tab="applications" role="tab" aria-selected="true">Applications <span id="icApplicationsTabCount">0</span></button>
-        <button type="button" class="ic-record-tab" data-record-tab="tasks" role="tab" aria-selected="false">Tasks <span id="icTasksTabCount">0</span></button>
-        <button type="button" class="ic-record-tab" data-record-tab="certificates" role="tab" aria-selected="false">Certificates <span id="icCertificatesTabCount">0</span></button>
+        <button type="button" class="ic-record-tab active" data-record-tab="applications" role="tab" aria-selected="true">Applications <span id="icApplicationsTabCount">—</span></button>
+        <button type="button" class="ic-record-tab" data-record-tab="tasks" role="tab" aria-selected="false">Tasks <span id="icTasksTabCount">—</span></button>
+        <button type="button" class="ic-record-tab" data-record-tab="certificates" role="tab" aria-selected="false">Certificates <span id="icCertificatesTabCount">—</span></button>
       </div>
-      <div class="ic-records-toolbar"><div><h3 id="icRecordListTitle">My Applications</h3><p id="icRecordListSubtitle">Track roles and application progress.</p></div><button type="button" class="ic-primary-button" id="icAddRecordButton">＋ Add application</button></div>
+      <div class="ic-records-toolbar"><div><h3 id="icRecordListTitle">My Applications</h3><p id="icRecordListSubtitle">Track roles and application progress.</p></div><button type="button" class="ic-primary-button" id="icAddRecordButton" disabled>＋ Add application</button></div>
       <div id="icRecordsList" class="ic-records-list"></div>
     </section>
     <section class="ic-profile-settings ic-workspace-panel" id="icProfileSettings">
@@ -151,7 +171,7 @@
       <p class="ic-profile-note" id="icProfileNote">Your profile information is loaded from your signed-in account.</p>
       <button type="button" class="ic-outline-button" id="icEditProfileButton">Edit display name</button>
     </section>
-    <div class="ic-dialog-backdrop" id="icRecordDialog" hidden>
+    <div class="ic-dialog-backdrop" id="icRecordDialog" role="dialog" aria-modal="true" aria-labelledby="icRecordDialogTitle" aria-describedby="icRecordDialogDescription" hidden>
       <form class="ic-record-dialog" id="icRecordForm">
         <button type="button" class="ic-dialog-close" id="icCloseRecordDialog" aria-label="Close dialog">×</button>
         <span class="ic-muted-label" id="icRecordDialogKicker">WORKSPACE</span>
@@ -166,7 +186,10 @@
         <div class="ic-dialog-actions"><button type="button" class="ic-outline-button" id="icCancelRecord">Cancel</button><button class="ic-primary-button" type="submit">Save record</button></div>
       </form>
     </div>
-    <div id="icWorkspaceNotice" class="ic-workspace-notice" role="status" aria-live="polite">Your personal workspace is ready.</div>
+    <div id="icWorkspaceNotice" class="ic-workspace-notice" role="status" aria-live="polite">
+      <span id="icWorkspaceNoticeText">Connecting to your private workspace…</span>
+      <button id="icWorkspaceRetry" type="button" hidden>Retry connection</button>
+    </div>
   </main>
 <footer class="site-footer ic-final-footer" style="padding: 2.6rem 0 1.6rem;">
   <div class="container">
@@ -214,7 +237,7 @@
           <b aria-hidden="true">↗</b>
         </a>
         <a class="ic-contact-card" href="https://www.linkedin.com/company/intellicoretechnologies" target="_blank" rel="noopener noreferrer">
-          <span class="ic-contact-icon ic-linkedin-square" aria-hidden="true">in</span>
+          <span class="ic-contact-icon ic-linkedin-square" aria-hidden="true"><svg viewBox="0 0 24 24" role="presentation"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.78C.8 0 0 .78 0 1.73v20.54C0 23.23.8 24 1.78 24h20.44c.98 0 1.78-.77 1.78-1.73V1.73C24 .78 23.2 0 22.22 0Z"/></svg></span>
           <span><small>LinkedIn</small><strong>Follow IntelliCore</strong></span>
           <b aria-hidden="true">↗</b>
         </a>
@@ -238,6 +261,7 @@
       <div id="policyModalBody" style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.65;"></div>
     </div>
   </div>
+  <script src="dashboard-visuals.js" defer></script>
   <script type="module" src="dashboard-auth.js"></script>
 </body>
 </html>

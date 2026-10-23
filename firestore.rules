@@ -1,0 +1,52 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/workspaceRecords/{recordId} {
+      function isOwner() {
+        return request.auth != null && request.auth.uid == userId;
+      }
+
+      function hasValidRecord() {
+        let data = request.resource.data;
+        return data.keys().hasAll([
+            'id', 'category', 'title', 'organisation', 'date',
+            'status', 'createdAt', 'updatedAt'
+          ])
+          && data.keys().hasOnly([
+            'id', 'category', 'title', 'organisation', 'date',
+            'status', 'createdAt', 'updatedAt'
+          ])
+          && data.id == recordId
+          && data.category in ['applications', 'tasks', 'certificates']
+          && data.title is string
+          && data.title.size() > 0
+          && data.title.size() <= 100
+          && data.organisation is string
+          && data.organisation.size() <= 120
+          && data.date is string
+          && data.date.size() <= 10
+          && data.createdAt is int
+          && data.updatedAt is int
+          && (
+            (data.category == 'applications'
+              && data.status in [
+                'Applied', 'Under review', 'Shortlisted',
+                'Interview Scheduled', 'Selected', 'Rejected', 'Withdrawn'
+              ])
+            || (data.category == 'tasks'
+              && data.status in ['To do', 'In progress', 'Completed'])
+            || (data.category == 'certificates'
+              && data.status in ['Earned', 'In progress'])
+          );
+      }
+
+      allow read, delete: if isOwner();
+      allow create: if isOwner() && hasValidRecord();
+      allow update: if isOwner()
+        && hasValidRecord()
+        && request.resource.data.category == resource.data.category
+        && request.resource.data.createdAt == resource.data.createdAt;
+    }
+  }
+}

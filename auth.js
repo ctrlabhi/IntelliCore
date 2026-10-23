@@ -46,7 +46,7 @@ function openModal() {
   document.body.classList.add("ic-modal-open");
   $("icAuthFormPanel").hidden = false;
   $("icDashboardPanel").hidden = true;
-  setTimeout(() => $("icAuthEmail")?.focus(), 80);
+  setTimeout(() => $("icAuthEmail")?.focus({ preventScroll: true }), 80);
 }
 
 function closeModal() {
