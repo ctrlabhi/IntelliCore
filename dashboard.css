@@ -153,7 +153,7 @@
 .ic-dialog-backdrop{position:fixed;inset:0;z-index:2000;background:rgba(0,4,12,.78);backdrop-filter:blur(8px);display:grid;place-items:center;padding:18px}
 .ic-record-dialog{position:relative;width:min(100%,480px);max-height:min(90vh,760px);overflow:auto;background:#071426;border:1px solid #176087;border-radius:22px;padding:27px;color:#edf6ff;box-shadow:0 25px 90px rgba(0,0,0,.45)}
 .ic-record-dialog h2{font-size:1.55rem;margin:9px 0;color:#fff;letter-spacing:-.03em}
-.ic-record-dialog>p{font-size:.85rem;color:#9eb7d8;margin:0 0 20px}
+.ic-record-dialog>p,.ic-profile-dialog-content>p{font-size:.85rem;color:#9eb7d8;margin:0 0 20px}
 .ic-dialog-close{position:absolute;right:15px;top:12px;border:0;background:transparent;color:#b7d5ed;font-size:1.8rem;cursor:pointer}
 .ic-form-field{display:flex;flex-direction:column;gap:7px;font-size:.8rem;font-weight:750;color:#c4d8ec;margin:14px 0}
 .ic-form-field input,.ic-form-field select{width:100%;min-width:0;background:#04101f;border:1px solid #214765;border-radius:11px;padding:12px;color:#edf6ff;font:inherit;font-weight:400;outline:none}
@@ -844,7 +844,7 @@
 .ic-review-card .ic-outline-button { flex: 1 1 125px; }
 .ic-profile-dialog { max-height: min(88vh, 700px); overflow-y: auto; }
 .ic-profile-dialog h2 { margin-top: 10px; color: #f0f7ff; }
-.ic-profile-dialog > p { color: #a9bfd8; font-size: .84rem; line-height: 1.6; }
+.ic-profile-dialog-content > p { color: #a9bfd8; font-size: .84rem; line-height: 1.6; }
 .ic-profile-dialog .ic-dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
 .ic-profile-dialog .ic-form-field { color: #b8cce2; }
 .ic-workspace-page .ic-training-section .ic-activity-empty,
@@ -1110,4 +1110,204 @@
 @media (max-width: 520px) {
   .ic-intern-card dl { grid-template-columns: 1fr; }
   .ic-intern-card-heading { flex-direction: column; }
+}
+
+@media (max-width: 760px) {
+  .ic-workspace-page .ic-workspace-welcome {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+  }
+  .ic-workspace-page .ic-welcome-avatar-wrap,
+  .ic-workspace-page .ic-welcome-avatar {
+    width: 56px;
+    height: 56px;
+  }
+  .ic-workspace-page .ic-welcome-copy { min-width: 0; }
+  .ic-workspace-page .ic-welcome-actions {
+    grid-column: 2;
+    width: auto;
+    min-width: 0;
+    padding-left: 0;
+    justify-content: flex-start;
+  }
+  .ic-workspace-page .ic-build-profile-button {
+    width: fit-content;
+    max-width: 100%;
+    white-space: normal;
+  }
+  .ic-workspace-page .ic-profile-progress {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+  }
+}
+
+.ic-workspace-page .ic-welcome-avatar[role="button"] {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.ic-workspace-page .ic-welcome-avatar[role="button"]:focus-visible {
+  outline: 2px solid #38d5ff;
+  outline-offset: 4px;
+}
+.ic-workspace-page .ic-welcome-avatar[aria-busy="true"] {
+  cursor: wait;
+  opacity: .7;
+}
+.ic-workspace-page #icInternshipDialog:not([hidden]) {
+  display: grid;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  padding: max(18px, env(safe-area-inset-top)) 14px max(18px, env(safe-area-inset-bottom));
+}
+.ic-workspace-page #icInternshipDialog .ic-profile-dialog {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 520px);
+  max-height: calc(100vh - 36px);
+  max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 36px);
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+.ic-workspace-page .ic-profile-dialog-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+.ic-workspace-page #icInternshipDialog .ic-dialog-actions {
+  flex: 0 0 auto;
+  margin-top: 0;
+  padding: 12px 0 4px;
+  border-top: 1px solid rgba(89, 158, 202, .2);
+  background: #071426;
+}
+.ic-workspace-page .ic-workspace-welcome.is-onboarding {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  row-gap: 8px;
+  align-items: center;
+  justify-items: center;
+  min-height: 168px;
+  margin: 24px 0;
+  padding: 26px 25px;
+  overflow: hidden;
+  position: relative;
+  isolation: isolate;
+  border: 1px solid rgba(54, 205, 255, .3);
+  background:
+    radial-gradient(ellipse at 50% 115%, rgba(0, 183, 255, .16), transparent 55%),
+    linear-gradient(135deg, rgba(7, 24, 43, .98), rgba(8, 19, 37, .98));
+  box-shadow: 0 16px 42px rgba(0, 0, 0, .22), inset 0 1px 0 rgba(255, 255, 255, .04);
+}
+.ic-workspace-page .ic-workspace-welcome.is-onboarding::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: linear-gradient(180deg, transparent, #36d9ff 28%, #4d8dff 72%, transparent);
+  opacity: .9;
+  z-index: -1;
+}
+.ic-workspace-page .ic-workspace-welcome.is-onboarding > :not(.ic-welcome-copy):not(.ic-welcome-actions) {
+  display: none !important;
+}
+.ic-workspace-page .ic-workspace-welcome.is-onboarding .ic-welcome-copy {
+  grid-column: 1;
+  width: 100%;
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+.ic-workspace-page .ic-workspace-welcome.is-onboarding .ic-welcome-copy > :not(#icProfileName) {
+  display: none !important;
+}
+.ic-workspace-page .ic-workspace-welcome.is-onboarding #icProfileName {
+  margin: 0 !important;
+  color: #f4f9ff !important;
+  font-size: clamp(1.5rem, 4.4vw, 1.9rem);
+  font-weight: 850;
+  line-height: 1.2;
+  letter-spacing: -.035em;
+  text-shadow: 0 2px 18px rgba(0, 190, 255, .2);
+}
+.ic-workspace-page .ic-workspace-welcome.is-onboarding .ic-welcome-actions {
+  display: block;
+  grid-column: 1;
+  width: min(100%, 360px);
+  padding: 0;
+  text-align: center;
+}
+.ic-workspace-page .ic-workspace-welcome.is-onboarding .ic-account-pill {
+  display: none !important;
+}
+.ic-workspace-page .ic-workspace-welcome.is-onboarding .ic-build-profile-button {
+  display: inline-block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 13px 18px;
+  border: 1px solid rgba(63, 212, 255, .5);
+  border-radius: 14px;
+  background: linear-gradient(110deg, rgba(9, 64, 91, .74), rgba(10, 39, 67, .9));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 0 22px rgba(0, 184, 255, .12);
+  color: #8cecff;
+  font-size: clamp(1rem, 3.4vw, 1.2rem);
+  font-weight: 850;
+  line-height: 1.35;
+  white-space: normal;
+  text-shadow: 0 0 14px rgba(0, 210, 255, .3);
+  animation: ic-profile-onboarding-pulse 2.4s ease-in-out infinite;
+}
+.ic-workspace-page .ic-workspace-welcome.is-onboarding .ic-build-profile-button:hover,
+.ic-workspace-page .ic-workspace-welcome.is-onboarding .ic-build-profile-button:focus-visible {
+  border-color: #73e8ff;
+  background: linear-gradient(110deg, rgba(12, 83, 113, .9), rgba(11, 48, 79, .98));
+  color: #d4faff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 0 26px rgba(0, 198, 255, .22);
+}
+@keyframes ic-profile-onboarding-pulse {
+  0%, 100% {
+    border-color: rgba(63, 212, 255, .4);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 0 14px rgba(0, 184, 255, .08);
+  }
+  50% {
+    border-color: rgba(94, 227, 255, .76);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 0 24px rgba(0, 184, 255, .2);
+  }
+}
+@media (max-width: 760px) {
+  .ic-workspace-page #icInternshipDialog:not([hidden]) {
+    padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom));
+  }
+  .ic-workspace-page #icInternshipDialog .ic-profile-dialog {
+    max-height: calc(100vh - 20px);
+    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 20px);
+    padding: 24px 18px;
+    border-radius: 18px;
+  }
+  .ic-workspace-page .ic-workspace-welcome.is-onboarding {
+    min-height: 148px;
+    margin: 15px 0;
+    padding: 20px 16px;
+  }
+  .ic-workspace-page .ic-workspace-welcome.is-onboarding .ic-build-profile-button {
+    font-size: clamp(.98rem, 4.7vw, 1.15rem);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ic-workspace-page .ic-workspace-welcome.is-onboarding .ic-build-profile-button { animation: none; }
 }

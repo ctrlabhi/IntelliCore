@@ -154,10 +154,11 @@
 
     <section class="ic-workspace-welcome" id="icProfile" aria-label="Account summary">
       <div class="ic-welcome-avatar-wrap">
-        <div class="ic-welcome-avatar" id="icProfileAvatar" aria-label="Profile picture">
+        <div class="ic-welcome-avatar" id="icProfileAvatar" role="button" tabindex="0" aria-label="Change profile photo">
           <img id="icProfilePhoto" alt="Your profile photo" hidden>
           <span id="icProfileInitial" aria-hidden="true">I</span>
         </div>
+        <input id="icProfilePhotoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
       </div>
       <div class="ic-welcome-copy">
         <span class="ic-muted-label">WELCOME BACK</span>
@@ -165,7 +166,7 @@
         <p id="icProfileEmail">Loading your account details…</p>
         <div class="ic-internship-prompt" id="icInternshipPrompt" aria-labelledby="icInternshipPromptTitle" hidden>
           <span class="ic-muted-label">YOUR INTERNSHIP STARTS HERE</span>
-          <h3 id="icInternshipPromptTitle">Firstly, build your profile for Internship</h3>
+          <h3 id="icInternshipPromptTitle">Firstly, build your profile</h3>
           <p>Enter your details and choose your domain and duration to unlock your dashboard.</p>
         </div>
       </div>
@@ -282,43 +283,44 @@
       <div class="ic-records-toolbar"><div><h3 id="icRecordListTitle">My Applications</h3><p id="icRecordListSubtitle">Track roles and application progress.</p></div><button type="button" class="ic-primary-button" id="icAddRecordButton" disabled>＋ Add application</button></div>
       <div id="icRecordsList" class="ic-records-list"></div>
     </section>
-    <div class="ic-dialog-backdrop" id="icInternshipDialog" role="dialog" aria-modal="true" aria-labelledby="icInternshipDialogTitle" hidden>
-      <form class="ic-record-dialog ic-profile-dialog" id="icInternshipForm">
-        <button type="button" class="ic-dialog-close" id="icCloseInternshipDialog" aria-label="Close internship profile">×</button>
-        <span class="ic-muted-label">START YOUR JOURNEY</span>
-        <h2 id="icInternshipDialogTitle">Build your internship profile</h2>
-        <p id="icInternshipDialogDescription">Select your domain and duration. Your profile becomes active as soon as you save it.</p>
-        <label class="ic-form-field">Full name<input id="icInternshipName" name="displayName" required minlength="2" maxlength="80" autocomplete="name" placeholder="Your full name"></label>
-        <label class="ic-form-field">Email address<input id="icInternshipEmail" type="email" autocomplete="email" readonly aria-readonly="true"></label>
-        <label class="ic-form-field">Gender<select id="icInternshipGender" name="gender" required><option value="">Choose an option</option><option value="Female">Female</option><option value="Male">Male</option><option value="Non-binary">Non-binary</option><option value="Prefer not to say">Prefer not to say</option></select></label>
-        <label class="ic-form-field">Internship domain<select id="icInternshipTrack" name="track" required></select></label>
-        <label class="ic-form-field">Internship duration<select id="icInternshipDuration" name="durationMonths" required><option value="1">1 month</option><option value="2">2 months</option><option value="3">3 months</option><option value="6">6 months</option></select></label>
-        <label class="ic-form-field">Phone number<input id="icInternshipPhone" name="phone" type="tel" required minlength="7" maxlength="24" autocomplete="tel" placeholder="+91 98765 43210"></label>
-        <label class="ic-form-field">Profile photo (optional)<input id="icInternshipPhoto" name="photo" type="file" accept="image/jpeg,image/png,image/webp"><small id="icInternshipPhotoStatus">If you skip this, your initials will be shown.</small></label>
-        <p id="icInternshipPeriodPreview" class="ic-profile-note"></p>
-        <div class="ic-dialog-actions"><button type="button" class="ic-outline-button" id="icCancelInternshipEdit">Cancel</button><button type="submit" class="ic-primary-button">Save my internship profile</button></div>
-      </form>
-    </div>
-    <div class="ic-dialog-backdrop" id="icRecordDialog" role="dialog" aria-modal="true" aria-labelledby="icRecordDialogTitle" aria-describedby="icRecordDialogDescription" hidden>
-      <form class="ic-record-dialog" id="icRecordForm">
-        <button type="button" class="ic-dialog-close" id="icCloseRecordDialog" aria-label="Close dialog">×</button>
-        <span class="ic-muted-label" id="icRecordDialogKicker">WORKSPACE</span>
-        <h2 id="icRecordDialogTitle">Add application</h2>
-        <p id="icRecordDialogDescription">Add a record to your personal workspace.</p>
-        <label class="ic-form-field">Title <input id="icRecordTitle" name="title" required maxlength="100" placeholder="e.g. Web Developer Intern"></label>
-        <label class="ic-form-field">Organisation / details <input id="icRecordOrganisation" name="organisation" maxlength="120" placeholder="e.g. IntelliCore"></label>
-        <label class="ic-form-field" id="icRecordStatusField">Status
-          <select id="icRecordStatus" name="status"><option>Applied</option><option>Under review</option><option>Interview</option><option>Selected</option><option>Not selected</option></select>
-        </label>
-        <label class="ic-form-field" id="icRecordDateField">Date <input id="icRecordDate" name="date" type="date"></label>
-        <div class="ic-dialog-actions"><button type="button" class="ic-outline-button" id="icCancelRecord">Cancel</button><button class="ic-primary-button" type="submit">Save record</button></div>
-      </form>
-    </div>
     <div id="icWorkspaceNotice" class="ic-workspace-notice" role="status" aria-live="polite">
       <span id="icWorkspaceNoticeText">Connecting to your private workspace…</span>
       <button id="icWorkspaceRetry" type="button" hidden>Retry connection</button>
     </div>
   </main>
+  <div class="ic-dialog-backdrop" id="icInternshipDialog" role="dialog" aria-modal="true" aria-labelledby="icInternshipDialogTitle" hidden>
+    <form class="ic-record-dialog ic-profile-dialog" id="icInternshipForm">
+      <button type="button" class="ic-dialog-close" id="icCloseInternshipDialog" aria-label="Close internship profile">×</button>
+      <div class="ic-profile-dialog-content">
+        <span class="ic-muted-label">START YOUR JOURNEY</span>
+        <h2 id="icInternshipDialogTitle">Build your internship profile</h2>
+        <p id="icInternshipDialogDescription">Select your domain and duration. Your profile becomes active as soon as you save it.</p>
+        <label class="ic-form-field">Full name<input id="icInternshipName" name="displayName" required minlength="2" maxlength="80" autocomplete="name" placeholder="Your full name"></label>
+        <label class="ic-form-field">Email address<input id="icInternshipEmail" type="email" autocomplete="email" readonly aria-readonly="true"></label>
+        <label class="ic-form-field">Gender<select id="icInternshipGender" name="gender" required><option value="">Choose an option</option><option value="Female">Female</option><option value="Male">Male</option></select></label>
+        <label class="ic-form-field">Internship domain<select id="icInternshipTrack" name="track" required></select></label>
+        <label class="ic-form-field">Internship duration<select id="icInternshipDuration" name="durationMonths" required><option value="1">1 month</option><option value="2">2 months</option><option value="3">3 months</option><option value="6">6 months</option></select></label>
+        <label class="ic-form-field">Phone number<input id="icInternshipPhone" name="phone" type="tel" required minlength="7" maxlength="24" autocomplete="tel" placeholder="+91 98765 43210"></label>
+        <p id="icInternshipPeriodPreview" class="ic-profile-note"></p>
+      </div>
+      <div class="ic-dialog-actions"><button type="button" class="ic-outline-button" id="icCancelInternshipEdit">Cancel</button><button type="submit" class="ic-primary-button">Save my profile</button></div>
+    </form>
+  </div>
+  <div class="ic-dialog-backdrop" id="icRecordDialog" role="dialog" aria-modal="true" aria-labelledby="icRecordDialogTitle" aria-describedby="icRecordDialogDescription" hidden>
+    <form class="ic-record-dialog" id="icRecordForm">
+      <button type="button" class="ic-dialog-close" id="icCloseRecordDialog" aria-label="Close dialog">×</button>
+      <span class="ic-muted-label" id="icRecordDialogKicker">WORKSPACE</span>
+      <h2 id="icRecordDialogTitle">Add application</h2>
+      <p id="icRecordDialogDescription">Add a record to your personal workspace.</p>
+      <label class="ic-form-field">Title <input id="icRecordTitle" name="title" required maxlength="100" placeholder="e.g. Web Developer Intern"></label>
+      <label class="ic-form-field">Organisation / details <input id="icRecordOrganisation" name="organisation" maxlength="120" placeholder="e.g. IntelliCore"></label>
+      <label class="ic-form-field" id="icRecordStatusField">Status
+        <select id="icRecordStatus" name="status"><option>Applied</option><option>Under review</option><option>Interview</option><option>Selected</option><option>Not selected</option></select>
+      </label>
+      <label class="ic-form-field" id="icRecordDateField">Date <input id="icRecordDate" name="date" type="date"></label>
+      <div class="ic-dialog-actions"><button type="button" class="ic-outline-button" id="icCancelRecord">Cancel</button><button class="ic-primary-button" type="submit">Save record</button></div>
+    </form>
+  </div>
 <footer class="site-footer ic-final-footer" style="padding: 2.6rem 0 1.6rem;">
   <div class="container">
     <div class="ic-footer-grid">

@@ -115,7 +115,27 @@ function withTimeout(operation, delay) {
     })
   ]).finally(() => clearTimeout(timeout));
 }
-async function connectWorkspace(user) {
+function callableErrorNotice(error, functionName) {
+  const code = typeof error?.code === "string" ? error.code : "";
+  if (code.endsWith("/not-found") || code === "not-found") {
+    return `Firebase Function "${functionName}" was not found in us-central1. Deploy the latest Functions to project intellicore-229.`;
+  }
+  if (code.endsWith("/unauthenticated") || code === "unauthenticated") {
+    return "Your sign-in expired before the secure workspace could load. Sign out and sign in again.";
+  }
+  if (code.endsWith("/permission-denied") || code === "permission-denied") {
+    return "Your account is not authorised to load the secure workspace. Check its verified email and assigned role.";
+  }
+  if (code.endsWith("/failed-precondition") || code === "failed-precondition") {
+    return error.message || "The secure workspace is not ready for this account yet.";
+  }
+  if (code.endsWith("/unavailable") || code.endsWith("/deadline-exceeded")
+    || error?.message === "Workspace connection timed out.") {
+    return `Firebase Function "${functionName}" did not respond. Check Firebase Functions availability and try again.`;
+  }
+  return `Firebase Function "${functionName}" failed${code ? ` (${code})` : ""}. Check Cloud Functions logs for project intellicore-229.`;
+}
+async function connectWorkspace(user, profileSetupError = null) {
   const attempt = ++connectionAttempt;
   recordsReady = false;
   $("workspaceTop").setAttribute("aria-busy", "true");
@@ -123,7 +143,9 @@ async function connectWorkspace(user) {
   notice("Connecting to your private workspace…");
   const [recordResult, trainingResult] = await Promise.allSettled([
     withTimeout(loadRecords(user, attempt), 20000),
-    withTimeout(refreshTrainingWorkspace(), 20000)
+    profileSetupError
+      ? Promise.reject(profileSetupError)
+      : withTimeout(refreshTrainingWorkspace(), 20000)
   ]);
   if (attempt !== connectionAttempt) return;
   $("workspaceTop").setAttribute("aria-busy", "false");
@@ -135,7 +157,8 @@ async function connectWorkspace(user) {
   } else if (trainingResult.status === "rejected") {
     trainingWorkspace = null;
     console.error("Training assignments could not be loaded.", trainingResult.reason);
-    notice("Your personal workspace loaded, but secure training services are unavailable. Check that Firebase Functions are deployed.");
+    const functionName = profileSetupError ? "ensureProfile" : "getTrainingDashboard";
+    notice(`Your personal workspace loaded, but ${callableErrorNotice(trainingResult.reason, functionName)}`);
   } else {
     notice("Your private workspace and training assignments are ready.");
   }
@@ -190,14 +213,23 @@ function renderProfileOnboarding(role, profile = null) {
   const complete = internshipProfileComplete(profile);
   const prompt = $("icInternshipPrompt");
   const button = $("icBuildProfileButton");
-  prompt.hidden = !isLearner || complete;
-  prompt.classList.toggle("is-onboarding", isLearner && !complete);
-  prompt.querySelector("p").textContent = profile?.track
-    ? "Complete your name, phone number, and other profile details to unlock your dashboard."
-    : "Enter your details and choose your domain and duration to unlock your dashboard.";
+  const isOnboarding = isLearner && !complete;
+  $("icProfile").classList.toggle("is-onboarding", isOnboarding);
+  prompt.hidden = true;
+  $("icProfileName").hidden = false;
+  $("icProfileEmail").hidden = isLearner && !complete;
+  $("icProfileInitial").hidden = false;
+  if (isOnboarding) {
+    const accountUser = currentUser || auth.currentUser;
+    const displayName = profile?.displayName || accountUser?.displayName
+      || accountUser?.email?.split("@")[0] || "Welcome";
+    $("icProfileName").textContent = displayName.trim().split(/\s+/)[0] || displayName;
+  }
   button.hidden = !isLearner;
-  button.textContent = complete ? "Edit profile" : "Build your profile";
-  button.classList.toggle("is-onboarding", isLearner && !complete);
+  button.textContent = isOnboarding
+    ? "Firstly, build your profile"
+    : "Edit profile";
+  button.classList.toggle("is-onboarding", isOnboarding);
   document.querySelectorAll("[data-internship-dashboard]").forEach(section => {
     section.hidden = isLearner && !complete;
   });
@@ -260,8 +292,13 @@ async function loadStoredProfilePhoto(user, name) {
 }
 function renderTraining() {
   const tasksElement = $("icTrainingTasks");
+  const internshipOptions = tracksForDashboard.map(track =>
+    `<option value="${escapeHtml(track)}">${escapeHtml(track)}</option>`
+  ).join("");
+  $("icInternshipTrack").innerHTML = `<option value="">Choose a domain</option>${internshipOptions}`;
+  $("icInternshipProfileForm").elements.track.innerHTML = internshipOptions;
+
   if (!trainingWorkspace) {
-    renderProfileOnboarding(authenticatedRole);
     const accountUser = currentUser || auth.currentUser;
     if (accountUser) {
       $("icProfileName").textContent = accountUser.displayName || accountUser.email?.split("@")[0] || "Your workspace";
@@ -269,6 +306,7 @@ function renderTraining() {
       $("icInternshipName").value = accountUser.displayName || "";
       $("icInternshipEmail").value = accountUser.email || "";
     }
+    renderProfileOnboarding(authenticatedRole);
     $("icTrainingTrack").textContent = "Training unavailable";
     $("icTrainingIntro").textContent = "Training services could not be reached. Retry after Firebase Functions are deployed.";
     tasksElement.innerHTML = '<div class="ic-activity-empty"><strong>Your training could not be loaded</strong><p>Refresh the page after the secure training service is available.</p></div>';
@@ -305,27 +343,22 @@ function renderTraining() {
     "founder", "co_founder", "admin", "hr_manager", "hr_executive", "operations_executive"
   ].includes(role);
 
-  renderProfileOnboarding(role, profile);
   $("icAttendancePanel").hidden = !isIntern || !hasRequiredProfile;
   $("icTrainingSection").hidden = isIntern && !hasRequiredProfile;
   $("icProfileName").textContent = profile.displayName || currentUser?.displayName || currentUser?.email?.split("@")[0] || "Your workspace";
   $("icProfileInitial").textContent = $("icProfileName").textContent.trim().charAt(0).toUpperCase() || "I";
+  renderProfileOnboarding(role, profile);
   const accountUser = currentUser || auth.currentUser;
   if (accountUser) {
     $("icInternshipEmail").value = accountUser.email || "";
     updateProfileCompletion(accountUser, profile);
   }
 
-  const internshipOptions = tracksForDashboard.map(track =>
-    `<option value="${escapeHtml(track)}">${escapeHtml(track)}</option>`
-  ).join("");
-  $("icInternshipTrack").innerHTML = internshipOptions;
-  $("icInternshipProfileForm").elements.track.innerHTML = internshipOptions;
   const durationSelect = $("icInternshipForm").elements.durationMonths;
   $("icInternshipName").value = profile.displayName || currentUser?.displayName || "";
   $("icInternshipGender").value = profile.gender || "";
   if (profile.durationMonths) durationSelect.value = String(profile.durationMonths);
-  $("icInternshipTrack").value = profile.track || tracksForDashboard[0];
+  $("icInternshipTrack").value = profile.track || "";
   $("icInternshipForm").elements.track.value = profile.track || tracksForDashboard[0];
   $("icInternshipPhone").value = profile.phone || "";
   $("icInternshipTrack").disabled = hasInternshipProfile;
@@ -805,31 +838,63 @@ function bindEvents() {
     if (event.target === $("icInternshipDialog")) $("icCancelInternshipEdit").click();
   });
   $("icInternshipDuration").addEventListener("change", updateInternshipPeriodPreview);
-  $("icInternshipPhoto").addEventListener("change", event => {
+  const profileAvatar = $("icProfileAvatar");
+  const profilePhotoInput = $("icProfilePhotoInput");
+  function openProfilePhotoPicker() {
+    if (!(currentUser || auth.currentUser)) {
+      notice("Sign in before changing your profile photo.");
+      return;
+    }
+    profilePhotoInput.click();
+  }
+  profileAvatar.addEventListener("click", openProfilePhotoPicker);
+  profileAvatar.addEventListener("keydown", event => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openProfilePhotoPicker();
+    }
+  });
+  profilePhotoInput.addEventListener("change", async event => {
     const file = event.target.files?.[0];
-    $("icInternshipPhotoStatus").textContent = file
-      ? `${file.name} selected`
-      : "If you skip this, your initials will be shown.";
+    const user = currentUser || auth.currentUser;
+    if (!file || !user) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      notice("Choose a JPEG, PNG, or WebP profile photo.");
+      profilePhotoInput.value = "";
+      return;
+    }
+    if (file.size > 3 * 1024 * 1024) {
+      notice("Choose a profile photo smaller than 3 MB.");
+      profilePhotoInput.value = "";
+      return;
+    }
+    profileAvatar.setAttribute("aria-busy", "true");
+    notice("Uploading your profile photo…");
+    try {
+      await uploadBytes(ref(storage, `profilePhotos/${user.uid}/avatar`), file, {
+        contentType: file.type
+      });
+      if (profilePhotoObjectUrl) URL.revokeObjectURL(profilePhotoObjectUrl);
+      profilePhotoObjectUrl = URL.createObjectURL(file);
+      $("icProfilePhoto").src = profilePhotoObjectUrl;
+      $("icProfilePhoto").alt = `${$("icProfileName").textContent}'s profile photo`;
+      $("icProfilePhoto").hidden = false;
+      notice("Your profile photo has been updated.");
+    } catch (error) {
+      console.error("The profile photo could not be uploaded.", error);
+      notice(error.message || "Could not update your profile photo.");
+    } finally {
+      profileAvatar.removeAttribute("aria-busy");
+      profilePhotoInput.value = "";
+    }
   });
   $("icInternshipForm").addEventListener("submit", async event => {
     event.preventDefault();
     const form = event.currentTarget;
     const submit = form.querySelector('[type="submit"]');
     const data = new FormData(form);
-    const photo = $("icInternshipPhoto").files?.[0];
     submit.disabled = true;
     try {
-      if (photo) {
-        if (!["image/jpeg", "image/png", "image/webp"].includes(photo.type)) {
-          throw new Error("Choose a JPEG, PNG, or WebP profile photo.");
-        }
-        if (photo.size > 3 * 1024 * 1024) {
-          throw new Error("Choose a profile photo smaller than 3 MB.");
-        }
-        await uploadBytes(ref(storage, `profilePhotos/${currentUser.uid}/avatar`), photo, {
-          contentType: photo.type
-        });
-      }
       const result = await callFunction("saveInternshipProfile", {
         displayName: data.get("displayName"),
         gender: data.get("gender"),
@@ -838,13 +903,6 @@ function bindEvents() {
         phone: data.get("phone")
       });
       await currentUser.reload();
-      if (photo) {
-        if (profilePhotoObjectUrl) URL.revokeObjectURL(profilePhotoObjectUrl);
-        profilePhotoObjectUrl = URL.createObjectURL(photo);
-        $("icProfilePhoto").src = profilePhotoObjectUrl;
-        $("icProfilePhoto").alt = `${data.get("displayName")}'s profile photo`;
-        $("icProfilePhoto").hidden = false;
-      }
       $("icCancelInternshipEdit").click();
       notice(`Your ${result.track} internship is active through ${result.endDate}.`);
       try {
@@ -1256,15 +1314,16 @@ onAuthStateChanged(auth, async user => {
   currentUser = user;
   trainingWorkspace = null;
   meetingRefreshTimer = window.setInterval(() => void refreshMeetingState(), 20000);
+  let profileSetupError = null;
   try {
     await callFunction("ensureProfile");
     if (auth.currentUser?.uid !== user.uid) return;
     await currentUser.reload();
   } catch (error) {
+    profileSetupError = error;
     console.error("The secured account profile could not be initialised.", error);
-    notice("Your account is signed in, but training profile setup is unavailable. Check that Firebase Functions are deployed.");
   }
   if (auth.currentUser?.uid !== user.uid) return;
   renderProfile(auth.currentUser);
-  void connectWorkspace(user);
+  void connectWorkspace(user, profileSetupError);
 });

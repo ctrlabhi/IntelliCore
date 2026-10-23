@@ -710,7 +710,7 @@ exports.saveInternshipProfile = onCall(async request => {
     throw new HttpsError("invalid-argument", "Full name must contain at least 2 characters.");
   }
   const gender = request.data?.gender;
-  const allowedGenders = ["Female", "Male", "Non-binary", "Prefer not to say"];
+  const allowedGenders = ["Female", "Male"];
   if (!allowedGenders.includes(gender)) {
     throw new HttpsError("invalid-argument", "Choose a gender option to continue.");
   }
