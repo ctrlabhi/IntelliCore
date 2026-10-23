@@ -1,6 +1,34 @@
 (function () {
   'use strict';
 
+  const scrollProgressBar = document.getElementById('scrollProgressBar');
+  const rocketRunner = document.getElementById('rocketRunner');
+  let scrollFrame = 0;
+
+  function updateScrollProgress() {
+    scrollFrame = 0;
+    const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+    const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    const progress = maxScroll ? Math.min(100, (scrollTop / maxScroll) * 100) : 0;
+
+    if (scrollProgressBar) scrollProgressBar.style.width = progress.toFixed(2) + '%';
+    if (rocketRunner) {
+      const rocketWidth = window.innerWidth <= 600 ? 29 : 34;
+      const edge = rocketWidth / 2 + 4;
+      const safeTravel = Math.max(0, window.innerWidth - edge * 2);
+      rocketRunner.style.left = (edge + safeTravel * (progress / 100)).toFixed(1) + 'px';
+    }
+  }
+
+  function scheduleScrollProgress() {
+    if (!scrollFrame) scrollFrame = window.requestAnimationFrame(updateScrollProgress);
+  }
+
+  scheduleScrollProgress();
+  window.addEventListener('scroll', scheduleScrollProgress, { passive: true });
+  window.addEventListener('resize', scheduleScrollProgress, { passive: true });
+  window.addEventListener('load', scheduleScrollProgress, { once: true });
+
   const canvas = document.getElementById('icWorkspaceNeuralCanvas');
   if (!canvas) return;
 

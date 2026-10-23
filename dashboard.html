@@ -12,6 +12,59 @@
   <link rel="stylesheet" href="dashboard.css" />
 </head>
 <body class="ic-workspace-page">
+  <div class="scroll-progress-wrap" aria-hidden="true">
+    <div class="scroll-progress-bar" id="scrollProgressBar"></div>
+    <div class="rocket-runner" id="rocketRunner">
+      <div class="rocket-smoke"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      <svg viewBox="0 0 72 36" role="presentation" focusable="false" aria-label="Blue rocket">
+        <defs>
+          <linearGradient id="rocketHull" x1="0" y1="0" x2="0.2" y2="1">
+            <stop offset="0" stop-color="#f7fdff"/>
+            <stop offset=".2" stop-color="#b8eaff"/>
+            <stop offset=".48" stop-color="#318de9"/>
+            <stop offset=".72" stop-color="#1160bd"/>
+            <stop offset="1" stop-color="#082c70"/>
+          </linearGradient>
+          <linearGradient id="rocketNose" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#6ecfff"/>
+            <stop offset=".72" stop-color="#dffaff"/>
+            <stop offset="1" stop-color="#ffffff"/>
+          </linearGradient>
+          <linearGradient id="rocketFin" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#39e7ff"/>
+            <stop offset="1" stop-color="#1551db"/>
+          </linearGradient>
+          <linearGradient id="rocketFire" x1="1" y1="0" x2="0" y2="0">
+            <stop offset="0" stop-color="#f4ffff"/>
+            <stop offset=".28" stop-color="#50eaff"/>
+            <stop offset=".68" stop-color="#078cff" stop-opacity=".88"/>
+            <stop offset="1" stop-color="#246bff" stop-opacity="0"/>
+          </linearGradient>
+          <radialGradient id="rocketWindow" cx="32%" cy="25%" r="80%">
+            <stop offset="0" stop-color="#eaffff"/>
+            <stop offset=".25" stop-color="#46e5ff"/>
+            <stop offset="1" stop-color="#06427f"/>
+          </radialGradient>
+        </defs>
+        <path d="M15 14 L22 14 L22 22 L15 22 Z" fill="#0b3b79" stroke="#7beaff" stroke-width=".8"/>
+        <g class="rocket-flame">
+          <path d="M16 18 L1 12 Q6 18 1 24 L16 20 Z" fill="url(#rocketFire)"/>
+          <path d="M16 18 L3 16.4 L9 18 L3 20 Z" fill="#f1ffff" opacity=".96"/>
+        </g>
+        <path d="M22 20 L15 29 L29 24 L29 20 Z" fill="url(#rocketFin)" stroke="#75e8ff" stroke-width=".65"/>
+        <path d="M22 16 L15 7 L29 12 L29 16 Z" fill="url(#rocketFin)" stroke="#75e8ff" stroke-width=".65"/>
+        <path d="M25 20 L21 26 L28 22" fill="none" stroke="#c8faff" stroke-width=".55" opacity=".85"/>
+        <path d="M19 18 C24 12 35 11 48 12 L59 14 L69 18 L59 22 L48 24 C35 25 24 24 19 18 Z" fill="url(#rocketHull)" stroke="#b8f4ff" stroke-width=".7"/>
+        <path d="M48 12 L59 14 L69 18 L59 22 L48 24 Q54 18 48 12 Z" fill="url(#rocketNose)" stroke="#e6fbff" stroke-width=".45"/>
+        <path d="M25 14.7 C34 12.8 44 13.2 53 15" fill="none" stroke="#ffffff" stroke-width=".8" stroke-linecap="round" opacity=".88"/>
+        <path d="M25 21.4 C34 23 43 22.8 51 21" fill="none" stroke="#052e75" stroke-width="1" stroke-linecap="round" opacity=".9"/>
+        <ellipse cx="39" cy="17.7" rx="3.7" ry="3.2" fill="#06295d" stroke="#d8fbff" stroke-width=".8"/>
+        <ellipse cx="39" cy="17.4" rx="2.45" ry="2.1" fill="url(#rocketWindow)"/>
+        <ellipse cx="38.2" cy="16.7" rx=".8" ry=".55" fill="#ffffff" opacity=".9"/>
+        <path d="M30 14.2 L29 21.8 M47 13.5 L46 22.5" stroke="#a4eaff" stroke-width=".45" opacity=".65"/>
+      </svg>
+    </div>
+  </div>
   <canvas class="ic-workspace-neural-canvas" id="icWorkspaceNeuralCanvas" aria-hidden="true"></canvas>
   <div class="ic-workspace-topline"><span></span></div>
   <a class="ic-skip-link" href="#workspaceHome">Skip to dashboard</a>
