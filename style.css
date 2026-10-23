@@ -3087,12 +3087,16 @@ body.ic-modal-open{overflow:hidden}
  .brand-sublabel { font-size:.52rem; }
 }
 @media(max-width:390px) {
- .ic-footer-grid { grid-template-columns:1fr; }
- .ic-footer-about,.ic-footer-connect { grid-column:auto; }
+ .ic-footer-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.5rem 1rem; }
+ .ic-footer-about,.ic-footer-connect { grid-column:1/-1; }
  .ic-footer-brand img { width:62px; height:62px; }
  .ic-footer-brand strong { font-size:1.5rem; }
  .ic-footer-connect .ic-contact-card:first-of-type strong { font-size:.75rem; }
 }
+
+.brand-sublabel { margin-top:0; }
+.ic-footer-brand>span { gap:3px; }
+.ic-email-icon svg { display:block; width:28px; height:28px; filter:drop-shadow(0 1px 2px rgba(0,210,255,.22)); }
 
 
 /* IntelliCore sign-in modal refinement */
@@ -3278,3 +3282,5 @@ body.ic-modal-open{overflow:hidden}
 @media (prefers-reduced-motion: reduce) {
   .ic-auth-primary, #icAuthForm input:not([type=checkbox]) { transition: none; }
 }
+
+.brand-logo .brand-text { gap: 3px; }

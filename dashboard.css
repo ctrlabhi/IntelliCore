@@ -600,6 +600,14 @@
   .ic-workspace-page .brand-sublabel { font-size: .52rem; }
 }
 @media (max-width: 390px) {
+  .ic-workspace-page .ic-footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem 1rem;
+  }
+  .ic-workspace-page .ic-footer-about,
+  .ic-workspace-page .ic-footer-connect {
+    grid-column: 1 / -1;
+  }
   .ic-workspace-page .brand-emblem { width: 44px !important; height: 44px !important; }
   .ic-workspace-page .brand-logo { gap: 7px; }
   .ic-workspace-page .brand-name { font-size: 1.05rem; }
@@ -607,6 +615,16 @@
   .ic-workspace-page .ic-footer-brand { gap: 10px; }
   .ic-workspace-page .ic-footer-brand img { width: 62px; height: 62px; }
   .ic-workspace-page .ic-footer-brand strong { font-size: 1.5rem; }
+}
+
+.ic-workspace-page .brand-text { gap: 3px; }
+.ic-workspace-page .brand-sublabel { margin-top: 0; }
+.ic-workspace-page .ic-footer-brand>span { gap: 3px; }
+.ic-workspace-page .ic-email-icon svg {
+  display: block;
+  width: 28px;
+  height: 28px;
+  filter: drop-shadow(0 1px 2px rgba(0, 210, 255, .22));
 }
 
 /* Reuse the homepage's layered night-sky background and neural animation. */
