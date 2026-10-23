@@ -1096,9 +1096,10 @@ function bindEvents() {
     } catch (error) {
       console.error("The Firebase internship profile draft could not be saved.", error);
       const code = typeof error?.code === "string" ? error.code : "";
-      formError.textContent = code.endsWith("/permission-denied") || code === "permission-denied"
-        ? "Firebase rejected this profile draft. Deploy the updated Firestore rules, then try again."
-        : error.message || "Could not save your profile to Firebase.";
+      const message = typeof error?.message === "string" && error.message
+        ? error.message
+        : "Unknown Firebase error.";
+      formError.textContent = `Could not save profile draft (${code || "unknown"}): ${message}`;
       formError.hidden = false;
       notice(formError.textContent);
     } finally {

@@ -85,11 +85,11 @@ service cloud.firestore {
 
     match /users/{userId}/profileDrafts/{draftId} {
       function isLearnerOwner() {
+        let profilePath = /databases/$(database)/documents/profiles/$(userId);
         return signedIn()
           && request.auth.uid == userId
           && request.auth.token.get('role', 'learner') == 'learner'
-          && exists(/databases/$(database)/documents/profiles/$(userId))
-          && get(/databases/$(database)/documents/profiles/$(userId)).data.role == 'learner';
+          && (!exists(profilePath) || get(profilePath).data.role == 'learner');
       }
 
       function hasValidProfileDraft() {
