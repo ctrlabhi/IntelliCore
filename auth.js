@@ -166,11 +166,8 @@ form?.addEventListener("submit", async event => {
       showDashboard(credential.user);
       message("Account created. Check your email for the verification link.");
     } else {
-      const credential = await signInWithEmailAndPassword(auth, email, password);
-      showDashboard(credential.user);
-      message(credential.user.emailVerified
-        ? "Login successful."
-        : "Please check your email for the verification link.");
+      await signInWithEmailAndPassword(auth, email, password);
+      window.location.replace("dashboard.html");
     }
   } catch (error) {
     message(errorMessage(error));
@@ -182,9 +179,8 @@ form?.addEventListener("submit", async event => {
 $("icGoogleSignIn")?.addEventListener("click", async () => {
   message("Connecting to Google...");
   try {
-    const result = await signInWithPopup(auth, googleProvider);
-    showDashboard(result.user);
-    message("Google sign-in successful.");
+    await signInWithPopup(auth, googleProvider);
+    window.location.replace("dashboard.html");
   } catch (error) {
     message(errorMessage(error));
   }
