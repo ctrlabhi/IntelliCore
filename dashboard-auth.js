@@ -32,6 +32,7 @@ const notice = (message, canRetry = false) => {
 };
 let currentUser = null;
 let loginRedirectStarted = false;
+let authenticatedRole = "learner";
 let activeTab = "applications";
 let records = { applications: [], tasks: [], certificates: [] };
 let editingId = null;
@@ -172,6 +173,35 @@ async function persistRecords(nextRecords) {
 function escapeHtml(value="") {
   return String(value).replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch]));
 }
+function internshipProfileComplete(profile) {
+  return Boolean(
+    profile?.role === "learner"
+    && profile.displayName
+    && profile.phone
+    && profile.gender
+    && profile.track
+    && profile.durationMonths
+    && profile.internshipStartDate
+    && profile.internshipEndDate
+  );
+}
+function renderProfileOnboarding(role, profile = null) {
+  const isLearner = role === "learner";
+  const complete = internshipProfileComplete(profile);
+  const prompt = $("icInternshipPrompt");
+  const button = $("icBuildProfileButton");
+  prompt.hidden = !isLearner || complete;
+  prompt.classList.toggle("is-onboarding", isLearner && !complete);
+  prompt.querySelector("p").textContent = profile?.track
+    ? "Complete your name, phone number, and other profile details to unlock your dashboard."
+    : "Enter your details and choose your domain and duration to unlock your dashboard.";
+  button.hidden = !isLearner;
+  button.textContent = complete ? "Edit profile" : "Build your profile";
+  button.classList.toggle("is-onboarding", isLearner && !complete);
+  document.querySelectorAll("[data-internship-dashboard]").forEach(section => {
+    section.hidden = isLearner && !complete;
+  });
+}
 function indiaDateString(date = new Date()) {
   const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone: "Asia/Kolkata",
@@ -194,6 +224,7 @@ function renderProfile(user, profile = trainingWorkspace?.profile || null) {
   const avatar = $("icProfilePhoto");
   avatar.hidden = true;
   void loadStoredProfilePhoto(user, name);
+  renderProfileOnboarding(profile?.role || authenticatedRole, profile);
   updateProfileCompletion(user, profile);
 }
 function updateProfileCompletion(user, profile = null) {
@@ -230,6 +261,14 @@ async function loadStoredProfilePhoto(user, name) {
 function renderTraining() {
   const tasksElement = $("icTrainingTasks");
   if (!trainingWorkspace) {
+    renderProfileOnboarding(authenticatedRole);
+    const accountUser = currentUser || auth.currentUser;
+    if (accountUser) {
+      $("icProfileName").textContent = accountUser.displayName || accountUser.email?.split("@")[0] || "Your workspace";
+      $("icProfileEmail").textContent = accountUser.email || "";
+      $("icInternshipName").value = accountUser.displayName || "";
+      $("icInternshipEmail").value = accountUser.email || "";
+    }
     $("icTrainingTrack").textContent = "Training unavailable";
     $("icTrainingIntro").textContent = "Training services could not be reached. Retry after Firebase Functions are deployed.";
     tasksElement.innerHTML = '<div class="ic-activity-empty"><strong>Your training could not be loaded</strong><p>Refresh the page after the secure training service is available.</p></div>';
@@ -237,9 +276,9 @@ function renderTraining() {
     $("icTrainingProgress").textContent = "Training service unavailable";
     $("icInternshipProgress").textContent = "—";
     $("icStaffPanel").hidden = true;
-    $("icInternshipPrompt").hidden = true;
     $("icAttendancePanel").hidden = true;
     $("icMeetingPanel").hidden = true;
+    $("icTrainingSection").hidden = authenticatedRole === "learner";
     return;
   }
 
@@ -253,9 +292,7 @@ function renderTraining() {
   const hasInternshipProfile = Boolean(
     profile.track && profile.durationMonths && profile.internshipStartDate && profile.internshipEndDate
   );
-  const hasRequiredProfile = Boolean(
-    hasInternshipProfile && profile.displayName && profile.phone && profile.gender
-  );
+  const hasRequiredProfile = internshipProfileComplete(profile);
   const today = indiaDateString();
   const isCheckedIn = attendance.some(item => item.attendanceDate === today);
   const canManageProfiles = ["founder", "co_founder", "admin", "hr_manager"].includes(role);
@@ -268,22 +305,16 @@ function renderTraining() {
     "founder", "co_founder", "admin", "hr_manager", "hr_executive", "operations_executive"
   ].includes(role);
 
-  $("icInternshipPrompt").hidden = !isIntern;
-  $("icInternshipPrompt").classList.toggle("is-complete", hasRequiredProfile);
+  renderProfileOnboarding(role, profile);
   $("icAttendancePanel").hidden = !isIntern || !hasRequiredProfile;
   $("icTrainingSection").hidden = isIntern && !hasRequiredProfile;
-  $("icInternshipPrompt").querySelector("p").textContent = hasInternshipProfile
-    ? hasRequiredProfile
-      ? "Your internship profile is complete. You can review or update your details here."
-      : "Complete your name, phone number, and gender to finish setting up your internship profile."
-    : "Add your details, select an internship domain and duration, and save to unlock your workspace.";
-  $("icInternshipPromptTitle").textContent = hasInternshipProfile
-    ? hasRequiredProfile ? "Your internship profile is ready" : "Complete your internship profile"
-    : "First, build your internship profile";
   $("icProfileName").textContent = profile.displayName || currentUser?.displayName || currentUser?.email?.split("@")[0] || "Your workspace";
   $("icProfileInitial").textContent = $("icProfileName").textContent.trim().charAt(0).toUpperCase() || "I";
   const accountUser = currentUser || auth.currentUser;
-  if (accountUser) updateProfileCompletion(accountUser, profile);
+  if (accountUser) {
+    $("icInternshipEmail").value = accountUser.email || "";
+    updateProfileCompletion(accountUser, profile);
+  }
 
   const internshipOptions = tracksForDashboard.map(track =>
     `<option value="${escapeHtml(track)}">${escapeHtml(track)}</option>`
@@ -309,7 +340,7 @@ function renderTraining() {
   $("icInternshipPeriodPreview").textContent = hasInternshipProfile
     ? `Active from ${profile.internshipStartDate} through ${profile.internshipEndDate}. Contact HR if your domain or duration needs to change.`
     : "Your internship starts as soon as you save this profile.";
-  $("icBuildProfileButton").textContent = hasRequiredProfile ? "Update your profile" : "Build your profile →";
+  $("icBuildProfileButton").textContent = hasRequiredProfile ? "Edit profile" : "Build your profile";
 
   const internshipActive = Boolean(activeInternship);
   $("icAttendanceSummary").textContent = `Domain: ${profile.track} · ${profile.durationMonths} month${profile.durationMonths === 1 ? "" : "s"} · ${profile.internshipStartDate} to ${profile.internshipEndDate}`;
@@ -1201,6 +1232,11 @@ onAuthStateChanged(auth, async user => {
     if (!latestUser || latestUser.uid !== user.uid) return;
     const token = await latestUser.getIdTokenResult(true);
     const signInProvider = token.claims.firebase?.sign_in_provider;
+    const tokenRole = token.claims.role;
+    authenticatedRole = [
+      "founder", "co_founder", "admin", "hr_manager", "hr_executive",
+      "operations_executive", "mentor", "learner"
+    ].includes(tokenRole) ? tokenRole : "learner";
     mayEnterWorkspace = token.claims.email_verified === true
       && ["google.com", "password"].includes(signInProvider)
       && (signInProvider !== "password" || latestUser.emailVerified);

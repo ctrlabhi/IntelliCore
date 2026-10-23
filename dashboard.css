@@ -882,7 +882,7 @@
   background: linear-gradient(110deg, rgba(15, 54, 93, .92), rgba(13, 34, 64, .96));
   box-shadow: 0 14px 36px rgba(0, 0, 0, .12);
 }
-.ic-internship-prompt:not(.is-complete) h2 { animation: ic-profile-text-blink 1.2s ease-in-out infinite; }
+.ic-internship-prompt.is-onboarding h3 { animation: ic-profile-text-blink 1.2s ease-in-out infinite; }
 .ic-internship-prompt.is-complete {
   border-color: rgba(49, 224, 164, .35);
   background: linear-gradient(110deg, rgba(8, 65, 61, .72), rgba(9, 35, 49, .96));
@@ -891,8 +891,15 @@
   0%, 100% { opacity: 1; }
   50% { opacity: .48; }
 }
+.ic-build-profile-button.is-onboarding { animation: ic-profile-button-pulse 1.8s ease-in-out infinite; }
+@keyframes ic-profile-button-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(77, 184, 255, .34); }
+  50% { box-shadow: 0 0 0 7px rgba(77, 184, 255, 0); }
+}
 @media (prefers-reduced-motion: reduce) {
-  .ic-internship-prompt h2 { animation: none; }
+  .ic-internship-prompt h2,
+  .ic-internship-prompt h3,
+  .ic-build-profile-button { animation: none !important; }
 }
 .ic-prompt-icon {
   display: grid;
@@ -908,6 +915,18 @@
 .ic-internship-prompt h2 { margin: 5px 0; color: #f2f8ff; font-size: 1.22rem; }
 .ic-internship-prompt p { margin: 0; color: #adc5df; font-size: .82rem; line-height: 1.6; }
 .ic-internship-prompt .ic-primary-button { white-space: nowrap; }
+.ic-workspace-welcome .ic-internship-prompt {
+  grid-template-columns: 1fr;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.ic-workspace-welcome .ic-internship-prompt h3 { margin: 3px 0; font-size: 1rem; }
+.ic-workspace-welcome .ic-internship-prompt p { max-width: 55ch; }
 .ic-attendance-panel {
   margin: 18px 0 22px;
   border-color: rgba(81, 161, 219, .2);

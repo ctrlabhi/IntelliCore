@@ -159,20 +159,24 @@
           <span id="icProfileInitial" aria-hidden="true">I</span>
         </div>
       </div>
-      <div class="ic-welcome-copy"><span class="ic-muted-label">WELCOME BACK</span><h2 id="icProfileName">Your workspace</h2><p id="icProfileEmail">Loading your account details…</p></div>
+      <div class="ic-welcome-copy">
+        <span class="ic-muted-label">WELCOME BACK</span>
+        <h2 id="icProfileName">Your workspace</h2>
+        <p id="icProfileEmail">Loading your account details…</p>
+        <div class="ic-internship-prompt" id="icInternshipPrompt" aria-labelledby="icInternshipPromptTitle" hidden>
+          <span class="ic-muted-label">YOUR INTERNSHIP STARTS HERE</span>
+          <h3 id="icInternshipPromptTitle">Firstly, build your profile for Internship</h3>
+          <p>Enter your details and choose your domain and duration to unlock your dashboard.</p>
+        </div>
+      </div>
       <div class="ic-welcome-actions">
         <span class="ic-account-pill"><span></span> Account connected</span>
+        <button type="button" class="ic-primary-button ic-build-profile-button" id="icBuildProfileButton" hidden>Build your profile <span aria-hidden="true">→</span></button>
       </div>
       <div class="ic-profile-progress" aria-label="Account profile completeness">
         <div><span>Account profile</span><strong id="icProfileCompletion">0%</strong></div>
         <div class="ic-progress-track" role="progressbar" aria-label="Profile completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="icProfileProgressBar"></span></div>
       </div>
-    </section>
-
-    <section class="ic-internship-prompt" id="icInternshipPrompt" aria-labelledby="icInternshipPromptTitle" hidden>
-      <div class="ic-prompt-icon" aria-hidden="true">✦</div>
-      <div><span class="ic-muted-label">YOUR INTERNSHIP STARTS HERE</span><h2 id="icInternshipPromptTitle">First, build your internship profile</h2><p>Enter your personal details and choose your internship domain and duration to continue.</p></div>
-      <button type="button" class="ic-primary-button" id="icBuildProfileButton">Build your profile <span aria-hidden="true">→</span></button>
     </section>
 
     <section class="ic-meeting-panel" id="icMeetingPanel" aria-label="Team meeting">
@@ -232,7 +236,7 @@
       <div class="ic-intern-directory-wrap" id="icAttendanceReportWrap" hidden><h3>Daily attendance</h3><div id="icAttendanceReport" class="ic-staff-data-list"></div></div>
     </section>
 
-    <section class="ic-workspace-stats" aria-label="Workspace summary">
+    <section class="ic-workspace-stats" aria-label="Workspace summary" data-internship-dashboard>
       <button type="button" class="ic-stat-card" data-workspace-view="applications" aria-label="Open personal applications"><span class="ic-stat-icon icon-blue">▣</span><span><span>Personal Applications</span><strong id="icApplicationsCount">—</strong><small>Private records you track</small></span><span class="ic-stat-arrow" aria-hidden="true">↗</span></button>
       <button type="button" class="ic-stat-card" data-workspace-view="tasks" aria-label="Open personal tasks"><span class="ic-stat-icon icon-violet">▤</span><span><span>Personal Tasks</span><strong id="icTasksCount">—</strong><small>Goals you track</small></span><span class="ic-stat-arrow" aria-hidden="true">↗</span></button>
       <button type="button" class="ic-stat-card" data-workspace-view="tasks" aria-label="Open completed personal tasks"><span class="ic-stat-icon icon-teal">✓</span><span><span>Personal tasks completed</span><strong id="icCompletedTasksCount">—</strong><small>Completed personal goals</small></span><span class="ic-stat-arrow" aria-hidden="true">↗</span></button>
@@ -243,11 +247,11 @@
       <button type="button" class="ic-stat-card" data-workspace-view="profile" aria-label="Edit profile"><span class="ic-stat-icon icon-teal">◎</span><span><span>Profile Status</span><strong class="ic-stat-word" id="icProfileStatus">—</strong><small>Your account overview</small></span><span class="ic-stat-arrow" aria-hidden="true">↗</span></button>
     </section>
 
-    <section class="ic-workspace-lower-grid">
+    <section class="ic-workspace-lower-grid" data-internship-dashboard>
       <article class="ic-workspace-panel ic-activity-panel">      <div class="ic-panel-heading"><div><span class="ic-muted-label">RECENT UPDATES</span><h3>Recent Activity</h3></div><span class="ic-panel-symbol">◷</span></div><div id="icWorkspaceActivity" class="ic-activity-empty"><strong>Loading recent activity…</strong></div></article>
       <article class="ic-workspace-panel ic-quick-actions-panel"><div class="ic-panel-heading"><div><span class="ic-muted-label">GET STARTED</span><h3>Quick Actions</h3><p>Get started with common tasks.</p></div><span class="ic-panel-symbol">ϟ</span></div>      <div class="ic-quick-actions"><a href="index.html#tracks" class="ic-quick-action"><span class="ic-quick-icon icon-blue">▣</span><span><strong>Browse Opportunities</strong><small>Explore latest internship and job openings</small></span><b>→</b></a><button type="button" class="ic-quick-action" data-workspace-view="training"><span class="ic-quick-icon icon-violet">▤</span><span><strong>Continue Training</strong><small>Open your assigned track tasks and reviews</small></span><b>→</b></button><button type="button" class="ic-quick-action" data-workspace-view="certificates"><span class="ic-quick-icon icon-amber">✧</span><span><strong>View Certificates</strong><small>Check your certificate notes</small></span><b>→</b></button><button type="button" class="ic-quick-action" data-workspace-view="profile"><span class="ic-quick-icon icon-teal">◎</span><span><strong>Update Profile</strong><small>Manage your personal information</small></span><b>→</b></button></div></article>
     </section>
-    <section class="ic-workspace-lower-grid ic-insights-grid" aria-label="Workspace details">
+    <section class="ic-workspace-lower-grid ic-insights-grid" aria-label="Workspace details" data-internship-dashboard>
       <article class="ic-workspace-panel">
         <div class="ic-panel-heading"><div><span class="ic-muted-label">PERSONAL TRACKER</span><h3>Upcoming task deadlines</h3><p>Dates you added to your personal task list.</p></div><span class="ic-panel-symbol" aria-hidden="true">◷</span></div>
         <div id="icUpcomingDeadlines" class="ic-activity-empty"><strong>Loading task dates…</strong></div>
@@ -265,7 +269,7 @@
         <div class="ic-unavailable-state"><strong>No notification service configured</strong><p>This workspace does not currently receive verified assignment, application, or certificate notifications.</p></div>
       </article>
     </section>
-    <section class="ic-records-section" aria-labelledby="icRecordsTitle">
+    <section class="ic-records-section" aria-labelledby="icRecordsTitle" data-internship-dashboard>
       <div class="ic-records-heading">
         <div><span class="ic-muted-label">YOUR PERSONAL SPACE</span><h2 id="icRecordsTitle">Manage your workspace</h2><p>Keep your applications, assigned tasks and achievements organised.</p></div>
         <label class="ic-record-search"><span aria-hidden="true">⌕</span><input id="icRecordSearch" type="search" placeholder="Search your records…" aria-label="Search records"></label>
@@ -285,6 +289,7 @@
         <h2 id="icInternshipDialogTitle">Build your internship profile</h2>
         <p id="icInternshipDialogDescription">Select your domain and duration. Your profile becomes active as soon as you save it.</p>
         <label class="ic-form-field">Full name<input id="icInternshipName" name="displayName" required minlength="2" maxlength="80" autocomplete="name" placeholder="Your full name"></label>
+        <label class="ic-form-field">Email address<input id="icInternshipEmail" type="email" autocomplete="email" readonly aria-readonly="true"></label>
         <label class="ic-form-field">Gender<select id="icInternshipGender" name="gender" required><option value="">Choose an option</option><option value="Female">Female</option><option value="Male">Male</option><option value="Non-binary">Non-binary</option><option value="Prefer not to say">Prefer not to say</option></select></label>
         <label class="ic-form-field">Internship domain<select id="icInternshipTrack" name="track" required></select></label>
         <label class="ic-form-field">Internship duration<select id="icInternshipDuration" name="durationMonths" required><option value="1">1 month</option><option value="2">2 months</option><option value="3">3 months</option><option value="6">6 months</option></select></label>
