@@ -868,68 +868,12 @@
       justify-content: center;
       flex-wrap: wrap;
       gap: 0.95rem;
-      margin-bottom: 2.8rem;
+      margin-bottom: 1.4rem;
     }
 
     .btn-lg {
       padding: 0.9rem 1.8rem;
       font-size: 1rem;
-    }
-
-    /* Showcase Panoramic Brand Banner Card */
-    .showcase-banner-card {
-      position: relative;
-      max-width: 940px;
-      margin: 0 auto 2.6rem;
-      border-radius: var(--radius-xl);
-      padding: 0.55rem;
-      background: linear-gradient(135deg, rgba(0, 210, 255, 0.28), rgba(131, 56, 236, 0.24), rgba(58, 134, 255, 0.22));
-      border: 1px solid rgba(0, 210, 255, 0.42);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.72), 0 0 35px rgba(0, 210, 255, 0.22);
-      transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
-      overflow: hidden;
-    }
-
-    .showcase-banner-card:hover {
-      transform: translateY(-5px) scale(1.004);
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.82), 0 0 45px rgba(0, 210, 255, 0.35);
-    }
-
-    .showcase-banner-inner {
-      position: relative;
-      border-radius: calc(var(--radius-xl) - 6px);
-      overflow: hidden;
-      background: #040711;
-    }
-
-    .showcase-banner-inner img {
-      width: 100%;
-      height: auto;
-      display: block;
-      object-fit: cover;
-    }
-
-    .showcase-banner-caption {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      padding: 0.8rem 1.25rem;
-      background: rgba(5, 8, 19, 0.92);
-      border-top: 1px solid rgba(56, 189, 248, 0.2);
-      font-size: 0.84rem;
-      color: var(--text-secondary);
-    }
-
-    .showcase-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--accent-cyan);
-      font-weight: 700;
-      text-shadow: 0 0 14px rgba(0, 210, 255, 0.16);
-      white-space: nowrap;
     }
 
     /* 4 Quick-Metric Cards */
@@ -2738,11 +2682,6 @@
       display: block;
       padding-bottom: clamp(1rem, 2vw, 1.6rem);
     }
-    .showcase-banner-card {
-      margin-bottom: clamp(1.25rem, 2vw, 1.8rem);
-    }
-
-
     /* Scroll motion: content glides into view and exits in the scroll direction. */
     .scroll-animate {
       opacity: 1;
@@ -3015,6 +2954,10 @@
 .ic-text-btn,.ic-auth-switch button{border:0;background:none;color:#39dcf5;font:inherit;font-weight:750;cursor:pointer;padding:4px 0}
 .ic-auth-message{font-size:.84rem;line-height:1.45;margin:0;color:#ffcf85;min-height:0}
 .ic-auth-message:empty{display:none}
+.ic-auth-loading{display:inline-flex;align-items:center;gap:10px}
+.ic-auth-spinner{width:17px;height:17px;border:2px solid rgba(3,19,36,.28);border-top-color:#031324;border-radius:50%;animation:ic-auth-spin .7s linear infinite}
+.ic-google-button .ic-auth-spinner{border-color:rgba(232,241,255,.25);border-top-color:#e8f1ff}
+@keyframes ic-auth-spin{to{transform:rotate(360deg)}}
 .ic-auth-primary{display:flex;align-items:center;justify-content:space-between;gap:10px;border:0;border-radius:13px;padding:17px 20px;background:linear-gradient(110deg,#22d8e8,#5297ff);color:#031324;font-size:1rem;font-weight:850;cursor:pointer}
 .ic-auth-primary:hover{filter:brightness(1.06)}
 .ic-auth-divider{display:flex;align-items:center;gap:12px;margin:1.3rem 0;color:#8297b7;font-size:.82rem}

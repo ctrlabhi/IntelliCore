@@ -2,9 +2,46 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && (
+          request.auth.token.firebase.sign_in_provider == 'google.com'
+          || request.auth.token.emailOtpVerified == true
+        );
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.get('role', '') in ['founder', 'co_founder', 'admin'];
+    }
+
+    function canViewInternProfiles() {
+      return signedIn()
+        && request.auth.token.get('role', '') in [
+          'founder', 'co_founder', 'admin', 'hr_manager', 'hr_executive',
+          'operations_executive'
+        ];
+    }
+
+    function canMentorTrack(track) {
+      return signedIn()
+        && request.auth.token.get('role', '') == 'mentor'
+        && track in request.auth.token.get('mentorTracks', []);
+    }
+
+    match /profiles/{userId} {
+      allow read: if signedIn() && (
+        request.auth.uid == userId
+        || canViewInternProfiles()
+        || canMentorTrack(resource.data.track)
+      );
+      allow write: if false;
+    }
+
     match /users/{userId}/workspaceRecords/{recordId} {
       function isOwner() {
-        return request.auth != null && request.auth.uid == userId;
+        return signedIn() && request.auth.uid == userId;
       }
 
       function hasValidRecord() {
@@ -47,6 +84,51 @@ service cloud.firestore {
         && hasValidRecord()
         && request.resource.data.category == resource.data.category
         && request.resource.data.createdAt == resource.data.createdAt;
+    }
+
+    match /trainingAssignments/{assignmentId} {
+      function canReadAssignment() {
+        return signedIn() && (
+          resource.data.assignedToUid == request.auth.uid
+          || isAdmin()
+          || canMentorTrack(resource.data.track)
+        );
+      }
+
+      allow read: if canReadAssignment();
+      allow write: if false;
+
+      match /submissions/{submissionId} {
+        function canReadParentAssignment() {
+          let assignment = get(
+            /databases/$(database)/documents/trainingAssignments/$(assignmentId)
+          ).data;
+          return signedIn() && (
+            assignment.assignedToUid == request.auth.uid
+            || isAdmin()
+            || canMentorTrack(assignment.track)
+          );
+        }
+
+        allow read: if canReadParentAssignment();
+        allow write: if false;
+      }
+
+      match /reviews/{reviewId} {
+        function canReadParentAssignment() {
+          let assignment = get(
+            /databases/$(database)/documents/trainingAssignments/$(assignmentId)
+          ).data;
+          return signedIn() && (
+            assignment.assignedToUid == request.auth.uid
+            || isAdmin()
+            || canMentorTrack(assignment.track)
+          );
+        }
+
+        allow read: if canReadParentAssignment();
+        allow write: if false;
+      }
     }
   }
 }

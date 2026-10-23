@@ -9,9 +9,7 @@
     modal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('ic-modal-open');
     const formPanel = $('icAuthFormPanel');
-    const dashboardPanel = $('icDashboardPanel');
     if (formPanel) formPanel.hidden = false;
-    if (dashboardPanel) dashboardPanel.hidden = true;
     $('icAuthEmail')?.focus({ preventScroll: true });
   }
   function closeModal() {

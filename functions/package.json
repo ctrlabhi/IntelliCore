@@ -1,0 +1,18 @@
+{
+  "name": "intellicore-functions",
+  "private": true,
+  "description": "Trusted backend for IntelliCore training and workspace access",
+  "main": "index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "test": "node --test",
+    "set-user-role": "node scripts/set-user-role.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.0.0",
+    "googleapis": "^144.0.0"
+  }
+}
