@@ -7,9 +7,7 @@ const { HttpsError, onCall } = require("firebase-functions/v2/https");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const { defineSecret } = require("firebase-functions/params");
 const { google } = require("googleapis");
-const {
-  randomBytes, randomInt, randomUUID, scryptSync, timingSafeEqual
-} = require("node:crypto");
+const { randomUUID } = require("node:crypto");
 const { tracks, taskById } = require("./curriculum");
 
 initializeApp();
@@ -18,14 +16,11 @@ setGlobalOptions({ region: "us-central1", maxInstances: 20 });
 const calendarClientId = defineSecret("GOOGLE_CALENDAR_CLIENT_ID");
 const calendarClientSecret = defineSecret("GOOGLE_CALENDAR_CLIENT_SECRET");
 const calendarRefreshToken = defineSecret("GOOGLE_CALENDAR_REFRESH_TOKEN");
-const resendApiKey = defineSecret("RESEND_API_KEY");
-const resendFromEmail = defineSecret("RESEND_FROM_EMAIL");
 const auth = getAuth();
 const db = getFirestore();
 const profileRef = uid => db.collection("profiles").doc(uid);
 const assignmentRef = id => db.collection("trainingAssignments").doc(id);
 const meetingRef = db.collection("organization").doc("currentMeeting");
-const emailOtpCollection = db.collection("emailOtpChallenges");
 const attendanceCollection = uid => db.collection("internships").doc(uid).collection("attendance");
 const superAdminRoles = ["founder", "co_founder"];
 const staffRoles = [...superAdminRoles, "admin", "hr_manager", "hr_executive", "operations_executive"];
@@ -39,9 +34,9 @@ const timezone = "Asia/Kolkata";
 function requireSignedIn(request) {
   if (!request.auth) throw new HttpsError("unauthenticated", "Please sign in to continue.");
   const signInProvider = request.auth.token.firebase?.sign_in_provider;
-  if (signInProvider === "password"
-    && (request.auth.token.email_verified !== true || request.auth.token.emailOtpVerified !== true)) {
-    throw new HttpsError("permission-denied", "Complete the one-time email code verification before using the IntelliCore workspace.");
+  if (!["password", "google.com"].includes(signInProvider)
+    || request.auth.token.email_verified !== true) {
+    throw new HttpsError("permission-denied", "Verify your email address before using the IntelliCore workspace.");
   }
   return request.auth;
 }
@@ -272,156 +267,6 @@ function hasVerifiedEmail(user) {
   return user.emailVerified
     || user.providerData.some(provider => provider.providerId === "google.com");
 }
-
-function requirePasswordOtpSession(request) {
-  if (!request.auth) throw new HttpsError("unauthenticated", "Sign in with your email and password first.");
-  if (request.auth.token.firebase?.sign_in_provider !== "password") {
-    throw new HttpsError("permission-denied", "Email codes are only for email and password sign-ins.");
-  }
-}
-
-function hashEmailOtp(uid, code, salt) {
-  return scryptSync(`${uid}:${code}`, salt, 32);
-}
-
-async function sendResendEmail({ to, code }) {
-  const from = resendFromEmail.value();
-  if (!/^[^<>@\s]+@[^<>@\s]+\.[^<>@\s]+$/.test(from)) {
-    throw new HttpsError("failed-precondition", "Configure a valid verified sender email for OTP delivery.");
-  }
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${resendApiKey.value()}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      from: `IntelliCore <${from}>`,
-      to: [to],
-      subject: "Your IntelliCore sign-in code",
-      text: `Your IntelliCore sign-in code is ${code}. It expires in 10 minutes. If you did not request this code, you can ignore this email.`,
-      html: `<div style="font-family:Arial,sans-serif;color:#13233e"><h2>IntelliCore sign-in</h2><p>Use this one-time code to verify your email:</p><p style="font-size:32px;font-weight:700;letter-spacing:8px">${code}</p><p>This code expires in 10 minutes. If you did not request it, ignore this email.</p></div>`
-    })
-  });
-  if (!response.ok) {
-    console.error("Resend rejected the OTP email request.", {
-      status: response.status,
-      details: await response.text()
-    });
-    throw new HttpsError("unavailable", "Could not send the email code. Try again shortly.");
-  }
-}
-
-exports.sendEmailOtp = onCall({
-  secrets: [resendApiKey, resendFromEmail]
-}, async request => {
-  requirePasswordOtpSession(request);
-  const account = await auth.getUser(request.auth.uid);
-  if (!account.email || account.email.toLowerCase() !== request.auth.token.email?.toLowerCase()) {
-    throw new HttpsError("permission-denied", "The signed-in account email could not be confirmed.");
-  }
-  if (!account.providerData.some(provider => provider.providerId === "password")) {
-    throw new HttpsError("permission-denied", "This account does not have an email and password sign-in.");
-  }
-  if (account.emailVerified && account.customClaims?.emailOtpVerified === true) {
-    return { alreadyVerified: true };
-  }
-
-  const uid = request.auth.uid;
-  const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
-  const salt = randomBytes(16).toString("hex");
-  const codeHash = hashEmailOtp(uid, code, salt).toString("hex");
-  const challengeRef = emailOtpCollection.doc(uid);
-  const sentAt = Date.now();
-  const day = new Date(sentAt).toISOString().slice(0, 10);
-
-  await db.runTransaction(async transaction => {
-    const snapshot = await transaction.get(challengeRef);
-    const previous = snapshot.exists ? snapshot.data() : {};
-    const previousSentAt = Number(previous.sentAt) || 0;
-    const dailyCount = previous.sentDay === day ? Number(previous.sentToday) || 0 : 0;
-    if (sentAt - previousSentAt < 60_000) {
-      throw new HttpsError("resource-exhausted", "Wait one minute before requesting another email code.");
-    }
-    if (dailyCount >= 5) {
-      throw new HttpsError("resource-exhausted", "You have reached today's email code limit. Try again tomorrow.");
-    }
-    transaction.set(challengeRef, {
-      codeHash,
-      salt,
-      attempts: 0,
-      sentAt,
-      sentDay: day,
-      sentToday: dailyCount + 1,
-      expiresAt: sentAt + 10 * 60_000
-    });
-  });
-
-  await sendResendEmail({ to: account.email, code });
-  return { alreadyVerified: false };
-});
-
-exports.verifyEmailOtp = onCall(async request => {
-  requirePasswordOtpSession(request);
-  const code = typeof request.data?.code === "string" ? request.data.code.trim() : "";
-  if (!/^\d{6}$/.test(code)) {
-    throw new HttpsError("invalid-argument", "Enter the six-digit email code.");
-  }
-
-  const account = await auth.getUser(request.auth.uid);
-  if (!account.email || !account.providerData.some(provider => provider.providerId === "password")) {
-    throw new HttpsError("permission-denied", "This account does not have an email and password sign-in.");
-  }
-  if (account.emailVerified && account.customClaims?.emailOtpVerified === true) {
-    return { verified: true };
-  }
-
-  const challengeRef = emailOtpCollection.doc(request.auth.uid);
-  const now = Date.now();
-  const outcome = await db.runTransaction(async transaction => {
-    const snapshot = await transaction.get(challengeRef);
-    if (!snapshot.exists) return "missing";
-    const challenge = snapshot.data();
-    if (Number(challenge.expiresAt) <= now) {
-      transaction.update(challengeRef, { codeHash: "", salt: "", attempts: 5 });
-      return "expired";
-    }
-    const attempts = Number(challenge.attempts) || 0;
-    if (attempts >= 5) {
-      transaction.update(challengeRef, { codeHash: "", salt: "" });
-      return "locked";
-    }
-    const expected = Buffer.from(String(challenge.codeHash || ""), "hex");
-    const actual = hashEmailOtp(request.auth.uid, code, String(challenge.salt || ""));
-    if (expected.length !== actual.length || !timingSafeEqual(expected, actual)) {
-      transaction.update(challengeRef, { attempts: attempts + 1 });
-      return "incorrect";
-    }
-    transaction.delete(challengeRef);
-    return "verified";
-  });
-
-  if (outcome === "missing") {
-    throw new HttpsError("not-found", "Request a new email code before verifying.");
-  }
-  if (outcome === "expired") {
-    throw new HttpsError("deadline-exceeded", "That email code expired. Request a new code.");
-  }
-  if (outcome === "locked") {
-    throw new HttpsError("resource-exhausted", "Too many incorrect codes. Request a new code.");
-  }
-  if (outcome === "incorrect") {
-    throw new HttpsError("invalid-argument", "That email code is incorrect.");
-  }
-
-  await auth.updateUser(request.auth.uid, { emailVerified: true });
-  const refreshedAccount = await auth.getUser(request.auth.uid);
-  await auth.setCustomUserClaims(request.auth.uid, {
-    ...(refreshedAccount.customClaims || {}),
-    emailOtpVerified: true
-  });
-  return { verified: true };
-});
 
 exports.ensureProfile = onCall(async request => {
   const user = requireSignedIn(request);

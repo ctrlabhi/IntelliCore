@@ -9,12 +9,12 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   signOut,
+  sendEmailVerification,
   sendPasswordResetEmail,
   updateProfile,
   onAuthStateChanged,
   setPersistence
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
-import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-functions.js";
 
 // Firebase Console se apna exact config yahan paste karo.
 const firebaseConfig = {
@@ -29,9 +29,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const functions = getFunctions(app, "us-central1");
 const googleProvider = new GoogleAuthProvider();
-const callFunction = (name, data = {}) => httpsCallable(functions, name)(data).then(result => result.data);
 
 const $ = id => document.getElementById(id);
 const modal = $("loginModal");
@@ -41,7 +39,9 @@ const form = $("icAuthForm");
 const msg = $("icAuthMessage");
 let mode = "login";
 let authActionInProgress = false;
-let otpChallengePending = false;
+let sessionCheckInProgress = false;
+let verificationCooldownUntil = 0;
+let verificationCooldownTimer = null;
 
 function message(text) {
   if (msg) msg.textContent = text;
@@ -63,7 +63,6 @@ function closeModal() {
 
 function setMode(nextMode) {
   mode = nextMode === "signup" ? "signup" : "login";
-  otpChallengePending = false;
 
   $("icAuthTabs").hidden = false;
   $("icAuthFormPanel").hidden = false;
@@ -71,7 +70,7 @@ function setMode(nextMode) {
     mode === "signup" ? "Create your IntelliCore account" : "Sign in to IntelliCore";
   $("icAuthSubtitle").textContent =
     mode === "signup"
-      ? "Create your account. A one-time email code is sent on your first sign-in."
+      ? "Create your account. We’ll email you a verification link."
       : "Use your password or continue directly with Google.";
   $("icAuthSubmit").innerHTML =
     mode === "signup" ? "Create account <span>→</span>" : "Log in <span>→</span>";
@@ -85,14 +84,9 @@ function setMode(nextMode) {
     mode === "signup" ? "new-password" : "current-password";
   $("icAuthPassword").required = true;
   $("icAuthPassword").disabled = false;
-  $("icAuthPasswordLabel").hidden = false;
   $("icAuthEmail").readOnly = false;
-  $("icAuthOtpLabel").hidden = true;
-  $("icAuthOtp").required = false;
-  $("icAuthOtp").value = "";
-  $("icOtpActions").hidden = true;
-  $("icResendOtp").hidden = true;
-  $("icCancelOtp").hidden = true;
+  $("icAuthPasswordLabel").hidden = false;
+  $("icVerificationActions").hidden = true;
   $("icAuthTabs").hidden = false;
   $("icGoogleSignIn").hidden = false;
   $("icAuthSwitch").hidden = false;
@@ -112,6 +106,8 @@ function errorMessage(error) {
     "auth/email-already-in-use": "This email already has an account. Please log in.",
     "auth/invalid-email": "Please enter a valid email address.",
     "auth/invalid-credential": "Email or password is incorrect.",
+    "auth/user-not-found": "Email or password is incorrect.",
+    "auth/wrong-password": "Email or password is incorrect.",
     "auth/weak-password": "Choose a stronger password with at least 6 characters.",
     "auth/popup-closed-by-user": "Google sign-in was cancelled.",
     "auth/popup-blocked": "Your browser blocked the Google sign-in popup.",
@@ -121,6 +117,7 @@ function errorMessage(error) {
   };
   return messages[error.code] || error.message || "Something went wrong. Please try again.";
 }
+
 function setLoading(button, busy, label) {
   button.disabled = busy;
   button.innerHTML = busy
@@ -128,33 +125,52 @@ function setLoading(button, busy, label) {
     : label;
 }
 
-function showOtpStep() {
-  otpChallengePending = true;
-  $("icAuthEmail").readOnly = true;
-  $("icAuthPasswordLabel").hidden = true;
-  $("icAuthPassword").disabled = true;
-  $("icAuthPassword").required = false;
-  $("icAuthPassword").value = "";
-  $("icAuthOtpLabel").hidden = false;
-  $("icAuthOtp").required = true;
-  $("icLoginOptions").hidden = true;
-  $("icAuthTabs").hidden = true;
-  $("icGoogleSignIn").hidden = true;
-  $("icAuthSwitch").hidden = true;
-  $("icResendOtp").hidden = false;
-  $("icCancelOtp").hidden = false;
-  $("icOtpActions").hidden = false;
-  $("icAuthTitle").textContent = "Check your email";
-  $("icAuthSubtitle").textContent = `Enter the six-digit code sent to ${$("icAuthEmail").value.trim()}.`;
-  $("icAuthSubmit").innerHTML = 'Verify code <span>→</span>';
-  $("icAuthOtp").focus();
+function showVerificationActions() {
+  $("icVerificationActions").hidden = false;
+  updateVerificationResendButton();
 }
 
-function resetOtpStep() {
-  otpChallengePending = false;
-  $("icAuthForm").reset();
-  setMode("login");
-  message("");
+function startVerificationCooldown() {
+  verificationCooldownUntil = Date.now() + 60_000;
+  updateVerificationResendButton();
+  if (verificationCooldownTimer !== null) window.clearInterval(verificationCooldownTimer);
+  verificationCooldownTimer = window.setInterval(updateVerificationResendButton, 1000);
+}
+
+function updateVerificationResendButton() {
+  const button = $("icResendVerification");
+  if (!button) return;
+  const remainingSeconds = Math.max(0, Math.ceil((verificationCooldownUntil - Date.now()) / 1000));
+  button.disabled = authActionInProgress || remainingSeconds > 0;
+  button.textContent = remainingSeconds > 0
+    ? `Resend in ${remainingSeconds}s`
+    : "Resend verification email";
+  if (remainingSeconds === 0 && verificationCooldownTimer !== null) {
+    window.clearInterval(verificationCooldownTimer);
+    verificationCooldownTimer = null;
+  }
+}
+
+function verificationErrorMessage(error) {
+  if (error.code === "auth/too-many-requests") {
+    startVerificationCooldown();
+    return "Firebase is temporarily limiting verification emails. Wait a minute and try again.";
+  }
+  if (error.code === "auth/network-request-failed") {
+    return "Could not reach Firebase to send the verification email. Check your connection and try again.";
+  }
+  return errorMessage(error);
+}
+
+async function refreshVerificationStatus(user) {
+  await user.reload();
+  const latestUser = auth.currentUser;
+  if (!latestUser || latestUser.uid !== user.uid) {
+    throw new Error("Your sign-in session has ended. Please log in again.");
+  }
+  if (!latestUser.emailVerified) return false;
+  await latestUser.getIdToken(true);
+  return true;
 }
 
 $("loginTrigger")?.addEventListener("click", openModal);
@@ -183,18 +199,12 @@ form?.addEventListener("submit", async event => {
   const password = $("icAuthPassword").value;
   const name = $("icAuthName").value.trim();
 
-  if (!email || (!otpChallengePending && password.length < 6)) {
+  if (!email || password.length < 6) {
     message("Enter a valid email and a password with at least 6 characters.");
     return;
   }
 
-  if (otpChallengePending) {
-    if (!/^\d{6}$/.test($("icAuthOtp").value.trim())) {
-      message("Enter the six-digit code sent to your email.");
-      $("icAuthOtp").focus();
-      return;
-    }
-  } else if (mode === "signup") {
+  if (mode === "signup") {
     if (!name) {
       message("Enter your full name.");
       return;
@@ -207,89 +217,126 @@ form?.addEventListener("submit", async event => {
 
   const submitButton = $("icAuthSubmit");
   authActionInProgress = true;
-  setLoading(submitButton, true, otpChallengePending ? "Verifying code…" : mode === "signup" ? "Creating account…" : "Signing in…");
+  setLoading(submitButton, true, mode === "signup" ? "Creating account…" : "Signing in…");
 
   try {
-    if (otpChallengePending) {
-      await callFunction("verifyEmailOtp", { code: $("icAuthOtp").value.trim() });
-      const user = auth.currentUser;
-      if (!user) throw new Error("Your sign-in session expired. Please log in again.");
-      await user.reload();
-      await user.getIdToken(true);
-      window.location.replace("dashboard.html");
-    } else if (mode === "signup") {
+    if (mode === "signup") {
       await setPersistence(auth, browserLocalPersistence);
       const credential = await createUserWithEmailAndPassword(auth, email, password);
-      try {
-        await updateProfile(credential.user, { displayName: name });
-      } catch (setupError) {
-        await signOut(auth);
-        throw setupError;
-      }
-      await signOut(auth);
       setMode("login");
-      $("icAuthName").value = "";
+      $("icAuthEmail").value = email;
       $("icAuthPassword").value = "";
       $("icAuthConfirm").value = "";
-      $("icAuthEmail").value = email;
-      message("Account created. Log in with your email and password to receive a one-time email code.");
+      showVerificationActions();
+
+      try {
+        await updateProfile(credential.user, { displayName: name });
+      } catch (profileError) {
+        console.error("The new account's display name could not be saved.", profileError);
+        message("Your account was created, but the profile name could not be saved. You can still verify your email and update your profile later.");
+        return;
+      }
+
+      try {
+        await sendEmailVerification(credential.user);
+        startVerificationCooldown();
+        message("Account created. Open the verification link sent to your email before signing in to the dashboard.");
+      } catch (verificationError) {
+        console.error("The account was created, but its verification email could not be sent.", verificationError);
+        message(`Your account was created, but the verification email could not be sent. ${verificationErrorMessage(verificationError)} Use the resend button to try again.`);
+      }
     } else {
       await setPersistence(auth, $("icRemember").checked
         ? browserLocalPersistence
         : browserSessionPersistence);
       const credential = await signInWithEmailAndPassword(auth, email, password);
-      await credential.user.reload();
-      const signedInUser = auth.currentUser;
-      if (!signedInUser) throw new Error("Your sign-in session expired. Please log in again.");
-      try {
-        const result = await callFunction("sendEmailOtp");
-        if (result.alreadyVerified) {
-          await signedInUser.getIdToken(true);
-          window.location.replace("dashboard.html");
-          return;
-        }
-        showOtpStep();
-        message("A six-digit sign-in code has been sent to your email.");
-      } catch (otpError) {
-        console.error("The email sign-in code could not be sent.", otpError);
-        try {
-          await signOut(auth);
-        } catch (signOutError) {
-          console.error("The session could not be cleared after OTP delivery failed.", signOutError);
-        }
-        message(otpError.message || "Could not send your email code. Try again shortly.");
+      const verified = await refreshVerificationStatus(credential.user);
+      if (!verified) {
+        showVerificationActions();
+        message("Your email address is not verified. Open the verification link in your inbox, then select “I’ve verified my email.”");
+      } else {
+        window.location.replace("dashboard.html");
       }
     }
   } catch (error) {
     message(errorMessage(error));
   } finally {
     authActionInProgress = false;
-    const restoredLabel = otpChallengePending
-      ? 'Verify code <span>→</span>'
-      : mode === "signup" ? 'Create account <span>→</span>' : 'Log in <span>→</span>';
+    const restoredLabel = mode === "signup" ? 'Create account <span>→</span>' : 'Log in <span>→</span>';
     setLoading(submitButton, false, restoredLabel);
+    updateVerificationResendButton();
   }
 });
 
-$("icResendOtp")?.addEventListener("click", async event => {
+$("icResendVerification")?.addEventListener("click", async event => {
   const button = event.currentTarget;
+  const user = auth.currentUser;
+  if (!user || !user.providerData.some(provider => provider.providerId === "password")) {
+    message("Sign in with your email and password first, then you can resend the verification email.");
+    return;
+  }
+  if (user.email?.toLowerCase() !== $("icAuthEmail").value.trim().toLowerCase()) {
+    message("The signed-in account does not match this email address. Log in with the account you want to verify.");
+    return;
+  }
   setLoading(button, true, "Sending…");
+  authActionInProgress = true;
   try {
-    await callFunction("sendEmailOtp");
-    message("A new six-digit code has been sent to your email.");
+    if (await refreshVerificationStatus(user)) {
+      window.location.replace("dashboard.html");
+      return;
+    }
+    await sendEmailVerification(auth.currentUser);
+    startVerificationCooldown();
+    message("A new verification link has been sent. Check your inbox and spam folder.");
   } catch (error) {
-    message(error.message || "Could not resend the email code. Try again shortly.");
+    console.error("The verification email could not be resent.", error);
+    message(verificationErrorMessage(error));
   } finally {
-    setLoading(button, false, "Resend code");
+    authActionInProgress = false;
+    updateVerificationResendButton();
   }
 });
-$("icCancelOtp")?.addEventListener("click", async () => {
+
+$("icCheckVerification")?.addEventListener("click", async event => {
+  const button = event.currentTarget;
+  const user = auth.currentUser;
+  if (!user) {
+    message("Please log in again to check your email verification status.");
+    return;
+  }
+  authActionInProgress = true;
+  setLoading(button, true, "Checking…");
+  try {
+    if (await refreshVerificationStatus(user)) {
+      window.location.replace("dashboard.html");
+    } else {
+      message("Firebase still shows this email as unverified. Open the latest link in your inbox and try again.");
+    }
+  } catch (error) {
+    console.error("The email verification status could not be refreshed.", error);
+    message(errorMessage(error));
+  } finally {
+    authActionInProgress = false;
+    setLoading(button, false, "I’ve verified my email");
+  }
+});
+
+$("icCancelVerification")?.addEventListener("click", async event => {
+  const button = event.currentTarget;
+  authActionInProgress = true;
+  setLoading(button, true, "Signing out…");
   try {
     await signOut(auth);
-    resetOtpStep();
+    $("icVerificationActions").hidden = true;
+    $("icAuthPassword").value = "";
+    message("You are signed out. Log in again after verifying your email.");
   } catch (error) {
-    console.error("The pending OTP sign-in could not be cancelled.", error);
-    message("Could not cancel this sign-in. Please refresh the page.");
+    console.error("The unverified account could not be signed out.", error);
+    message(errorMessage(error));
+  } finally {
+    authActionInProgress = false;
+    setLoading(button, false, "Sign out");
   }
 });
 
@@ -329,18 +376,33 @@ $("icForgotPassword")?.addEventListener("click", async () => {
 });
 
 onAuthStateChanged(auth, user => {
-  if (!user || authActionInProgress || !modal.classList.contains("is-open")) return;
-  void user.getIdTokenResult().then(token => {
-    const googleSignIn = token.claims.firebase?.sign_in_provider === "google.com";
-    const firstEmailOtpVerified = user.emailVerified && token.claims.emailOtpVerified === true;
-    if (googleSignIn || firstEmailOtpVerified) window.location.replace("dashboard.html");
-  }).catch(error => {
-    console.error("The existing sign-in session could not be checked.", error);
-    message("Could not check your sign-in status. Please try again.");
-  });
+  if (!user || authActionInProgress || sessionCheckInProgress || !modal.classList.contains("is-open")) return;
+  sessionCheckInProgress = true;
+  void (async () => {
+    try {
+      const isGoogleUser = user.providerData.some(provider => provider.providerId === "google.com");
+      if (isGoogleUser) {
+        window.location.replace("dashboard.html");
+        return;
+      }
+      if (!user.providerData.some(provider => provider.providerId === "password")) return;
+      if (await refreshVerificationStatus(user)) {
+        window.location.replace("dashboard.html");
+      } else {
+        $("icAuthEmail").value = user.email || "";
+        showVerificationActions();
+        message("Your email address is not verified. Open the link in your inbox to access the dashboard.");
+      }
+    } catch (error) {
+      console.error("The existing sign-in session could not be checked.", error);
+      message("Could not check your sign-in status. Please try again.");
+    } finally {
+      sessionCheckInProgress = false;
+    }
+  })();
 });
 
 setMode("login");
-if (new URLSearchParams(window.location.search).get("otp") === "required") {
-  message("Enter your password to receive the one-time code for this email account.");
+if (new URLSearchParams(window.location.search).get("verification") === "required") {
+  message("Email verification is required. Log in with your email and password to resend the verification link.");
 }

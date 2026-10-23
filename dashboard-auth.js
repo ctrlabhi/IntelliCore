@@ -31,6 +31,7 @@ const notice = (message, canRetry = false) => {
   if (retry) retry.hidden = !canRetry;
 };
 let currentUser = null;
+let loginRedirectStarted = false;
 let activeTab = "applications";
 let records = { applications: [], tasks: [], certificates: [] };
 let editingId = null;
@@ -1186,23 +1187,34 @@ bindEvents();
 onAuthStateChanged(auth, async user => {
   if (meetingRefreshTimer !== null) window.clearInterval(meetingRefreshTimer);
   meetingRefreshTimer = null;
-  if (!user) { window.location.replace("index.html?auth=login"); return; }
+  if (!user) {
+    if (!loginRedirectStarted) {
+      loginRedirectStarted = true;
+      window.location.replace("index.html?auth=login");
+    }
+    return;
+  }
   let mayEnterWorkspace = false;
   try {
-    const token = await user.getIdTokenResult();
-    const googleSignIn = token.claims.firebase?.sign_in_provider === "google.com";
-    mayEnterWorkspace = googleSignIn
-      || (user.emailVerified && token.claims.emailOtpVerified === true);
+    await user.reload();
+    const latestUser = auth.currentUser;
+    if (!latestUser || latestUser.uid !== user.uid) return;
+    const token = await latestUser.getIdTokenResult(true);
+    const signInProvider = token.claims.firebase?.sign_in_provider;
+    mayEnterWorkspace = token.claims.email_verified === true
+      && ["google.com", "password"].includes(signInProvider)
+      && (signInProvider !== "password" || latestUser.emailVerified);
   } catch (error) {
-    console.error("The signed-in user's OTP verification status could not be checked.", error);
+    console.error("The signed-in user's email verification status could not be checked.", error);
   }
   if (!mayEnterWorkspace) {
+    loginRedirectStarted = true;
     try {
       await signOut(auth);
     } catch (error) {
-      console.error("The account without completed OTP verification could not be signed out.", error);
+      console.error("The account without verified email could not be signed out.", error);
     }
-    window.location.replace("index.html?auth=login&otp=required");
+    window.location.replace("index.html?auth=login&verification=required");
     return;
   }
   currentUser = user;

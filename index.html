@@ -1353,17 +1353,16 @@
             <label id="icNameLabel" hidden>Full name<input id="icAuthName" name="name" autocomplete="name" placeholder="Your full name"></label>
             <label>Email address<input id="icAuthEmail" name="email" type="email" autocomplete="email" required placeholder="you@example.com"></label>
             <label id="icAuthPasswordLabel">Password<input id="icAuthPassword" name="password" type="password" autocomplete="current-password" required minlength="6" placeholder="Enter your password"></label>
-            <label id="icAuthOtpLabel" hidden>Email sign-in code<input id="icAuthOtp" name="otp" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="Enter 6-digit code"></label>
-            <div class="ic-auth-row" id="icOtpActions" hidden><button type="button" class="ic-text-btn" id="icResendOtp">Resend code</button><button type="button" class="ic-text-btn" id="icCancelOtp">Cancel</button></div>
             <label id="icConfirmLabel" hidden>Confirm password<input id="icAuthConfirm" name="confirmPassword" type="password" autocomplete="new-password" minlength="6" placeholder="Re-enter your password"></label>
             <div class="ic-auth-row" id="icLoginOptions"><label class="ic-check"><input type="checkbox" id="icRemember"> Remember me</label><button type="button" class="ic-text-btn" id="icForgotPassword">Forgot password?</button></div>
+            <div class="ic-auth-row" id="icVerificationActions" hidden><button type="button" class="ic-text-btn" id="icResendVerification">Resend verification email</button><button type="button" class="ic-text-btn" id="icCheckVerification">I’ve verified my email</button><button type="button" class="ic-text-btn" id="icCancelVerification">Sign out</button></div>
             <p class="ic-auth-message" id="icAuthMessage" role="status"></p>
             <button type="submit" class="ic-auth-primary" id="icAuthSubmit">Log in <span>→</span></button>
           </form>
           <div class="ic-auth-divider"><span>or continue with</span></div>
           <button type="button" class="ic-google-button" id="icGoogleSignIn"><span class="ic-google-g">G</span> Continue with Google</button>
           <p class="ic-auth-switch" id="icAuthSwitch">New to IntelliCore? <button type="button" data-auth-mode="signup">Create an account</button></p>
-          <p class="ic-auth-footnote">Email accounts use a one-time six-digit code on first login. Later logins use your password; Google sign-in works directly.</p>
+          <p class="ic-auth-footnote">Email/password accounts must verify their email before accessing the workspace. Google sign-in works directly.</p>
         </div>
       </section>
     </div>

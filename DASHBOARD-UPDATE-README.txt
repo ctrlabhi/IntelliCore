@@ -5,10 +5,10 @@ Current project
 ---------------
 - Static HTML, CSS, and JavaScript site published at intellicoretechnologies.in.
 - Firebase Authentication is used for sign-in.
-- Email/password accounts must enter a six-digit code emailed on their first
-  login before workspace access. After verification, later password logins do
-  not require another code; Google sign-in remains direct. Accounts verified
-  by the older email-link flow also receive this code once.
+- Email/password sign-up sends Firebase's built-in verification link. Users
+  must verify their address before the dashboard or protected records are
+  available. Unverified users can request a resend; Google sign-in remains
+  direct under the existing verified-account access policy.
 - Private workspace records use Firestore under each user's own
   users/{uid}/workspaceRecords collection.
 - Interns create their own internship profile by selecting one of the eight
@@ -61,16 +61,30 @@ Production setup
    to deploy this Firebase project:
    firebase login
 2. In Firebase Console for project intellicore-229, enable Email/Password and
-   Google sign-in, add the production domain to authorised domains, create a
-   Firestore database in Native mode, and create the default Storage bucket.
-   Configure Resend with a verified sender domain/address. Set the API key and
-   sender address as Firebase Functions secrets (never in source code):
-   firebase functions:secrets:set RESEND_API_KEY --project intellicore-229
-   firebase functions:secrets:set RESEND_FROM_EMAIL --project intellicore-229
-   Email/password accounts receive a six-digit code on first login. Google
-   sign-in can be used directly.
-3. Cloud Functions deployment requires a Firebase project on the Blaze plan
-   with billing configured. Review quotas and billing alerts before launch.
+   Google sign-in under Authentication > Sign-in method. Under Authentication
+   > Settings > Authorised domains, inspect the allowed hosts:
+   the repository's CNAME identifies intellicoretechnologies.in as the
+   production website and the Firebase web config uses
+   intellicore-229.firebaseapp.com as its auth domain. Add the production
+   website domain if it is missing. The repository does not confirm whether
+   www.intellicoretechnologies.in is a live website alias; add it only if that
+   host is configured to serve the site. Keep the existing Firebase email
+   verification template and review its action/continue URL under
+   Authentication > Templates > Email address verification. The application
+   does not override that URL.
+   Also create a Firestore database in Native mode and the default Storage
+   bucket if they do not already exist. Email verification uses Firebase
+   Authentication directly and does not require Functions, Resend, SMTP, or
+   another email provider.
+3. The existing workspace callable Functions and Google Calendar integration
+   require Cloud Functions deployment; Firebase currently requires the Blaze
+   plan for deployment. This billing requirement is unrelated to email
+   verification. The updated verified-email guard must be deployed with the
+   existing Functions for callable workspace features to accept verified
+   password users. If the project remains on Spark, email verification itself
+   still works, but this backend update cannot be deployed until the existing
+   Functions hosting plan requirement is met. Review quotas and billing alerts
+   before deploying Functions.
 4. Install the Functions dependencies from the project root:
    npm --prefix functions install
 5. Deploy the backend, database rules/indexes, and Storage rules:
@@ -129,6 +143,9 @@ them to that account. The original local copy is kept. Existing Firebase
 accounts get a training profile after signing in once with the deployed
 Functions backend. Older track-only profiles can complete the new duration
 setup when they have no saved internship dates.
+Existing accounts already marked email-verified by Firebase remain verified;
+unverified accounts must follow the email link before protected access. Existing
+role claims are preserved, and no user-verification claim migration is needed.
 
 Training and internship workflow
 --------------------------------
@@ -159,6 +176,17 @@ Security and product limitations
 --------------------------------
 - Custom claims are assigned only by the trusted role-provisioning script.
   Do not expose this script or Admin SDK credentials to the website.
+- Firestore, Storage, and callable workspace functions require a trusted
+  Firebase Authentication token with a verified email and an enabled sign-in
+  provider. Email/password verification is checked from Firebase's
+  email_verified token claim. Browser code cannot set that claim or assign
+  user roles.
+- The website does not contain a custom verification action URL. Firebase
+  uses the existing project email-verification template; inspect its template
+  and authorized-domain settings in the Firebase Console before production use.
+- This repository cannot show the live Firebase Console authorised-domain
+  list or the currently saved email-template URL. Confirm both manually in
+  project intellicore-229; no production configuration was changed here.
 - Training assignment writes, review transitions, internship profile changes,
   attendance records, and meeting state are performed by Cloud Functions.
 - Attendance is self-reported check-in, not biometric or location-verified.
