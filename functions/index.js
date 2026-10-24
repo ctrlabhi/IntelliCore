@@ -290,7 +290,7 @@ exports.ensureProfile = onCall(async request => {
     profile.track = snapshot.get("track") || null;
   }
   await ref.set(profile, { merge: true });
-  return publicProfile({ ...profile, track: profile.track });
+  return publicProfile({ ...(snapshot.exists ? snapshot.data() : {}), ...profile });
 });
 
 exports.updateDisplayName = onCall(async request => {
@@ -721,7 +721,12 @@ exports.saveInternshipProfile = onCall(async request => {
   const phone = validPhone(request.data?.phone);
   const durationMonths = requireSupportedDuration(request.data?.durationMonths);
   const ref = profileRef(user.uid);
-  const startDate = dateInIndia();
+  const draftSnapshot = await db.collection("users").doc(user.uid)
+    .collection("profileDrafts").doc("current").get();
+  const savedAt = draftSnapshot.get("savedAt");
+  const startDate = savedAt?.toDate
+    ? dateInIndia(savedAt.toDate())
+    : dateInIndia();
   const endDate = addDurationMonths(startDate, durationMonths);
   const savedDates = await db.runTransaction(async transaction => {
     const profileSnapshot = await transaction.get(ref);
@@ -837,6 +842,9 @@ exports.checkInToday = onCall(async request => {
     }
     if (today < data.internshipStartDate || today > data.internshipEndDate) {
       throw new HttpsError("failed-precondition", "Attendance check-in is only available during your internship dates.");
+    }
+    if (new Date(`${today}T00:00:00Z`).getUTCDay() === 0) {
+      return { alreadyCheckedIn: false, skippedSunday: true, attendanceDate: today };
     }
     const existing = await transaction.get(attendanceRef);
     if (existing.exists) return { alreadyCheckedIn: true, attendanceDate: today };

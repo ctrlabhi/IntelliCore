@@ -191,9 +191,9 @@
     </section>
 
     <section class="ic-attendance-panel ic-workspace-panel" id="icAttendancePanel" aria-labelledby="icAttendanceTitle" hidden>
-      <div class="ic-attendance-heading"><div><span class="ic-muted-label">YOUR INTERNSHIP</span><h2 id="icAttendanceTitle">Attendance</h2><p id="icAttendanceSummary">Attendance is recorded when you check in.</p></div><span class="ic-attendance-count" id="icAttendanceCount">0 days</span></div>
+      <div class="ic-attendance-heading"><div><span class="ic-muted-label">YOUR INTERNSHIP</span><h2 id="icAttendanceTitle">Attendance</h2><p id="icAttendanceSummary">Attendance is recorded automatically when you log in. Sundays are excluded.</p></div><span class="ic-attendance-count" id="icAttendanceCount">0 days</span></div>
       <div class="ic-intern-profile-details" id="icInternProfileDetails" aria-label="Your internship profile"></div>
-      <div class="ic-attendance-actions"><p id="icAttendanceMessage">Check in once each day you attend.</p><button type="button" class="ic-primary-button" id="icCheckInButton">Check in today</button></div>
+      <div class="ic-attendance-actions"><p id="icAttendanceMessage">Attendance is recorded automatically when you log in. Sundays are excluded.</p><button type="button" class="ic-primary-button" id="icCheckInButton">Check in today</button></div>
       <div id="icAttendanceHistory" class="ic-attendance-history"></div>
     </section>
 
@@ -263,7 +263,7 @@
       </article>
       <article class="ic-workspace-panel ic-unavailable-panel" id="icProgramInformation">
         <div class="ic-panel-heading"><div><span class="ic-muted-label">PROGRAM INFORMATION</span><h3>Internship &amp; attendance</h3><p>Your current internship and attendance records appear above.</p></div><span class="ic-panel-symbol" aria-hidden="true">◎</span></div>
-        <div class="ic-unavailable-state"><strong>Attendance is self-reported</strong><p>Use the daily check-in on this dashboard. Leave management and mentor scheduling are not currently part of the workspace.</p></div>
+        <div class="ic-unavailable-state"><strong>Attendance is recorded automatically</strong><p>One attendance entry is saved per login day during your active internship. Sundays are excluded. Leave management and mentor scheduling are not currently part of the workspace.</p></div>
       </article>
       <article class="ic-workspace-panel ic-unavailable-panel" id="icNotifications">
         <div class="ic-panel-heading"><div><span class="ic-muted-label">UPDATES</span><h3>Notifications</h3><p>Account-specific alerts are not connected yet.</p></div><span class="ic-panel-symbol" aria-hidden="true">♧</span></div>
@@ -294,7 +294,7 @@
       <div class="ic-profile-dialog-content">
         <span class="ic-muted-label">START YOUR JOURNEY</span>
         <h2 id="icInternshipDialogTitle">Build your internship profile</h2>
-        <p id="icInternshipDialogDescription">Select your domain and duration. Saving creates a profile draft; internship activation requires trusted review.</p>
+        <p id="icInternshipDialogDescription">Choose your domain and duration. Saving activates your internship and keeps its dates fixed.</p>
         <label class="ic-form-field">Full name<input id="icInternshipName" name="displayName" required minlength="2" maxlength="80" autocomplete="name" placeholder="Your full name"></label>
         <label class="ic-form-field">Email address<input id="icInternshipEmail" type="email" autocomplete="email" readonly aria-readonly="true"></label>
         <label class="ic-form-field">Gender<select id="icInternshipGender" name="gender" required><option value="">Choose an option</option><option value="Female">Female</option><option value="Male">Male</option></select></label>
