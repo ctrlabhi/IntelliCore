@@ -575,8 +575,10 @@
     .contact-detail-link:hover { border-color: rgba(0, 210, 255, 0.48); background: rgba(0, 210, 255, 0.07); }
     .contact-detail-icon { display: grid; place-items: center; flex: 0 0 42px; width: 42px; height: 42px; border-radius: 13px; color: var(--accent-cyan); background: linear-gradient(145deg, rgba(0, 210, 255, 0.16), rgba(58, 134, 255, 0.10)); border: 1px solid rgba(0, 210, 255, 0.18); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
     .contact-detail-icon svg { width: 21px; height: 21px; display: block; }
-    .contact-detail-link.whatsapp-link .contact-detail-icon { color: #25D366; background: rgba(37, 211, 102, 0.13); border-color: rgba(37, 211, 102, 0.32); box-shadow: 0 0 18px rgba(37, 211, 102, 0.08), inset 0 1px 0 rgba(255,255,255,0.05); }
-    .contact-detail-link.whatsapp-link .contact-detail-icon svg { width: 25px; height: 25px; }
+    .contact-detail-link.email-link .contact-detail-icon { color: #fff; background: linear-gradient(145deg, #168cff, #0a66c2); border-color: #258eea; border-radius: 12px; box-shadow: 0 0 18px rgba(22, 140, 255, 0.16); }
+    .contact-detail-link.email-link .contact-detail-icon svg { width: 28px; height: 28px; }
+    .contact-detail-link.whatsapp-link .contact-detail-icon { color: #fff; background: #25D366; border-color: #25D366; border-radius: 12px; box-shadow: 0 0 18px rgba(37, 211, 102, 0.12); }
+    .contact-detail-link.whatsapp-link .contact-detail-icon svg { width: 38px; height: 38px; }
     .contact-detail-link.whatsapp-link:hover { border-color: rgba(37, 211, 102, 0.45); background: rgba(37, 211, 102, 0.06); }
     .contact-detail-label { display: inline; margin-right: 0.45rem; color: var(--text-muted); font-size: 0.62rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
     .contact-modal-close { position: absolute; top: 1rem; right: 1rem; display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid rgba(0, 210, 255, 0.25); border-radius: 50%; background: rgba(0, 210, 255, 0.07); color: var(--accent-cyan); font-size: 1.45rem; cursor: pointer; }
@@ -2889,7 +2891,7 @@
 .ic-footer-about p,.ic-footer-connect>p{font-size:.92rem;line-height:1.75;color:var(--text-secondary,#9aaac5);margin:0 0 1.25rem}
 .ic-footer-company-link{display:flex;align-items:center;gap:.8rem;padding:.8rem .9rem;margin-top:1.1rem;border:1px solid rgba(55,105,145,.4);border-radius:14px;background:rgba(9,23,42,.7);text-decoration:none;color:#eaf5ff;transition:transform .2s,border-color .2s,background .2s}
 .ic-footer-company-link:hover,.ic-contact-card:hover{transform:translateY(-2px);border-color:rgba(0,210,255,.6);background:rgba(10,31,53,.92)}
-.ic-linkedin-icon,.ic-linkedin-square{display:grid;place-items:center;background:#0a66c2;color:#fff;border-radius:7px}
+.ic-linkedin-icon,.ic-linkedin-square{display:grid;place-items:center;background:#0a66c2;color:#fff;border-radius:10px}
 .ic-linkedin-icon{width:35px;height:35px;flex-shrink:0}
 .ic-linkedin-icon svg,.ic-linkedin-square svg{display:block;width:23px;height:23px;fill:currentColor}
 .ic-footer-company-link>span:nth-child(2){display:grid;gap:.2rem;min-width:0}
@@ -2906,8 +2908,8 @@
 .ic-footer-connect>p{margin-bottom:.25rem}
 .ic-contact-card{display:grid;grid-template-columns:43px minmax(0,1fr) 16px;align-items:center;gap:.75rem;padding:.72rem .8rem;border:1px solid rgba(48,91,130,.48);border-radius:14px;background:linear-gradient(110deg,rgba(12,27,47,.92),rgba(7,15,29,.96));color:#edf5ff;text-decoration:none;min-width:0;transition:transform .2s,border-color .2s,background .2s}
 .ic-contact-icon{width:43px;height:43px;display:grid;place-items:center;border-radius:12px;background:rgba(0,195,235,.12);color:#42def5;font-size:1.5rem}
-.ic-whatsapp-icon{background:rgba(20,220,115,.12);color:#21d76e}
-.ic-whatsapp-icon svg{filter:drop-shadow(0 0 4px rgba(33,215,110,.15))}
+.ic-whatsapp-icon{background:#25D366;color:#fff}
+.ic-whatsapp-icon svg{width:38px;height:38px;filter:none}
 .ic-contact-icon.ic-linkedin-square{width:43px;height:43px;background:#0a66c2;color:#fff}
 .ic-contact-card>span:nth-child(2){display:grid;gap:.25rem;min-width:0}
 .ic-contact-card small{font-size:.72rem;color:#8fa3c1;font-weight:700}
@@ -3096,7 +3098,8 @@ body.ic-modal-open{overflow:hidden}
 
 .brand-sublabel { margin-top:0; }
 .ic-footer-brand>span { gap:3px; }
-.ic-email-icon svg { display:block; width:28px; height:28px; filter:drop-shadow(0 1px 2px rgba(0,210,255,.22)); }
+.ic-email-icon { background:linear-gradient(145deg,#168cff,#0a66c2); color:#fff; }
+.ic-email-icon svg { display:block; width:32px; height:32px; filter:none; }
 
 
 /* IntelliCore sign-in modal refinement */
