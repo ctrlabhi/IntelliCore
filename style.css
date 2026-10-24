@@ -2893,7 +2893,8 @@
 .ic-footer-company-link:hover,.ic-contact-card:hover{transform:translateY(-2px);border-color:rgba(0,210,255,.6);background:rgba(10,31,53,.92)}
 .ic-linkedin-icon,.ic-linkedin-square{display:grid;place-items:center;background:#0a66c2;color:#fff;border-radius:10px}
 .ic-linkedin-icon{width:35px;height:35px;flex-shrink:0}
-.ic-linkedin-icon svg,.ic-linkedin-square svg{display:block;width:23px;height:23px;fill:currentColor}
+.ic-linkedin-icon svg{display:block;width:23px;height:23px;fill:currentColor}
+.ic-linkedin-square svg{display:block;width:38px;height:38px;fill:currentColor}
 .ic-footer-company-link>span:nth-child(2){display:grid;gap:.2rem;min-width:0}
 .ic-footer-company-link strong{font-size:.84rem}
 .ic-footer-company-link small{font-size:.73rem;color:#8799b8}
@@ -2910,7 +2911,7 @@
 .ic-contact-icon{width:43px;height:43px;display:grid;place-items:center;border-radius:12px;background:rgba(0,195,235,.12);color:#42def5;font-size:1.5rem}
 .ic-whatsapp-icon{background:#25D366;color:#fff}
 .ic-whatsapp-icon svg{width:38px;height:38px;filter:none}
-.ic-contact-icon.ic-linkedin-square{width:43px;height:43px;background:#0a66c2;color:#fff}
+.ic-contact-icon.ic-linkedin-square{width:48px;height:48px;background:#0a66c2;color:#fff}
 .ic-contact-card>span:nth-child(2){display:grid;gap:.25rem;min-width:0}
 .ic-contact-card small{font-size:.72rem;color:#8fa3c1;font-weight:700}
 .ic-contact-card strong{font-size:clamp(.78rem,.95vw,.91rem);font-weight:750;overflow-wrap:anywhere}
