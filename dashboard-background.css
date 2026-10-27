@@ -729,6 +729,11 @@ body {
     padding: 0 !important;
   }
 
+  .ic-workspace-page .ic-workspace-hero-copy,
+  .ic-workspace-page .ic-workspace-hero-copy h1 {
+    text-align: center;
+  }
+
   .ic-workspace-hero-copy h1 .ic-mobile-welcome-greeting { color: #fff; }
   .ic-workspace-hero-copy h1 .ic-mobile-welcome-name { color: #1ccfff; }
 
@@ -751,6 +756,13 @@ body {
     background: transparent !important;
     text-align: left !important;
     box-shadow: none !important;
+  }
+
+  .ic-workspace-page .ic-live-clock {
+    justify-self: center;
+    align-items: center !important;
+    justify-content: center;
+    text-align: center !important;
   }
 
   .welcome-date .live-date-label,

@@ -1363,7 +1363,10 @@ function bindEvents() {
       const message = typeof error?.message === "string" && error.message
         ? error.message
         : "Unknown Firebase error.";
-      formError.textContent = `Could not save your internship profile${code ? ` (${code})` : ""}: ${message}`;
+      const userMessage = /(?:learner|intern) profile is not ready/i.test(message)
+        ? "This response came from an older internship-save service. Reload the latest dashboard files; on Spark, profile setup saves a private draft and requires the updated Firestore rules."
+        : message;
+      formError.textContent = `Could not save your internship profile${code ? ` (${code})` : ""}: ${userMessage}`;
       formError.hidden = false;
       notice(formError.textContent);
     } finally {
