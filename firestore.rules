@@ -5,31 +5,110 @@ service cloud.firestore {
     function signedIn() {
       return request.auth != null
         && request.auth.token.email_verified == true
-        && request.auth.token.firebase.sign_in_provider in ['google.com', 'password'];
+        && request.auth.token.firebase.sign_in_provider in ['google.com', 'password']
+        && (!exists(/databases/$(database)/documents/profiles/$(request.auth.uid))
+          || get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.get('accountStatus', 'active') != 'deactivated');
+    }
+
+    function hasStaffEmail(emails) {
+      return signedIn() && request.auth.token.get('email', '') in emails;
+    }
+
+    function roleForCurrentUser() {
+      let profilePath = /databases/$(database)/documents/profiles/$(request.auth.uid);
+      let email = request.auth.token.get('email', '');
+      return email == 'ctrlabhishek@gmail.com' ? 'founder'
+        : email == 'thesumitsah47@gmail.com' ? 'admin'
+        : email == 'tanu65159@gmail.com' ? 'operations_executive'
+        : email == 'mikkurwt694@gmail.com' ? 'hr_executive'
+        : email == 'ashitarohilla32@gmail.com' ? 'hr_manager'
+        : exists(profilePath)
+          ? get(profilePath).data.get('role', request.auth.token.get('role', 'learner'))
+          : request.auth.token.get('role', 'learner');
+    }
+
+    function mentorTracksForCurrentUser() {
+      let profilePath = /databases/$(database)/documents/profiles/$(request.auth.uid);
+      return exists(profilePath)
+        ? get(profilePath).data.get('mentorTracks', request.auth.token.get('mentorTracks', []))
+        : request.auth.token.get('mentorTracks', []);
     }
 
     function isAdmin() {
-      return signedIn()
-        && request.auth.token.get('role', '') in ['founder', 'co_founder', 'admin'];
+      return (signedIn()
+        && roleForCurrentUser() in ['founder', 'co_founder', 'admin']
+        ) || hasStaffEmail(['ctrlabhishek@gmail.com', 'thesumitsah47@gmail.com']);
     }
 
     function canViewInternProfiles() {
-      return signedIn()
-        && request.auth.token.get('role', '') in [
+      return (signedIn()
+        && roleForCurrentUser() in [
           'founder', 'co_founder', 'admin', 'hr_manager', 'hr_executive',
           'operations_executive'
-        ];
+        ]) || hasStaffEmail([
+          'ctrlabhishek@gmail.com', 'thesumitsah47@gmail.com',
+          'tanu65159@gmail.com', 'mikkurwt694@gmail.com',
+          'ashitarohilla32@gmail.com'
+        ]);
+    }
+
+    function canViewAttendanceReport() {
+      return (signedIn()
+        && roleForCurrentUser() in [
+          'founder', 'co_founder', 'admin', 'hr_manager', 'operations_executive'
+        ]) || hasStaffEmail([
+          'ctrlabhishek@gmail.com', 'thesumitsah47@gmail.com',
+          'tanu65159@gmail.com', 'ashitarohilla32@gmail.com'
+        ]);
+    }
+
+    function canManageTrainingAssignments() {
+      return (signedIn()
+        && roleForCurrentUser() in [
+          'founder', 'co_founder', 'admin', 'hr_manager'
+        ]) || hasStaffEmail([
+          'ctrlabhishek@gmail.com', 'thesumitsah47@gmail.com',
+          'ashitarohilla32@gmail.com'
+        ]);
+    }
+
+    function supportedTrack(track) {
+      return track in [
+        'Business Analyst Intern', 'Web Development Intern',
+        'Data Analyst Intern', 'Digital Marketing Intern',
+        'Graphic Designer Intern', 'Social Media Intern',
+        'Content Writing Intern', 'Human Resources Intern'
+      ];
+    }
+
+    function twoDigits(value) {
+      return value < 10 ? '0' + string(value) : string(value);
+    }
+
+    function indiaDateString(value) {
+      return string(value.year()) + '-' + twoDigits(value.month()) + '-' + twoDigits(value.day());
+    }
+
+    function canManageContentFor(track) {
+      return (track == 'all' && canManageTrainingAssignments())
+        || (track != 'all' && supportedTrack(track)
+          && (canManageTrainingAssignments() || canMentorTrack(track)));
     }
 
     function canMentorTrack(track) {
       return signedIn()
-        && request.auth.token.get('role', '') == 'mentor'
-        && track in request.auth.token.get('mentorTracks', []);
+        && roleForCurrentUser() == 'mentor'
+        && track in mentorTracksForCurrentUser();
     }
 
     function learnerClaim() {
       return signedIn()
-        && request.auth.token.get('role', 'learner') == 'learner';
+        && roleForCurrentUser() == 'learner'
+        && !(request.auth.token.get('email', '') in [
+            'ctrlabhishek@gmail.com', 'thesumitsah47@gmail.com',
+            'tanu65159@gmail.com', 'mikkurwt694@gmail.com',
+            'ashitarohilla32@gmail.com'
+          ]);
     }
 
     match /profiles/{userId} {
@@ -96,6 +175,129 @@ service cloud.firestore {
             || data.accountStatus in ['active', 'deactivated']);
       }
 
+      function canActivateFromSavedDraft() {
+        let draftPath = /databases/$(database)/documents/users/$(userId)/profileDrafts/current;
+        let draft = get(draftPath).data;
+        let data = request.resource.data;
+        return canManageTrainingAssignments()
+          && exists(draftPath)
+          && resource.data.role == 'learner'
+          && resource.data.get('internshipStatus', '') != 'active'
+          && resource.data.get('accountStatus', 'active') == 'active'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'displayName', 'gender', 'phone', 'track', 'durationMonths',
+            'internshipStartDate', 'internshipEndDate', 'internshipStatus',
+            'accountStatus', 'profileCompletedAt', 'updatedAt', 'profileUpdatedBy'
+          ])
+          && data.uid == userId
+          && data.role == 'learner'
+          && data.mentorTracks == resource.data.mentorTracks
+          && data.email == draft.email
+          && data.displayName == draft.displayName
+          && data.gender == draft.gender
+          && data.phone == draft.phone
+          && data.track == draft.track
+          && data.durationMonths == draft.durationMonths
+          && data.internshipStartDate == draft.internshipStartDate
+          && data.internshipEndDate == draft.internshipEndDate
+          && data.gender in ['Female', 'Male']
+          && data.track in [
+            'Business Analyst Intern', 'Web Development Intern',
+            'Data Analyst Intern', 'Digital Marketing Intern',
+            'Graphic Designer Intern', 'Social Media Intern',
+            'Content Writing Intern', 'Human Resources Intern'
+          ]
+          && data.durationMonths in [1, 2, 3, 6]
+          && data.internshipStartDate is string
+          && data.internshipStartDate.matches('^\\d{4}-\\d{2}-\\d{2}$')
+          && data.internshipEndDate is string
+          && data.internshipEndDate.matches('^\\d{4}-\\d{2}-\\d{2}$')
+          && data.internshipEndDate >= data.internshipStartDate
+          && data.internshipStatus == 'active'
+          && data.accountStatus == 'active'
+          && data.profileUpdatedBy == request.auth.uid
+          && data.profileCompletedAt == request.time
+          && data.updatedAt == request.time;
+      }
+
+      function canAssignStaffRole() {
+        let data = request.resource.data;
+        return isAdmin()
+          && resource.data.role == 'learner'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'role', 'mentorTracks', 'roleAssignedBy', 'roleAssignedAt', 'updatedAt'
+          ])
+          && data.uid == userId
+          && data.email == resource.data.email
+          && data.role in ['mentor', 'hr_manager', 'hr_executive', 'operations_executive']
+          && data.mentorTracks is list
+          && data.mentorTracks.size() <= 8
+          && (data.role == 'mentor'
+            ? data.mentorTracks.size() > 0
+              && data.mentorTracks.toSet().hasOnly([
+                'Business Analyst Intern', 'Web Development Intern',
+                'Data Analyst Intern', 'Digital Marketing Intern',
+                'Graphic Designer Intern', 'Social Media Intern',
+                'Content Writing Intern', 'Human Resources Intern'
+              ])
+            : data.mentorTracks.size() == 0)
+          && data.roleAssignedBy == request.auth.uid
+          && data.roleAssignedAt == request.time
+          && data.updatedAt == request.time;
+      }
+
+      function canManageInternshipDetails() {
+        let data = request.resource.data;
+        return canManageTrainingAssignments()
+          && resource.data.role == 'learner'
+          && resource.data.internshipStatus == 'active'
+          && resource.data.accountStatus != 'deactivated'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'track', 'durationMonths', 'internshipEndDate', 'phone',
+            'profileUpdatedBy', 'updatedAt'
+          ])
+          && data.uid == userId
+          && data.role == resource.data.role
+          && data.email == resource.data.email
+          && data.track in [
+            'Business Analyst Intern', 'Web Development Intern',
+            'Data Analyst Intern', 'Digital Marketing Intern',
+            'Graphic Designer Intern', 'Social Media Intern',
+            'Content Writing Intern', 'Human Resources Intern'
+          ]
+          && data.durationMonths in [1, 2, 3, 6]
+          && data.internshipStartDate == resource.data.internshipStartDate
+          && data.internshipEndDate is string
+          && data.internshipEndDate.matches('^\\d{4}-\\d{2}-\\d{2}$')
+          && data.internshipEndDate >= data.internshipStartDate
+          && (!data.keys().hasAny(['phone']) || data.phone == null
+            || (data.phone is string && data.phone.size() >= 7 && data.phone.size() <= 24
+              && data.phone.matches('^[+()0-9 .-]+$')
+              && data.phone.matches('^([^0-9]*[0-9]){7,15}[^0-9]*$')))
+          && data.profileUpdatedBy == request.auth.uid
+          && data.updatedAt == request.time;
+      }
+
+      function canChangeInternAccountStatus() {
+        let data = request.resource.data;
+        return canManageTrainingAssignments()
+          && resource.data.role == 'learner'
+          && resource.data.internshipStatus == 'active'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'accountStatus', 'deactivatedAt', 'deactivatedBy',
+            'reactivatedAt', 'reactivatedBy', 'updatedAt'
+          ])
+          && data.accountStatus in ['active', 'deactivated']
+          && data.updatedAt == request.time
+          && (data.accountStatus == 'deactivated'
+            ? resource.data.get('lastLoginAt', null) is timestamp
+              && resource.data.lastLoginAt <= request.time - duration.value(7, 'd')
+              && data.deactivatedAt == request.time
+              && data.deactivatedBy == request.auth.uid
+            : data.reactivatedAt == request.time
+              && data.reactivatedBy == request.auth.uid);
+      }
+
       allow read: if signedIn() && (
         request.auth.uid == userId
         || canViewInternProfiles()
@@ -109,13 +311,21 @@ service cloud.firestore {
         && (!request.resource.data.keys().hasAny(['track'])
           || request.resource.data.track == null)
         && validLearnerProfile();
-      allow update: if isOwner()
-        && learnerClaim()
-        && resource.data.role == 'learner'
-        && validLearnerProfile()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'displayName', 'gender', 'phone'
-        ]);
+      allow update: if (isOwner()
+          && learnerClaim()
+          && resource.data.role == 'learner'
+          && validLearnerProfile()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'displayName', 'gender', 'phone', 'lastLoginAt', 'updatedAt'
+          ])
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['lastLoginAt'])
+            || request.resource.data.lastLoginAt == request.time)
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['updatedAt'])
+            || request.resource.data.updatedAt == request.time))
+        || canActivateFromSavedDraft()
+        || canManageInternshipDetails()
+        || canChangeInternAccountStatus()
+        || canAssignStaffRole();
     }
 
     match /users/{userId}/workspaceRecords/{recordId} {
@@ -170,7 +380,7 @@ service cloud.firestore {
         let profilePath = /databases/$(database)/documents/profiles/$(userId);
         return signedIn()
           && request.auth.uid == userId
-          && request.auth.token.get('role', 'learner') == 'learner'
+          && learnerClaim()
           && (!exists(profilePath) || get(profilePath).data.role == 'learner');
       }
 
@@ -214,23 +424,151 @@ service cloud.firestore {
           && data.savedAt == request.time;
       }
 
-      allow read: if draftId == 'current' && isLearnerOwner();
+      allow read: if draftId == 'current'
+        && (isLearnerOwner() || canViewInternProfiles());
       allow create, update: if draftId == 'current'
         && isLearnerOwner()
         && hasValidProfileDraft();
     }
 
     match /trainingAssignments/{assignmentId} {
+      function validDueDate(value) {
+        return value == null
+          || (value is string && value.matches('^\\d{4}-\\d{2}-\\d{2}$'));
+      }
+
+      function canManageTrack(track) {
+        return canManageTrainingAssignments() || canMentorTrack(track);
+      }
+
+      function targetIsActiveLearner(data) {
+        let profilePath = /databases/$(database)/documents/profiles/$(data.assignedToUid);
+        return exists(profilePath)
+          && get(profilePath).data.email == data.learnerEmail
+          && get(profilePath).data.uid == data.assignedToUid
+          && get(profilePath).data.role == 'learner'
+          && get(profilePath).data.accountStatus != 'deactivated'
+          && get(profilePath).data.track == data.track
+          && get(profilePath).data.internshipStatus == 'active';
+      }
+
+      function validAssignmentCreate() {
+        let data = request.resource.data;
+        return signedIn()
+          && canManageTrack(data.track)
+          && data.keys().hasAll([
+            'assignedToUid', 'learnerEmail', 'track', 'taskId', 'status', 'dueDate',
+            'assignedByUid', 'assignedByRole', 'assignedAt', 'updatedAt',
+            'submissionCount', 'latestSubmissionText', 'latestSubmissionUrl',
+            'latestSubmissionId', 'latestReviewId', 'feedback'
+          ])
+          && data.keys().hasOnly([
+            'assignedToUid', 'learnerEmail', 'track', 'taskId', 'status', 'dueDate',
+            'assignedByUid', 'assignedByRole', 'assignedAt', 'updatedAt',
+            'submissionCount', 'latestSubmissionText', 'latestSubmissionUrl',
+            'latestSubmissionId', 'latestReviewId', 'feedback'
+          ])
+          && data.assignedToUid is string
+          && data.learnerEmail is string
+          && data.track in [
+            'Business Analyst Intern', 'Web Development Intern',
+            'Data Analyst Intern', 'Digital Marketing Intern',
+            'Graphic Designer Intern', 'Social Media Intern',
+            'Content Writing Intern', 'Human Resources Intern'
+          ]
+          && data.taskId is string
+          && data.taskId.matches('^[A-Za-z0-9_-]{1,100}$')
+          && data.status == 'assigned'
+          && validDueDate(data.dueDate)
+          && data.assignedByUid == request.auth.uid
+          && data.assignedByRole == roleForCurrentUser()
+          && data.assignedAt == request.time
+          && data.updatedAt == request.time
+          && data.submissionCount == 0
+          && data.latestSubmissionText == ''
+          && data.latestSubmissionUrl == ''
+          && data.latestSubmissionId == ''
+          && data.latestReviewId == ''
+          && data.feedback == ''
+          && targetIsActiveLearner(data);
+      }
+
+      function validLearnerSubmissionUpdate() {
+        let data = request.resource.data;
+        let submissionPath = /databases/$(database)/documents/trainingAssignments/$(assignmentId)/submissions/$(data.latestSubmissionId);
+        let submission = getAfter(submissionPath).data;
+        return signedIn()
+          && resource.data.assignedToUid == request.auth.uid
+          && resource.data.status in ['assigned', 'changes_requested']
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'status', 'submissionCount', 'latestSubmissionText', 'latestSubmissionUrl',
+            'latestSubmissionId', 'submittedAt', 'feedback', 'updatedAt'
+          ])
+          && data.status == 'submitted'
+          && data.submissionCount == resource.data.submissionCount + 1
+          && data.latestSubmissionId is string
+          && data.latestSubmissionId.size() >= 1
+          && data.latestSubmissionText is string
+          && data.latestSubmissionUrl is string
+          && data.latestSubmissionText.size() <= 20000
+          && data.latestSubmissionUrl.size() <= 2048
+          && (data.latestSubmissionText.size() > 0 || data.latestSubmissionUrl.size() > 0)
+          && (data.latestSubmissionUrl == ''
+            || data.latestSubmissionUrl.matches('^https://[^\\s]+$'))
+          && data.feedback == ''
+          && data.submittedAt == request.time
+          && data.updatedAt == request.time
+          && existsAfter(submissionPath)
+          && submission.assignmentId == assignmentId
+          && submission.userId == request.auth.uid
+          && submission.track == resource.data.track
+          && submission.attempt == data.submissionCount
+          && submission.text == data.latestSubmissionText
+          && submission.url == data.latestSubmissionUrl
+          && submission.submittedAt == request.time;
+      }
+
+      function validReviewerUpdate() {
+        let data = request.resource.data;
+        let reviewPath = /databases/$(database)/documents/trainingAssignments/$(assignmentId)/reviews/$(data.latestReviewId);
+        let review = getAfter(reviewPath).data;
+        return signedIn()
+          && resource.data.status == 'submitted'
+          && canManageTrack(resource.data.track)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'status', 'feedback', 'reviewedByUid', 'reviewedAt',
+            'latestReviewId', 'updatedAt'
+          ])
+          && data.status in ['approved', 'changes_requested']
+          && data.feedback is string
+          && data.feedback.size() >= 1
+          && data.feedback.size() <= 4000
+          && data.reviewedByUid == request.auth.uid
+          && data.reviewedAt == request.time
+          && data.updatedAt == request.time
+          && data.latestReviewId is string
+          && data.latestReviewId.size() >= 1
+          && existsAfter(reviewPath)
+          && review.assignmentId == assignmentId
+          && review.reviewerUid == request.auth.uid
+          && review.decision == data.status
+          && review.feedback == data.feedback
+          && review.reviewedAt == request.time;
+      }
+
       function canReadAssignment() {
         return signedIn() && (
           resource.data.assignedToUid == request.auth.uid
           || isAdmin()
+          || canManageTrainingAssignments()
           || canMentorTrack(resource.data.track)
         );
       }
 
       allow read: if canReadAssignment();
-      allow write: if false;
+      allow create: if validAssignmentCreate();
+      allow update: if validLearnerSubmissionUpdate() || validReviewerUpdate();
+      allow delete: if false;
 
       match /submissions/{submissionId} {
         function canReadParentAssignment() {
@@ -240,12 +578,43 @@ service cloud.firestore {
           return signedIn() && (
             assignment.assignedToUid == request.auth.uid
             || isAdmin()
+            || canManageTrainingAssignments()
             || canMentorTrack(assignment.track)
           );
         }
 
+        function parentAssignment() {
+          return get(/databases/$(database)/documents/trainingAssignments/$(assignmentId)).data;
+        }
+
+        function validSubmissionCreate() {
+          let data = request.resource.data;
+          let parent = parentAssignment();
+          let parentAfter = getAfter(/databases/$(database)/documents/trainingAssignments/$(assignmentId)).data;
+          return signedIn()
+            && parent.assignedToUid == request.auth.uid
+            && parent.status in ['assigned', 'changes_requested']
+            && parentAfter.status == 'submitted'
+            && parentAfter.latestSubmissionId == submissionId
+            && data.keys().hasOnly([
+              'assignmentId', 'userId', 'track', 'attempt', 'text', 'url', 'submittedAt'
+            ])
+            && data.assignmentId == assignmentId
+            && data.userId == request.auth.uid
+            && data.track == parent.track
+            && data.attempt == parent.submissionCount + 1
+            && data.text is string
+            && data.url is string
+            && data.text.size() <= 20000
+            && data.url.size() <= 2048
+            && (data.text.size() > 0 || data.url.size() > 0)
+            && (data.url == '' || data.url.matches('^https://[^\\s]+$'))
+            && data.submittedAt == request.time;
+        }
+
         allow read: if canReadParentAssignment();
-        allow write: if false;
+        allow create: if validSubmissionCreate();
+        allow update, delete: if false;
       }
 
       match /reviews/{reviewId} {
@@ -256,18 +625,283 @@ service cloud.firestore {
           return signedIn() && (
             assignment.assignedToUid == request.auth.uid
             || isAdmin()
+            || canManageTrainingAssignments()
             || canMentorTrack(assignment.track)
           );
         }
 
+        function parentAssignment() {
+          return get(/databases/$(database)/documents/trainingAssignments/$(assignmentId)).data;
+        }
+
+        function validReviewCreate() {
+          let data = request.resource.data;
+          let parent = parentAssignment();
+          let parentAfter = getAfter(/databases/$(database)/documents/trainingAssignments/$(assignmentId)).data;
+          return signedIn()
+            && parent.status == 'submitted'
+            && canManageTrack(parent.track)
+            && parentAfter.status == data.decision
+            && parentAfter.latestReviewId == reviewId
+            && data.keys().hasOnly([
+              'assignmentId', 'reviewerUid', 'decision', 'feedback', 'reviewedAt'
+            ])
+            && data.assignmentId == assignmentId
+            && data.reviewerUid == request.auth.uid
+            && data.decision in ['approved', 'changes_requested']
+            && data.feedback is string
+            && data.feedback.size() >= 1
+            && data.feedback.size() <= 4000
+            && data.reviewedAt == request.time;
+        }
+
         allow read: if canReadParentAssignment();
-        allow write: if false;
+        allow create: if validReviewCreate();
+        allow update, delete: if false;
       }
     }
 
     match /internships/{userId}/attendance/{attendanceId} {
-      allow read: if signedIn() && request.auth.uid == userId;
+      function twoDigits(value) {
+        return value < 10 ? '0' + string(value) : string(value);
+      }
+
+      function indiaDateString(value) {
+        return string(value.year()) + '-'
+          + twoDigits(value.month()) + '-'
+          + twoDigits(value.day());
+      }
+
+      function validCheckIn() {
+        let data = request.resource.data;
+        let profilePath = /databases/$(database)/documents/profiles/$(userId);
+        let profile = get(profilePath).data;
+        let indiaNow = request.time + duration.value(330, 'm');
+        return signedIn()
+          && request.auth.uid == userId
+          && exists(profilePath)
+          && profile.role == 'learner'
+          && profile.accountStatus != 'deactivated'
+          && profile.internshipStatus == 'active'
+          && profile.track is string
+          && profile.durationMonths in [1, 2, 3, 6]
+          && profile.internshipStartDate is string
+          && profile.internshipEndDate is string
+          && indiaNow.dayOfWeek() != 7
+          && attendanceId == indiaDateString(indiaNow)
+          && data.keys().hasOnly([
+            'uid', 'attendanceDate', 'track', 'durationMonths',
+            'internshipStartDate', 'internshipEndDate', 'checkedInAt'
+          ])
+          && data.uid == userId
+          && data.attendanceDate == attendanceId
+          && data.track == profile.track
+          && data.durationMonths == profile.durationMonths
+          && data.internshipStartDate == profile.internshipStartDate
+          && data.internshipEndDate == profile.internshipEndDate
+          && data.attendanceDate >= profile.internshipStartDate
+          && data.attendanceDate <= profile.internshipEndDate
+          && data.checkedInAt == request.time;
+      }
+
+      allow read: if (signedIn() && request.auth.uid == userId)
+        || canViewAttendanceReport()
+        || canMentorTrack(resource.data.track);
+      allow create: if validCheckIn();
+      allow update, delete: if false;
+    }
+
+    match /{path=**}/attendance/{attendanceId} {
+      allow read: if canViewAttendanceReport();
       allow write: if false;
+    }
+
+    match /organization/{recordId} {
+      function mayManageMeetings() {
+        return isAdmin() || (signedIn() && roleForCurrentUser() in ['founder', 'co_founder']);
+      }
+
+      function mayReadMeeting() {
+        return signedIn() && (isAdmin()
+          || roleForCurrentUser() in [
+            'founder', 'co_founder', 'hr_manager', 'hr_executive',
+            'operations_executive', 'mentor'
+          ]
+          || roleForCurrentUser() == 'learner');
+      }
+
+      function validMeetingStart() {
+        let data = request.resource.data;
+        return data.keys().hasAll([
+            'title', 'status', 'meetUrl', 'eventId', 'startedByUid', 'startedAt', 'expiresAt'
+          ])
+          && data.keys().hasOnly([
+            'title', 'status', 'meetUrl', 'eventId', 'startedByUid', 'startedAt', 'expiresAt'
+          ])
+          && data.title == 'IntelliCore Intern Team Meeting'
+          && data.status == 'active'
+          && data.meetUrl is string
+          && data.meetUrl.matches('^https://meet\\.google\\.com/[a-z]{3}-[a-z]{4}-[a-z]{3}/?$')
+          && data.eventId == ''
+          && data.startedByUid == request.auth.uid
+          && data.startedAt == request.time
+          && data.expiresAt is timestamp
+          && data.expiresAt > request.time
+          && data.expiresAt <= request.time + duration.value(2, 'h');
+      }
+
+      allow read: if recordId == 'currentMeeting' && mayReadMeeting();
+      allow create: if recordId == 'currentMeeting' && mayManageMeetings()
+        && validMeetingStart();
+      allow update: if recordId == 'currentMeeting' && mayManageMeetings()
+        && (validMeetingStart()
+          && (resource.data.status != 'active'
+            || resource.data.expiresAt <= request.time)
+          || resource.data.status == 'active'
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              'status', 'endedByUid', 'endedAt'
+            ])
+            && request.resource.data.status == 'ended'
+            && request.resource.data.endedByUid == request.auth.uid
+            && request.resource.data.endedAt == request.time);
+      allow delete: if false;
+    }
+
+    match /announcements/{announcementId} {
+      function canReadAnnouncement() {
+        return signedIn() && (
+          resource.data.audienceTrack == 'all'
+          || (roleForCurrentUser() == 'learner'
+            && exists(/databases/$(database)/documents/profiles/$(request.auth.uid))
+            && get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.track
+              == resource.data.audienceTrack)
+          || (roleForCurrentUser() == 'mentor'
+            && resource.data.audienceTrack in mentorTracksForCurrentUser())
+          || roleForCurrentUser() in [
+            'founder', 'co_founder', 'admin', 'hr_manager', 'hr_executive', 'operations_executive'
+          ]
+          || canManageTrainingAssignments()
+        );
+      }
+
+      function validAnnouncement() {
+        let data = request.resource.data;
+        return data.keys().hasAll([
+            'title', 'body', 'audienceTrack', 'createdByUid', 'createdAt'
+          ])
+          && data.keys().hasOnly([
+            'title', 'body', 'audienceTrack', 'createdByUid', 'createdAt'
+          ])
+          && data.title is string && data.title.size() >= 3 && data.title.size() <= 120
+          && data.body is string && data.body.size() >= 1 && data.body.size() <= 5000
+          && (data.audienceTrack == 'all' || supportedTrack(data.audienceTrack))
+          && canManageContentFor(data.audienceTrack)
+          && data.createdByUid == request.auth.uid
+          && data.createdAt == request.time;
+      }
+
+      allow read: if canReadAnnouncement();
+      allow create: if signedIn() && validAnnouncement();
+      allow update, delete: if false;
+    }
+
+    match /learningResources/{resourceId} {
+      function canReadResource() {
+        return signedIn() && (
+          resource.data.track == 'all'
+          || (roleForCurrentUser() == 'learner'
+            && exists(/databases/$(database)/documents/profiles/$(request.auth.uid))
+            && get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.track
+              == resource.data.track)
+          || (roleForCurrentUser() == 'mentor'
+            && resource.data.track in mentorTracksForCurrentUser())
+          || roleForCurrentUser() in [
+            'founder', 'co_founder', 'admin', 'hr_manager', 'hr_executive', 'operations_executive'
+          ]
+          || canManageTrainingAssignments()
+        );
+      }
+
+      function validResource() {
+        let data = request.resource.data;
+        return data.keys().hasAll([
+            'title', 'description', 'url', 'type', 'track',
+            'createdByUid', 'createdAt'
+          ])
+          && data.keys().hasOnly([
+            'title', 'description', 'url', 'type', 'track',
+            'createdByUid', 'createdAt'
+          ])
+          && data.title is string && data.title.size() >= 2 && data.title.size() <= 120
+          && data.description is string && data.description.size() <= 2000
+          && data.url is string && data.url.matches('^https://[^\\s]+$')
+          && data.type in ['Article', 'Video', 'Course', 'Document', 'Link']
+          && (data.track == 'all' || supportedTrack(data.track))
+          && canManageContentFor(data.track)
+          && data.createdByUid == request.auth.uid
+          && data.createdAt == request.time;
+      }
+
+      allow read: if canReadResource();
+      allow create: if signedIn() && validResource();
+      allow update, delete: if false;
+    }
+
+    match /certificateRequests/{userId} {
+      function canReviewCertificate() {
+        return canManageTrainingAssignments();
+      }
+
+      function validCertificateRequest() {
+        let data = request.resource.data;
+        let profilePath = /databases/$(database)/documents/profiles/$(userId);
+        return signedIn()
+          && request.auth.uid == userId
+          && exists(profilePath)
+          && roleForCurrentUser() == 'learner'
+          && get(profilePath).data.role == 'learner'
+          && get(profilePath).data.internshipStatus == 'active'
+          && get(profilePath).data.internshipEndDate is string
+          && get(profilePath).data.internshipEndDate
+            <= indiaDateString(request.time + duration.value(330, 'm'))
+          && data.keys().hasAll([
+            'uid', 'email', 'displayName', 'track', 'status', 'requestedAt'
+          ])
+          && data.keys().hasOnly([
+            'uid', 'email', 'displayName', 'track', 'status', 'requestedAt',
+            'feedback', 'reviewedByUid', 'reviewedAt'
+          ])
+          && data.uid == userId
+          && data.email == get(profilePath).data.email
+          && data.displayName == get(profilePath).data.displayName
+          && data.track == get(profilePath).data.track
+          && data.status == 'requested'
+          && data.requestedAt == request.time
+          && (!data.keys().hasAny(['feedback']) || data.feedback == '')
+          && !data.keys().hasAny(['reviewedByUid', 'reviewedAt']);
+      }
+
+      function validCertificateReview() {
+        let data = request.resource.data;
+        return canReviewCertificate()
+          && resource.data.status == 'requested'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'status', 'feedback', 'reviewedByUid', 'reviewedAt'
+          ])
+          && data.status in ['approved', 'declined']
+          && data.feedback is string && data.feedback.size() <= 2000
+          && data.reviewedByUid == request.auth.uid
+          && data.reviewedAt == request.time;
+      }
+
+      allow read: if signedIn() && (
+        request.auth.uid == userId
+        || canReviewCertificate()
+        || canViewInternProfiles()
+      );
+      allow create: if userId == request.auth.uid && validCertificateRequest();
+      allow update: if validCertificateReview();
+      allow delete: if false;
     }
   }
 }

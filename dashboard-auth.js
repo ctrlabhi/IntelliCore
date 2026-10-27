@@ -3,10 +3,9 @@ import {
   connectAuthEmulator, getAuth, onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
 import {
-  collection, connectFirestoreEmulator, doc, getDoc, getDocs, initializeFirestore,
-  limit, orderBy, query, serverTimestamp, setDoc, where
+  collection, collectionGroup, connectFirestoreEmulator, doc, getDoc, getDocs, initializeFirestore,
+  limit, orderBy, query, runTransaction, serverTimestamp, setDoc, startAfter, where
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
-import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-functions.js";
 import {
   connectStorageEmulator, getBlob, getStorage, ref, uploadBytes
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-storage.js";
@@ -29,11 +28,15 @@ if (useFirebaseEmulators) {
   connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
   connectFirestoreEmulator(db, "127.0.0.1", 8080);
 }
-const functions = getFunctions(app, "us-central1");
 const storage = getStorage(app);
 if (useFirebaseEmulators) connectStorageEmulator(storage, "127.0.0.1", 9199);
-const callFunction = (name, data = {}) => httpsCallable(functions, name)(data).then(result => result.data);
 const $ = id => document.getElementById(id);
+const sparkStaffRolesByEmail = new Map([
+  ["thesumitsah47@gmail.com", "admin"],
+  ["tanu65159@gmail.com", "operations_executive"],
+  ["mikkurwt694@gmail.com", "hr_executive"],
+  ["ashitarohilla32@gmail.com", "hr_manager"]
+]);
 const notice = (message, canRetry = false) => {
   const text = $("icWorkspaceNoticeText");
   const retry = $("icWorkspaceRetry");
@@ -51,6 +54,7 @@ let selectedAttendanceMonth = "";
 let internshipPeriodPreview = null;
 let profilePhotoObjectUrl = null;
 let meetingRefreshTimer = null;
+let certificateRequest = null;
 
 const localProfileStorageKey = uid => `icLocalInternshipProfile:${uid}`;
 const firebaseProfileDraftRef = uid => doc(db, "users", uid, "profileDrafts", "current");
@@ -112,9 +116,8 @@ async function ensureClientProfile(user) {
   const token = await user.getIdTokenResult();
   if (snapshot.exists()) {
     const profile = snapshot.data();
-    if (profile.role !== (token.claims.role || "learner")) {
-      throw new Error("Your workspace profile and Firebase role claim do not match. Contact an authorised administrator.");
-    }
+    if (profile.accountStatus === "deactivated") throw new Error("Your account access is deactivated. Contact IntelliCore HR.");
+    await setDoc(ref, { lastLoginAt: serverTimestamp(), updatedAt: serverTimestamp() }, { merge: true });
     return profile;
   }
   if (token.claims.role && token.claims.role !== "learner") {
@@ -129,7 +132,8 @@ async function ensureClientProfile(user) {
     track: null
   };
   await setDoc(ref, profile);
-  return profile;
+  await setDoc(ref, { lastLoginAt: serverTimestamp(), updatedAt: serverTimestamp() }, { merge: true });
+  return { ...profile, lastLoginAt: null };
 }
 async function saveClientProfileDraft(user, values) {
   const startDate = values.internshipStartDate;
@@ -172,7 +176,8 @@ async function updateClientPersonalProfile(user, values) {
   await setDoc(ref, {
     displayName: values.displayName,
     gender: values.gender,
-    phone: values.phone
+    phone: values.phone,
+    updatedAt: serverTimestamp()
   }, { merge: true });
   const saved = await getDoc(ref);
   if (!saved.exists()) throw new Error("The profile was updated but could not be reloaded.");
@@ -228,26 +233,6 @@ function withTimeout(operation, delay) {
     })
   ]).finally(() => clearTimeout(timeout));
 }
-function callableErrorNotice(error, functionName) {
-  const code = typeof error?.code === "string" ? error.code : "";
-  if (code.endsWith("/not-found") || code === "not-found") {
-    return `Firebase Function "${functionName}" was not found in us-central1. Deploy the latest Functions to project intellicore-229.`;
-  }
-  if (code.endsWith("/unauthenticated") || code === "unauthenticated") {
-    return "Your sign-in expired before the secure workspace could load. Sign out and sign in again.";
-  }
-  if (code.endsWith("/permission-denied") || code === "permission-denied") {
-    return "Your account is not authorised to load the secure workspace. Check its verified email and assigned role.";
-  }
-  if (code.endsWith("/failed-precondition") || code === "failed-precondition") {
-    return error.message || "The secure workspace is not ready for this account yet.";
-  }
-  if (code.endsWith("/unavailable") || code.endsWith("/deadline-exceeded")
-    || error?.message === "Workspace connection timed out.") {
-    return `Firebase Function "${functionName}" did not respond. Check Firebase Functions availability and try again.`;
-  }
-  return `Firebase Function "${functionName}" failed${code ? ` (${code})` : ""}. Check Cloud Functions logs for project intellicore-229.`;
-}
 async function connectWorkspace(user, profileSetupError = null) {
   const attempt = ++connectionAttempt;
   $("workspaceTop").setAttribute("aria-busy", "true");
@@ -274,14 +259,12 @@ async function connectWorkspace(user, profileSetupError = null) {
     if (trainingWorkspace?.profile.localOnly) {
       notice("Your profile is saved on this device only. It is not synced to your IntelliCore account.");
     } else if (trainingWorkspace?.profile.profileDraft) {
-      notice("Your saved profile is ready, but secure activation and training could not connect.");
+      notice("Your profile draft is saved. Wait for HR or Founder to activate it.");
     } else {
       notice(`Your secure profile or workspace could not be loaded. ${trainingResult.reason?.message || "Check your Firestore rules and connection."}`, true);
     }
   } else {
-    notice(trainingWorkspace?.sparkLimited
-      ? "Your profile, assigned task statuses, and saved attendance loaded. Detailed curriculum, task actions, and new attendance require trusted Cloud Functions; nothing was fabricated."
-      : "Your private workspace and training assignments are ready.");
+    notice("Your profile, training tasks and attendance are connected to Firebase.");
   }
   const profile = trainingWorkspace?.profile;
   if (attempt === connectionAttempt
@@ -292,8 +275,6 @@ async function connectWorkspace(user, profileSetupError = null) {
     && trainingWorkspace.activeInternship) {
     if (isSundayInIndia()) {
       notice("Your workspace is ready. Sunday is an off day, so attendance was not recorded.");
-    } else if (trainingWorkspace.sparkLimited) {
-      notice("Your workspace is ready. Login attendance requires a trusted Cloud Function and was not recorded on the Spark plan.");
     } else {
       let result;
       try {
@@ -301,7 +282,7 @@ async function connectWorkspace(user, profileSetupError = null) {
         if (attempt !== connectionAttempt) return;
       } catch (error) {
         console.error("Daily attendance could not be recorded during login.", error);
-        notice(`Your dashboard is ready, but today's attendance was not recorded. ${callableErrorNotice(error, "checkInToday")}`, true);
+        notice(`Your dashboard is ready, but today's attendance was not recorded. ${error.message || "Retry the check-in."}`, true);
       }
       if (result?.skippedSunday) {
         notice("Your workspace is ready. Sunday is an off day, so attendance was not recorded.");
@@ -495,7 +476,37 @@ function renderAttendanceCalendar(attendance, periodPreview = internshipPeriodPr
     </div>`;
 }
 async function recordAttendanceForLogin(user, attempt = connectionAttempt) {
-  const result = await callFunction("checkInToday");
+  const today = indiaDateString();
+  if (isSundayInIndia(today)) return { alreadyCheckedIn: false, skippedSunday: true, attendanceDate: today };
+  const attendanceRef = doc(db, "internships", user.uid, "attendance", today);
+  const profileRef = doc(db, "profiles", user.uid);
+  const result = await runTransaction(db, async transaction => {
+    const [profileSnapshot, attendanceSnapshot] = await Promise.all([
+      transaction.get(profileRef), transaction.get(attendanceRef)
+    ]);
+    if (!profileSnapshot.exists()) throw new Error("Build your internship profile before checking in.");
+    const profile = profileSnapshot.data();
+    if (profile.accountStatus === "deactivated") throw new Error("Your account access is deactivated.");
+    if (profile.role !== "learner" || profile.internshipStatus !== "active"
+      || !profile.track || !profile.durationMonths
+      || !profile.internshipStartDate || !profile.internshipEndDate) {
+      throw new Error("Attendance starts after HR activates your internship profile.");
+    }
+    if (today < profile.internshipStartDate || today > profile.internshipEndDate) {
+      throw new Error("Attendance is available only within your internship dates.");
+    }
+    if (attendanceSnapshot.exists()) return { alreadyCheckedIn: true, attendanceDate: today };
+    transaction.set(attendanceRef, {
+      uid: user.uid,
+      attendanceDate: today,
+      track: profile.track,
+      durationMonths: profile.durationMonths,
+      internshipStartDate: profile.internshipStartDate,
+      internshipEndDate: profile.internshipEndDate,
+      checkedInAt: serverTimestamp()
+    });
+    return { alreadyCheckedIn: false, attendanceDate: today };
+  });
   if (attempt !== connectionAttempt || auth.currentUser?.uid !== user.uid) return null;
   return result;
 }
@@ -718,7 +729,7 @@ function renderTraining() {
     ? "Your saved details are ready. The end date follows your selected duration; trusted processing is required to activate the internship."
     : hasInternshipProfile
     ? "Update your personal details below. Domain, duration, and dates stay fixed while your internship is active."
-    : "Enter your details, choose your domain and duration, and select a start date. On Spark, saving creates a private draft; activation requires trusted backend processing.";
+    : "Enter your details, choose your domain and duration, and select a start date. HR or Founder will activate your saved draft.";
   $("icInternshipPeriodPreview").textContent = profile.profileDraft
     ? `Profile draft saved to Firebase. Proposed period: ${profile.internshipStartDate} through ${profile.internshipEndDate}.`
     : hasInternshipProfile
@@ -729,7 +740,7 @@ function renderTraining() {
   const internshipActive = Boolean(activeInternship);
   $("icAttendanceSummary").textContent = hasInternshipProfile
     ? trainingWorkspace.sparkLimited
-      ? `Saved attendance is read-only on Spark. Secure check-in requires trusted backend processing. ${profile.track} · ${profile.durationMonths} month${profile.durationMonths === 1 ? "" : "s"} · ${profile.internshipStartDate} to ${profile.internshipEndDate}`
+      ? `Attendance check-in is enabled for this internship. ${profile.track} · ${profile.durationMonths} month${profile.durationMonths === 1 ? "" : "s"} · ${profile.internshipStartDate} to ${profile.internshipEndDate}`
       : `Attendance is recorded automatically once per login day (Sunday excluded). ${profile.track} · ${profile.durationMonths} month${profile.durationMonths === 1 ? "" : "s"} · ${profile.internshipStartDate} to ${profile.internshipEndDate}`
     : profile.profileDraft
       ? "Your selected internship dates are saved as a draft. Attendance begins only after trusted activation."
@@ -749,13 +760,11 @@ function renderTraining() {
     ? hasInternshipProfile ? "Saved check-ins in this internship" : "Build your internship profile to begin"
     : canViewAttendance ? "Open the staff attendance report" : "Attendance is managed by authorised staff";
   $("icCheckInButton").disabled = profile.profileDraft || profile.localOnly
-    || trainingWorkspace.sparkLimited || !internshipActive || isCheckedIn || isSunday;
+    || !internshipActive || isCheckedIn || isSunday;
   $("icCheckInButton").textContent = profile.profileDraft
     ? "Activation required"
     : profile.localOnly
       ? "Sync required"
-      : trainingWorkspace.sparkLimited
-        ? "Check-in requires secure backend"
     : isSunday ? "Sunday (no attendance)"
       : isCheckedIn ? "Attendance recorded today" : internshipActive ? "Check in today" : "Internship ended";
   renderInternProfileDetails(profile, hasInternshipProfile, internshipActive, today);
@@ -768,9 +777,7 @@ function renderTraining() {
   $("icProfileDetailsButton").setAttribute("aria-label", hasRequiredProfile
     ? "View or edit your internship profile"
     : "Complete your internship profile");
-  $("icAttendanceMessage").textContent = trainingWorkspace.sparkLimited
-    ? "Saved attendance history is read-only on the Spark plan. Automatically recording or submitting a new check-in requires a trusted Cloud Function; no client-generated attendance is accepted."
-    : profile.profileDraft
+  $("icAttendanceMessage").textContent = profile.profileDraft
     ? "Your profile is saved as a draft. Attendance will begin only after trusted profile activation."
     : profile.localOnly
       ? "This profile is saved on this device only. Sync it to your account before using attendance."
@@ -824,19 +831,17 @@ function renderTraining() {
   $("icTrainingTrack").textContent = profile.track
     || (role === "mentor" ? profile.mentorTracks.join(", ") || "No tracks assigned" : ["founder", "co_founder", "admin"].includes(role) ? "All tracks" : "Track pending");
   $("icTrainingIntro").textContent = profile.profileDraft
-    ? "Your profile and selected dates are saved as a draft. Trusted backend activation is required before training or attendance starts."
+    ? "Your profile and selected dates are saved. HR or Founder activation will unlock training and attendance."
     : profile.localOnly
       ? "Profile saved on this device. Secure training data is not synced."
     : role === "learner"
     ? profile.track
-      ? trainingWorkspace.sparkLimited
-        ? `Your ${profile.track} assignment statuses are available. Detailed curriculum and submissions require the trusted Cloud Functions backend, which is not available on Spark.`
-        : `Your ${profile.track} training assignments and progress.`
+      ? `Your ${profile.track} training assignments and progress.`
       : "Complete your profile to activate your internship and see assignments here."
     : `Signed in with ${role} access for your authorised training tracks.`;
 
   if (profile.profileDraft) {
-    tasksElement.innerHTML = '<div class="ic-activity-empty"><strong>Profile draft saved</strong><p>Your domain, duration, and dates are saved. Activating the internship and unlocking training requires trusted backend processing, which is not available on Spark.</p></div>';
+    tasksElement.innerHTML = '<div class="ic-activity-empty"><strong>Profile draft saved</strong><p>HR or Founder must activate your internship before assigned training and attendance begin.</p></div>';
   } else if (profile.localOnly) {
     tasksElement.innerHTML = '<div class="ic-activity-empty"><strong>Your dashboard is ready</strong><p>Training assignments will appear after this profile is securely synced to your IntelliCore account.</p></div>';
   } else if (!profile.track && role === "learner") {
@@ -869,7 +874,7 @@ function renderTraining() {
       const feedback = assignment.feedback
         ? `<div class="ic-review-feedback"><strong>Mentor feedback</strong><p>${escapeHtml(assignment.feedback)}</p></div>`
         : "";
-      const canSubmit = role === "learner" && !trainingWorkspace.sparkLimited
+      const canSubmit = role === "learner"
         && ["assigned", "changes_requested"].includes(assignment.status);
       const submitForm = canSubmit
         ? `<form class="ic-training-submit" data-training-submit="${escapeHtml(assignment.id)}"><label>Submission notes<textarea name="text" maxlength="20000" rows="3" placeholder="Summarise your work and what you learned"></textarea></label><label>Deliverable link (optional)<input name="url" type="url" maxlength="2048" placeholder="https://…"></label><button type="submit" class="ic-primary-button">Submit for review</button></form>`
@@ -1013,85 +1018,246 @@ function httpsHref(value) {
   }
 }
 async function refreshTrainingWorkspace() {
-  if (authenticatedRole === "learner") {
-    const user = currentUser || auth.currentUser;
-    if (!user) throw new Error("Sign in to load your private workspace.");
-    const profileRefForUser = doc(db, "profiles", user.uid);
-    const [profileSnapshot, assignmentSnapshot, attendanceSnapshot] = await Promise.all([
-      getDoc(profileRefForUser),
-      getDocs(query(
-        collection(db, "trainingAssignments"),
-        where("assignedToUid", "==", user.uid),
-        orderBy("assignedAt", "desc"),
-        limit(100)
-      )),
-      getDocs(query(
-        collection(db, "internships", user.uid, "attendance"),
-        orderBy("attendanceDate", "desc"),
-        limit(200)
-      ))
-    ]);
-    if (!profileSnapshot.exists()) {
-      throw new Error("Your learner profile is not available. Refresh and retry.");
+  const user = currentUser || auth.currentUser;
+  if (!user) throw new Error("Sign in to load your private workspace.");
+  const role = authenticatedRole || "learner";
+  const profileSnapshot = await getDoc(doc(db, "profiles", user.uid));
+  if (!profileSnapshot.exists()) throw new Error("Your workspace profile is not available. Refresh and retry.");
+  const storedProfile = profileSnapshot.data();
+  if (storedProfile.accountStatus === "deactivated") throw new Error("Your account access is deactivated. Contact IntelliCore HR.");
+  const profile = { ...storedProfile, uid: user.uid, email: user.email || "", role };
+  const taskById = window.IntelliCoreCurriculum?.taskById;
+  const toAssignment = document => {
+    const data = document.data();
+    const task = taskById?.get(data.taskId);
+    return {
+      id: document.id,
+      ...data,
+      assignedAt: data.assignedAt?.toMillis?.() || null,
+      updatedAt: data.updatedAt?.toMillis?.() || null,
+      submittedAt: data.submittedAt?.toMillis?.() || null,
+      reviewedAt: data.reviewedAt?.toMillis?.() || null,
+      task: task || {
+        title: data.taskTitle || String(data.taskId || "Assigned task").replaceAll("-", " "),
+        track: data.track || profile.track || "",
+        instructions: "Task details are unavailable in the approved curriculum.",
+        deliverable: "Follow the instructions shared by your mentor.",
+        rubric: []
+      }
+    };
+  };
+  const [personalAssignmentSnapshot, attendanceSnapshot, meetingSnapshot] = await Promise.all([
+    getDocs(query(
+      collection(db, "trainingAssignments"),
+      where("assignedToUid", "==", user.uid),
+      orderBy("assignedAt", "desc"),
+      limit(100)
+    )),
+    getDocs(query(
+      collection(db, "internships", user.uid, "attendance"),
+      orderBy("attendanceDate", "desc"),
+      limit(200)
+    )),
+    getDoc(doc(db, "organization", "currentMeeting"))
+  ]);
+  let profileView = profile;
+  if (role === "learner" && !internshipProfileComplete(profile)) {
+    const draft = await loadFirebaseProfileDraft(user);
+    if (draft) profileView = draft.profile;
+  }
+  const today = indiaDateString();
+  const assignments = personalAssignmentSnapshot.docs.map(toAssignment);
+  const attendance = attendanceSnapshot.docs.map(document => ({
+    attendanceDate: document.get("attendanceDate"),
+    checkedInAt: document.get("checkedInAt")?.toMillis?.() || null
+  }));
+  const meetingData = meetingSnapshot.exists() ? meetingSnapshot.data() : null;
+  const activeMeeting = meetingData?.status === "active"
+    && meetingData.expiresAt?.toMillis?.() > Date.now()
+    ? {
+      title: meetingData.title,
+      meetUrl: meetingData.meetUrl,
+      startedAt: meetingData.startedAt?.toMillis?.() || null,
+      expiresAt: meetingData.expiresAt.toMillis()
     }
-    const profile = profileSnapshot.data();
-    const today = indiaDateString();
-    const assignments = assignmentSnapshot.docs.map(document => {
-      const assignment = document.data();
-      const task = window.IntelliCoreCurriculum?.taskById.get(assignment.taskId);
-      const taskTitle = assignment.taskTitle || task?.title
-        || String(assignment.taskId || "Assigned task").replaceAll("-", " ");
+    : null;
+  const contentTracks = role === "mentor"
+    ? [...new Set(profile.mentorTracks || [])]
+    : profileView.track ? [profileView.track] : [];
+  const contentRoles = ["founder", "co_founder", "admin", "hr_manager", "hr_executive", "operations_executive"];
+  const readAllContent = contentRoles.includes(role);
+  const [announcementSnapshots, resourceSnapshots, certificateSnapshot] = await Promise.all([
+    Promise.all([
+      getDocs(query(collection(db, "announcements"), where("audienceTrack", "==", "all"), orderBy("createdAt", "desc"), limit(20))),
+      ...(readAllContent ? [] : contentTracks.map(track => getDocs(query(
+        collection(db, "announcements"), where("audienceTrack", "==", track),
+        orderBy("createdAt", "desc"), limit(20)
+      ))))
+    ]),
+    Promise.all([
+      getDocs(query(collection(db, "learningResources"), where("track", "==", "all"), orderBy("createdAt", "desc"), limit(20))),
+      ...(readAllContent ? [] : contentTracks.map(track => getDocs(query(
+        collection(db, "learningResources"), where("track", "==", track),
+        orderBy("createdAt", "desc"), limit(20)
+      ))))
+    ]),
+    getDoc(doc(db, "certificateRequests", user.uid))
+  ]);
+  if (readAllContent) {
+    announcementSnapshots[0] = await getDocs(query(collection(db, "announcements"), orderBy("createdAt", "desc"), limit(40)));
+    resourceSnapshots[0] = await getDocs(query(collection(db, "learningResources"), orderBy("createdAt", "desc"), limit(40)));
+  }
+  const recentDocuments = snapshots => [...new Map(snapshots.flatMap(snapshot => snapshot.docs)
+    .map(document => [document.id, document])).values()]
+    .sort((a, b) => (b.get("createdAt")?.toMillis?.() || 0) - (a.get("createdAt")?.toMillis?.() || 0));
+  certificateRequest = certificateSnapshot.exists() ? certificateSnapshot.data() : null;
+  const availableTracks = ["founder", "co_founder", "admin", "hr_manager"].includes(role)
+    ? tracksForDashboard
+    : role === "mentor" ? profile.mentorTracks || [] : [];
+  const catalog = (window.IntelliCoreCurriculum?.tracks || {});
+  const taskCatalog = availableTracks.flatMap(track =>
+    (catalog[track] || []).map(task => ({ ...task, track }))
+  );
+  let reviewQueue = [];
+  if (availableTracks.length) {
+    const queues = await Promise.all(availableTracks.map(track => getDocs(query(
+      collection(db, "trainingAssignments"),
+      where("track", "==", track),
+      where("status", "==", "submitted"),
+      limit(100)
+    ))));
+    reviewQueue = queues.flatMap(snapshot => snapshot.docs.map(toAssignment))
+      .sort((a, b) => (b.submittedAt || 0) - (a.submittedAt || 0));
+  }
+  let internDirectory = [];
+  let internDirectoryHasMore = false;
+  let internDirectoryNextCursor = null;
+  const canViewProfiles = ["founder", "co_founder", "admin", "hr_manager", "hr_executive", "operations_executive"].includes(role);
+  if (canViewProfiles) {
+    const directory = await getDocs(query(
+      collection(db, "profiles"),
+      where("role", "==", "learner"),
+      orderBy("displayName"),
+      limit(101)
+    ));
+    internDirectoryHasMore = directory.size > 100;
+    const rows = directory.docs.slice(0, 100);
+    internDirectoryNextCursor = internDirectoryHasMore ? rows.at(-1)?.id || null : null;
+    internDirectory = rows.map(document => {
+      const intern = document.data();
+      const lastLoginAt = intern.lastLoginAt?.toMillis?.() || null;
+      const enrolled = Boolean(intern.track && intern.internshipStartDate && intern.internshipEndDate
+        && intern.internshipStatus === "active");
       return {
-        id: document.id,
-        ...assignment,
-        assignedAt: assignment.assignedAt?.toMillis?.() || null,
-        updatedAt: assignment.updatedAt?.toMillis?.() || null,
-        task: task || {
-          title: taskTitle,
-          track: assignment.track || profile.track || "",
-          instructions: "Detailed task instructions are not stored in this assignment record. The secure training service is required to load the approved curriculum.",
-          deliverable: "Refer to the task assignment provided by your mentor.",
-          rubric: []
-        }
+        uid: document.id,
+        email: intern.email || "",
+        displayName: intern.displayName || "",
+        phone: intern.phone || "",
+        track: intern.track || "",
+        durationMonths: intern.durationMonths || null,
+        internshipStartDate: intern.internshipStartDate || null,
+        internshipEndDate: intern.internshipEndDate || null,
+        lastLoginAt,
+        accountStatus: intern.accountStatus || "active",
+        enrolled,
+        inactive: enrolled && Boolean(lastLoginAt && lastLoginAt < Date.now() - 7 * 24 * 60 * 60 * 1000)
       };
     });
-    const attendance = attendanceSnapshot.docs.map(document => ({
-      attendanceDate: document.get("attendanceDate"),
-      checkedInAt: document.get("checkedInAt")?.toMillis?.() || null
-    }));
-    const profileDraft = !internshipProfileComplete(profile)
-      ? await loadFirebaseProfileDraft(user)
-      : null;
-    trainingWorkspace = {
-      profile: profileDraft?.profile || { ...profile, uid: user.uid, email: user.email || "", role: "learner" },
-      assignments,
-      catalog: [],
-      reviewQueue: [],
-      attendance,
-      activeInternship: Boolean(
-        profile.internshipStartDate
-        && profile.internshipEndDate
-        && today >= profile.internshipStartDate
-        && today <= profile.internshipEndDate
-      ),
-      activeMeeting: null,
-      internDirectory: [],
-      attendanceReport: [],
-      sparkLimited: true
-    };
-    renderTraining();
-    return;
   }
-  const workspace = await callFunction("getTrainingDashboard");
-  const profileDraft = workspace.profile?.role === "learner" && !internshipProfileComplete(workspace.profile)
-    ? await loadFirebaseProfileDraft(currentUser)
-    : null;
-  trainingWorkspace = profileDraft
-    ? { ...workspace, profile: profileDraft.profile }
-    : workspace;
+  let attendanceReport = [];
+  const canViewAttendance = ["founder", "co_founder", "admin", "hr_manager", "operations_executive"].includes(role);
+  if (canViewAttendance) {
+    const report = await getDocs(query(
+      collectionGroup(db, "attendance"),
+      orderBy("attendanceDate", "desc"),
+      limit(500)
+    ));
+    const profileByUid = new Map(internDirectory.map(intern => [intern.uid, intern]));
+    attendanceReport = report.docs.map(document => {
+      const uid = document.ref.parent.parent?.id || "";
+      const intern = profileByUid.get(uid) || {};
+      return {
+        uid,
+        attendanceDate: document.get("attendanceDate") || document.id,
+        checkedInAt: document.get("checkedInAt")?.toMillis?.() || null,
+        email: intern.email || "",
+        displayName: intern.displayName || "",
+        track: intern.track || ""
+      };
+    });
+  }
+  trainingWorkspace = {
+    profile: profileView,
+    assignments,
+    catalog: taskCatalog,
+    reviewQueue,
+    attendance,
+    activeInternship: Boolean(
+      profile.internshipStatus === "active"
+      && profile.internshipStartDate
+      && profile.internshipEndDate
+      && today >= profile.internshipStartDate
+      && today <= profile.internshipEndDate
+    ),
+    activeMeeting,
+    announcements: recentDocuments(announcementSnapshots).slice(0, 20).map(document => ({ id: document.id, ...document.data() })),
+    resources: recentDocuments(resourceSnapshots).slice(0, 20).map(document => ({ id: document.id, ...document.data() })),
+    internDirectory,
+    internDirectoryHasMore,
+    internDirectoryNextCursor,
+    attendanceReport,
+    sparkLimited: false
+  };
   renderTraining();
+  renderAdditionalWorkspace();
 }
-function renderMeetingPanel(activeMeeting, role, hasInternshipProfile, sparkLimited = false) {
+
+function renderAdditionalWorkspace() {
+  const announcements = trainingWorkspace?.announcements || [];
+  const resources = trainingWorkspace?.resources || [];
+  $("icAnnouncementsList").innerHTML = announcements.length
+    ? announcements.map(item => `<article><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.body)}</p><small>${escapeHtml(item.audienceTrack === "all" ? "All interns" : item.audienceTrack || "Internship update")}</small></article>`).join("")
+    : "<strong>No announcements yet</strong><p>There are no announcements for your internship track.</p>";
+  $("icLearningResourcesList").innerHTML = resources.length
+    ? resources.map(item => `<article><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.description || "")}</p><a href="${httpsHref(item.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.type || "Open resource")} ↗</a></article>`).join("")
+    : "<strong>No learning resources yet</strong><p>When resources are assigned to your track, they will appear here.</p>";
+  const projects = trainingWorkspace?.assignments || [];
+  $("icProjectsList").innerHTML = projects.length
+    ? projects.map(item => `<article><strong>${escapeHtml(item.task.title)}</strong><p>${escapeHtml(item.track)} · ${escapeHtml(item.status.replaceAll("_", " "))}${item.dueDate ? ` · Due ${escapeHtml(item.dueDate)}` : ""}</p><a href="#icTrainingSection">Open assigned work ↗</a></article>`).join("")
+    : "<strong>No projects yet</strong><p>New mentor assignments will appear here.</p>";
+  const status = certificateRequest?.status || "Not requested";
+  $("icCertificateStatus").textContent = status.replaceAll("_", " ").replace(/^./, char => char.toUpperCase());
+  $("icCertificateDetail").textContent = certificateRequest?.feedback
+    || (certificateRequest ? "HR has received your request." : "Request HR review after your internship ends");
+  const profile = trainingWorkspace?.profile;
+  const today = indiaDateString();
+  $("icCertificateEligibility").disabled = Boolean(certificateRequest)
+    || !profile || profile.role !== "learner" || !profile.internshipEndDate
+    || profile.internshipEndDate > today || profile.internshipStatus !== "active";
+  $("icCertificateEligibility").setAttribute("aria-label", certificateRequest
+    ? `Certificate request ${status}`
+    : "Request certificate review after your internship ends");
+}
+
+async function requestCertificateReview() {
+  const profile = trainingWorkspace?.profile;
+  if (!currentUser || !profile || profile.role !== "learner") throw new Error("Only intern accounts can request certificate review.");
+  if (!profile.internshipEndDate || profile.internshipEndDate > indiaDateString()) {
+    throw new Error("Certificate review is available after your internship end date.");
+  }
+  const requestRef = doc(db, "certificateRequests", currentUser.uid);
+  await setDoc(requestRef, {
+    uid: currentUser.uid,
+    email: currentUser.email || "",
+    displayName: profile.displayName || currentUser.displayName || "Intern",
+    track: profile.track || "",
+    status: "requested",
+    requestedAt: serverTimestamp()
+  });
+  certificateRequest = (await getDoc(requestRef)).data();
+  renderAdditionalWorkspace();
+}
+function renderMeetingPanel(activeMeeting, role, hasInternshipProfile) {
   const canManageMeetings = ["founder", "co_founder"].includes(role);
   const canSeeMeeting = hasInternshipProfile || [
     "founder", "co_founder", "admin", "hr_manager", "hr_executive", "operations_executive"
@@ -1102,32 +1268,253 @@ function renderMeetingPanel(activeMeeting, role, hasInternshipProfile, sparkLimi
   $("icMeetingTitle").textContent = activeMeeting?.title || "Team meeting";
   $("icMeetingStatus").textContent = activeMeeting
     ? "Meeting is live"
-    : sparkLimited ? "Secure service unavailable" : "No active meeting";
+    : "No active meeting";
   $("icMeetingDescription").textContent = activeMeeting
     ? `The IntelliCore team meeting is live${activeMeeting.expiresAt ? ` until ${new Date(activeMeeting.expiresAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : ""}.`
-    : sparkLimited
-      ? "Meeting status and Google Meet creation require the trusted Cloud Functions service."
-      : canManageMeetings
+    : canManageMeetings
       ? "Start a shared Google Meet for active interns."
       : "There is no active organisation-wide meeting right now.";
   $("icStartMeetButton").hidden = !canManageMeetings || Boolean(activeMeeting);
   $("icEndMeetButton").hidden = !canManageMeetings || !activeMeeting;
 }
 async function refreshMeetingState() {
-  if (!currentUser || !trainingWorkspace || trainingWorkspace.sparkLimited
+  if (!currentUser || !trainingWorkspace
     || trainingWorkspace.profile.localOnly || trainingWorkspace.profile.profileDraft) return;
   try {
-    const result = await callFunction("getActiveTeamMeeting");
+    const snapshot = await getDoc(doc(db, "organization", "currentMeeting"));
     if (auth.currentUser?.uid !== currentUser.uid || !trainingWorkspace) return;
-    trainingWorkspace.activeMeeting = result.activeMeeting;
+    const meeting = snapshot.exists() ? snapshot.data() : null;
+    trainingWorkspace.activeMeeting = meeting?.status === "active"
+      && meeting.expiresAt?.toMillis?.() > Date.now()
+      ? {
+        title: meeting.title,
+        meetUrl: meeting.meetUrl,
+        startedAt: meeting.startedAt?.toMillis?.() || null,
+        expiresAt: meeting.expiresAt.toMillis()
+      }
+      : null;
     const profile = trainingWorkspace.profile;
     const hasInternshipProfile = Boolean(
       profile.track && profile.durationMonths && profile.internshipStartDate && profile.internshipEndDate
     );
-    renderMeetingPanel(result.activeMeeting, profile.role || "learner", hasInternshipProfile);
+    renderMeetingPanel(trainingWorkspace.activeMeeting, profile.role || "learner", hasInternshipProfile);
   } catch (error) {
     console.error("The shared meeting status could not be refreshed.", error);
   }
+}
+
+async function assignTrainingTask({ email, taskId, dueDate = "" }) {
+  const task = window.IntelliCoreCurriculum?.taskById.get(taskId);
+  if (!task) throw new Error("Choose a task from the approved training curriculum.");
+  const learnerEmail = String(email || "").trim().toLowerCase();
+  const candidates = await getDocs(query(
+    collection(db, "profiles"),
+    where("email", "==", learnerEmail),
+    where("role", "==", "learner"),
+    limit(2)
+  ));
+  if (!candidates.size) throw new Error("No intern profile was found for that email.");
+  if (candidates.size > 1) throw new Error("More than one profile uses that email. Contact an administrator.");
+  const targetRef = candidates.docs[0].ref;
+  const targetUid = targetRef.id;
+  const existing = await getDocs(query(
+    collection(db, "trainingAssignments"),
+    where("assignedToUid", "==", targetUid),
+    where("taskId", "==", taskId),
+    limit(1)
+  ));
+  if (!existing.empty) throw new Error("This task has already been assigned to that intern.");
+  if (dueDate && !/^\d{4}-\d{2}-\d{2}$/.test(dueDate)) throw new Error("Choose a valid due date.");
+  const assignmentRef = doc(db, "trainingAssignments", `${targetUid}__${taskId}`);
+  await runTransaction(db, async transaction => {
+    const [target, assignment] = await Promise.all([
+      transaction.get(targetRef), transaction.get(assignmentRef)
+    ]);
+    if (!target.exists() || target.get("role") !== "learner") throw new Error("The selected account is not an intern.");
+    const profile = target.data();
+    if (profile.accountStatus === "deactivated" || profile.internshipStatus !== "active") {
+      throw new Error("Only active intern profiles can receive training tasks.");
+    }
+    if (profile.track !== task.track) throw new Error("The task must match the intern's activated domain.");
+    if (authenticatedRole === "mentor" && !(profile.mentorTracks || []).includes(task.track)) {
+      throw new Error("Your Team Leader account is not authorised for this domain.");
+    }
+    if (assignment.exists()) throw new Error("This task has already been assigned to that intern.");
+    transaction.set(assignmentRef, {
+      assignedToUid: targetUid,
+      learnerEmail,
+      track: task.track,
+      taskId,
+      status: "assigned",
+      dueDate: dueDate || null,
+      assignedByUid: auth.currentUser.uid,
+      assignedByRole: authenticatedRole,
+      assignedAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      submissionCount: 0,
+      latestSubmissionText: "",
+      latestSubmissionUrl: "",
+      latestSubmissionId: "",
+      latestReviewId: "",
+      feedback: ""
+    });
+  });
+}
+
+async function submitTrainingTask(assignmentId, { text = "", url = "" }) {
+  const notes = String(text).trim();
+  const deliverableUrl = String(url).trim();
+  if (notes.length > 20000 || deliverableUrl.length > 2048) throw new Error("Submission is too long.");
+  if (!notes && !deliverableUrl) throw new Error("Add notes or a deliverable link before submitting.");
+  if (deliverableUrl && !httpsHref(deliverableUrl)) throw new Error("Deliverable links must use HTTPS.");
+  const assignmentRef = doc(db, "trainingAssignments", assignmentId);
+  const submissionRef = doc(collection(db, "trainingAssignments", assignmentId, "submissions"));
+  await runTransaction(db, async transaction => {
+    const assignment = await transaction.get(assignmentRef);
+    if (!assignment.exists() || assignment.get("assignedToUid") !== auth.currentUser.uid) {
+      throw new Error("This assignment is not available in your account.");
+    }
+    if (!["assigned", "changes_requested"].includes(assignment.get("status"))) {
+      throw new Error("This task cannot be submitted in its current review state.");
+    }
+    const attempt = Number(assignment.get("submissionCount") || 0) + 1;
+    transaction.set(submissionRef, {
+      assignmentId,
+      userId: auth.currentUser.uid,
+      track: assignment.get("track"),
+      attempt,
+      text: notes,
+      url: deliverableUrl,
+      submittedAt: serverTimestamp()
+    });
+    transaction.update(assignmentRef, {
+      status: "submitted",
+      submissionCount: attempt,
+      latestSubmissionText: notes,
+      latestSubmissionUrl: deliverableUrl,
+      latestSubmissionId: submissionRef.id,
+      submittedAt: serverTimestamp(),
+      feedback: "",
+      updatedAt: serverTimestamp()
+    });
+  });
+}
+
+async function reviewTrainingTask(assignmentId, decision, feedback) {
+  const reviewFeedback = String(feedback || "").trim();
+  if (!["approved", "changes_requested"].includes(decision)) throw new Error("Choose approve or request changes.");
+  if (!reviewFeedback || reviewFeedback.length > 4000) throw new Error("Add feedback of up to 4,000 characters.");
+  const assignmentRef = doc(db, "trainingAssignments", assignmentId);
+  const reviewRef = doc(collection(db, "trainingAssignments", assignmentId, "reviews"));
+  await runTransaction(db, async transaction => {
+    const assignment = await transaction.get(assignmentRef);
+    if (!assignment.exists()) throw new Error("The assignment was not found.");
+    if (assignment.get("status") !== "submitted") throw new Error("Only submitted work can be reviewed.");
+    const track = assignment.get("track");
+    if (authenticatedRole === "mentor" && !(trainingWorkspace.profile.mentorTracks || []).includes(track)) {
+      throw new Error("Your Team Leader account is not authorised for this domain.");
+    }
+    transaction.set(reviewRef, {
+      assignmentId,
+      reviewerUid: auth.currentUser.uid,
+      decision,
+      feedback: reviewFeedback,
+      reviewedAt: serverTimestamp()
+    });
+    transaction.update(assignmentRef, {
+      status: decision,
+      feedback: reviewFeedback,
+      reviewedByUid: auth.currentUser.uid,
+      reviewedAt: serverTimestamp(),
+      latestReviewId: reviewRef.id,
+      updatedAt: serverTimestamp()
+    });
+  });
+}
+
+async function changeInternAccountStatus(uid, status) {
+  if (!["active", "deactivated"].includes(status)) throw new Error("Choose a valid account status.");
+  const profileRef = doc(db, "profiles", uid);
+  await runTransaction(db, async transaction => {
+    const profileSnapshot = await transaction.get(profileRef);
+    if (!profileSnapshot.exists() || profileSnapshot.get("role") !== "learner") {
+      throw new Error("The intern profile was not found.");
+    }
+    const profile = profileSnapshot.data();
+    if (profile.internshipStatus !== "active" || !profile.internshipStartDate || !profile.internshipEndDate) {
+      throw new Error("Only an active internship profile can have access changed.");
+    }
+    if (status === "deactivated") {
+      const lastLogin = profile.lastLoginAt?.toMillis?.() || 0;
+      if (!lastLogin || Date.now() - lastLogin < 7 * 24 * 60 * 60 * 1000) {
+        throw new Error("Access can be deactivated after 7 days without an intern login.");
+      }
+      transaction.update(profileRef, {
+        accountStatus: "deactivated",
+        deactivatedAt: serverTimestamp(),
+        deactivatedBy: auth.currentUser.uid,
+        updatedAt: serverTimestamp()
+      });
+    } else {
+      transaction.update(profileRef, {
+        accountStatus: "active",
+        reactivatedAt: serverTimestamp(),
+        reactivatedBy: auth.currentUser.uid,
+        updatedAt: serverTimestamp()
+      });
+    }
+  });
+}
+
+async function startSharedMeeting() {
+  const meetingWindow = window.open("https://meet.google.com/new", "_blank", "noopener,noreferrer");
+  const pastedUrl = window.prompt("Google Meet khulne ke baad uska link yahan paste karein:");
+  if (!pastedUrl) { meetingWindow?.close(); return null; }
+  let meetUrl;
+  try {
+    const parsed = new URL(pastedUrl.trim());
+    if (parsed.protocol !== "https:" || parsed.hostname !== "meet.google.com"
+      || !/^\/[a-z]{3}-[a-z]{4}-[a-z]{3}\/?$/i.test(parsed.pathname)) {
+      throw new Error();
+    }
+    meetUrl = parsed.href;
+  } catch {
+    meetingWindow?.close();
+    throw new Error("Paste a valid https://meet.google.com/xxx-xxxx-xxx link.");
+  }
+  const meetingRef = doc(db, "organization", "currentMeeting");
+  const expiresAt = new Date(Date.now() + 119 * 60 * 1000);
+  await runTransaction(db, async transaction => {
+    const current = await transaction.get(meetingRef);
+    if (current.exists() && current.get("status") === "active"
+      && current.get("expiresAt")?.toMillis?.() > Date.now()) {
+      throw new Error("A team meeting is already active.");
+    }
+    transaction.set(meetingRef, {
+      title: "IntelliCore Intern Team Meeting",
+      status: "active",
+      meetUrl,
+      eventId: "",
+      startedByUid: auth.currentUser.uid,
+      startedAt: serverTimestamp(),
+      expiresAt
+    });
+  });
+  if (meetingWindow) meetingWindow.location.href = meetUrl;
+  return { title: "IntelliCore Intern Team Meeting", meetUrl, expiresAt: expiresAt.getTime() };
+}
+
+async function endSharedMeeting() {
+  const meetingRef = doc(db, "organization", "currentMeeting");
+  await runTransaction(db, async transaction => {
+    const meeting = await transaction.get(meetingRef);
+    if (!meeting.exists() || meeting.get("status") !== "active") throw new Error("There is no active team meeting to end.");
+    transaction.update(meetingRef, {
+      status: "ended",
+      endedByUid: auth.currentUser.uid,
+      endedAt: serverTimestamp()
+    });
+  });
 }
 function updateInternshipPeriodPreview() {
   const duration = Number($("icInternshipDuration").value);
@@ -1213,6 +1600,18 @@ function renderAll() {
   renderTraining();
 }
 function bindEvents() {
+  $("icCertificateEligibility").addEventListener("click", async event => {
+    const button = event.currentTarget;
+    if (button.disabled) return;
+    button.disabled = true;
+    try {
+      await requestCertificateReview();
+      notice("Your certificate request has been sent to HR for review.");
+    } catch (error) {
+      notice(error.message || "Could not request certificate review.");
+      button.disabled = false;
+    }
+  });
   const openInternshipProfile = () => {
     dialogReturnFocus = document.activeElement;
     $("icInternshipDialog").hidden = false;
@@ -1237,6 +1636,12 @@ function bindEvents() {
   });
   $("icInternshipDuration").addEventListener("change", updateInternshipPeriodPreview);
   $("icInternshipStartDate").addEventListener("change", updateInternshipPeriodPreview);
+  $("icInternshipStartDate").addEventListener("click", event => {
+    const input = event.currentTarget;
+    if (!input.disabled && typeof input.showPicker === "function") {
+      try { input.showPicker(); } catch (error) { /* The browser's native picker may already be open. */ }
+    }
+  });
   const profileAvatar = $("icProfileAvatar");
   const profilePhotoInput = $("icProfilePhotoInput");
   function openProfilePhotoPicker() {
@@ -1350,13 +1755,13 @@ function bindEvents() {
           role: "learner"
         },
         activeInternship: activeProfile,
-        sparkLimited: true
+        sparkLimited: false
       };
       selectedAttendanceMonth = savedProfile.internshipStartDate.slice(0, 7);
       renderAll();
       notice(activeProfile
         ? "Your personal profile details were saved. Internship dates and enrollment remain unchanged."
-        : "Your profile draft was saved securely. Internship activation and attendance require trusted backend processing, which is not available on the Spark plan.");
+        : "Your profile draft was saved securely. HR or the Founder can activate the internship from the Pending Activations page.");
     } catch (error) {
       console.error("The secure internship profile could not be saved.", error);
       const code = typeof error?.code === "string" ? error.code : "";
@@ -1377,7 +1782,7 @@ function bindEvents() {
     const button = event.currentTarget;
     button.disabled = true;
     try {
-      const result = await callFunction("checkInToday");
+      const result = await recordAttendanceForLogin(currentUser || auth.currentUser);
       button.textContent = "Checked in today";
       notice(result.skippedSunday
         ? "Sunday is an off day. Attendance was not recorded."
@@ -1408,11 +1813,51 @@ function bindEvents() {
     const data = new FormData(form);
     submit.disabled = true;
     try {
-      await callFunction("updateInternshipProfile", {
-        email: data.get("email"),
-        track: data.get("track"),
-        durationMonths: Number(data.get("durationMonths")),
-        phone: data.get("phone")
+      const email = String(data.get("email") || "").trim().toLowerCase();
+      const track = String(data.get("track") || "");
+      const durationMonths = Number(data.get("durationMonths"));
+      const phone = String(data.get("phone") || "").trim();
+      if (!tracksForDashboard.includes(track) || ![1, 2, 3, 6].includes(durationMonths)) {
+        throw new Error("Choose a supported domain and duration.");
+      }
+      const results = await getDocs(query(
+        collection(db, "profiles"),
+        where("email", "==", email),
+        where("role", "==", "learner"),
+        limit(2)
+      ));
+      if (!results.size) throw new Error("No intern profile was found for that email.");
+      if (results.size > 1) throw new Error("More than one profile uses that email.");
+      const profileRef = results.docs[0].ref;
+      await runTransaction(db, async transaction => {
+        const profileSnapshot = await transaction.get(profileRef);
+        if (!profileSnapshot.exists() || profileSnapshot.get("role") !== "learner") {
+          throw new Error("The selected account is not an intern.");
+        }
+        const profile = profileSnapshot.data();
+        if (profile.internshipStatus !== "active" || profile.accountStatus === "deactivated") {
+          throw new Error("Activate the intern profile before changing its domain or duration.");
+        }
+        if (profile.track !== track) {
+          const existingAssignments = await getDocs(query(
+            collection(db, "trainingAssignments"),
+            where("assignedToUid", "==", profileRef.id),
+            limit(1)
+          ));
+          if (!existingAssignments.empty) {
+            throw new Error("Resolve the intern's training tasks before changing their domain.");
+          }
+        }
+        const startDate = profile.internshipStartDate || indiaDateString();
+        transaction.update(profileRef, {
+          track,
+          durationMonths,
+          internshipStartDate: startDate,
+          internshipEndDate: addMonthsToDate(startDate, durationMonths),
+          ...(phone ? { phone } : {}),
+          profileUpdatedBy: auth.currentUser.uid,
+          updatedAt: serverTimestamp()
+        });
       });
       form.reset();
       notice("The intern's domain and duration have been updated.");
@@ -1431,12 +1876,11 @@ function bindEvents() {
   });
   $("icStartMeetButton").addEventListener("click", async event => {
     const button = event.currentTarget;
-    const meetingWindow = window.open("about:blank", "_blank");
-    if (meetingWindow) meetingWindow.opener = null;
     button.disabled = true;
     button.textContent = "Starting meeting…";
     try {
-      const meeting = await callFunction("startTeamMeeting");
+      const meeting = await startSharedMeeting();
+      if (!meeting) return;
       trainingWorkspace.activeMeeting = meeting;
       renderMeetingPanel(meeting, trainingWorkspace.profile.role || "learner", Boolean(
         trainingWorkspace.profile.track
@@ -1445,14 +1889,12 @@ function bindEvents() {
         && trainingWorkspace.profile.internshipEndDate
       ));
       notice("Google Meet is live and visible to active interns.");
-      if (meetingWindow) meetingWindow.location.href = meeting.meetUrl;
       void refreshTrainingWorkspace().catch(error =>
         console.error("The dashboard could not refresh after starting the meeting.", error)
       );
     } catch (error) {
       console.error("The team meeting could not be started.", error);
       notice(error.message || "Could not start the Google Meet.");
-      meetingWindow?.close();
     } finally {
       button.disabled = false;
       button.textContent = "Start meeting";
@@ -1463,7 +1905,7 @@ function bindEvents() {
     const button = event.currentTarget;
     button.disabled = true;
     try {
-      await callFunction("endTeamMeeting");
+      await endSharedMeeting();
       trainingWorkspace.activeMeeting = null;
       renderMeetingPanel(null, trainingWorkspace.profile.role || "learner", Boolean(
         trainingWorkspace.profile.track
@@ -1488,12 +1930,31 @@ function bindEvents() {
       moreButton.disabled = true;
       moreButton.textContent = "Loading interns…";
       try {
-        const page = await callFunction("getMoreInternDirectory", {
-          cursor: moreButton.dataset.cursor
+        const cursorSnapshot = await getDoc(doc(db, "profiles", moreButton.dataset.cursor));
+        if (!cursorSnapshot.exists()) throw new Error("The directory changed. Refresh to continue.");
+        const page = await getDocs(query(
+          collection(db, "profiles"),
+          where("role", "==", "learner"),
+          orderBy("displayName"),
+          startAfter(cursorSnapshot),
+          limit(101)
+        ));
+        const rows = page.docs.slice(0, 100).map(document => {
+          const intern = document.data();
+          const lastLoginAt = intern.lastLoginAt?.toMillis?.() || null;
+          const enrolled = Boolean(intern.track && intern.internshipStartDate && intern.internshipEndDate
+            && intern.internshipStatus === "active");
+          return {
+            uid: document.id, email: intern.email || "", displayName: intern.displayName || "",
+            phone: intern.phone || "", track: intern.track || "", durationMonths: intern.durationMonths || null,
+            internshipStartDate: intern.internshipStartDate || null, internshipEndDate: intern.internshipEndDate || null,
+            lastLoginAt, accountStatus: intern.accountStatus || "active", enrolled,
+            inactive: enrolled && Boolean(lastLoginAt && lastLoginAt < Date.now() - 7 * 24 * 60 * 60 * 1000)
+          };
         });
-        trainingWorkspace.internDirectory.push(...page.internDirectory);
-        trainingWorkspace.internDirectoryHasMore = page.internDirectoryHasMore;
-        trainingWorkspace.internDirectoryNextCursor = page.internDirectoryNextCursor;
+        trainingWorkspace.internDirectory.push(...rows);
+        trainingWorkspace.internDirectoryHasMore = page.size > 100;
+        trainingWorkspace.internDirectoryNextCursor = page.size > 100 ? rows.at(-1)?.uid || null : null;
         renderTraining();
       } catch (error) {
         console.error("The next intern directory page could not be loaded.", error);
@@ -1514,7 +1975,7 @@ function bindEvents() {
     if (!confirm(prompt)) return;
     button.disabled = true;
     try {
-      await callFunction("setInternAccountStatus", { uid, status });
+      await changeInternAccountStatus(uid, status);
       await refreshTrainingWorkspace();
       notice(isDeactivation
         ? "Intern access has been deactivated. Their records are retained."
@@ -1620,7 +2081,7 @@ function bindEvents() {
     const data = new FormData(form);
     submit.disabled = true;
     try {
-      await callFunction("assignTrainingTask", {
+      await assignTrainingTask({
         email: data.get("email"),
         taskId: data.get("taskId"),
         dueDate: data.get("dueDate")
@@ -1647,8 +2108,7 @@ function bindEvents() {
     const data = new FormData(form);
     submit.disabled = true;
     try {
-      await callFunction("submitTrainingTask", {
-        assignmentId: form.dataset.trainingSubmit,
+      await submitTrainingTask(form.dataset.trainingSubmit, {
         text: data.get("text"),
         url: data.get("url")
       });
@@ -1674,11 +2134,7 @@ function bindEvents() {
     const buttons = [...form.querySelectorAll("button")];
     buttons.forEach(button => { button.disabled = true; });
     try {
-      await callFunction("reviewTrainingTask", {
-        assignmentId: form.dataset.reviewForm,
-        decision,
-        feedback: data.get("feedback")
-      });
+      await reviewTrainingTask(form.dataset.reviewForm, decision, data.get("feedback"));
       notice(decision === "approved" ? "Task approved and learner notified in the dashboard." : "Revision requested and feedback saved.");
       try {
         await refreshTrainingWorkspace();
@@ -1739,6 +2195,7 @@ onAuthStateChanged(auth, async user => {
     return;
   }
   let mayEnterWorkspace = false;
+  const accountEmail = user.email?.trim().toLowerCase() || "";
   try {
     await user.reload();
     const latestUser = auth.currentUser;
@@ -1746,10 +2203,23 @@ onAuthStateChanged(auth, async user => {
     const token = await latestUser.getIdTokenResult(true);
     const signInProvider = token.claims.firebase?.sign_in_provider;
     const tokenRole = token.claims.role;
-    authenticatedRole = [
+    const profileSnapshot = await getDoc(doc(db, "profiles", latestUser.uid));
+    const accountProfile = profileSnapshot.exists() ? profileSnapshot.data() : null;
+    const validTokenRole = [
       "founder", "co_founder", "admin", "hr_manager", "hr_executive",
       "operations_executive", "mentor", "learner"
-    ].includes(tokenRole) ? tokenRole : "learner";
+    ].includes(tokenRole) ? tokenRole : "";
+    if (accountProfile?.accountStatus === "deactivated") {
+      loginRedirectStarted = true;
+      await signOut(auth);
+      window.location.replace("index.html?auth=login&deactivated=1");
+      return;
+    }
+    authenticatedRole = accountEmail === "ctrlabhishek@gmail.com"
+      ? "founder"
+      : sparkStaffRolesByEmail.get(accountEmail)
+        || accountProfile?.role
+        || (validTokenRole && validTokenRole !== "learner" ? validTokenRole : validTokenRole || "learner");
     mayEnterWorkspace = token.claims.email_verified === true
       && ["google.com", "password"].includes(signInProvider)
       && (signInProvider !== "password" || latestUser.emailVerified);
@@ -1766,17 +2236,21 @@ onAuthStateChanged(auth, async user => {
     window.location.replace("index.html?auth=login&verification=required");
     return;
   }
-  if (["founder", "co_founder"].includes(authenticatedRole)) {
+  const operationsWorkspace = new URLSearchParams(window.location.search).get("workspace") === "operations";
+  if (["founder", "co_founder"].includes(authenticatedRole) && !operationsWorkspace) {
     window.location.replace("founder-dashboard.html");
     return;
   }
-  if (["admin", "hr_manager", "hr_executive", "operations_executive"].includes(authenticatedRole)
-    && new URLSearchParams(window.location.search).get("workspace") !== "operations") {
+  if (sparkStaffRolesByEmail.has(accountEmail) && !operationsWorkspace) {
     window.location.replace("hr-dashboard.html");
     return;
   }
-  if (authenticatedRole === "mentor"
-    && new URLSearchParams(window.location.search).get("workspace") !== "operations") {
+  if (["admin", "hr_manager", "hr_executive", "operations_executive"].includes(authenticatedRole)
+    && !operationsWorkspace) {
+    window.location.replace("hr-dashboard.html");
+    return;
+  }
+  if (authenticatedRole === "mentor" && !operationsWorkspace) {
     window.location.replace("tl-dashboard.html");
     return;
   }

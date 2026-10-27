@@ -8,11 +8,11 @@
   <title>HR Dashboard | IntelliCore</title>
   <link rel="icon" type="image/png" href="Photos/favicon.png">
   <link rel="stylesheet" href="hr-dashboard.css">
-  <link rel="stylesheet" href="dashboard-background.css">
+  <link rel="stylesheet" href="dashboard-background.css?v=20261028-hr-mobile-welcome">
 </head>
 <body>
   <canvas id="icWorkspaceNeuralCanvas" class="dashboard-background-canvas" aria-hidden="true"></canvas>
-  <div class="auth-state" id="authState" role="status">Verifying staff access…</div>
+  <div class="auth-state" id="authState" role="status">Verifying…</div>
   <div class="dashboard-shell" id="dashboardShell" hidden>
     <aside class="sidebar" id="sidebar">
       <button class="sidebar-close" id="sidebarClose" type="button" aria-label="Close dashboard navigation">×</button>
@@ -41,7 +41,7 @@
         <div class="nav-group-label">TOOLS</div>
         <a class="nav-link" href="#profile"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg> Email Templates</a>
         <a class="nav-link" href="#interns"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3H5a2 2 0 0 0-2 2v4m12-6h4a2 2 0 0 1 2 2v4M3 15v4a2 2 0 0 0 2 2h4m12-6v4a2 2 0 0 1-2 2h-4"/></svg> Bulk Actions</a>
-        <a class="nav-link" href="#domains"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg> Resources</a>
+        <a class="nav-link" href="#resources"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg> Resources</a>
         <div class="nav-group-label">SETTINGS</div>
         <a class="nav-link" href="#profile"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.7a8 8 0 0 1-1.7 1l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.7-1l-1.7.7-1.4-2.4 1.4-1.1a7 7 0 0 1 0-2l-1.4-1.1 1.4-2.4 1.7.7a8 8 0 0 1 1.7-1l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.7 1l1.7-.7 1.4 2.4-1.4 1.1a7 7 0 0 1 0 2Z"/></svg> Profile Settings</a>
         <button class="nav-link nav-button" id="sidebarLogout" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5m5 5H3m9-9h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7"/></svg> Logout</button>
@@ -55,10 +55,10 @@
         <button class="mobile-menu" id="mobileMenu" type="button" aria-label="Open dashboard navigation" aria-controls="sidebar" aria-expanded="false">☰</button>
         <label class="global-search"><span aria-hidden="true">⌕</span><input id="globalSearch" type="search" placeholder="Search interns, domains, tasks, people…" aria-label="Search dashboard"><kbd>⌘ K</kbd></label>
         <div class="topbar-actions">
-          <button class="notification-button" id="notificationButton" type="button" aria-label="Notifications, 5 unread"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span class="notification-count" aria-hidden="true">5</span></button>
+          <button class="notification-button" id="notificationButton" type="button" aria-label="Notifications"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span class="notification-count" aria-hidden="true" hidden></span></button>
           <span class="topbar-divider"></span>
           <div class="user-chip"><span class="user-avatar" id="userAvatar">IC</span><span class="user-details"><strong id="userName">Staff</strong><small id="userRole">HR Dashboard</small></span></div>
-          <a class="operational-link" href="dashboard.html?workspace=operations">Open secure workspace <span aria-hidden="true">↗</span></a>
+          <a class="operational-link" href="Intern-dashboard.html?workspace=operations">Open secure workspace <span aria-hidden="true">↗</span></a>
           <button class="topbar-logout" id="topbarLogout" type="button">Log out <span aria-hidden="true">↗</span></button>
         </div>
       </header>
@@ -66,7 +66,7 @@
       <div class="content">
         <section class="welcome-banner" id="overview">
           <div class="welcome-copy">
-            <h1><span class="desktop-welcome-title">Manage. Guide. <span>Grow.</span></span><span class="mobile-welcome-title">Welcome back, <span id="mobileWelcomeName">Staff</span>!</span></h1>
+            <h1><span class="desktop-welcome-title">Manage. Guide. <span>Grow.</span></span><span class="mobile-welcome-title">Welcome back, <span class="mobile-welcome-name"><span id="mobileWelcomeName">Staff</span>!</span></span></h1>
             <p id="welcomeCopy">Handle interns, assign tasks, track progress and build a productive team.</p>
             <div class="welcome-meta"><span id="roleScope">HR Dashboard · Role-based access</span><span class="access-pill">Authorized scope</span></div>
           </div>
@@ -74,119 +74,71 @@
           <div class="welcome-date"><span class="live-date-label"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 9h18M7 13h.01M12 13h.01M17 13h.01M7 17h.01M12 17h.01"/></svg><span data-live-date>Loading date…</span></span><strong data-live-time>--:--:--</strong><small data-live-greeting>Good Morning!</small></div>
         </section>
 
-        <div class="sample-notice"><span>ⓘ</span><p><strong>Dashboard preview.</strong> KPIs and activity below are sample data, not live records. Use <a href="dashboard.html?workspace=operations">the secure workspace</a> for currently connected intern, attendance and training tools.</p></div>
+        <div class="sample-notice" id="liveDataNotice" role="status"><span>ⓘ</span><p><strong>Connecting to live records.</strong> Interns, attendance and training load from your authorized Firebase workspace.</p></div>
+        <div class="sample-notice" id="sparkPlanNotice" role="note"><span>ⓘ</span><p><strong>Live Firebase workspace.</strong> Profiles, activation, tasks, reviews and login attendance use Firestore with role-based security rules.</p></div>
 
         <section class="stats-grid" aria-label="HR summary">
-          <article class="stat-card"><span class="stat-icon blue"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.3A4.7 4.7 0 0 1 7.2 14h3.6a4.7 4.7 0 0 1 4.7 4.7V20M16 4.8a3.5 3.5 0 0 1 0 6.7M17 14.2a4.6 4.6 0 0 1 4.5 4.5V20"/></svg></span><div><small>Interns</small><strong>124</strong><span class="trend">↑ 12% <em>from last month</em></span></div></article>
-          <article class="stat-card"><span class="stat-icon green"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.3A4.7 4.7 0 0 1 7.2 14h3.6a4.7 4.7 0 0 1 4.7 4.7V20M16 4.8a3.5 3.5 0 0 1 0 6.7M17 14.2a4.6 4.6 0 0 1 4.5 4.5V20"/></svg></span><div><small>Active Interns</small><strong>108</strong><span class="trend">↑ 8% <em>from last month</em></span></div></article>
+          <article class="stat-card"><span class="stat-icon blue"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.3A4.7 4.7 0 0 1 7.2 14h3.6a4.7 4.7 0 0 1 4.7 4.7V20M16 4.8a3.5 3.5 0 0 1 0 6.7M17 14.2a4.6 4.6 0 0 1 4.5 4.5V20"/></svg></span><div><small>Interns</small><strong id="liveInternCount">—</strong><span class="trend">Registered learner profiles</span></div></article>
+          <article class="stat-card"><span class="stat-icon green"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.3A4.7 4.7 0 0 1 7.2 14h3.6a4.7 4.7 0 0 1 4.7 4.7V20M16 4.8a3.5 3.5 0 0 1 0 6.7M17 14.2a4.6 4.6 0 0 1 4.5 4.5V20"/></svg></span><div><small>Active Interns</small><strong id="liveActiveCount">—</strong><span class="trend">Within approved internship dates</span></div></article>
           <article class="stat-card"><span class="stat-icon violet">◈</span><div><small>Total Domains</small><strong>8</strong><span class="trend">Across all tracks</span></div></article>
-          <article class="stat-card"><span class="stat-icon amber"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5h6M8.5 10h7M8.5 14h3M15 15.5l1.5 1.5 3-3"/></svg></span><div><small>Pending Tasks</small><strong>32</strong><span class="trend">↑ 4 new</span></div></article>
-          <article class="stat-card"><span class="stat-icon cyan"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 9h18M8 14l2.5 2.5L16 11"/></svg></span><div><small>Attendance Rate</small><strong>89%</strong><span class="trend">↑ 5% <em>this month</em></span></div></article>
-          <article class="stat-card"><span class="stat-icon pink">✧</span><div><small>Certificates Issued</small><strong>96</strong><span class="trend">↑ 20% <em>this month</em></span></div></article>
+          <article class="stat-card"><span class="stat-icon amber"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5h6M8.5 10h7M8.5 14h3M15 15.5l1.5 1.5 3-3"/></svg></span><div><small>Open Tasks</small><strong id="liveOpenTaskCount">—</strong><span class="trend">Assigned or awaiting review</span></div></article>
+          <article class="stat-card"><span class="stat-icon cyan"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 9h18M8 14l2.5 2.5L16 11"/></svg></span><div><small>Attendance Check-ins</small><strong id="liveAttendanceCount">—</strong><span class="trend">Saved records in authorized scope</span></div></article>
+          <article class="stat-card"><span class="stat-icon pink">✧</span><div><small>Training Domains</small><strong>8</strong><span class="trend">Approved internship tracks</span></div></article>
         </section>
 
         <section class="overview-grid">
           <article class="panel domain-panel" id="domains">
-            <div class="panel-heading"><div><h2>Interns by Domain</h2></div><select aria-label="Domain chart period"><option>This month</option><option>Last 6 months</option></select></div>
+            <div class="panel-heading"><div><h2>Interns by Domain</h2></div></div>
             <div class="domain-chart-wrap">
-              <div class="donut-chart"><div><strong>124</strong><span>Total</span></div></div>
-              <ul class="legend">
-                <li><i class="c1"></i><span>Human Resources</span><b>28</b></li>
-                <li><i class="c2"></i><span>Graphic Design</span><b>20</b></li>
-                <li><i class="c3"></i><span>Web Development</span><b>18</b></li>
-                <li><i class="c4"></i><span>Digital Marketing</span><b>15</b></li>
-                <li><i class="c5"></i><span>Content Writing</span><b>12</b></li>
-                <li><i class="c6"></i><span>Business Analyst</span><b>10</b></li>
-                <li><i class="c7"></i><span>Operations &amp; Other</span><b>21</b></li>
-              </ul>
+              <div class="donut-chart" id="domainDonut"><div><strong id="domainTotal">—</strong><span>Total</span></div></div>
+              <ul class="legend" id="domainLegend"><li>No live domain data loaded yet.</li></ul>
             </div>
           </article>
           <article class="panel chart-panel" id="reports">
-            <div class="panel-heading"><div><h2>Internship Overview</h2></div><select aria-label="Intern overview period"><option>Last 6 Months</option><option>This year</option></select></div>
-            <div class="line-chart" role="img" aria-label="Illustrative line chart showing intern and active intern counts increasing from May to October">
-              <div class="chart-y-labels"><span>200</span><span>150</span><span>100</span><span>50</span><span>0</span></div>
-              <svg viewBox="0 0 520 170" preserveAspectRatio="none" aria-hidden="true">
-                <defs><linearGradient id="areaBlue" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#159cff" stop-opacity=".24"/><stop offset="1" stop-color="#159cff" stop-opacity="0"/></linearGradient><linearGradient id="areaGreen" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#00d6a0" stop-opacity=".16"/><stop offset="1" stop-color="#00d6a0" stop-opacity="0"/></linearGradient></defs>
-                <path class="grid-lines" d="M0 12H520 M0 48H520 M0 84H520 M0 120H520 M0 156H520"/>
-                <path fill="url(#areaBlue)" d="M8 145 L105 111 L202 86 L299 65 L396 44 L512 28 L512 160 L8 160Z"/><path fill="url(#areaGreen)" d="M8 151 L105 131 L202 116 L299 101 L396 86 L512 78 L512 160 L8 160Z"/>
-                <path class="line-blue" d="M8 145 L105 111 L202 86 L299 65 L396 44 L512 28"/><path class="line-green" d="M8 151 L105 131 L202 116 L299 101 L396 86 L512 78"/>
-                <g class="points-blue"><circle cx="8" cy="145" r="4"/><circle cx="105" cy="111" r="4"/><circle cx="202" cy="86" r="4"/><circle cx="299" cy="65" r="4"/><circle cx="396" cy="44" r="4"/><circle cx="512" cy="28" r="4"/></g>
-                <g class="points-green"><circle cx="8" cy="151" r="4"/><circle cx="105" cy="131" r="4"/><circle cx="202" cy="116" r="4"/><circle cx="299" cy="101" r="4"/><circle cx="396" cy="86" r="4"/><circle cx="512" cy="78" r="4"/></g>
-              </svg>
-              <div class="chart-x-labels"><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span></div>
-            </div>
-            <div class="chart-legend"><span><i class="legend-blue"></i>Total interns</span><span><i class="legend-green"></i>Active interns</span></div>
+            <div class="panel-heading"><div><h2>Internship History</h2></div></div>
+            <div class="line-chart" id="internshipTrend" role="status">Historical snapshots are not stored yet.</div><div class="chart-legend"><span>Live totals are shown above.</span></div>
           </article>
-          <article class="panel actions-panel">
-            <div class="panel-heading"><div><h2>Quick Actions</h2></div></div>
-            <div class="action-grid">
-              <button type="button" data-preview-action="Add intern"><span>♙+</span>Add Intern <b>›</b></button>
-              <button type="button" data-preview-action="Assign task"><span>▤</span>Assign Task <b>›</b></button>
-              <button type="button" data-preview-action="Create domain"><span>◈</span>Create Domain <b>›</b></button>
-              <button type="button" data-preview-action="Mark attendance"><span>▦</span>Mark Attendance <b>›</b></button>
-              <button type="button" data-preview-action="Send announcement"><span>➤</span>Send Announcement <b>›</b></button>
-              <button type="button" data-preview-action="Generate certificate"><span>✧</span>Generate Certificate <b>›</b></button>
-            </div>
-          </article>
+          <article class="panel actions-panel"><div class="panel-heading"><div><h2>Live Workspace</h2></div></div><div class="action-grid"><a href="#interns">View Interns <b>›</b></a><a href="#attendance">Attendance <b>›</b></a><a href="#tasks">Tasks &amp; Projects <b>›</b></a><a href="#domains">Domain Summary <b>›</b></a></div></article>
         </section>
 
         <section class="detail-grid">
           <article class="panel activity-panel" id="activity">
             <div class="panel-heading"><div><h2>Recent Intern Activity</h2></div><a href="#activity" class="view-link">View all ↗</a></div>
-            <ol class="activity-list">
-              <li><span class="staff-avatar avatar-1">PS</span><span><strong>Priya Sharma <small>submitted task · Poster Design</small></strong></span><time>10 min ago</time></li>
-              <li><span class="staff-avatar avatar-2">RV</span><span><strong>Rahul Verma <small>marked attendance</small></strong></span><time>32 min ago</time></li>
-              <li><span class="staff-avatar avatar-3">SY</span><span><strong>Sneha Yadav <small>completed a task</small></strong></span><time>1 hour ago</time></li>
-              <li><span class="staff-avatar avatar-4">AK</span><span><strong>Aman Kumar <small>joined as Web Development Intern</small></strong></span><time>2 hours ago</time></li>
-              <li><span class="staff-avatar avatar-5">RS</span><span><strong>Riya Singh <small>submitted task · Blog Content</small></strong></span><time>3 hours ago</time></li>
-            </ol>
+            <ol class="activity-list" id="liveActivityList"><li>No live attendance or task activity loaded yet.</li></ol>
           </article>
           <article class="panel deadline-panel" id="deadlines">
             <div class="panel-heading"><div><h2>Upcoming Deadlines</h2></div><a href="#deadlines" class="view-link">View all ↗</a></div>
-            <div class="deadline-list">
-              <div class="deadline-row"><span class="date-badge"><small>OCT</small><b>26</b></span><span><strong>Social Media Campaign</strong><small>Graphic Design Interns</small></span><b class="tag task-tag">Task</b></div>
-              <div class="deadline-row"><span class="date-badge"><small>OCT</small><b>27</b></span><span><strong>Blog Content Submission</strong><small>Content Writing Interns</small></span><b class="tag task-tag">Task</b></div>
-              <div class="deadline-row"><span class="date-badge"><small>OCT</small><b>28</b></span><span><strong>Weekly Report</strong><small>All Interns</small></span><b class="tag report-tag">Report</b></div>
-              <div class="deadline-row"><span class="date-badge"><small>OCT</small><b>30</b></span><span><strong>Attendance Update</strong><small>HR Team</small></span><b class="tag internal-tag">Internal</b></div>
-              <div class="deadline-row"><span class="date-badge"><small>NOV</small><b>02</b></span><span><strong>Certificate Review</strong><small>Operations Team</small></span><b class="tag review-tag">Review</b></div>
-            </div>
+            <div class="deadline-list" id="liveDeadlineList"><p>No live task deadlines loaded yet.</p></div>
           </article>
           <article class="panel attendance-panel" id="attendance">
-            <div class="panel-heading"><div><h2>Attendance Overview</h2></div><select aria-label="Attendance period"><option>This Month</option><option>Last month</option></select></div>
-            <div class="attendance-ring"><div><strong>89%</strong><span>Overall Attendance</span></div></div>
-            <div class="attendance-legend"><span><i class="present-dot"></i><b>Present</b><small>108</small></span><span><i class="absent-dot"></i><b>Absent</b><small>10</small></span><span><i class="leave-dot"></i><b>Leave</b><small>6</small></span></div>
+            <div class="panel-heading"><div><h2>Attendance Overview</h2></div><select id="attendancePeriod" aria-label="Attendance period"></select></div>
+            <div class="attendance-ring"><div><strong id="liveTodayAttendance">—</strong><span>Check-ins today</span></div></div>
+            <div class="attendance-legend"><span><i class="present-dot"></i><b>Saved check-ins</b><small id="liveAttendanceTotal">—</small></span></div>
           </article>
         </section>
 
         <section class="panel intern-panel" id="interns">
-          <div class="panel-heading intern-heading"><div><h2>All Interns</h2></div><div class="table-tools"><input id="internSearch" type="search" placeholder="Search interns…" aria-label="Search sample interns"><select id="domainFilter" aria-label="Filter by domain"><option value="">All Domains</option><option>Web Development</option><option>Graphic Design</option><option>Data Analyst</option><option>Content Writing</option><option>Social Media</option><option>Human Resources</option><option>Business Analyst</option><option>Digital Marketing</option></select><select aria-label="Filter by status"><option>All Status</option><option>Active</option><option>Inactive</option></select><select aria-label="Filter by period"><option>This Month</option><option>Last 6 months</option></select><button type="button" class="export-button" id="exportButton">⇩ Export</button></div></div>
-          <div class="table-scroll"><table><thead><tr><th>#</th><th>Name</th><th>Domain</th><th>Role</th><th>Status</th><th>Attendance</th><th>Join Date</th><th>End Date</th><th>Tasks</th><th>Actions</th></tr></thead><tbody id="internRows">
-            <tr><td>01</td><td><span class="table-avatar">PS</span>Priya Sharma</td><td>Graphic Design</td><td>Intern</td><td><span class="table-status active">Active</span></td><td>92%</td><td>2026-10-23</td><td>2026-11-23</td><td>5/6</td><td><button class="row-menu" data-preview-action="Open intern record" type="button" aria-label="Open Priya Sharma sample record">•••</button></td></tr>
-            <tr><td>02</td><td><span class="table-avatar">RV</span>Rahul Verma</td><td>Web Development</td><td>Intern</td><td><span class="table-status active">Active</span></td><td>88%</td><td>2026-10-22</td><td>2026-11-22</td><td>4/5</td><td><button class="row-menu" data-preview-action="Open intern record" type="button" aria-label="Open Rahul Verma sample record">•••</button></td></tr>
-            <tr><td>03</td><td><span class="table-avatar">SY</span>Sneha Yadav</td><td>Human Resources</td><td>Intern</td><td><span class="table-status active">Active</span></td><td>95%</td><td>2026-10-21</td><td>2026-11-21</td><td>6/6</td><td><button class="row-menu" data-preview-action="Open intern record" type="button" aria-label="Open Sneha Yadav sample record">•••</button></td></tr>
-            <tr><td>04</td><td><span class="table-avatar">AM</span>Aman Kumar</td><td>Digital Marketing</td><td>Intern</td><td><span class="table-status active">Active</span></td><td>90%</td><td>2026-10-20</td><td>2026-11-20</td><td>4/5</td><td><button class="row-menu" data-preview-action="Open intern record" type="button" aria-label="Open Aman Kumar sample record">•••</button></td></tr>
-            <tr><td>05</td><td><span class="table-avatar">RS</span>Riya Singh</td><td>Content Writing</td><td>Intern</td><td><span class="table-status inactive">Inactive</span></td><td>76%</td><td>2026-10-18</td><td>2026-11-18</td><td>3/6</td><td><button class="row-menu" data-preview-action="Open intern record" type="button" aria-label="Open Riya Singh sample record">•••</button></td></tr>
-            <tr><td>06</td><td><span class="table-avatar">DK</span>Dev Kapoor</td><td>Data Analyst</td><td>Intern</td><td><span class="table-status active">Active</span></td><td>89%</td><td>2026-10-17</td><td>2026-11-17</td><td>4/6</td><td><button class="row-menu" data-preview-action="Open intern record" type="button" aria-label="Open Dev Kapoor sample record">•••</button></td></tr>
-            <tr><td>07</td><td><span class="table-avatar">NK</span>Neha Kapoor</td><td>Social Media</td><td>Intern</td><td><span class="table-status active">Active</span></td><td>93%</td><td>2026-10-16</td><td>2026-11-16</td><td>5/6</td><td><button class="row-menu" data-preview-action="Open intern record" type="button" aria-label="Open Neha Kapoor sample record">•••</button></td></tr>
-            <tr><td>08</td><td><span class="table-avatar">AR</span>Arjun Rao</td><td>Business Analyst</td><td>Intern</td><td><span class="table-status active">Active</span></td><td>91%</td><td>2026-10-15</td><td>2026-11-15</td><td>5/6</td><td><button class="row-menu" data-preview-action="Open intern record" type="button" aria-label="Open Arjun Rao sample record">•••</button></td></tr>
-          </tbody></table><p class="empty-search" id="emptySearch" hidden>No sample interns match your search.</p></div>
+          <div class="panel-heading intern-heading"><div><h2>All Interns</h2></div><div class="table-tools"><input id="internSearch" type="search" placeholder="Search interns…" aria-label="Search live intern records"><select id="domainFilter" aria-label="Filter by domain"><option value="">All Domains</option></select><select aria-label="Filter by status"><option value="">All Statuses</option></select><button type="button" class="export-button" id="exportButton">⇩ Export</button></div></div>
+          <div class="table-scroll"><table><thead><tr><th>#</th><th>Name</th><th>Email</th><th>Domain</th><th>Phone</th><th>Role</th><th>Status</th><th>Attendance</th><th>Duration</th><th>Start Date</th><th>End Date</th><th>Last Login</th><th>Tasks</th><th>Actions</th></tr></thead><tbody id="internRows"></tbody></table><p class="empty-search" id="emptySearch" hidden>No intern records match these filters.</p></div>
         </section>
 
         <section class="module-grid" aria-label="HR workspace modules">
-          <article class="module-card" id="recruitment"><span>▣</span><div><small>PEOPLE</small><h2>Recruitment &amp; Applications</h2><p>Preview application stages, interview coordination and hiring follow-ups.</p></div><b>›</b></article>
-          <article class="module-card" id="staff"><span>♜</span><div><small>TEAM COORDINATION</small><h2>Team Leaders</h2><p>Preview assignments, team workload and domain coordination.</p></div><b>›</b></article>
-          <article class="module-card" id="tasks"><span>☑</span><div><small>WORK MANAGEMENT</small><h2>Tasks &amp; Projects</h2><p>Preview assigned tasks, reviews and due dates. Use your secure workspace for connected training tools.</p></div><b>›</b></article>
-          <article class="module-card" id="certificates"><span>✧</span><div><small>INTERN RECORDS</small><h2>Certificates</h2><p>Certificate data and issuance controls are not connected in this preview.</p></div><b>›</b></article>
-          <article class="module-card" id="announcements"><span>➤</span><div><small>COMMUNICATION</small><h2>Announcements</h2><p>Preview company and domain announcement management.</p></div><b>›</b></article>
+          <article class="module-card" id="recruitment"><span>▣</span><div><small>PEOPLE</small><h2>Recruitment &amp; Applications</h2><p>Recruitment applications are not yet stored in this workspace.</p></div><b>›</b></article>
+          <article class="module-card" id="staff"><span>♜</span><div><small>TEAM COORDINATION</small><h2>Team Leaders</h2><p id="liveStaffList">Team Leader access is shown from assigned Firebase profiles.</p></div><b>›</b></article>
+          <article class="module-card live-task-module" id="tasks"><span>☑</span><div><small>WORK MANAGEMENT</small><h2>Tasks &amp; Projects</h2><p id="liveTaskSummary">Approved curriculum and live assignments load from Firebase.</p><div id="liveTaskCatalog"></div><div id="liveAssignedTasks"></div><a class="export-button" id="manageTasksLink" href="Intern-dashboard.html?workspace=operations#icAssignTaskForm">Assign tasks or review submissions ↗</a></div></article>
+          <article class="module-card" id="certificates"><span>✧</span><div><small>INTERN RECORDS</small><h2>Certificate Requests</h2><p>Review learner requests after their internship dates have ended.</p><div id="certificateRequestList">No certificate requests are waiting for review.</div></div><b>›</b></article>
+          <article class="module-card" id="announcements"><span>➤</span><div><small>COMMUNICATION</small><h2>Announcements</h2><form id="announcementForm"><label>Title<input name="title" maxlength="120" required></label><label>Audience<select name="audienceTrack" id="announcementAudience"><option value="all">All interns</option></select></label><label>Message<textarea name="body" maxlength="5000" rows="3" required></textarea></label><button class="export-button" type="submit">Publish announcement</button></form><div id="liveAnnouncements">No announcements have been published.</div></div><b>›</b></article>
+          <article class="module-card" id="resources"><span>▣</span><div><small>LEARNING</small><h2>Learning Resources</h2><form id="resourceForm"><label>Title<input name="title" maxlength="120" required></label><label>Audience<select name="track" id="resourceAudience"><option value="all">All interns</option></select></label><label>Type<select name="type"><option>Link</option><option>Article</option><option>Video</option><option>Course</option><option>Document</option></select></label><label>Description<textarea name="description" maxlength="2000" rows="2"></textarea></label><label>HTTPS link<input name="url" type="url" pattern="https://.*" required></label><button class="export-button" type="submit">Publish resource</button></form><div id="liveResources">No resources have been published.</div></div><b>›</b></article>
           <article class="module-card" id="profile"><span>◎</span><div><small>YOUR ACCOUNT</small><h2>Profile &amp; Settings</h2><p id="profileEmail">Signed in with an authorized staff account.</p></div><b>›</b></article>
         </section>
-        <footer class="page-footer">IntelliCore HR Dashboard <span>Illustrative preview · Role-gated · Management actions are not connected</span></footer>
+        <footer class="page-footer">IntelliCore HR Dashboard <span>Live data · Role-gated · Actions use trusted authorization</span></footer>
       </div>
     </main>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="dashboard-visuals.js" defer></script>
   <script src="live-clock.js" defer></script>
-  <script type="module" src="hr-dashboard.js"></script>
+  <script src="functions/curriculum.js"></script>
+  <script type="module" src="hr-dashboard.js?v=20261028-pending-activation"></script>
 </body>
 </html>

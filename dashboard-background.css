@@ -793,3 +793,57 @@ body {
   .welcome-date strong,
   .ic-live-clock strong { font-size: 14px !important; }
 }
+
+@media (max-width: 480px) {
+  .dashboard-shell .welcome-banner {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 0;
+    padding: 16px 12px !important;
+    text-align: center;
+  }
+  .dashboard-shell .welcome-copy {
+    width: 100%;
+    min-width: 0;
+    flex: none;
+    text-align: center;
+  }
+  .dashboard-shell .welcome-copy h1 {
+    margin: 0 auto 4px;
+    font-size: 23px;
+    line-height: 1.2;
+    text-align: center;
+  }
+  .dashboard-shell .mobile-welcome-title {
+    display: block;
+    color: #f4f7ff !important;
+  }
+  .dashboard-shell .mobile-welcome-title > .mobile-welcome-name {
+    display: block;
+    color: #1ccfff !important;
+  }
+  .dashboard-shell .mobile-welcome-name > span {
+    display: inline !important;
+    color: inherit !important;
+  }
+  .dashboard-shell .welcome-copy p {
+    max-width: 34ch;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .dashboard-shell .welcome-meta {
+    justify-content: center;
+  }
+  .dashboard-shell .welcome-date {
+    align-self: center;
+    align-items: center;
+    justify-content: center;
+    width: max-content;
+    min-width: 150px;
+    margin: 0 auto !important;
+    text-align: center;
+  }
+}

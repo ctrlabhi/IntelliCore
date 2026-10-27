@@ -49,13 +49,18 @@ function requireSignedIn(request) {
 }
 
 function callerRole(user) {
-  if (user.token.email_verified === true
-    && typeof user.token.email === "string"
-    && founderEmailAllowlist.has(user.token.email.trim().toLowerCase())) {
+  const email = typeof user.token.email === "string"
+    ? user.token.email.trim().toLowerCase()
+    : "";
+  if (user.token.email_verified === true && founderEmailAllowlist.has(email)) {
     return "founder";
   }
   const role = user.token.role;
-  return staffRoles.includes(role) || role === "mentor" ? role : "learner";
+  if (staffRoles.includes(role) || role === "mentor") return role;
+  if (user.token.email_verified === true && staffAccountAllowlist.has(email)) {
+    return staffAccountAllowlist.get(email).role;
+  }
+  return "learner";
 }
 
 function mentorTracks(user) {
@@ -955,6 +960,73 @@ exports.saveInternshipProfile = onCall(async request => {
   });
   await auth.updateUser(user.uid, { displayName });
   return { track, durationMonths, ...savedDates, status: "active" };
+});
+
+exports.activateInternProfile = onCall(async request => {
+  const user = requireSignedIn(request);
+  requireAnyRole(user, profileManagers, "Only an administrator or HR manager can activate an internship profile.");
+  const email = validEmail(request.data?.email);
+  const target = await userByEmail(email);
+  if (!hasVerifiedEmail(target)) {
+    throw new HttpsError("failed-precondition", "The intern must verify their email before activation.");
+  }
+  if (target.customClaims?.role && target.customClaims.role !== "learner") {
+    throw new HttpsError("failed-precondition", "Only learner accounts can be activated as interns.");
+  }
+
+  const draftRef = db.collection("users").doc(target.uid)
+    .collection("profileDrafts").doc("current");
+  const draftSnapshot = await draftRef.get();
+  if (!draftSnapshot.exists) {
+    throw new HttpsError("failed-precondition", "This intern has not saved an internship profile draft.");
+  }
+  const draft = draftSnapshot.data();
+  const displayName = requiredText(draft.displayName, "Full name", 80);
+  if (displayName.length < 2 || draft.email !== email || !validTrack(draft.track)
+    || !["Female", "Male"].includes(draft.gender)) {
+    throw new HttpsError("failed-precondition", "The saved internship profile is incomplete or invalid.");
+  }
+  const phone = validPhone(draft.phone);
+  const durationMonths = requireSupportedDuration(draft.durationMonths);
+  const startDate = draft.internshipStartDate;
+  const endDate = addDurationMonths(startDate, durationMonths);
+  if (!validDateString(startDate) || draft.internshipEndDate !== endDate) {
+    throw new HttpsError("failed-precondition", "The saved internship dates do not match its selected duration.");
+  }
+
+  const ref = profileRef(target.uid);
+  await db.runTransaction(async transaction => {
+    const profileSnapshot = await transaction.get(ref);
+    const current = profileSnapshot.exists ? profileSnapshot.data() : {};
+    if (current.role && current.role !== "learner") {
+      throw new HttpsError("permission-denied", "Only learner profiles can be activated.");
+    }
+    if (current.internshipStartDate && current.internshipEndDate
+      && current.internshipStatus === "active") {
+      throw new HttpsError("already-exists", "This internship profile is already active.");
+    }
+    transaction.set(ref, {
+      uid: target.uid,
+      email,
+      displayName,
+      role: "learner",
+      mentorTracks: [],
+      track: draft.track,
+      gender: draft.gender,
+      phone,
+      durationMonths,
+      internshipStartDate: startDate,
+      internshipEndDate: endDate,
+      internshipStatus: "active",
+      accountStatus: current.accountStatus || "active",
+      profileCompletedAt: FieldValue.serverTimestamp(),
+      profileUpdatedBy: user.uid,
+      updatedAt: FieldValue.serverTimestamp(),
+      ...(!profileSnapshot.exists ? { createdAt: FieldValue.serverTimestamp() } : {})
+    }, { merge: true });
+  });
+  if (target.displayName !== displayName) await auth.updateUser(target.uid, { displayName });
+  return { uid: target.uid, email, track: draft.track, startDate, endDate, status: "active" };
 });
 
 exports.updateInternshipProfile = onCall(async request => {

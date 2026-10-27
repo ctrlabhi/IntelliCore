@@ -9,7 +9,7 @@
   <meta name="description" content="Your IntelliCore intern dashboard for your internship profile, assigned work, attendance, and progress." />
   <link rel="icon" type="image/png" href="favicon.png?v=4" />
   <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="Intern-dashboard.css" />
+  <link rel="stylesheet" href="Intern-dashboard.css?v=20261027-reference-attendance-layout" />
 <link rel="stylesheet" href="dashboard-background.css" />
 </head>
 <body class="ic-workspace-page">
@@ -308,7 +308,7 @@
       <div class="ic-stat-card"><span class="ic-stat-icon icon-teal">✓</span><span><span>Completed Tasks</span><strong class="ic-stat-word" id="icApprovedTrainingCount">—</strong><small>Approved by your mentor</small></span></div>
       <button type="button" class="ic-stat-card" data-workspace-view="attendance" aria-label="Open attendance"><span class="ic-stat-icon icon-amber"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 9h18M8 14l2.5 2.5L16 11"/></svg></span><span><span>Attendance</span><strong class="ic-stat-word" id="icAttendanceStatStatus">—</strong><small id="icAttendanceStatDetail">Recorded check-ins</small></span></button>
       <button type="button" class="ic-stat-card" data-workspace-view="training" aria-label="Open internship progress"><span class="ic-stat-icon icon-blue">↗</span><span><span>Internship Progress</span><strong class="ic-stat-word" id="icInternshipProgress">—</strong><small>Based on approved training tasks</small></span></button>
-      <div class="ic-stat-card" id="icCertificateEligibility" aria-label="Certificate status is not configured"><span class="ic-stat-icon icon-violet">✧</span><span><span>Certificate Status</span><strong class="ic-stat-word">Contact HR</strong><small>for current verified status</small></span></div>
+      <button type="button" class="ic-stat-card" id="icCertificateEligibility" aria-label="Request certificate review"><span class="ic-stat-icon icon-violet">✧</span><span><span>Certificate Status</span><strong class="ic-stat-word" id="icCertificateStatus">Not requested</strong><small id="icCertificateDetail">Request HR review after your internship ends</small></span></button>
     </section>
 
     <section class="ic-workspace-lower-grid ic-insights-grid" aria-label="Workspace details">
@@ -320,17 +320,17 @@
         <div class="ic-panel-heading"><div><h3>Profile checklist</h3><p>Complete your internship onboarding.</p></div><span class="ic-panel-symbol" aria-hidden="true">✓</span></div>
         <div id="icOnboardingChecklist" class="ic-onboarding-list" aria-live="polite">Loading account checklist…</div>
       </article>
-      <article class="ic-workspace-panel ic-unavailable-panel" id="icNotifications">
-        <div class="ic-panel-heading"><div><h3>Recent Announcements</h3><p>Company updates will appear here when available.</p></div><span class="ic-panel-symbol" aria-hidden="true">♧</span></div>
-        <div class="ic-unavailable-state"><strong>No announcements yet</strong><p>There are no verified company announcements to show right now.</p></div>
+      <article class="ic-workspace-panel" id="icNotifications">
+        <div class="ic-panel-heading"><div><h3>Recent Announcements</h3><p>Company and track updates.</p></div><span class="ic-panel-symbol" aria-hidden="true">♧</span></div>
+        <div id="icAnnouncementsList" class="ic-unavailable-state"><strong>No announcements yet</strong><p>There are no announcements for your internship track.</p></div>
       </article>
-      <article class="ic-workspace-panel ic-unavailable-panel" id="icLearningResources">
+      <article class="ic-workspace-panel" id="icLearningResources">
         <div class="ic-panel-heading"><div><h3>Learning Resources</h3><p>Resources shared for your internship.</p></div><span class="ic-panel-symbol" aria-hidden="true">▣</span></div>
-        <div class="ic-unavailable-state"><strong>No learning resources yet</strong><p>When resources are assigned to your track, they will appear here.</p></div>
+        <div id="icLearningResourcesList" class="ic-unavailable-state"><strong>No learning resources yet</strong><p>When resources are assigned to your track, they will appear here.</p></div>
       </article>
-      <article class="ic-workspace-panel ic-unavailable-panel" id="icProjects">
+      <article class="ic-workspace-panel" id="icProjects">
         <div class="ic-panel-heading"><div><h3>My Projects</h3><p>Projects assigned to your internship.</p></div><span class="ic-panel-symbol" aria-hidden="true">▱</span></div>
-        <div class="ic-unavailable-state"><strong>Project workspace is not available yet</strong><p>Project assignments will appear here once the project module is connected.</p></div>
+        <div id="icProjectsList" class="ic-unavailable-state"><strong>No projects yet</strong><p>New mentor assignments will appear here.</p></div>
       </article>
     </section>
     <div id="icWorkspaceNotice" class="ic-workspace-notice" role="status" aria-live="polite">
@@ -350,9 +350,11 @@
         <label class="ic-form-field">Gender<select id="icInternshipGender" name="gender" required><option value="">Choose an option</option><option value="Female">Female</option><option value="Male">Male</option></select></label>
         <label class="ic-form-field">Internship domain<select id="icInternshipTrack" name="track" required></select></label>
         <label class="ic-form-field">Internship duration<select id="icInternshipDuration" name="durationMonths" required><option value="1">1 month</option><option value="2">2 months</option><option value="3">3 months</option><option value="6">6 months</option></select></label>
-        <label class="ic-form-field">Internship start date<input id="icInternshipStartDate" name="internshipStartDate" type="date" required></label>
-        <label class="ic-form-field">Internship end date<input id="icInternshipEndDate" type="date" readonly aria-readonly="true"></label>
-        <label class="ic-form-field">Phone number<input id="icInternshipPhone" name="phone" type="tel" required minlength="7" maxlength="24" autocomplete="tel" placeholder="+91 98765 43210"></label>
+        <label class="ic-form-field">Internship start date<input id="icInternshipStartDate" name="internshipStartDate" type="date" required aria-describedby="icInternshipDateHint"></label>
+        <label class="ic-form-field">Internship end date<input id="icInternshipEndDate" type="date" readonly aria-readonly="true" aria-describedby="icInternshipDateHint"></label>
+        <small class="ic-profile-field-hint" id="icInternshipDateHint">Choose a start date from the calendar. The end date updates automatically from your duration.</small>
+        <label class="ic-form-field">Phone number<input id="icInternshipPhone" name="phone" type="tel" required minlength="7" maxlength="24" autocomplete="tel" placeholder="98765 43210" aria-describedby="icInternshipPhoneHint"></label>
+        <small class="ic-profile-field-hint" id="icInternshipPhoneHint">Enter 7–15 digits. Adding +91 is optional.</small>
         <p id="icInternshipPeriodPreview" class="ic-profile-note"></p>
       </div>
       <p class="ic-profile-form-error" id="icInternshipFormError" role="alert" aria-live="assertive" hidden></p>
@@ -432,6 +434,6 @@
   <script src="dashboard-visuals.js" defer></script>
   <script src="live-clock.js" defer></script>
   <script src="functions/curriculum.js" defer></script>
-  <script type="module" src="dashboard-auth.js?v=20261027-profile-date-preview"></script>
+  <script type="module" src="dashboard-auth.js?v=20261028-spark-staff-login"></script>
 </body>
 </html>

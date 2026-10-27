@@ -36,11 +36,11 @@ if (useFirebaseEmulators) {
   connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
 }
 const googleProvider = new GoogleAuthProvider();
-const autoProvisionedStaffEmails = new Set([
-  "thesumitsah47@gmail.com",
-  "tanu65159@gmail.com",
-  "mikkurwt694@gmail.com",
-  "ashitarohilla32@gmail.com"
+const staffRolesByEmail = new Map([
+  ["thesumitsah47@gmail.com", "admin"],
+  ["tanu65159@gmail.com", "operations_executive"],
+  ["mikkurwt694@gmail.com", "hr_executive"],
+  ["ashitarohilla32@gmail.com", "hr_manager"]
 ]);
 const founderEmail = "ctrlabhishek@gmail.com";
 
@@ -203,15 +203,13 @@ async function redirectToDashboard(user) {
 
   const claims = token.claims;
   const email = latestUser.email?.trim().toLowerCase() || "";
-  if (autoProvisionedStaffEmails.has(email)
-    && !["admin", "hr_manager", "hr_executive", "operations_executive"].includes(claims.role)) {
-    throw new Error("This staff account has not been provisioned. Staff role assignment requires an authorised administrator and cannot be performed on the free Spark client.");
-  }
-  if (email === founderEmail && !["founder", "co_founder"].includes(claims.role)) {
-    throw new Error("This Founder account has no verified role claim. Founder access cannot be granted by the browser or on the Spark client.");
-  }
+  // On Spark, use the same verified email allowlist as Firestore rules. This
+  // keeps staff sign-in immediate without requiring an undeployed callable.
 
-  const role = claims.role;
+  const claimedRole = claims.role;
+  const role = (claimedRole && claimedRole !== "learner")
+    ? claimedRole
+    : staffRolesByEmail.get(email) || (email === founderEmail ? "founder" : claimedRole);
   const destination = ["founder", "co_founder"].includes(role)
     ? "founder-dashboard.html"
     : ["admin", "hr_manager", "hr_executive", "operations_executive"].includes(role)

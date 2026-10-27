@@ -16,7 +16,10 @@ Current project
   start date and a duration of 1, 2, 3, or 6 months; the end date is calculated
   in the dashboard and the attendance calendar can preview those months.
   Draft dates do not enroll the intern or enable attendance; only a trusted
-  backend can activate the enrollment.
+  backend can activate the enrollment. HR Manager and Administrator can review
+  a saved draft and activate it through the trusted `activateInternProfile`
+  Function. HR dashboard profile, draft, attendance, and task reads follow
+  role-scoped Firestore rules.
 - Saved attendance can be read by its owner on Spark, but new attendance is
   read-only unless the trusted `checkInToday` Function is available. Do not
   accept client-written attendance: a browser cannot securely prove a login
@@ -39,7 +42,7 @@ Current project
   `hr-dashboard.html`, presented as the shared role-gated HR Dashboard.
   Its KPIs and
   records are illustrative. The existing operational tools remain available
-  from its "Open secure workspace" link at `dashboard.html?workspace=operations`.
+  from its "Open secure workspace" link at `Intern-dashboard.html?workspace=operations`.
 - Senior HR Manager, Senior HR Executive, and Senior Operations Executive are
   not currently provisionable roles. The dashboard does not grant these
   additional role names or permissions.
@@ -67,9 +70,13 @@ Current project
 - On Spark, learner dashboards read only their own profile, assigned task
   records, and attendance history through Firestore rules. Public curriculum
   content is served from `functions/curriculum.js`. Assignment creation,
-  submissions, review transitions, staff profile management, admin reports,
-  account deactivation, and Google Meet operations still require trusted
-  callable Functions and are not simulated on Spark.
+  submissions, review transitions, profile activation, staff profile
+  management, admin reports, account deactivation, automatic login attendance,
+  and Google Meet operations still require trusted callable Functions and are
+  not simulated on Spark. The HR dashboard displays live profiles, drafts,
+  assignments and attendance when its required Firestore rules are published;
+  authorized HR Managers can assign curriculum tasks and activate profiles
+  when Functions are deployed.
 - Profile display names and drafts are stored in the owner's Firestore profile
   documents. Profile photos are stored under a per-user Firebase Storage path.
 - Intern profile setup requires a name, phone number, gender, domain, duration,
@@ -82,7 +89,6 @@ Files to publish
 - index.html
 - style.css
 - auth.js
-- dashboard.html
 - Intern-dashboard.css
 - dashboard-background.css
 - dashboard-auth.js

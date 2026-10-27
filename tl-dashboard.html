@@ -13,7 +13,7 @@
 </head>
 <body class="team-leader-page">
   <canvas id="icWorkspaceNeuralCanvas" class="dashboard-background-canvas" aria-hidden="true"></canvas>
-  <div class="auth-state" id="authState" role="status">Verifying TL Dashboard access…</div>
+  <div class="auth-state" id="authState" role="status">Verifying…</div>
   <div class="dashboard-shell" id="dashboardShell" hidden>
     <aside class="sidebar" id="sidebar">
       <button class="sidebar-close" id="sidebarClose" type="button" aria-label="Close dashboard navigation">×</button>
@@ -26,7 +26,7 @@
         <a class="nav-link active" href="#overview"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg> Dashboard</a>
         <div class="nav-group-label">MY DOMAIN</div>
         <a class="nav-link" href="#interns"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.5A4.5 4.5 0 0 1 7 14h4a4.5 4.5 0 0 1 4.5 4.5V20M16 5a3.5 3.5 0 0 1 0 6.5M17 14a4.5 4.5 0 0 1 4.5 4.5V20"/></svg> My Interns</a>
-        <a class="nav-link" href="dashboard.html?workspace=operations#icAssignTaskForm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h12M9 12h12M9 18h12"/><path d="m3 6 1.5 1.5L7 5m-4 7 1.5 1.5L7 11m-4 7 1.5 1.5L7 17"/></svg> Tasks &amp; Projects</a>
+        <a class="nav-link" href="Intern-dashboard.html?workspace=operations#icAssignTaskForm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h12M9 12h12M9 18h12"/><path d="m3 6 1.5 1.5L7 5m-4 7 1.5 1.5L7 11m-4 7 1.5 1.5L7 17"/></svg> Tasks &amp; Projects</a>
         <a class="nav-link" href="#attendance"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Attendance</a>
         <a class="nav-link" href="#completion"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="m8 14-1 8 5-3 5 3-1-8"/></svg> Certificates &amp; Completion</a>
         <a class="nav-link" href="#announcements"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11v2l13 5V6L3 11Z"/><path d="M6 14v4a2 2 0 0 0 2 2h2l-2-5m8-7 4-2v12l-4-2"/></svg> Announcements</a>
@@ -47,10 +47,10 @@
         <button class="mobile-menu" id="mobileMenu" type="button" aria-label="Open dashboard navigation" aria-controls="sidebar" aria-expanded="false">☰</button>
         <label class="global-search"><span aria-hidden="true">⌕</span><input id="globalSearch" type="search" placeholder="Search interns, tasks, announcements…" aria-label="Search dashboard"><kbd>⌘ K</kbd></label>
         <div class="topbar-actions">
-          <button class="notification-button" id="notificationButton" type="button" aria-label="Notifications, 5 unread"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span class="notification-count" aria-hidden="true">5</span></button>
+          <button class="notification-button" id="notificationButton" type="button" aria-label="Notifications"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span class="notification-count" aria-hidden="true" hidden></span></button>
           <span class="topbar-divider"></span>
           <div class="user-chip"><span class="user-avatar" id="userAvatar">TL</span><span class="user-details"><strong id="userName">Team Leader</strong><small id="userRole">Team Leader</small></span></div>
-          <a class="operational-link" href="dashboard.html?workspace=operations#icTrainingSection">Open secure workspace <span aria-hidden="true">↗</span></a>
+          <a class="operational-link" href="Intern-dashboard.html?workspace=operations#icTrainingSection">Open secure workspace <span aria-hidden="true">↗</span></a>
           <button class="topbar-logout" id="topbarLogout" type="button">Log out <span aria-hidden="true">↗</span></button>
         </div>
       </header>
@@ -66,48 +66,40 @@
           <div class="welcome-date"><span class="live-date-label"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 9h18M7 13h.01M12 13h.01M17 13h.01M7 17h.01M12 17h.01"/></svg><span data-live-date>Loading date…</span></span><strong data-live-time>--:--:--</strong><small data-live-greeting>Good Morning!</small></div>
         </section>
 
-        <div class="sample-notice"><span>ⓘ</span><p><strong>Dashboard preview.</strong> Names, counts, attendance, tasks and activity are illustrative—not live intern data. The domain selector only lists tracks authorized by your signed-in account. Use <a href="dashboard.html?workspace=operations">the secure workspace</a> for currently connected task assignment and submission review.</p></div>
+        <div class="sample-notice"><span>ⓘ</span><p><strong>Live Team Leader workspace.</strong> Intern, task and attendance records below are limited to your assigned tracks.</p></div>
 
         <section class="stats-grid team-stats" aria-label="My domain summary">
-          <article class="stat-card"><span class="stat-icon blue"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.3A4.7 4.7 0 0 1 7.2 14h3.6a4.7 4.7 0 0 1 4.7 4.7V20M16 4.8a3.5 3.5 0 0 1 0 6.7M17 14.2a4.6 4.6 0 0 1 4.5 4.5V20"/></svg></span><div><small>My Interns</small><strong>20</strong><span class="trend">↑ 2 new <em>this month</em></span></div></article>
-          <article class="stat-card"><span class="stat-icon green"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.3A4.7 4.7 0 0 1 7.2 14h3.6a4.7 4.7 0 0 1 4.7 4.7V20M16 4.8a3.5 3.5 0 0 1 0 6.7M17 14.2a4.6 4.6 0 0 1 4.5 4.5V20"/></svg></span><div><small>Active Interns</small><strong>18</strong><span class="trend">↑ 10%</span></div></article>
-          <article class="stat-card"><span class="stat-icon amber"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5h6M8.5 10h7M8.5 14h3M15 15.5l1.5 1.5 3-3"/></svg></span><div><small>Pending Tasks</small><strong>12</strong><span class="trend trend-down">↓ 4 <em>from last week</em></span></div></article>
-          <article class="stat-card"><span class="stat-icon green">✓</span><div><small>Tasks Completed</small><strong>48</strong><span class="trend">↑ 25%</span></div></article>
-          <article class="stat-card"><span class="stat-icon cyan"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 9h18M8 14l2.5 2.5L16 11"/></svg></span><div><small>Attendance Rate</small><strong>92%</strong><span class="trend">↑ 5%</span></div></article>
+          <article class="stat-card"><span class="stat-icon blue"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.3A4.7 4.7 0 0 1 7.2 14h3.6a4.7 4.7 0 0 1 4.7 4.7V20M16 4.8a3.5 3.5 0 0 1 0 6.7M17 14.2a4.6 4.6 0 0 1 4.5 4.5V20"/></svg></span><div><small>My Interns</small><strong id="tlInternCount">—</strong><span class="trend">Authorized tracks</span></div></article>
+          <article class="stat-card"><span class="stat-icon green"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.3A4.7 4.7 0 0 1 7.2 14h3.6a4.7 4.7 0 0 1 4.7 4.7V20M16 4.8a3.5 3.5 0 0 1 0 6.7M17 14.2a4.6 4.6 0 0 1 4.5 4.5V20"/></svg></span><div><small>Active Interns</small><strong id="tlActiveCount">—</strong><span class="trend">Within internship dates</span></div></article>
+          <article class="stat-card"><span class="stat-icon amber"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5h6M8.5 10h7M8.5 14h3M15 15.5l1.5 1.5 3-3"/></svg></span><div><small>Pending Tasks</small><strong id="tlPendingTasks">—</strong><span class="trend trend-down">Awaiting completion or review</span></div></article>
+          <article class="stat-card"><span class="stat-icon green">✓</span><div><small>Tasks Completed</small><strong id="tlCompletedTasks">—</strong><span class="trend">Approved by mentor</span></div></article>
+          <article class="stat-card"><span class="stat-icon cyan"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 9h18M8 14l2.5 2.5L16 11"/></svg></span><div><small>Attendance Rate</small><strong id="tlAttendanceRate">—</strong><span class="trend">Current month</span></div></article>
         </section>
 
         <section class="overview-grid team-overview">
           <article class="panel domain-panel">
             <div class="panel-heading"><div><h2>Domain Overview</h2></div><select id="domainSelect" aria-label="Choose an authorized domain"></select></div>
             <div class="domain-chart-wrap">
-              <div class="team-donut"><div><strong>20</strong><span>Interns</span></div></div>
+              <div class="team-donut"><div><strong id="tlDomainCount">—</strong><span>Interns</span></div></div>
               <ul class="legend team-domain-legend">
-                <li><i class="c-active"></i><span>Active</span><b>18</b></li>
-                <li><i class="c-inactive"></i><span>Inactive</span><b>2</b></li>
-                <li><i class="c-completion"></i><span>Completion Rate</span><b>76%</b></li>
+                <li><i class="c-active"></i><span>Active</span><b id="tlDomainActive">—</b></li>
+                <li><i class="c-inactive"></i><span>Inactive</span><b id="tlDomainInactive">—</b></li>
+                <li><i class="c-completion"></i><span>Completion Rate</span><b id="tlDomainCompletion">—</b></li>
               </ul>
             </div>
           </article>
           <article class="panel chart-panel" id="reports">
             <div class="panel-heading"><div><h2>Task Progress</h2></div><select aria-label="Task chart period"><option>This Month</option><option>Last 6 Months</option></select></div>
-            <div class="line-chart team-bar-chart" role="img" aria-label="Illustrative bar chart showing assigned and completed tasks from May to October">
-              <div class="chart-y-labels"><span>50</span><span>40</span><span>30</span><span>20</span><span>10</span><span>0</span></div>
-              <svg viewBox="0 0 520 170" preserveAspectRatio="none" aria-hidden="true">
-                <path class="grid-lines" d="M0 12H520 M0 40H520 M0 68H520 M0 96H520 M0 124H520 M0 152H520"/>
-                <g class="assigned-bars"><rect x="22" y="106" width="25" height="46" rx="1"/><rect x="102" y="88" width="25" height="64" rx="1"/><rect x="182" y="68" width="25" height="84" rx="1"/><rect x="262" y="54" width="25" height="98" rx="1"/><rect x="342" y="42" width="25" height="110" rx="1"/><rect x="422" y="30" width="25" height="122" rx="1"/></g>
-                <g class="completed-bars"><rect x="51" y="126" width="25" height="26" rx="1"/><rect x="131" y="113" width="25" height="39" rx="1"/><rect x="211" y="102" width="25" height="50" rx="1"/><rect x="291" y="88" width="25" height="64" rx="1"/><rect x="371" y="74" width="25" height="78" rx="1"/><rect x="451" y="61" width="25" height="91" rx="1"/></g>
-              </svg>
-              <div class="chart-x-labels"><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span></div>
-            </div>
+            <div class="line-chart team-bar-chart" id="tlTaskSummary" role="status">Loading live task progress…</div>
             <div class="chart-legend"><span><i class="legend-blue"></i>Assigned Tasks</span><span><i class="legend-green"></i>Completed Tasks</span></div>
           </article>
           <article class="panel actions-panel">
             <div class="panel-heading"><div><h2>Quick Actions</h2></div></div>
             <div class="action-grid team-actions">
-              <a href="dashboard.html?workspace=operations#icAssignTaskForm"><span>▤</span>Assign Task <b>›</b></a>
-              <a href="dashboard.html?workspace=operations#icReviewQueue"><span>➤</span>Review Submissions <b>›</b></a>
-              <button type="button" data-preview-action="View reports"><span>▥</span>View Reports <b>›</b></button>
-              <button type="button" data-preview-action="Send announcement"><span>▤</span>Message Interns <b>›</b></button>
+              <a href="Intern-dashboard.html?workspace=operations#icAssignTaskForm"><span>▤</span>Assign Task <b>›</b></a>
+              <a href="Intern-dashboard.html?workspace=operations#icReviewQueue"><span>➤</span>Review Submissions <b>›</b></a>
+              <a href="Intern-dashboard.html?workspace=operations#icAttendanceReportWrap"><span>▥</span>View Reports <b>›</b></a>
+              <button type="button" id="messageTeamButton"><span>▤</span>Message Interns <b>›</b></button>
             </div>
           </article>
         </section>
@@ -115,53 +107,37 @@
         <section class="detail-grid team-detail">
           <article class="panel activity-panel" id="activity">
             <div class="panel-heading"><div><h2>Recent Activity <small>(My Domain)</small></h2></div><a href="#activity" class="view-link">View all ↗</a></div>
-            <ol class="activity-list">
-              <li><span class="staff-avatar avatar-1">RS</span><span><strong>Riya Singh <small>submitted task · Landing Page</small></strong></span><time>10 min ago</time></li>
-              <li><span class="staff-avatar avatar-2">KM</span><span><strong>Kunal Mehta <small>marked attendance</small></strong></span><time>32 min ago</time></li>
-              <li><span class="staff-avatar avatar-3">SK</span><span><strong>Simran Kaur <small>completed a task</small></strong></span><time>1 hour ago</time></li>
-              <li><span class="staff-avatar avatar-4">AV</span><span><strong>Aditya Verma <small>asked a question</small></strong></span><time>2 hours ago</time></li>
-              <li><span class="staff-avatar avatar-5">NG</span><span><strong>Neha Gupta <small>submitted task · API Integration</small></strong></span><time>3 hours ago</time></li>
-            </ol>
+            <ol class="activity-list" id="liveTeamActivity"><li>Loading live team activity…</li></ol>
           </article>
           <article class="panel deadline-panel" id="deadlines">
             <div class="panel-heading"><div><h2>Upcoming Deadlines <small>(My Interns)</small></h2></div><a href="#deadlines" class="view-link">View all ↗</a></div>
-            <div class="deadline-list">
-              <div class="deadline-row"><span class="date-badge"><small>OCT</small><b>27</b></span><span><strong>Portfolio Website</strong><small>Aditya Verma</small></span><b class="tag team-task-tag">Task</b></div>
-              <div class="deadline-row"><span class="date-badge"><small>OCT</small><b>28</b></span><span><strong>API Integration</strong><small>Simran Kaur</small></span><b class="tag team-task-tag">Task</b></div>
-              <div class="deadline-row"><span class="date-badge"><small>OCT</small><b>30</b></span><span><strong>Project Report</strong><small>Kunal Mehta</small></span><b class="tag team-report-tag">Report</b></div>
-              <div class="deadline-row"><span class="date-badge"><small>NOV</small><b>02</b></span><span><strong>Final Presentation</strong><small>Riya Singh</small></span><b class="tag team-task-tag">Task</b></div>
-            </div>
+            <div class="deadline-list" id="liveTeamDeadlines">Loading live deadlines…</div>
           </article>
           <article class="panel attendance-panel" id="attendance">
-            <div class="panel-heading"><div><h2>Attendance Overview <small>(My Domain)</small></h2></div><select aria-label="Attendance period"><option>This Month</option><option>Last month</option></select></div>
-            <div class="attendance-ring"><div><strong>92%</strong><span>Attendance</span></div></div>
-            <div class="attendance-legend"><span><i class="present-dot"></i><b>Present</b><small>414</small></span><span><i class="absent-dot"></i><b>Absent</b><small>24</small></span><span><i class="leave-dot"></i><b>Leave</b><small>12</small></span></div>
+            <div class="panel-heading"><div><h2>Attendance Overview <small>(My Domain)</small></h2></div><select id="tlAttendancePeriod" aria-label="Attendance period"></select></div>
+            <div class="attendance-ring"><div><strong id="tlAttendanceRing">—</strong><span>Attendance</span></div></div>
+            <div class="attendance-legend"><span><i class="present-dot"></i><b>Present</b><small id="tlPresentCount">—</small></span><span><i class="absent-dot"></i><b>No check-in</b><small id="tlAbsentCount">—</small></span></div>
           </article>
         </section>
 
         <section class="panel intern-panel" id="interns">
-          <div class="panel-heading intern-heading"><div><h2>My Interns <small>(Authorized tracks only)</small></h2></div><div class="table-tools"><input id="internSearch" type="search" placeholder="Search interns…" aria-label="Search sample interns"><select id="statusFilter" aria-label="Filter interns by status"><option value="all">All Status</option><option>Active</option><option>On Hold</option><option>Completed</option></select><select aria-label="Internship period"><option>This Month</option><option>Last 6 months</option></select><button type="button" class="export-button" id="exportButton">⇩ Export</button></div></div>
-          <div class="table-scroll"><table><thead><tr><th>#</th><th>Name</th><th>Email</th><th>Status</th><th>Attendance</th><th>Tasks (C/T)</th><th>Join Date</th><th>End Date</th><th>Actions</th></tr></thead><tbody id="internRows">
-            <tr data-status="Active"><td>01</td><td><span class="table-avatar">AV</span>Aditya Verma</td><td>aditya@example.com</td><td><span class="table-status active">Active</span></td><td>95%</td><td>5/6</td><td>2026-10-21</td><td>2026-11-21</td><td><button class="row-menu" data-preview-action="View intern details" type="button">•••</button></td></tr>
-            <tr data-status="Active"><td>02</td><td><span class="table-avatar">SK</span>Simran Kaur</td><td>simran@example.com</td><td><span class="table-status active">Active</span></td><td>88%</td><td>4/5</td><td>2026-10-20</td><td>2026-11-20</td><td><button class="row-menu" data-preview-action="View intern details" type="button">•••</button></td></tr>
-            <tr data-status="On Hold"><td>03</td><td><span class="table-avatar">KM</span>Kunal Mehta</td><td>kunal@example.com</td><td><span class="table-status hold">On Hold</span></td><td>92%</td><td>3/6</td><td>2026-10-18</td><td>2026-11-18</td><td><button class="row-menu" data-preview-action="View intern details" type="button">•••</button></td></tr>
-            <tr data-status="Completed"><td>04</td><td><span class="table-avatar">RS</span>Riya Singh</td><td>riya@example.com</td><td><span class="table-status complete">Completed</span></td><td>96%</td><td>6/6</td><td>2026-09-17</td><td>2026-10-17</td><td><button class="row-menu" data-preview-action="View intern details" type="button">•••</button></td></tr>
-            <tr data-status="Active"><td>05</td><td><span class="table-avatar">NG</span>Neha Gupta</td><td>neha@example.com</td><td><span class="table-status active">Active</span></td><td>91%</td><td>3/6</td><td>2026-10-15</td><td>2026-11-15</td><td><button class="row-menu" data-preview-action="View intern details" type="button">•••</button></td></tr>
-          </tbody></table><p class="empty-search" id="emptySearch" hidden>No sample interns match your filters.</p></div>
+          <div class="panel-heading intern-heading"><div><h2>My Interns <small>(Authorized tracks only)</small></h2></div><div class="table-tools"><input id="internSearch" type="search" placeholder="Search interns…" aria-label="Search live interns"><select id="statusFilter" aria-label="Filter interns by status"><option value="all">All Status</option><option>Active</option><option>Scheduled</option><option>Pending activation</option><option>Completed</option><option>Deactivated</option></select><button type="button" class="export-button" id="exportButton">⇩ Export</button></div></div>
+          <div class="table-scroll"><table><thead><tr><th>#</th><th>Name</th><th>Email</th><th>Status</th><th>Attendance</th><th>Tasks (C/T)</th><th>Join Date</th><th>End Date</th><th>Actions</th></tr></thead><tbody id="internRows"></tbody></table><p class="empty-search" id="emptySearch" hidden>No interns match your search.</p></div>
         </section>
 
         <section class="module-grid" aria-label="TL Dashboard modules">
-          <article class="module-card" id="completion"><span>✧</span><div><small>COMPLETION</small><h2>Certificates &amp; Completion</h2><p>Preview completion checks and recommendations. Certificate issuance stays with authorized HR/Admin.</p></div><b>›</b></article>
-          <article class="module-card" id="announcements"><span>➤</span><div><small>MY DOMAIN</small><h2>Announcements</h2><p>Preview team notices. Company-wide publishing is reserved for authorized Admin/HR roles.</p></div><b>›</b></article>
+          <article class="module-card" id="completion"><span>✧</span><div><small>COMPLETION</small><h2>Certificates &amp; Completion</h2><p>Interns can send completed-program certificate requests to HR for review. Final approval is handled by HR.</p></div><b>›</b></article>
+          <article class="module-card" id="announcements"><span>➤</span><div><small>MY DOMAIN</small><h2>Announcements</h2><p>Use Message Interns to publish a notice to one of your assigned tracks.</p></div><b>›</b></article>
           <article class="module-card" id="profile"><span>◎</span><div><small>YOUR ACCOUNT</small><h2>Profile &amp; Settings</h2><p id="profileEmail">Signed in with an authorized Team Leader account.</p></div><b>›</b></article>
         </section>
-        <footer class="page-footer">IntelliCore TL Dashboard <span>Track-scoped preview · Illustrative data · No cross-domain access</span></footer>
+        <footer class="page-footer">IntelliCore TL Dashboard <span>Live records · Track-scoped access</span></footer>
       </div>
     </main>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="dashboard-visuals.js" defer></script>
   <script src="live-clock.js" defer></script>
+  <script src="functions/curriculum.js"></script>
   <script type="module" src="tl-dashboard.js"></script>
 </body>
 </html>

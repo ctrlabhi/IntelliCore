@@ -865,6 +865,8 @@
 .ic-profile-dialog-content > p { color: #a9bfd8; font-size: .84rem; line-height: 1.6; }
 .ic-profile-dialog .ic-dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
 .ic-profile-dialog .ic-form-field { color: #b8cce2; }
+.ic-workspace-page .ic-profile-field-hint { display: block; margin: -8px 0 12px; color: #8fa9c4; font-size: .7rem; line-height: 1.5; }
+.ic-workspace-page #icInternshipStartDate { cursor: pointer; }
 .ic-workspace-page .ic-training-section .ic-activity-empty,
 .ic-workspace-page .ic-staff-panel .ic-activity-empty { color: #9fb4ce; }
 
@@ -1586,7 +1588,7 @@
 .ic-workspace-page .header-actions{margin-top:auto!important;display:flex!important;width:100%;justify-content:stretch!important}
 .ic-workspace-page .ic-header-logout{width:100%;justify-content:center;padding:10px!important;border-color:#087ba2!important;background:transparent!important;color:#c7e9fa!important}
 .ic-workspace-page .hamburger-btn{display:none!important}
-.ic-workspace-page .ic-workspace-main{position:relative;z-index:1;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));align-content:start;gap:14px;width:auto!important;max-width:1480px;margin:0 0 0 204px!important;padding:18px 22px 54px!important}
+.ic-workspace-page .ic-workspace-main{position:relative;z-index:1;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));align-content:start;gap:14px;width:auto!important;max-width:none;margin:0 0 0 204px!important;padding:18px 22px 54px!important}
 .ic-workspace-page .ic-dashboard-topbar{grid-column:1/-1;order:0;display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:42px}
 .ic-workspace-page .ic-dashboard-search{display:flex;align-items:center;gap:10px;width:min(420px,60%);padding:9px 12px;border:1px solid #11304b;border-radius:8px;background:#041424;color:#9eb6d1}
 .ic-workspace-page .ic-dashboard-search svg,.ic-workspace-page .ic-dashboard-notifications svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
@@ -1759,7 +1761,7 @@
 .ic-workspace-page .brand-logo{padding:0 7px!important}
 .ic-workspace-page .brand-logo{height:67px;flex:0 0 67px;gap:10px;border-bottom:1px solid rgba(37,130,185,.15)}
 .ic-workspace-page .brand-emblem{width:43px!important;height:43px!important}
-.ic-workspace-page .desktop-nav{width:100%!important;gap:0!important;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#12334d transparent}
+.ic-workspace-page .desktop-nav{flex:0 0 auto!important;justify-content:flex-start!important;width:100%!important;gap:0!important;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#12334d transparent}
 .ic-workspace-page .desktop-nav .nav-link{height:34px;min-height:34px;padding:0 10px!important;margin:2px 0;font-size:.6875rem!important;gap:11px!important;white-space:nowrap!important}
 .ic-workspace-page .desktop-nav .nav-link svg{width:17px!important;height:17px!important;flex:0 0 17px!important}
 .ic-workspace-page .desktop-nav .nav-link.is-active{background:linear-gradient(100deg,#073b72,#082d57)!important;color:#34dcff!important}
@@ -2108,3 +2110,45 @@
   .ic-workspace-page .ic-live-clock strong{font-size:17px}
   .ic-workspace-page .ic-live-clock small{font-size:12px}
 }
+
+/* Match the reference layout for the internship summary and attendance calendar. */
+.ic-workspace-page .ic-attendance-panel{padding:15px!important;border:1px solid #10314d!important;border-radius:12px!important;background:linear-gradient(145deg,#061a2c,#041323)!important;color:#eaf4ff;box-shadow:0 12px 30px rgba(0,0,0,.14)}
+.ic-workspace-page .ic-attendance-heading{align-items:center;gap:10px}
+.ic-workspace-page .ic-attendance-heading h2{color:#edf6ff!important;font-size:.98rem;font-weight:750}
+.ic-workspace-page .ic-attendance-month-label select{min-height:32px;padding:5px 25px 5px 9px;border:1px solid #153b59;border-radius:8px;background:#041426;color:#bfd3e8;font:inherit;font-size:.66rem}
+.ic-workspace-page .ic-attendance-actions{display:flex;justify-content:flex-end;margin:8px 0 0;padding:0;border:0}
+.ic-workspace-page .ic-attendance-actions p{display:none}
+.ic-workspace-page .ic-attendance-actions .ic-primary-button{padding:6px 9px;border-radius:7px;font-size:.63rem}
+.ic-workspace-page .ic-attendance-actions:has(.ic-primary-button:disabled){display:none}
+.ic-workspace-page .ic-attendance-calendar-body{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(105px,.6fr);align-items:start;gap:14px;margin-top:10px}
+.ic-workspace-page .ic-attendance-calendar-grid{grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.ic-workspace-page .ic-attendance-calendar-grid>span:nth-child(-n+7){padding:4px 0;color:#829bb6;font-size:.6rem;font-weight:700}
+.ic-workspace-page .ic-calendar-day{display:grid;place-items:center;aspect-ratio:1;border-radius:50%;background:#102944;color:#bfd0e2;font-size:.66rem}
+.ic-workspace-page .ic-calendar-day.is-recorded{background:#08775f;color:#b9ffeb;font-weight:750}
+.ic-workspace-page .ic-calendar-day.is-no-record{background:#392b25;color:#ffc187}
+.ic-workspace-page .ic-calendar-day.is-upcoming{background:#12243a;color:#90a5ba}
+.ic-workspace-page .ic-calendar-day.is-today{outline:1px solid #21b9f1;outline-offset:1px}
+.ic-workspace-page .ic-calendar-day.is-empty{background:transparent}
+.ic-workspace-page .ic-attendance-calendar-legend{display:grid;grid-template-columns:1fr;align-content:start;gap:7px;margin:0;color:#9eb4ca;font-size:.64rem}
+.ic-workspace-page .ic-attendance-calendar-legend>span{display:grid;grid-template-columns:9px minmax(0,1fr) auto;align-items:center;gap:6px;padding:6px 7px;border:1px solid #12314a;border-radius:7px;background:#041426}
+.ic-workspace-page .ic-attendance-calendar-legend>span>span{color:#adc2d7}
+.ic-workspace-page .ic-attendance-calendar-legend i{width:8px;height:8px;border-radius:50%;background:#08775f}
+.ic-workspace-page .ic-attendance-calendar-legend i.is-no-record{background:#ed8b39}
+.ic-workspace-page .ic-attendance-calendar-legend i.is-upcoming{background:#268ee5}
+.ic-workspace-page .ic-attendance-calendar-legend strong{color:#e3f1ff;font-size:.65rem}
+.ic-workspace-page .ic-workspace-welcome#icProfile{padding:14px!important;border:1px solid #10314d!important;border-radius:12px!important;background:linear-gradient(145deg,#061a2c,#041323)!important;box-shadow:0 12px 30px rgba(0,0,0,.14)!important}
+.ic-workspace-page .ic-internship-card-heading{padding-bottom:8px;border-bottom:1px solid #12314a}
+.ic-workspace-page .ic-internship-card-heading h2{font-size:.98rem}
+.ic-workspace-page .ic-profile-details-link{font-size:.66rem;font-weight:700}
+.ic-workspace-page .ic-welcome-avatar{width:52px;height:52px;border:1px solid #087cba;background:linear-gradient(145deg,#073f76,#06315a)!important;box-shadow:0 0 0 4px rgba(0,163,232,.08)}
+.ic-workspace-page .ic-welcome-copy h2{font-size:.9rem;font-weight:750}
+.ic-workspace-page .ic-welcome-copy p{margin:3px 0 0;color:#a9bfd8!important;font-size:.7rem}
+.ic-workspace-page #icProfile .ic-account-pill{display:none!important}
+.ic-workspace-page .ic-intern-profile-details{margin-top:10px!important;padding-top:4px;border-top:0}
+.ic-workspace-page .ic-intern-profile-details>div{display:grid!important;grid-template-columns:22px minmax(75px,.65fr) minmax(0,1.35fr);gap:8px!important;padding:7px 0!important;border-bottom:1px solid #102b43!important}
+.ic-workspace-page .ic-intern-profile-icon{width:20px;height:20px;border-radius:6px;background:#0b3152;color:#51c9ff;font-size:.68rem}
+.ic-workspace-page .ic-intern-profile-details .ic-intern-profile-label{color:#8ca6c1!important;font-size:.66rem}
+.ic-workspace-page .ic-intern-profile-details strong{max-width:100%;color:#dcecff!important;font-size:.67rem;font-weight:600}
+.ic-workspace-page .ic-intern-profile-row strong.is-profile-active{padding:3px 9px;border-radius:999px;background:rgba(0,211,160,.14);color:#00dba7!important}
+.ic-workspace-page .ic-attendance-history{max-height:none;overflow:visible}
+@media(max-width:760px){.ic-workspace-page .ic-attendance-calendar-body{grid-template-columns:minmax(0,1fr);gap:12px}.ic-workspace-page .ic-attendance-calendar-legend{grid-template-columns:repeat(3,minmax(0,1fr))}.ic-workspace-page .ic-attendance-calendar-legend>span{grid-template-columns:8px minmax(0,1fr);gap:4px;padding:5px;font-size:.58rem}.ic-workspace-page .ic-attendance-calendar-legend>span>strong{grid-column:2}.ic-workspace-page .ic-workspace-welcome#icProfile{grid-column:1/-1}}
