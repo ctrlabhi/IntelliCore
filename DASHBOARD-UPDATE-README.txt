@@ -71,7 +71,7 @@ Files to publish
 - style.css
 - auth.js
 - dashboard.html
-- dashboard.css
+- Intern-dashboard.css
 - dashboard-background.css
 - dashboard-auth.js
 - dashboard-visuals.js
