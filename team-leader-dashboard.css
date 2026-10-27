@@ -62,7 +62,7 @@
   .team-leader-page .team-domain-legend{gap:10px}
   .team-leader-page .module-grid{grid-template-columns:1fr}
 }
-.welcome-date{align-items:center;text-align:center}.welcome-date>span{font-size:14px}.welcome-date strong{align-self:center;font-size:22px}.welcome-date small{font-size:16px;font-weight:800}
+.welcome-date{align-items:center;text-align:center}.welcome-date>span{font-size:14px}.welcome-date strong{align-self:center;font-size:22px}.welcome-date small{font-size:16px;font-weight:400}
 .welcome-date small[data-greeting="Good Afternoon"]{font-weight:400}
 .welcome-date .live-date-label{display:flex;align-items:center;justify-content:center;gap:6px}
 .welcome-date .live-date-label svg{width:16px;height:16px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}

@@ -29,7 +29,9 @@
   function updateClock() {
     const now = new Date();
     const date = dateFormatter.format(now);
-    const time = timeFormatter.format(now);
+    const time = timeFormatter.formatToParts(now)
+      .map(part => part.type === 'dayPeriod' ? part.value.toUpperCase() : part.value)
+      .join('');
     const hour = Number(hourFormatter.format(now));
     const greeting = hour < 12
       ? 'Good Morning'
