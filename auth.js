@@ -15,6 +15,7 @@ import {
   onAuthStateChanged,
   setPersistence
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-functions.js";
 
 // Firebase Console se apna exact config yahan paste karo.
 const firebaseConfig = {
@@ -30,6 +31,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
+const bootstrapAccount = httpsCallable(getFunctions(app, "us-central1"), "bootstrapAccount");
+const autoProvisionedStaffEmails = new Set([
+  "thesumitsah47@gmail.com",
+  "tanu65159@gmail.com",
+  "mikkurwt694@gmail.com",
+  "ashitarohilla32@gmail.com"
+]);
 
 const $ = id => document.getElementById(id);
 const modal = $("loginModal");
@@ -188,8 +196,22 @@ async function redirectToDashboard(user) {
     throw new Error("Verify your email address before opening a dashboard.");
   }
 
-  const isAllowlistedFounder = latestUser.email?.trim().toLowerCase() === "ctrlabhishek@gmail.com";
-  const role = isAllowlistedFounder ? "founder" : token.claims.role;
+  let claims = token.claims;
+  const email = latestUser.email?.trim().toLowerCase() || "";
+  try {
+    await bootstrapAccount();
+    await latestUser.getIdToken(true);
+    claims = (await latestUser.getIdTokenResult()).claims;
+  } catch (error) {
+    console.error("The signed-in account could not be provisioned or its dashboard role verified.", error);
+    if (autoProvisionedStaffEmails.has(email)) {
+      const code = typeof error?.code === "string" ? error.code : "unknown";
+      throw new Error(`Could not prepare your IntelliCore workspace (${code}). Please try again or contact an administrator.`);
+    }
+  }
+
+  const isAllowlistedFounder = email === "ctrlabhishek@gmail.com";
+  const role = isAllowlistedFounder ? "founder" : claims.role;
   const destination = ["founder", "co_founder"].includes(role)
     ? "founder-dashboard.html"
     : ["admin", "hr_manager", "hr_executive", "operations_executive"].includes(role)

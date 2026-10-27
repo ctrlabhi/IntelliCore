@@ -24,6 +24,12 @@ const meetingRef = db.collection("organization").doc("currentMeeting");
 const attendanceCollection = uid => db.collection("internships").doc(uid).collection("attendance");
 const superAdminRoles = ["founder", "co_founder"];
 const founderEmailAllowlist = new Set(["ctrlabhishek@gmail.com"]);
+const staffAccountAllowlist = new Map([
+  ["thesumitsah47@gmail.com", { role: "admin", displayName: "Sumit Kumar" }],
+  ["tanu65159@gmail.com", { role: "operations_executive", displayName: "Tanya Tyagi" }],
+  ["mikkurwt694@gmail.com", { role: "hr_executive", displayName: "Mahak Rawat" }],
+  ["ashitarohilla32@gmail.com", { role: "hr_manager", displayName: "Ashita Rohilla" }]
+]);
 const staffRoles = [...superAdminRoles, "admin", "hr_manager", "hr_executive", "operations_executive"];
 const internManagerRoles = staffRoles;
 const profileManagers = [...superAdminRoles, "admin", "hr_manager"];
@@ -275,12 +281,9 @@ function hasVerifiedEmail(user) {
     || user.providerData.some(provider => provider.providerId === "google.com");
 }
 
-exports.ensureProfile = onCall(async request => {
-  const user = requireSignedIn(request);
-  const authUser = await auth.getUser(user.uid);
+async function ensureProfileRecord(user, authUser, role) {
   const ref = profileRef(user.uid);
   const snapshot = await ref.get();
-  const role = callerRole(user);
   const profile = {
     uid: user.uid,
     email: authUser.email || "",
@@ -298,6 +301,47 @@ exports.ensureProfile = onCall(async request => {
   }
   await ref.set(profile, { merge: true });
   return publicProfile({ ...(snapshot.exists ? snapshot.data() : {}), ...profile });
+}
+
+exports.bootstrapAccount = onCall(async request => {
+  const user = requireSignedIn(request);
+  const authUser = await auth.getUser(user.uid);
+  if (!hasVerifiedEmail(authUser)) {
+    throw new HttpsError("permission-denied", "Verify your email address before creating a workspace.");
+  }
+
+  const account = staffAccountAllowlist.get((authUser.email || "").trim().toLowerCase());
+  let role = callerRole(user);
+  if (account) {
+    const currentClaims = authUser.customClaims || {};
+    if (currentClaims.role !== account.role
+      || (currentClaims.mentorTracks?.length || 0) > 0) {
+      await auth.setCustomUserClaims(user.uid, {
+        ...currentClaims,
+        role: account.role,
+        mentorTracks: []
+      });
+    }
+    if (authUser.displayName !== account.displayName) {
+      await auth.updateUser(user.uid, { displayName: account.displayName });
+    }
+    role = account.role;
+  }
+
+  const profile = await ensureProfileRecord(
+    user,
+    account ? { ...authUser, displayName: account.displayName } : authUser,
+    role
+  );
+  return { role, profile };
+});
+
+exports.ensureProfile = onCall(async request => {
+  const user = requireSignedIn(request);
+  const authUser = await auth.getUser(user.uid);
+  const role = callerRole(user);
+  const profile = await ensureProfileRecord(user, authUser, role);
+  return profile;
 });
 
 exports.listRoleAssignmentCandidates = onCall(async request => {

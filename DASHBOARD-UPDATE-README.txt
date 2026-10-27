@@ -37,9 +37,13 @@ Current project
 - Senior HR Manager, Senior HR Executive, and Senior Operations Executive are
   not currently provisionable roles. The dashboard does not grant these
   additional role names or permissions.
-- Accounts without an explicit trusted Firebase role claim use the learner
-  dashboard. Users cannot assign themselves a staff role from the client;
-  Founder/Co-founder assignment is enforced by server-side callable Functions.
+- After sign-in, `auth.js` refreshes the verified user's Firebase token and
+  routes Founder/Co-founder, HR/admin, Team Leader, and learner roles to their
+  matching dashboards. It calls the trusted `bootstrapAccount` Function, which
+  creates or updates the verified account's intern/staff profile on first login.
+  The Function grants the four configured staff roles from a server-side email
+  allowlist; no client-supplied role is trusted. Other accounts without an
+  explicit staff role claim use `Intern-dashboard.html`.
 - Mentor accounts (the currently provisioned role used for Team Leaders) open
   `tl-dashboard.html`. Its example metrics are illustrative and its
   track selector is limited to the account's authorized mentor-track claims.
@@ -139,17 +143,20 @@ Production setup
    npm --prefix functions run set-user-role -- <firebase-uid-or-email> founder
    npm --prefix functions run set-user-role -- <firebase-uid-or-email> co_founder
    Never add service-account keys or credentials to this repository.
-8. Provision staff using only their required role:
+8. The `bootstrapAccount` Function assigns the configured roles on verified
+   sign-in:
+   - `thesumitsah47@gmail.com` — Sumit Kumar, Admin
+   - `tanu65159@gmail.com` — Tanya Tyagi, Operations Executive
+   - `mikkurwt694@gmail.com` — Mahak Rawat, HR Executive
+   - `ashitarohilla32@gmail.com` — Ashita Rohilla, HR Manager
+   It also creates or refreshes every verified user's profile on sign-in, so
+   staff do not need to activate intern profiles manually. Internship domain,
+   duration, and enrollment dates remain the intern's own profile setup.
+   For other staff accounts, provision only their required role:
    npm --prefix functions run set-user-role -- <firebase-uid-or-email> hr_manager
    npm --prefix functions run set-user-role -- <firebase-uid-or-email> hr_executive
    npm --prefix functions run set-user-role -- <firebase-uid-or-email> operations_executive
    npm --prefix functions run set-user-role -- <firebase-uid-or-email> admin
-   For the requested staff accounts, run:
-   npm --prefix functions run set-user-role -- tanu65159@gmail.com operations_executive
-   npm --prefix functions run set-user-role -- mikkurwt694@gmail.com hr_executive
-   npm --prefix functions run set-user-role -- ashitarohilla32@gmail.com hr_manager
-   Sumit Kumar (Web Developer) — administrator access to the HR Dashboard:
-   npm --prefix functions run set-user-role -- thesumitsah47@gmail.com admin
 9. Provision mentors with only the tracks they are authorised to review:
    npm --prefix functions run set-user-role -- <firebase-uid-or-email> mentor "Web Development Intern,Data Analyst Intern"
    Valid track names are listed in index.html and functions/curriculum.js.
