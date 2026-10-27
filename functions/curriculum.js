@@ -201,4 +201,6 @@ const taskById = new Map(
   )
 );
 
-module.exports = { tracks, taskById };
+const curriculum = { tracks, taskById };
+if (typeof module !== "undefined" && module.exports) module.exports = curriculum;
+if (typeof window !== "undefined") window.IntelliCoreCurriculum = curriculum;

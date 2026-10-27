@@ -27,13 +27,95 @@ service cloud.firestore {
         && track in request.auth.token.get('mentorTracks', []);
     }
 
+    function learnerClaim() {
+      return signedIn()
+        && request.auth.token.get('role', 'learner') == 'learner';
+    }
+
     match /profiles/{userId} {
+      function isOwner() {
+        return signedIn() && request.auth.uid == userId;
+      }
+
+      function validLearnerProfile() {
+        let data = request.resource.data;
+        return data.keys().hasAll([
+            'uid', 'email', 'displayName', 'role', 'mentorTracks'
+          ])
+          && data.keys().hasOnly([
+            'uid', 'email', 'displayName', 'role', 'mentorTracks',
+            'track', 'gender', 'phone', 'durationMonths',
+            'internshipStartDate', 'internshipEndDate', 'internshipStatus',
+            'accountStatus', 'createdAt', 'updatedAt', 'lastLoginAt',
+            'profileCompletedAt', 'roleAssignedBy', 'roleAssignedAt',
+            'trackAssignedBy', 'trackAssignedAt', 'deactivatedAt',
+            'deactivatedBy', 'reactivatedAt', 'reactivatedBy',
+            'profileUpdatedBy'
+          ])
+          && data.uid == userId
+          && data.email == request.auth.token.get('email', '')
+          && data.displayName is string
+          && data.displayName.size() <= 80
+          && data.role == 'learner'
+          && data.mentorTracks is list
+          && data.mentorTracks.size() == 0
+          && (!data.keys().hasAny(['track'])
+            || data.track == null
+            || data.track in [
+              'Business Analyst Intern', 'Web Development Intern',
+              'Data Analyst Intern', 'Digital Marketing Intern',
+              'Graphic Designer Intern', 'Social Media Intern',
+              'Content Writing Intern', 'Human Resources Intern'
+            ])
+          && (!data.keys().hasAny(['gender'])
+            || data.gender == null
+            || data.gender in ['Female', 'Male'])
+          && (!data.keys().hasAny(['phone'])
+            || data.phone == null
+            || (data.phone is string
+              && data.phone.size() >= 7
+              && data.phone.size() <= 24
+              && data.phone.matches('^[+()0-9 .-]+$')
+              && data.phone.matches('^([^0-9]*[0-9]){7,15}[^0-9]*$')))
+          && (!data.keys().hasAny(['durationMonths'])
+            || data.durationMonths == null
+            || (data.durationMonths is int && data.durationMonths in [1, 2, 3, 6]))
+          && ((!data.keys().hasAny(['internshipStartDate'])
+              && !data.keys().hasAny(['internshipEndDate']))
+            || (data.internshipStartDate is string
+              && data.internshipStartDate.matches('^\\d{4}-\\d{2}-\\d{2}$')
+              && data.internshipEndDate is string
+              && data.internshipEndDate.matches('^\\d{4}-\\d{2}-\\d{2}$')
+              && data.internshipEndDate >= data.internshipStartDate
+              && data.durationMonths is int
+              && data.track is string
+              && data.gender in ['Female', 'Male']
+              && data.phone is string
+              && data.internshipStatus == 'active'))
+          && (!data.keys().hasAny(['accountStatus'])
+            || data.accountStatus in ['active', 'deactivated']);
+      }
+
       allow read: if signedIn() && (
         request.auth.uid == userId
         || canViewInternProfiles()
         || canMentorTrack(resource.data.track)
       );
-      allow write: if false;
+      allow create: if isOwner()
+        && learnerClaim()
+        && request.resource.data.keys().hasOnly([
+          'uid', 'email', 'displayName', 'role', 'mentorTracks', 'track'
+        ])
+        && (!request.resource.data.keys().hasAny(['track'])
+          || request.resource.data.track == null)
+        && validLearnerProfile();
+      allow update: if isOwner()
+        && learnerClaim()
+        && resource.data.role == 'learner'
+        && validLearnerProfile()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'displayName', 'gender', 'phone'
+        ]);
     }
 
     match /users/{userId}/workspaceRecords/{recordId} {
@@ -96,11 +178,13 @@ service cloud.firestore {
         let data = request.resource.data;
         return data.keys().hasAll([
             'displayName', 'email', 'gender', 'phone', 'track',
-            'durationMonths', 'savedAt'
+            'durationMonths', 'internshipStartDate', 'internshipEndDate',
+            'savedAt'
           ])
           && data.keys().hasOnly([
             'displayName', 'email', 'gender', 'phone', 'track',
-            'durationMonths', 'savedAt'
+            'durationMonths', 'internshipStartDate', 'internshipEndDate',
+            'savedAt'
           ])
           && data.displayName is string
           && data.displayName.size() >= 2
@@ -121,6 +205,11 @@ service cloud.firestore {
           ]
           && data.durationMonths is int
           && data.durationMonths in [1, 2, 3, 6]
+          && data.internshipStartDate is string
+          && data.internshipStartDate.matches('^\\d{4}-\\d{2}-\\d{2}$')
+          && data.internshipEndDate is string
+          && data.internshipEndDate.matches('^\\d{4}-\\d{2}-\\d{2}$')
+          && data.internshipEndDate >= data.internshipStartDate
           && data.savedAt is timestamp
           && data.savedAt == request.time;
       }
@@ -174,6 +263,11 @@ service cloud.firestore {
         allow read: if canReadParentAssignment();
         allow write: if false;
       }
+    }
+
+    match /internships/{userId}/attendance/{attendanceId} {
+      allow read: if signedIn() && request.auth.uid == userId;
+      allow write: if false;
     }
   }
 }

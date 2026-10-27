@@ -83,6 +83,7 @@ onAuthStateChanged(auth, async user => {
 
     const name = latestUser.displayName?.trim() || "Team Leader";
     $("userName").textContent = name;
+    $("mobileWelcomeName").textContent = name.split(/\s+/)[0];
     $("userAvatar").textContent = name.split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase();
     $("profileEmail").textContent = latestUser.email || "Authorized Team Leader account";
     $("domainSelect").innerHTML = tracks.map(track =>

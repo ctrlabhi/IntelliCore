@@ -11,18 +11,24 @@ Current project
   direct under the existing verified-account access policy.
 - Private workspace records use Firestore under each user's own
   users/{uid}/workspaceRecords collection.
-- Interns create their own internship profile by selecting one of the eight
-  tracks and a duration of 1, 2, 3, or 6 months. The server saves the start
-  and end dates using Asia/Kolkata.
-- Attendance is an explicit daily check-in. The server allows at most one
-  check-in per Asia/Kolkata calendar day and only within the internship dates.
+- On the Spark plan, interns can create a basic owner-only learner profile and
+  save their internship details as a private Firestore draft. They choose a
+  start date and a duration of 1, 2, 3, or 6 months; the end date is calculated
+  in the dashboard and the attendance calendar can preview those months.
+  Draft dates do not enroll the intern or enable attendance; only a trusted
+  backend can activate the enrollment.
+- Saved attendance can be read by its owner on Spark, but new attendance is
+  read-only unless the trusted `checkInToday` Function is available. Do not
+  accept client-written attendance: a browser cannot securely prove a login
+  event or enforce a one-per-Asia/Kolkata-day check-in.
 - Founder and Co-founder are Super Admins and can start/end the shared Google
   Meet. A live link is shown to active interns and staff; meetings expire after
   two hours.
-- The verified `ctrlabhishek@gmail.com` account is allowlisted as a Founder
-  for dashboard routing and trusted callable authorization; other Founder and
-  Co-founder accounts use explicit Firebase role claims. Founder and
-  Co-founder accounts open `founder-dashboard.html`, a separate
+- The trusted Functions backend allowlists the verified
+  `ctrlabhishek@gmail.com` account as a Founder; other Founder and Co-founder
+  accounts use explicit Firebase role claims. The browser routes only from
+  role claims, so the allowlisted account still needs a provisioned claim to
+  open `founder-dashboard.html` on Spark. That page is a separate
   role-gated command-center UI. Its organization KPIs and sample records are
   illustrative. The Founder-only role assignment form calls trusted Functions
   to grant Team Leader (mentor, with selected track claims), HR Manager, or HR
@@ -38,12 +44,11 @@ Current project
   not currently provisionable roles. The dashboard does not grant these
   additional role names or permissions.
 - After sign-in, `auth.js` refreshes the verified user's Firebase token and
-  routes Founder/Co-founder, HR/admin, Team Leader, and learner roles to their
-  matching dashboards. It calls the trusted `bootstrapAccount` Function, which
-  creates or updates the verified account's intern/staff profile on first login.
-  The Function grants the four configured staff roles from a server-side email
-  allowlist; no client-supplied role is trusted. Other accounts without an
-  explicit staff role claim use `Intern-dashboard.html`.
+  routes only from existing Firebase role claims. Learner profiles can be
+  initialized safely by their owner on Spark. Staff role provisioning still
+  requires the trusted `bootstrapAccount` Function or an authorized
+  administrator; the browser never grants staff roles. Unprovisioned
+  allowlisted staff accounts receive an explicit error on Spark.
 - Mentor accounts (the currently provisioned role used for Team Leaders) open
   `tl-dashboard.html`. Its example metrics are illustrative and its
   track selector is limited to the account's authorized mentor-track claims.
@@ -59,15 +64,18 @@ Current project
 - HR Manager manages internship profiles and attendance. HR Executive views
   intern profiles. Operations Executive views profiles and attendance.
   Mentors assign and review work only for authorised tracks.
-- Training assignments, submissions, reviews, profile updates, attendance,
-  and meeting operations use trusted callable Cloud Functions and Firebase
-  Authentication custom claims. Browser-editable role values never authorize
-  access.
-- Profile display names are saved to Firebase Authentication. Profile photos
-  are stored under a per-user Firebase Storage path.
-- Intern profile setup requires a name, phone number, gender, domain, and
-  internship duration. Profile photos are optional; the workspace displays
-  the user's first initial when no photo is uploaded.
+- On Spark, learner dashboards read only their own profile, assigned task
+  records, and attendance history through Firestore rules. Public curriculum
+  content is served from `functions/curriculum.js`. Assignment creation,
+  submissions, review transitions, staff profile management, admin reports,
+  account deactivation, and Google Meet operations still require trusted
+  callable Functions and are not simulated on Spark.
+- Profile display names and drafts are stored in the owner's Firestore profile
+  documents. Profile photos are stored under a per-user Firebase Storage path.
+- Intern profile setup requires a name, phone number, gender, domain, duration,
+  and start date; the end date is calculated from the duration. Profile photos
+  are optional; the workspace displays the user's first initial when no photo
+  is uploaded.
 
 Files to publish
 ----------------
@@ -95,7 +103,28 @@ Files to publish
 - firestore.indexes.json
 - storage.rules
 - storage.cors.json
+- .firebaserc
 - DASHBOARD-UPDATE-README.txt
+
+Spark smoke test without production data
+---------------------------------------
+1. Install Node.js and the Firebase CLI on the development machine. This is
+   only for local emulators; it does not require Blaze or deploy anything.
+2. From the project root, start the Auth, Firestore, and Storage emulators:
+   firebase emulators:start --only auth,firestore,storage --project intellicore-229
+3. In a second terminal at the project root, serve the static files locally,
+   for example:
+   python -m http.server 8000
+4. Open http://127.0.0.1:8000/index.html?firebaseEmulator=1. Create a test
+   email/password account, open its verification link from the Auth emulator
+   UI at http://127.0.0.1:4000, then sign in again. Profile-photo uploads
+   during this test are routed to the Storage emulator as well.
+5. Open the Intern dashboard, save a profile draft with a start date and
+   duration, and verify that the end date/calendar month updates. The profile
+   draft and learner task/attendance reads use only the emulators.
+6. In the Firestore emulator UI, verify that the draft is under the test UID.
+   Attempting to write role, active enrollment dates, or attendance directly
+   must be denied by the rules. No Firebase production documents are changed.
 
 Production setup
 ----------------
@@ -118,23 +147,22 @@ Production setup
    bucket if they do not already exist. Email verification uses Firebase
    Authentication directly and does not require Functions, Resend, SMTP, or
    another email provider.
-3. The existing workspace callable Functions and Google Calendar integration
-   require Cloud Functions deployment; Firebase currently requires the Blaze
-   plan for deployment. This billing requirement is unrelated to email
-   verification. The updated verified-email guard must be deployed with the
-   existing Functions for callable workspace features to accept verified
-   password users. If the project remains on Spark, email verification itself
-   still works, but this backend update cannot be deployed until the existing
-   Functions hosting plan requirement is met. Review quotas and billing alerts
-   before deploying Functions.
-4. Install the Functions dependencies from the project root:
-   npm --prefix functions install
-5. Deploy the backend, database rules/indexes, and Storage rules:
-   firebase deploy --only functions,firestore:rules,firestore:indexes,storage --project intellicore-229
-6. Configure Storage CORS for the website and local development. From the
+3. This project targets the Firebase Spark plan. Do not deploy Cloud
+   Functions or enable billing as part of the Spark setup. Profile editing,
+   learner workspace reads, and saved attendance history use Firebase client
+   SDK access guarded by Firestore rules. Automatic attendance check-in,
+   assignment submissions/reviews, staff administration, account lifecycle,
+   and Google Calendar/Meet operations remain unavailable without trusted
+   backend compute.
+4. After the project owner explicitly approves a rules-only change, deploy the
+   Firestore rules and indexes (this does not deploy Functions or modify
+   Firestore documents):
+   firebase deploy --only firestore:rules,firestore:indexes --project intellicore-229
+   Do not run any deployment command without the project owner's approval.
+5. Configure Storage CORS for the website and local development. From the
    project root, apply the included configuration:
    gcloud storage buckets update gs://intellicore-229.firebasestorage.app --cors-file=storage.cors.json --project=intellicore-229
-7. Provision the Founder and Co-founder Super Admin accounts explicitly.
+6. Provision the Founder and Co-founder Super Admin accounts explicitly.
    Authenticate with Google
    Application Default Credentials, then run:
    gcloud auth application-default login
@@ -143,8 +171,8 @@ Production setup
    npm --prefix functions run set-user-role -- <firebase-uid-or-email> founder
    npm --prefix functions run set-user-role -- <firebase-uid-or-email> co_founder
    Never add service-account keys or credentials to this repository.
-8. The `bootstrapAccount` Function assigns the configured roles on verified
-   sign-in:
+7. When a trusted Functions backend is available, `bootstrapAccount` assigns
+   the configured roles on verified sign-in:
    - `thesumitsah47@gmail.com` — Sumit Kumar, Admin
    - `tanu65159@gmail.com` — Tanya Tyagi, Operations Executive
    - `mikkurwt694@gmail.com` — Mahak Rawat, HR Executive
@@ -238,8 +266,10 @@ Security and product limitations
 - This repository cannot show the live Firebase Console authorised-domain
   list or the currently saved email-template URL. Confirm both manually in
   project intellicore-229; no production configuration was changed here.
-- Training assignment writes, review transitions, internship profile changes,
-  attendance records, and meeting state are performed by Cloud Functions.
+- On Spark, the intern profile and owner-only learner workspace reads are
+  protected by Firestore rules. Attendance is read-only. Training assignment
+  writes/submissions/reviews, admin profile changes, trusted login check-ins,
+  and meeting state still require Cloud Functions.
 - Attendance is self-reported check-in, not biometric or location-verified.
 - Google Calendar events and Meet links are created using the configured
   Calendar owner's account. The integration does not send separate

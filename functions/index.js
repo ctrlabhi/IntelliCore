@@ -87,6 +87,12 @@ function dateInIndia(date = new Date()) {
   return `${values.year}-${values.month}-${values.day}`;
 }
 
+function validDateString(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const parsed = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+}
+
 function addDurationMonths(startDate, durationMonths) {
   const [year, month, day] = startDate.split("-").map(Number);
   const targetMonthIndex = month - 1 + durationMonths;
@@ -887,23 +893,36 @@ exports.saveInternshipProfile = onCall(async request => {
   const draftSnapshot = await db.collection("users").doc(user.uid)
     .collection("profileDrafts").doc("current").get();
   const savedAt = draftSnapshot.get("savedAt");
-  const startDate = savedAt?.toDate
+  const requestedStartDate = draftSnapshot.get("internshipStartDate");
+  const startDate = requestedStartDate || (savedAt?.toDate
     ? dateInIndia(savedAt.toDate())
-    : dateInIndia();
+    : dateInIndia());
   const endDate = addDurationMonths(startDate, durationMonths);
+  const requestedEndDate = draftSnapshot.get("internshipEndDate");
+  if (!validDateString(startDate)
+    || (requestedEndDate !== undefined && requestedEndDate !== endDate)) {
+    throw new HttpsError("invalid-argument", "The saved internship date range is invalid. Review the start date and duration.");
+  }
   const savedDates = await db.runTransaction(async transaction => {
     const profileSnapshot = await transaction.get(ref);
-    if (!profileSnapshot.exists || profileSnapshot.get("role") !== "learner") {
-      throw new HttpsError("failed-precondition", "Your intern profile is not ready. Refresh and try again.");
+    if (profileSnapshot.exists && profileSnapshot.get("role") !== "learner") {
+      throw new HttpsError("permission-denied", "Only learner accounts can activate an internship profile.");
     }
-    const current = profileSnapshot.data();
+    const current = profileSnapshot.exists ? profileSnapshot.data() : null;
     const profileData = {
       displayName,
       gender,
       phone,
       updatedAt: FieldValue.serverTimestamp()
     };
-    if (current.internshipStartDate && current.internshipEndDate) {
+    if (!current) {
+      profileData.uid = user.uid;
+      profileData.email = user.token.email || "";
+      profileData.role = "learner";
+      profileData.mentorTracks = [];
+      profileData.createdAt = FieldValue.serverTimestamp();
+    }
+    if (current?.internshipStartDate && current?.internshipEndDate) {
       if (current.track === track && current.durationMonths === durationMonths) {
         transaction.set(ref, {
           ...profileData,
@@ -913,7 +932,7 @@ exports.saveInternshipProfile = onCall(async request => {
       }
       throw new HttpsError("failed-precondition", "Your internship profile is already active. Contact HR to change your domain or duration.");
     }
-    if (current.track && current.track !== track) {
+    if (current?.track && current.track !== track) {
       const assignments = await transaction.get(db.collection("trainingAssignments")
         .where("assignedToUid", "==", user.uid)
         .limit(1));

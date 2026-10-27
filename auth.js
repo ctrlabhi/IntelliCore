@@ -13,9 +13,9 @@ import {
   sendPasswordResetEmail,
   updateProfile,
   onAuthStateChanged,
-  setPersistence
+  setPersistence,
+  connectAuthEmulator
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
-import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-functions.js";
 
 // Firebase Console se apna exact config yahan paste karo.
 const firebaseConfig = {
@@ -30,14 +30,19 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const useFirebaseEmulators = new URLSearchParams(location.search).get("firebaseEmulator") === "1"
+  && ["localhost", "127.0.0.1"].includes(location.hostname);
+if (useFirebaseEmulators) {
+  connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+}
 const googleProvider = new GoogleAuthProvider();
-const bootstrapAccount = httpsCallable(getFunctions(app, "us-central1"), "bootstrapAccount");
 const autoProvisionedStaffEmails = new Set([
   "thesumitsah47@gmail.com",
   "tanu65159@gmail.com",
   "mikkurwt694@gmail.com",
   "ashitarohilla32@gmail.com"
 ]);
+const founderEmail = "ctrlabhishek@gmail.com";
 
 const $ = id => document.getElementById(id);
 const modal = $("loginModal");
@@ -196,22 +201,17 @@ async function redirectToDashboard(user) {
     throw new Error("Verify your email address before opening a dashboard.");
   }
 
-  let claims = token.claims;
+  const claims = token.claims;
   const email = latestUser.email?.trim().toLowerCase() || "";
-  try {
-    await bootstrapAccount();
-    await latestUser.getIdToken(true);
-    claims = (await latestUser.getIdTokenResult()).claims;
-  } catch (error) {
-    console.error("The signed-in account could not be provisioned or its dashboard role verified.", error);
-    if (autoProvisionedStaffEmails.has(email)) {
-      const code = typeof error?.code === "string" ? error.code : "unknown";
-      throw new Error(`Could not prepare your IntelliCore workspace (${code}). Please try again or contact an administrator.`);
-    }
+  if (autoProvisionedStaffEmails.has(email)
+    && !["admin", "hr_manager", "hr_executive", "operations_executive"].includes(claims.role)) {
+    throw new Error("This staff account has not been provisioned. Staff role assignment requires an authorised administrator and cannot be performed on the free Spark client.");
+  }
+  if (email === founderEmail && !["founder", "co_founder"].includes(claims.role)) {
+    throw new Error("This Founder account has no verified role claim. Founder access cannot be granted by the browser or on the Spark client.");
   }
 
-  const isAllowlistedFounder = email === "ctrlabhishek@gmail.com";
-  const role = isAllowlistedFounder ? "founder" : claims.role;
+  const role = claims.role;
   const destination = ["founder", "co_founder"].includes(role)
     ? "founder-dashboard.html"
     : ["admin", "hr_manager", "hr_executive", "operations_executive"].includes(role)
@@ -219,7 +219,7 @@ async function redirectToDashboard(user) {
       : role === "mentor"
         ? "tl-dashboard.html"
         : "Intern-dashboard.html";
-  window.location.replace(destination);
+  window.location.replace(`${destination}${useFirebaseEmulators ? "?firebaseEmulator=1" : ""}`);
 }
 
 $("loginTrigger")?.addEventListener("click", openModal);

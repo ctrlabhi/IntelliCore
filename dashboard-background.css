@@ -2,6 +2,8 @@ body {
   isolation: isolate;
 }
 
+.mobile-welcome-title { display: none; }
+
 .dashboard-background-canvas {
   position: fixed;
   inset: 0;
@@ -9,6 +11,38 @@ body {
   width: 100%;
   height: 100%;
   pointer-events: none;
+}
+
+@media (min-width: 761px) {
+  .welcome-banner,
+  .ic-workspace-page .ic-workspace-hero {
+    min-height: 0;
+    padding: 4px 12px 12px !important;
+    gap: 12px;
+  }
+
+  .welcome-copy h1,
+  .ic-workspace-page .ic-workspace-hero h1 {
+    margin-top: 0 !important;
+    margin-bottom: 4px !important;
+  }
+
+  .welcome-meta,
+  .ic-workspace-page .ic-workspace-hero-meta {
+    margin-top: 4px;
+  }
+
+  .welcome-art,
+  .ic-workspace-page .ic-hero-orbit {
+    height: 112px;
+    flex-basis: 145px;
+  }
+
+  .welcome-date,
+  .ic-workspace-page .ic-live-clock {
+    gap: 2px;
+    padding: 6px 9px;
+  }
 }
 
 .dashboard-shell,
@@ -626,4 +660,124 @@ body {
   .welcome-date {
     max-width: 100%;
   }
+}
+
+@media (max-width: 760px) {
+  .welcome-banner {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    align-content: center;
+    min-height: 0;
+    padding: 12px 14px !important;
+  }
+
+  .welcome-copy {
+    grid-column: 1;
+    grid-row: 1;
+    width: 100%;
+  }
+
+  .welcome-copy h1 {
+    margin: 0;
+    font-size: clamp(22px, 6vw, 28px);
+    line-height: 1.12;
+  }
+
+  .welcome-copy p,
+  .welcome-meta,
+  .welcome-art,
+  .ic-workspace-hero-copy p,
+  .ic-workspace-hero-meta,
+  .ic-workspace-page .ic-hero-orbit {
+    display: none !important;
+  }
+
+  .ic-workspace-hero {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    align-content: center;
+    min-height: 0 !important;
+    padding: 12px 14px !important;
+  }
+
+  .mobile-welcome-greeting,
+  .mobile-welcome-name,
+  .ic-mobile-welcome-greeting,
+  .ic-mobile-welcome-name {
+    display: block;
+  }
+
+  .mobile-welcome-greeting,
+  .ic-mobile-welcome-greeting {
+    color: #f4f7ff !important;
+  }
+
+  .welcome-copy h1 > .mobile-welcome-title {
+    display: block;
+    color: #f4f7ff !important;
+  }
+  .mobile-welcome-title > span { display: block; color: #1ccfff !important; }
+  .desktop-welcome-title { display: none; }
+
+  .ic-workspace-hero-copy {
+    grid-column: 1;
+    grid-row: 1;
+    width: 100%;
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .ic-workspace-hero-copy h1 .ic-mobile-welcome-greeting { color: #fff; }
+  .ic-workspace-hero-copy h1 .ic-mobile-welcome-name { color: #1ccfff; }
+
+  .welcome-date,
+  .ic-live-clock {
+    position: static !important;
+    grid-column: 1;
+    grid-row: 2;
+    display: flex !important;
+    align-items: center !important;
+    justify-self: start;
+    gap: 8px !important;
+    width: fit-content !important;
+    min-width: 0 !important;
+    max-width: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    border: 0 !important;
+    background: transparent !important;
+    text-align: left !important;
+    box-shadow: none !important;
+  }
+
+  .welcome-date .live-date-label,
+  .ic-live-clock .live-date-label {
+    display: none !important;
+  }
+
+  .welcome-date strong,
+  .ic-live-clock strong {
+    align-self: auto !important;
+    color: #7ddcff !important;
+    font-size: 15px !important;
+    font-weight: 800;
+    letter-spacing: .3px;
+  }
+
+  .welcome-date small,
+  .ic-live-clock small {
+    color: #a9bfd8 !important;
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .welcome-banner,
+  .ic-workspace-hero { padding: 10px 12px !important; }
+  .welcome-copy h1 { font-size: 22px; }
+  .welcome-date strong,
+  .ic-live-clock strong { font-size: 14px !important; }
 }

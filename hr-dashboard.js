@@ -52,9 +52,9 @@ function applyRole(role, name) {
   const config = staffRoles[role];
   $("userName").textContent = name;
   $("userRole").textContent = config.label;
+  $("mobileWelcomeName").textContent = name.split(/\s+/)[0];
   $("welcomeCopy").textContent = `Welcome back, ${name.split(/\s+/)[0]}. Review your authorized work and coordinate your team.`;
   $("roleScope").textContent = config.scope;
-  $("dashboardRoleLabel").textContent = config.display;
   $("userAvatar").textContent = name.split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase();
   $("profileEmail").textContent = auth.currentUser?.email || "Signed in with an authorized staff account.";
 

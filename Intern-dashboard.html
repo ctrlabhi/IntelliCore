@@ -79,17 +79,22 @@
         </div>
       </a>
 
+      <div class="ic-sidebar-caption">INTERN WORKSPACE</div>
       <nav class="desktop-nav ic-workspace-nav" aria-label="Workspace navigation">
         <a href="#workspaceHome" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Intern Dashboard</a>
         <a href="#icProfile" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
         <a href="#icTrainingSection" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="m3 6 1 1 2-2m-3 7 1 1 2-2m-3 7 1 1 2-2"/></svg>My Tasks</a>
         <a href="#icAttendancePanel" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Attendance</a>
+        <div class="ic-sidebar-group-label">LEARNING</div>
+        <a href="#icProjects" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 7 9-4 9 4-9 4-9-4Z"/><path d="m5 11 7 3 7-3M5 15l7 3 7-3"/></svg>My Projects</a>
+        <a href="#icLearningResources" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v15H4zM8 3v4m8-4v4M7 10h10M7 14h6"/></svg>Learning Resources</a>
+        <a href="#icCertificateEligibility" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.4 5 5.5.8-4 3.9.9 5.5-4.8-2.6-4.8 2.6.9-5.5-4-3.9 5.5-.8L12 3Z"/></svg>Certificates</a>
+        <div class="ic-sidebar-group-label">UPDATES &amp; HELP</div>
+        <a href="#icNotifications" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12h4"/></svg>Announcements</a>
+        <a href="mailto:Info@IntelliCoreTechnologies.in" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 4.4 1.6c-1.1 1.2-1.9 1.2-1.9 3.4m0 3h.01"/></svg>Support</a>
       </nav>
-
+      <div class="ic-sidebar-foot"><span class="ic-sidebar-foot-dot"></span> Intern workspace</div>
       <div class="header-actions">
-        <button class="contact-us-btn ic-header-logout" id="icHeaderLogout" type="button">
-          Log out <span aria-hidden="true">↗</span>
-        </button>
         <button class="hamburger-btn" id="hamburgerBtn" type="button" aria-label="Toggle mobile navigation" aria-controls="mobileDrawer" aria-expanded="false">
           <span class="hamburger-bar"></span>
           <span class="hamburger-bar"></span>
@@ -111,15 +116,26 @@
       <button class="mobile-drawer-close" id="closeDrawerBtn" type="button"
               aria-label="Close navigation menu" title="Close menu">&times;</button>
     </div>
-    <ul class="mobile-nav-list">
-      <li><a href="#workspaceHome" class="mobile-nav-link">Intern dashboard <span>→</span></a></li>
-      <li><a href="#icProfile" class="mobile-nav-link">My profile <span>→</span></a></li>
-      <li><a href="#icTrainingSection" class="mobile-nav-link">My tasks <span>→</span></a></li>
-      <li><a href="#icAttendancePanel" class="mobile-nav-link">Attendance <span>→</span></a></li>
-      <li><a href="#icRecordsTitle" class="mobile-nav-link">My records <span>→</span></a></li>
-      <li><a href="index.html#tracks" class="mobile-nav-link">Opportunities <span>→</span></a></li>
-      <li><a href="index.html#services" class="mobile-nav-link">IntelliCore services <span>→</span></a></li>
-    </ul>
+    <nav aria-label="Intern workspace navigation">
+      <p class="mobile-nav-group">WORKSPACE</p>
+      <ul class="mobile-nav-list">
+        <li><a href="#workspaceHome" class="mobile-nav-link">Intern dashboard <span>→</span></a></li>
+        <li><a href="#icProfile" class="mobile-nav-link">My profile <span>→</span></a></li>
+        <li><a href="#icTrainingSection" class="mobile-nav-link">My tasks <span>→</span></a></li>
+        <li><a href="#icAttendancePanel" class="mobile-nav-link">Attendance <span>→</span></a></li>
+      </ul>
+      <p class="mobile-nav-group">LEARNING</p>
+      <ul class="mobile-nav-list">
+        <li><a href="#icProjects" class="mobile-nav-link">My projects <span>→</span></a></li>
+        <li><a href="#icLearningResources" class="mobile-nav-link">Learning resources <span>→</span></a></li>
+        <li><a href="#icCertificateEligibility" class="mobile-nav-link">Certificates <span>→</span></a></li>
+      </ul>
+      <p class="mobile-nav-group">UPDATES &amp; HELP</p>
+      <ul class="mobile-nav-list">
+        <li><a href="#icNotifications" class="mobile-nav-link">Announcements <span>→</span></a></li>
+        <li><a href="mailto:Info@IntelliCoreTechnologies.in" class="mobile-nav-link">Support <span>↗</span></a></li>
+      </ul>
+    </nav>
 
   </aside>
 
@@ -146,17 +162,43 @@
   <!-- 3. HERO SECTION (PDF SLIDE 1 + CORPORATE IT STARTUP POSITIONING) -->
   
   <main class="ic-workspace-main" id="workspaceTop" aria-busy="true">
+    <div class="ic-dashboard-topbar">
+      <label class="ic-dashboard-search" for="icTaskSearch">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>
+        <input id="icTaskSearch" type="search" placeholder="Search assigned tasks…" aria-label="Search assigned tasks">
+      </label>
+      <div class="ic-dashboard-user">
+        <a class="ic-dashboard-notifications" href="#icNotifications" aria-label="Open announcements">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12h4"/></svg>
+        </a>
+        <span class="ic-dashboard-user-divider" aria-hidden="true"></span>
+        <span class="ic-dashboard-avatar" id="icDashboardInitial" aria-hidden="true">I</span>
+        <span class="ic-dashboard-user-copy"><strong id="icDashboardUserName">Intern</strong><small id="icDashboardUserRole">Intern</small></span>
+        <button class="ic-topbar-logout" id="icHeaderLogout" type="button">Log out <span aria-hidden="true">↗</span></button>
+      </div>
+    </div>
     <section class="ic-workspace-hero" id="workspaceHome">
       <div class="ic-workspace-hero-copy">
-        <div class="ic-workspace-kicker"><span class="ic-status-dot"></span> INTERN DASHBOARD</div>
-        <h1>Welcome back,<br><span id="icInternWelcomeName">Intern</span></h1>
-        <p>Your internship profile, assigned tasks, attendance, and progress—all in one place.</p>
-        <div class="ic-live-clock" aria-label="Current date and time"><span class="live-date-label"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 9h18M7 13h.01M12 13h.01M17 13h.01M7 17h.01M12 17h.01"/></svg><span data-live-date>Loading date…</span></span><strong data-live-time>--:--:--</strong><small data-live-greeting>Good Morning!</small></div>
+        <h1><span class="ic-mobile-welcome-greeting">Welcome back, </span><span class="ic-mobile-welcome-name"><span id="icInternWelcomeName">Intern</span>!</span></h1>
+        <p>Keep learning, complete your tasks and grow with IntelliCore.</p>
+        <div class="ic-workspace-hero-meta"><span>◈ Intern Workspace</span><span class="ic-workspace-access-pill">Assigned access</span></div>
       </div>
-      <div class="ic-hero-orbit" aria-hidden="true"><div class="ic-orbit-ring ring-one"></div><div class="ic-orbit-ring ring-two"></div><div class="ic-orbit-core"><img src="Photos/favicon.png" alt="IntelliCore logo"></div><div class="welcome-chip-track"><span class="orbit-chip chip-one"><span>Learn</span></span><span class="orbit-chip chip-two"><span>Grow</span></span><span class="orbit-chip chip-three"><span>Build</span></span></div></div>
+      <div class="ic-hero-orbit" aria-hidden="true">
+        <div class="ic-orbit-ring ring-one"></div>
+        <div class="ic-orbit-ring ring-two"></div>
+        <img class="ic-hero-logo" src="Photos/favicon.png" alt="">
+        <span class="ic-hero-chip chip-learn">Learn</span>
+        <span class="ic-hero-chip chip-grow">Grow</span>
+        <span class="ic-hero-chip chip-build">Build</span>
+      </div>
+      <div class="ic-live-clock" aria-label="Current date and time"><span class="live-date-label"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 9h18M7 13h.01M12 13h.01M17 13h.01M7 17h.01M12 17h.01"/></svg><span data-live-date>Loading date…</span></span><strong data-live-time>--:--:--</strong><small data-live-greeting>Good Morning!</small></div>
     </section>
 
-    <section class="ic-workspace-welcome" id="icProfile" aria-label="Account summary">
+    <section class="ic-workspace-welcome" id="icProfile" aria-label="My current internship">
+      <div class="ic-internship-card-heading">
+        <h2>My Current Internship</h2>
+        <button type="button" class="ic-profile-details-link" id="icProfileDetailsButton">Complete Profile</button>
+      </div>
       <div class="ic-welcome-avatar-wrap">
         <div class="ic-welcome-avatar" id="icProfileAvatar" role="button" tabindex="0" aria-label="Change profile photo">
           <img id="icProfilePhoto" alt="Your profile photo" hidden>
@@ -165,19 +207,23 @@
         <input id="icProfilePhotoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
       </div>
       <div class="ic-welcome-copy">
-        <span class="ic-muted-label">WELCOME BACK</span>
-        <h2 id="icProfileName">Your workspace</h2>
-        <p id="icProfileEmail">Loading your account details…</p>
+        <h2 id="icInternshipTitle">Internship profile</h2>
+        <p id="icInternshipCompany">IntelliCore</p>
+        <div class="ic-profile-identity-source" hidden>
+          <span id="icProfileName">Your workspace</span>
+          <span id="icProfileEmail">Loading your account details…</span>
+        </div>
         <div class="ic-internship-prompt" id="icInternshipPrompt" aria-labelledby="icInternshipPromptTitle" hidden>
           <span class="ic-muted-label">YOUR INTERNSHIP STARTS HERE</span>
-          <h3 id="icInternshipPromptTitle">Firstly, build your profile</h3>
-          <p>Enter your details and choose your domain and duration to unlock your dashboard.</p>
+          <h3 id="icInternshipPromptTitle">Complete your internship profile</h3>
+          <p>Enter your details, domain and duration to activate your internship.</p>
         </div>
       </div>
       <div class="ic-welcome-actions">
         <span class="ic-account-pill"><span></span> Account connected</span>
         <button type="button" class="ic-primary-button ic-build-profile-button" id="icBuildProfileButton" hidden>Build your profile <span aria-hidden="true">→</span></button>
       </div>
+      <div class="ic-intern-profile-details" id="icInternProfileDetails" aria-label="Your internship profile"></div>
       <div class="ic-profile-progress" aria-label="Account profile completeness">
         <div><span>Account profile</span><strong id="icProfileCompletion">0%</strong></div>
         <div class="ic-progress-track" role="progressbar" aria-label="Profile completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="icProfileProgressBar"></span></div>
@@ -195,18 +241,34 @@
     </section>
 
     <section class="ic-attendance-panel ic-workspace-panel" id="icAttendancePanel" aria-labelledby="icAttendanceTitle" hidden>
-      <div class="ic-attendance-heading"><div><span class="ic-muted-label">YOUR INTERNSHIP</span><h2 id="icAttendanceTitle">Attendance</h2><p id="icAttendanceSummary">Attendance is recorded automatically when you log in. Sundays are excluded.</p></div><span class="ic-attendance-count" id="icAttendanceCount">0 days</span></div>
-      <div class="ic-intern-profile-details" id="icInternProfileDetails" aria-label="Your internship profile"></div>
-      <div class="ic-attendance-actions"><p id="icAttendanceMessage">Attendance is recorded automatically when you log in. Sundays are excluded.</p><button type="button" class="ic-primary-button" id="icCheckInButton">Check in today</button></div>
+      <div class="ic-attendance-heading"><div><h2 id="icAttendanceTitle">My Attendance</h2><p id="icAttendanceSummary">Monthly attendance overview.</p></div><label class="ic-attendance-month-label" for="icAttendanceMonthFilter"><select id="icAttendanceMonthFilter" aria-label="Attendance month"></select></label></div>
+      <div class="ic-attendance-actions"><p id="icAttendanceMessage">Saved attendance is shown here. Secure check-in starts only after trusted internship activation.</p><button type="button" class="ic-primary-button" id="icCheckInButton">Check in today</button></div>
       <div id="icAttendanceHistory" class="ic-attendance-history"></div>
     </section>
 
     <section class="ic-training-section ic-workspace-panel" id="icTrainingSection" aria-labelledby="icTrainingTitle" aria-live="polite">
       <div class="ic-panel-heading">
-        <div><span class="ic-muted-label">YOUR INTERNSHIP</span><h2 id="icTrainingTitle">Training workspace</h2><p id="icTrainingIntro">Loading your internship profile…</p></div>
+        <div><span class="ic-muted-label">YOUR INTERNSHIP</span><h2 id="icTrainingTitle">Task Overview</h2><p id="icTrainingIntro">Loading your internship profile…</p></div>
         <div class="ic-training-heading-actions"><span class="ic-training-track-pill" id="icTrainingTrack">Loading track</span><button type="button" class="ic-outline-button" id="icRefreshTraining">Refresh</button></div>
       </div>
+      <div class="ic-training-filters" role="group" aria-label="Filter assigned tasks">
+        <button type="button" class="active" data-task-filter="all" aria-pressed="true">All Tasks</button>
+        <button type="button" data-task-filter="pending" aria-pressed="false">Pending <span id="icPendingTaskCount">—</span></button>
+        <button type="button" data-task-filter="in-progress" aria-pressed="false">In Progress <span id="icInProgressTaskCount">—</span></button>
+        <button type="button" data-task-filter="completed" aria-pressed="false">Completed <span id="icCompletedTaskCount">—</span></button>
+      </div>
       <div id="icTrainingTasks" class="ic-training-tasks"><div class="ic-activity-empty"><strong>Loading your assignments…</strong></div></div>
+    </section>
+    <section class="ic-workspace-panel ic-progress-panel" id="icProgressPanel" aria-labelledby="icProgressTitle">
+      <div class="ic-panel-heading"><div><h3 id="icProgressTitle">My Progress</h3><p>Based on approved training assignments.</p></div></div>
+      <div class="ic-progress-chart-wrap">
+        <div class="ic-progress-chart" id="icProgressChart" role="img" aria-label="0% overall internship progress"><div><strong id="icProgressChartValue">0%</strong><span>Overall Progress</span></div></div>
+      </div>
+      <div class="ic-progress-legend">
+        <div><span class="ic-progress-legend-dot is-approved"></span><span>Approved</span><strong id="icProgressApproved">0</strong></div>
+        <div><span class="ic-progress-legend-dot is-active"></span><span>In Progress</span><strong id="icProgressActive">0</strong></div>
+        <div><span class="ic-progress-legend-dot is-pending"></span><span>Pending</span><strong id="icProgressPending">0</strong></div>
+      </div>
     </section>
     <section class="ic-staff-panel ic-workspace-panel" id="icStaffPanel" aria-labelledby="icStaffTitle" hidden>
       <div class="ic-panel-heading">
@@ -241,51 +303,35 @@
       <div class="ic-intern-directory-wrap" id="icAttendanceReportWrap" hidden><h3>Daily attendance</h3><div id="icAttendanceReport" class="ic-staff-data-list"></div></div>
     </section>
 
-    <section class="ic-workspace-stats" aria-label="Workspace summary" data-internship-dashboard>
-      <button type="button" class="ic-stat-card" data-workspace-view="applications" aria-label="Open personal applications"><span class="ic-stat-icon icon-blue">▣</span><span><span>Personal Applications</span><strong id="icApplicationsCount">—</strong><small>Private records you track</small></span><span class="ic-stat-arrow" aria-hidden="true">↗</span></button>
-      <button type="button" class="ic-stat-card" data-workspace-view="tasks" aria-label="Open personal tasks"><span class="ic-stat-icon icon-violet">▤</span><span><span>Personal Tasks</span><strong id="icTasksCount">—</strong><small>Goals you track</small></span><span class="ic-stat-arrow" aria-hidden="true">↗</span></button>
-      <button type="button" class="ic-stat-card" data-workspace-view="tasks" aria-label="Open completed personal tasks"><span class="ic-stat-icon icon-teal">✓</span><span><span>Personal tasks completed</span><strong id="icCompletedTasksCount">—</strong><small>Completed personal goals</small></span><span class="ic-stat-arrow" aria-hidden="true">↗</span></button>
-      <button type="button" class="ic-stat-card" data-workspace-view="certificates" aria-label="Open certificate notes"><span class="ic-stat-icon icon-amber">✧</span><span><span>Certificate Notes</span><strong id="icCertificatesCount">—</strong><small>Personal notes, not issued certificates</small></span><span class="ic-stat-arrow" aria-hidden="true">↗</span></button>
-      <button type="button" class="ic-stat-card" data-workspace-view="training" aria-label="Open assigned training tasks"><span class="ic-stat-icon icon-violet"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5h6M8.5 10h7M8.5 14h3M15 15.5l1.5 1.5 3-3"/></svg></span><span><span>Training assignments</span><strong class="ic-stat-word" id="icAssignedTrainingCount">—</strong><small id="icTrainingProgress">Loading assigned tasks</small></span><span class="ic-stat-arrow" aria-hidden="true">↗</span></button>
-      <button type="button" class="ic-stat-card" data-workspace-view="attendance" aria-label="Open attendance"><span class="ic-stat-icon icon-amber"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 9h18M8 14l2.5 2.5L16 11"/></svg></span><span><span>Attendance</span><strong class="ic-stat-word" id="icAttendanceStatStatus">—</strong><small id="icAttendanceStatDetail">Build your internship profile to begin</small></span><span class="ic-stat-arrow" aria-hidden="true">↗</span></button>
-      <button type="button" class="ic-stat-card" data-workspace-view="training" aria-label="Open internship progress"><span class="ic-stat-icon icon-blue">↗</span><span><span>Internship progress</span><strong class="ic-stat-word" id="icInternshipProgress">—</strong><small>Based on approved training tasks</small></span><span class="ic-stat-arrow" aria-hidden="true">↗</span></button>
-      <button type="button" class="ic-stat-card" data-workspace-view="profile" aria-label="Edit profile"><span class="ic-stat-icon icon-teal">◎</span><span><span>Profile Status</span><strong class="ic-stat-word" id="icProfileStatus">—</strong><small>Your account overview</small></span><span class="ic-stat-arrow" aria-hidden="true">↗</span></button>
+    <section class="ic-workspace-stats" aria-label="Internship summary">
+      <button type="button" class="ic-stat-card" data-workspace-view="training" aria-label="Open assigned training tasks"><span class="ic-stat-icon icon-blue">▤</span><span><span>Assigned Tasks</span><strong class="ic-stat-word" id="icAssignedTrainingCount">—</strong><small id="icTrainingProgress">Loading assigned tasks</small></span></button>
+      <div class="ic-stat-card"><span class="ic-stat-icon icon-teal">✓</span><span><span>Completed Tasks</span><strong class="ic-stat-word" id="icApprovedTrainingCount">—</strong><small>Approved by your mentor</small></span></div>
+      <button type="button" class="ic-stat-card" data-workspace-view="attendance" aria-label="Open attendance"><span class="ic-stat-icon icon-amber"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 9h18M8 14l2.5 2.5L16 11"/></svg></span><span><span>Attendance</span><strong class="ic-stat-word" id="icAttendanceStatStatus">—</strong><small id="icAttendanceStatDetail">Recorded check-ins</small></span></button>
+      <button type="button" class="ic-stat-card" data-workspace-view="training" aria-label="Open internship progress"><span class="ic-stat-icon icon-blue">↗</span><span><span>Internship Progress</span><strong class="ic-stat-word" id="icInternshipProgress">—</strong><small>Based on approved training tasks</small></span></button>
+      <div class="ic-stat-card" id="icCertificateEligibility" aria-label="Certificate status is not configured"><span class="ic-stat-icon icon-violet">✧</span><span><span>Certificate Status</span><strong class="ic-stat-word">Contact HR</strong><small>for current verified status</small></span></div>
     </section>
 
-    <section class="ic-workspace-lower-grid" data-internship-dashboard>
-      <article class="ic-workspace-panel ic-activity-panel">      <div class="ic-panel-heading"><div><span class="ic-muted-label">RECENT UPDATES</span><h3>Recent Activity</h3></div><span class="ic-panel-symbol">◷</span></div><div id="icWorkspaceActivity" class="ic-activity-empty"><strong>Loading recent activity…</strong></div></article>
-      <article class="ic-workspace-panel ic-quick-actions-panel"><div class="ic-panel-heading"><div><span class="ic-muted-label">GET STARTED</span><h3>Quick Actions</h3><p>Get started with common tasks.</p></div><span class="ic-panel-symbol">ϟ</span></div>      <div class="ic-quick-actions"><a href="index.html#tracks" class="ic-quick-action"><span class="ic-quick-icon icon-blue">▣</span><span><strong>Browse Opportunities</strong><small>Explore latest internship and job openings</small></span><b>→</b></a><button type="button" class="ic-quick-action" data-workspace-view="training"><span class="ic-quick-icon icon-violet">▤</span><span><strong>Continue Training</strong><small>Open your assigned track tasks and reviews</small></span><b>→</b></button><button type="button" class="ic-quick-action" data-workspace-view="certificates"><span class="ic-quick-icon icon-amber">✧</span><span><strong>View Certificates</strong><small>Check your certificate notes</small></span><b>→</b></button><button type="button" class="ic-quick-action" data-workspace-view="profile"><span class="ic-quick-icon icon-teal">◎</span><span><strong>Update Profile</strong><small>Manage your personal information</small></span><b>→</b></button></div></article>
-    </section>
-    <section class="ic-workspace-lower-grid ic-insights-grid" aria-label="Workspace details" data-internship-dashboard>
+    <section class="ic-workspace-lower-grid ic-insights-grid" aria-label="Workspace details">
       <article class="ic-workspace-panel">
-        <div class="ic-panel-heading"><div><span class="ic-muted-label">PERSONAL TRACKER</span><h3>Upcoming task deadlines</h3><p>Dates you added to your personal task list.</p></div><span class="ic-panel-symbol" aria-hidden="true">◷</span></div>
-        <div id="icUpcomingDeadlines" class="ic-activity-empty"><strong>Loading task dates…</strong></div>
+        <div class="ic-panel-heading"><div><h3>Upcoming task deadlines</h3><p>Due dates for mentor-assigned work.</p></div><span class="ic-panel-symbol" aria-hidden="true">◷</span></div>
+        <div id="icUpcomingDeadlines" class="ic-activity-empty"><strong>Loading assigned task dates…</strong></div>
       </article>
       <article class="ic-workspace-panel">
-        <div class="ic-panel-heading"><div><span class="ic-muted-label">GETTING STARTED</span><h3>Account checklist</h3><p>Steps based on your current account details.</p></div><span class="ic-panel-symbol" aria-hidden="true">✓</span></div>
+        <div class="ic-panel-heading"><div><h3>Profile checklist</h3><p>Complete your internship onboarding.</p></div><span class="ic-panel-symbol" aria-hidden="true">✓</span></div>
         <div id="icOnboardingChecklist" class="ic-onboarding-list" aria-live="polite">Loading account checklist…</div>
       </article>
-      <article class="ic-workspace-panel ic-unavailable-panel" id="icProgramInformation">
-        <div class="ic-panel-heading"><div><span class="ic-muted-label">PROGRAM INFORMATION</span><h3>Internship &amp; attendance</h3><p>Your current internship and attendance records appear above.</p></div><span class="ic-panel-symbol" aria-hidden="true">◎</span></div>
-        <div class="ic-unavailable-state"><strong>Attendance is recorded automatically</strong><p>One attendance entry is saved per login day during your active internship. Sundays are excluded. Leave management and mentor scheduling are not currently part of the workspace.</p></div>
-      </article>
       <article class="ic-workspace-panel ic-unavailable-panel" id="icNotifications">
-        <div class="ic-panel-heading"><div><span class="ic-muted-label">UPDATES</span><h3>Notifications</h3><p>Account-specific alerts are not connected yet.</p></div><span class="ic-panel-symbol" aria-hidden="true">♧</span></div>
-        <div class="ic-unavailable-state"><strong>No notification service configured</strong><p>This workspace does not currently receive verified assignment, application, or certificate notifications.</p></div>
+        <div class="ic-panel-heading"><div><h3>Recent Announcements</h3><p>Company updates will appear here when available.</p></div><span class="ic-panel-symbol" aria-hidden="true">♧</span></div>
+        <div class="ic-unavailable-state"><strong>No announcements yet</strong><p>There are no verified company announcements to show right now.</p></div>
       </article>
-    </section>
-    <section class="ic-records-section" aria-labelledby="icRecordsTitle" data-internship-dashboard>
-      <div class="ic-records-heading">
-        <div><span class="ic-muted-label">YOUR PERSONAL SPACE</span><h2 id="icRecordsTitle">Manage your workspace</h2><p>Keep your applications, assigned tasks and achievements organised.</p></div>
-        <label class="ic-record-search"><span aria-hidden="true">⌕</span><input id="icRecordSearch" type="search" placeholder="Search your records…" aria-label="Search records"></label>
-      </div>
-      <div class="ic-record-tabs" role="tablist" aria-label="Workspace records">
-        <button type="button" class="ic-record-tab active" data-record-tab="applications" role="tab" aria-selected="true">Applications <span id="icApplicationsTabCount">—</span></button>
-        <button type="button" class="ic-record-tab" data-record-tab="tasks" role="tab" aria-selected="false">Tasks <span id="icTasksTabCount">—</span></button>
-        <button type="button" class="ic-record-tab" data-record-tab="certificates" role="tab" aria-selected="false">Certificates <span id="icCertificatesTabCount">—</span></button>
-      </div>
-      <div class="ic-records-toolbar"><div><h3 id="icRecordListTitle">My Applications</h3><p id="icRecordListSubtitle">Track roles and application progress.</p></div><button type="button" class="ic-primary-button" id="icAddRecordButton" disabled>＋ Add application</button></div>
-      <div id="icRecordsList" class="ic-records-list"></div>
+      <article class="ic-workspace-panel ic-unavailable-panel" id="icLearningResources">
+        <div class="ic-panel-heading"><div><h3>Learning Resources</h3><p>Resources shared for your internship.</p></div><span class="ic-panel-symbol" aria-hidden="true">▣</span></div>
+        <div class="ic-unavailable-state"><strong>No learning resources yet</strong><p>When resources are assigned to your track, they will appear here.</p></div>
+      </article>
+      <article class="ic-workspace-panel ic-unavailable-panel" id="icProjects">
+        <div class="ic-panel-heading"><div><h3>My Projects</h3><p>Projects assigned to your internship.</p></div><span class="ic-panel-symbol" aria-hidden="true">▱</span></div>
+        <div class="ic-unavailable-state"><strong>Project workspace is not available yet</strong><p>Project assignments will appear here once the project module is connected.</p></div>
+      </article>
     </section>
     <div id="icWorkspaceNotice" class="ic-workspace-notice" role="status" aria-live="polite">
       <span id="icWorkspaceNoticeText">Connecting to your private workspace…</span>
@@ -298,12 +344,14 @@
       <div class="ic-profile-dialog-content">
         <span class="ic-muted-label">START YOUR JOURNEY</span>
         <h2 id="icInternshipDialogTitle">Build your internship profile</h2>
-        <p id="icInternshipDialogDescription">Choose your domain and duration. Saving activates your internship and keeps its dates fixed.</p>
+        <p id="icInternshipDialogDescription">Choose your domain, duration, and start date. The end date is calculated automatically; saved dates remain a draft until trusted activation.</p>
         <label class="ic-form-field">Full name<input id="icInternshipName" name="displayName" required minlength="2" maxlength="80" autocomplete="name" placeholder="Your full name"></label>
         <label class="ic-form-field">Email address<input id="icInternshipEmail" type="email" autocomplete="email" readonly aria-readonly="true"></label>
         <label class="ic-form-field">Gender<select id="icInternshipGender" name="gender" required><option value="">Choose an option</option><option value="Female">Female</option><option value="Male">Male</option></select></label>
         <label class="ic-form-field">Internship domain<select id="icInternshipTrack" name="track" required></select></label>
         <label class="ic-form-field">Internship duration<select id="icInternshipDuration" name="durationMonths" required><option value="1">1 month</option><option value="2">2 months</option><option value="3">3 months</option><option value="6">6 months</option></select></label>
+        <label class="ic-form-field">Internship start date<input id="icInternshipStartDate" name="internshipStartDate" type="date" required></label>
+        <label class="ic-form-field">Internship end date<input id="icInternshipEndDate" type="date" readonly aria-readonly="true"></label>
         <label class="ic-form-field">Phone number<input id="icInternshipPhone" name="phone" type="tel" required minlength="7" maxlength="24" autocomplete="tel" placeholder="+91 98765 43210"></label>
         <p id="icInternshipPeriodPreview" class="ic-profile-note"></p>
       </div>
@@ -311,22 +359,7 @@
       <div class="ic-dialog-actions"><button type="button" class="ic-outline-button" id="icCancelInternshipEdit">Cancel</button><button type="submit" class="ic-primary-button">Save my profile</button></div>
     </form>
   </div>
-  <div class="ic-dialog-backdrop" id="icRecordDialog" role="dialog" aria-modal="true" aria-labelledby="icRecordDialogTitle" aria-describedby="icRecordDialogDescription" hidden>
-    <form class="ic-record-dialog" id="icRecordForm">
-      <button type="button" class="ic-dialog-close" id="icCloseRecordDialog" aria-label="Close dialog">×</button>
-      <span class="ic-muted-label" id="icRecordDialogKicker">WORKSPACE</span>
-      <h2 id="icRecordDialogTitle">Add application</h2>
-      <p id="icRecordDialogDescription">Add a record to your personal workspace.</p>
-      <label class="ic-form-field">Title <input id="icRecordTitle" name="title" required maxlength="100" placeholder="e.g. Web Developer Intern"></label>
-      <label class="ic-form-field">Organisation / details <input id="icRecordOrganisation" name="organisation" maxlength="120" placeholder="e.g. IntelliCore"></label>
-      <label class="ic-form-field" id="icRecordStatusField">Status
-        <select id="icRecordStatus" name="status"><option>Applied</option><option>Under review</option><option>Interview</option><option>Selected</option><option>Not selected</option></select>
-      </label>
-      <label class="ic-form-field" id="icRecordDateField">Date <input id="icRecordDate" name="date" type="date"></label>
-      <div class="ic-dialog-actions"><button type="button" class="ic-outline-button" id="icCancelRecord">Cancel</button><button class="ic-primary-button" type="submit">Save record</button></div>
-    </form>
-  </div>
-<footer class="site-footer ic-final-footer" style="padding: 2.6rem 0 1.6rem;">
+<footer class="site-footer ic-final-footer" hidden style="padding: 2.6rem 0 1.6rem;">
   <div class="container">
     <div class="ic-footer-grid">
       <div class="ic-footer-about">
@@ -398,6 +431,7 @@
   </div>
   <script src="dashboard-visuals.js" defer></script>
   <script src="live-clock.js" defer></script>
-  <script type="module" src="dashboard-auth.js"></script>
+  <script src="functions/curriculum.js" defer></script>
+  <script type="module" src="dashboard-auth.js?v=20261027-profile-date-preview"></script>
 </body>
 </html>
