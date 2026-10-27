@@ -79,8 +79,17 @@ function applyRole(role, name) {
   });
 }
 
+function setMobileNavOpen(open) {
+  $("sidebar").classList.toggle("open", open);
+  $("sidebarOverlay").hidden = !open;
+  $("mobileMenu").textContent = open ? "×" : "☰";
+  $("mobileMenu").setAttribute("aria-expanded", String(open));
+  $("mobileMenu").setAttribute("aria-label", open ? "Close dashboard navigation" : "Open dashboard navigation");
+  (open ? $("sidebarClose") : $("mobileMenu")).focus({ preventScroll: true });
+}
+
 function closeMobileNav() {
-  $("sidebar").classList.remove("open");
+  setMobileNavOpen(false);
 }
 
 onAuthStateChanged(auth, async user => {
@@ -108,7 +117,7 @@ onAuthStateChanged(auth, async user => {
       return;
     }
     if (!staffRoles[role]) {
-      window.location.replace("dashboard.html?workspace=operations");
+      window.location.replace("Intern-dashboard.html");
       return;
     }
 
@@ -132,7 +141,13 @@ async function logout() {
 }
 
 $("sidebarLogout").addEventListener("click", logout);
-$("mobileMenu").addEventListener("click", () => $("sidebar").classList.toggle("open"));
+$("topbarLogout").addEventListener("click", logout);
+$("sidebarClose").addEventListener("click", closeMobileNav);
+$("mobileMenu").addEventListener("click", () => setMobileNavOpen(!$("sidebar").classList.contains("open")));
+$("sidebarOverlay").addEventListener("click", closeMobileNav);
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && $("sidebar").classList.contains("open")) closeMobileNav();
+});
 $("sidebar").querySelectorAll(".nav-link:not(.nav-button)").forEach(link => {
   link.addEventListener("click", () => {
     $("sidebar").querySelectorAll(".nav-link").forEach(item => item.classList.remove("active"));

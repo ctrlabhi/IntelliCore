@@ -28,8 +28,17 @@ function showToast(message) {
   toastTimer = window.setTimeout(() => toast.classList.remove("show"), 3600);
 }
 
+function setMobileNavOpen(open) {
+  $("sidebar").classList.toggle("open", open);
+  $("sidebarOverlay").hidden = !open;
+  $("mobileMenu").textContent = open ? "×" : "☰";
+  $("mobileMenu").setAttribute("aria-expanded", String(open));
+  $("mobileMenu").setAttribute("aria-label", open ? "Close dashboard navigation" : "Open dashboard navigation");
+  (open ? $("sidebarClose") : $("mobileMenu")).focus({ preventScroll: true });
+}
+
 function closeMobileNav() {
-  $("sidebar").classList.remove("open");
+  setMobileNavOpen(false);
 }
 
 function setRoleAssignmentStatus(message, state = "") {
@@ -155,7 +164,7 @@ onAuthStateChanged(auth, async user => {
     }
 
     if (!isAllowlistedFounder && !["founder", "co_founder"].includes(token.claims.role)) {
-      window.location.replace("dashboard.html");
+      window.location.replace("Intern-dashboard.html");
       return;
     }
 
@@ -186,7 +195,12 @@ $("logoutButton").addEventListener("click", async () => {
   }
 });
 
-$("mobileMenu").addEventListener("click", () => $("sidebar").classList.toggle("open"));
+$("sidebarClose").addEventListener("click", closeMobileNav);
+$("mobileMenu").addEventListener("click", () => setMobileNavOpen(!$("sidebar").classList.contains("open")));
+$("sidebarOverlay").addEventListener("click", closeMobileNav);
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && $("sidebar").classList.contains("open")) closeMobileNav();
+});
 $("sidebar").querySelectorAll(".nav-link").forEach(link => {
   link.addEventListener("click", () => {
     $("sidebar").querySelectorAll(".nav-link").forEach(item => item.classList.remove("active"));
