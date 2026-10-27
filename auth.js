@@ -173,6 +173,33 @@ async function refreshVerificationStatus(user) {
   return true;
 }
 
+async function redirectToDashboard(user) {
+  await user.reload();
+  const latestUser = auth.currentUser;
+  if (!latestUser || latestUser.uid !== user.uid) {
+    throw new Error("Your sign-in session has ended. Please log in again.");
+  }
+
+  const token = await latestUser.getIdTokenResult(true);
+  const provider = token.claims.firebase?.sign_in_provider;
+  const verified = token.claims.email_verified === true
+    && (provider !== "password" || latestUser.emailVerified);
+  if (!verified || !["google.com", "password"].includes(provider)) {
+    throw new Error("Verify your email address before opening a dashboard.");
+  }
+
+  const isAllowlistedFounder = latestUser.email?.trim().toLowerCase() === "ctrlabhishek@gmail.com";
+  const role = isAllowlistedFounder ? "founder" : token.claims.role;
+  const destination = ["founder", "co_founder"].includes(role)
+    ? "founder-dashboard.html"
+    : ["admin", "hr_manager", "hr_executive", "operations_executive"].includes(role)
+      ? "hr-dashboard.html"
+      : role === "mentor"
+        ? "tl-dashboard.html"
+        : "Intern-dashboard.html";
+  window.location.replace(destination);
+}
+
 $("loginTrigger")?.addEventListener("click", openModal);
 $("closeLoginModal")?.addEventListener("click", closeModal);
 
@@ -255,7 +282,7 @@ form?.addEventListener("submit", async event => {
         showVerificationActions();
         message("Your email address is not verified. Open the verification link in your inbox, then select “I’ve verified my email.”");
       } else {
-        window.location.replace("dashboard.html");
+        await redirectToDashboard(credential.user);
       }
     }
   } catch (error) {
@@ -283,7 +310,7 @@ $("icResendVerification")?.addEventListener("click", async event => {
   authActionInProgress = true;
   try {
     if (await refreshVerificationStatus(user)) {
-      window.location.replace("dashboard.html");
+      await redirectToDashboard(user);
       return;
     }
     await sendEmailVerification(auth.currentUser);
@@ -309,7 +336,7 @@ $("icCheckVerification")?.addEventListener("click", async event => {
   setLoading(button, true, "Checking…");
   try {
     if (await refreshVerificationStatus(user)) {
-      window.location.replace("dashboard.html");
+      await redirectToDashboard(user);
     } else {
       message("Firebase still shows this email as unverified. Open the latest link in your inbox and try again.");
     }
@@ -349,8 +376,8 @@ $("icGoogleSignIn")?.addEventListener("click", async () => {
     await setPersistence(auth, $("icRemember").checked
       ? browserLocalPersistence
       : browserSessionPersistence);
-    await signInWithPopup(auth, googleProvider);
-    window.location.replace("dashboard.html");
+    const credential = await signInWithPopup(auth, googleProvider);
+    await redirectToDashboard(credential.user);
   } catch (error) {
     message(errorMessage(error));
   } finally {
@@ -382,12 +409,12 @@ onAuthStateChanged(auth, user => {
     try {
       const isGoogleUser = user.providerData.some(provider => provider.providerId === "google.com");
       if (isGoogleUser) {
-        window.location.replace("dashboard.html");
+        await redirectToDashboard(user);
         return;
       }
       if (!user.providerData.some(provider => provider.providerId === "password")) return;
       if (await refreshVerificationStatus(user)) {
-        window.location.replace("dashboard.html");
+        await redirectToDashboard(user);
       } else {
         $("icAuthEmail").value = user.email || "";
         showVerificationActions();
