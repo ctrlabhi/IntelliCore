@@ -19,6 +19,33 @@ Current project
 - Founder and Co-founder are Super Admins and can start/end the shared Google
   Meet. A live link is shown to active interns and staff; meetings expire after
   two hours.
+- The verified `ctrlabhishek@gmail.com` account is allowlisted as a Founder
+  for dashboard routing and trusted callable authorization; other Founder and
+  Co-founder accounts use explicit Firebase role claims. Founder and
+  Co-founder accounts open `founder-dashboard.html`, a separate
+  role-gated command-center UI. Its organization KPIs and sample records are
+  illustrative. The Founder-only role assignment form calls trusted Functions
+  to grant Team Leader (mentor, with selected track claims), HR Manager, or HR
+  Executive to active verified learner accounts. New assignments take effect
+  after the target signs in again. Other organization-wide management actions
+  on this page are not connected to live data or write operations.
+- Admin, HR Manager, HR Executive, and Operations Executive accounts open
+  `admin-dashboard.html`, presented as the shared role-gated HR Dashboard.
+  Its KPIs and
+  records are illustrative. The existing operational tools remain available
+  from its "Open secure workspace" link at `dashboard.html?workspace=operations`.
+- Senior HR Manager, Senior HR Executive, and Senior Operations Executive are
+  not currently provisionable roles. The dashboard does not grant these
+  additional role names or permissions.
+- Accounts without an explicit trusted Firebase role claim use the learner
+  dashboard. Users cannot assign themselves a staff role from the client;
+  Founder/Co-founder assignment is enforced by server-side callable Functions.
+- Mentor accounts (the currently provisioned role used for Team Leaders) open
+  `team-leader-dashboard.html`. Its example metrics are illustrative and its
+  track selector is limited to the account's authorized mentor-track claims.
+  Task assignment and submission review links open the existing secure
+  workspace; other Team Leader workflows remain preview-only.
+- All four dashboards display a live date and clock using India Standard Time.
 - Admin, HR Manager, HR Executive, and Operations Executive are staff admins.
   They can browse the paginated intern directory grouped by domain and review
   enrolled interns who have not logged in for seven days.
@@ -45,8 +72,19 @@ Files to publish
 - auth.js
 - dashboard.html
 - dashboard.css
+- dashboard-background.css
 - dashboard-auth.js
 - dashboard-visuals.js
+- founder-dashboard.html
+- founder-dashboard.css
+- founder-dashboard.js
+- admin-dashboard.html
+- admin-dashboard.css
+- admin-dashboard.js
+- team-leader-dashboard.html
+- team-leader-dashboard.css
+- team-leader-dashboard.js
+- live-clock.js
 - functions/
 - firebase.json
 - firestore.rules
@@ -92,22 +130,28 @@ Production setup
 6. Configure Storage CORS for the website and local development. From the
    project root, apply the included configuration:
    gcloud storage buckets update gs://intellicore-229.firebasestorage.app --cors-file=storage.cors.json --project=intellicore-229
-7. Provision the Founder and Co-founder Super Admin accounts explicitly. Find the account's Firebase
-   Authentication UID in Firebase Console. Authenticate with Google
+7. Provision the Founder and Co-founder Super Admin accounts explicitly.
+   Authenticate with Google
    Application Default Credentials, then run:
    gcloud auth application-default login
    PowerShell:
    $env:FIREBASE_PROJECT_ID = "intellicore-229"
-   npm --prefix functions run set-user-role -- <firebase-uid> founder
-   npm --prefix functions run set-user-role -- <firebase-uid> co_founder
+   npm --prefix functions run set-user-role -- <firebase-uid-or-email> founder
+   npm --prefix functions run set-user-role -- <firebase-uid-or-email> co_founder
    Never add service-account keys or credentials to this repository.
 8. Provision staff using only their required role:
-   npm --prefix functions run set-user-role -- <firebase-uid> hr_manager
-   npm --prefix functions run set-user-role -- <firebase-uid> hr_executive
-   npm --prefix functions run set-user-role -- <firebase-uid> operations_executive
-   npm --prefix functions run set-user-role -- <firebase-uid> admin
+   npm --prefix functions run set-user-role -- <firebase-uid-or-email> hr_manager
+   npm --prefix functions run set-user-role -- <firebase-uid-or-email> hr_executive
+   npm --prefix functions run set-user-role -- <firebase-uid-or-email> operations_executive
+   npm --prefix functions run set-user-role -- <firebase-uid-or-email> admin
+   For the requested staff accounts, run:
+   npm --prefix functions run set-user-role -- tanu65159@gmail.com operations_executive
+   npm --prefix functions run set-user-role -- mikkurwt694@gmail.com hr_executive
+   npm --prefix functions run set-user-role -- ashitarohilla32@gmail.com hr_manager
+   Sumit Kumar (Web Developer) — administrator access to the HR Dashboard:
+   npm --prefix functions run set-user-role -- thesumitsah47@gmail.com admin
 9. Provision mentors with only the tracks they are authorised to review:
-   npm --prefix functions run set-user-role -- <firebase-uid> mentor "Web Development Intern,Data Analyst Intern"
+   npm --prefix functions run set-user-role -- <firebase-uid-or-email> mentor "Web Development Intern,Data Analyst Intern"
    Valid track names are listed in index.html and functions/curriculum.js.
 10. After a role change, the user must sign out and sign in again for Firebase
     Authentication to refresh custom claims. Interns must sign in once before

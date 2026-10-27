@@ -23,6 +23,7 @@ const assignmentRef = id => db.collection("trainingAssignments").doc(id);
 const meetingRef = db.collection("organization").doc("currentMeeting");
 const attendanceCollection = uid => db.collection("internships").doc(uid).collection("attendance");
 const superAdminRoles = ["founder", "co_founder"];
+const founderEmailAllowlist = new Set(["ctrlabhishek@gmail.com"]);
 const staffRoles = [...superAdminRoles, "admin", "hr_manager", "hr_executive", "operations_executive"];
 const internManagerRoles = staffRoles;
 const profileManagers = [...superAdminRoles, "admin", "hr_manager"];
@@ -42,6 +43,11 @@ function requireSignedIn(request) {
 }
 
 function callerRole(user) {
+  if (user.token.email_verified === true
+    && typeof user.token.email === "string"
+    && founderEmailAllowlist.has(user.token.email.trim().toLowerCase())) {
+    return "founder";
+  }
   const role = user.token.role;
   return staffRoles.includes(role) || role === "mentor" ? role : "learner";
 }
@@ -93,7 +99,8 @@ function requireSupportedDuration(value) {
 }
 
 function canJoinMeeting(user) {
-  return user.token.role === "learner" || staffRoles.includes(user.token.role);
+  const role = callerRole(user);
+  return role === "learner" || staffRoles.includes(role);
 }
 
 function calendarApi() {
@@ -291,6 +298,118 @@ exports.ensureProfile = onCall(async request => {
   }
   await ref.set(profile, { merge: true });
   return publicProfile({ ...(snapshot.exists ? snapshot.data() : {}), ...profile });
+});
+
+exports.listRoleAssignmentCandidates = onCall(async request => {
+  const user = requireSignedIn(request);
+  requireAdmin(user);
+
+  const snapshot = await db.collection("profiles")
+    .where("role", "==", "learner")
+    .limit(100)
+    .get();
+  const accounts = snapshot.empty
+    ? { users: [] }
+    : await auth.getUsers(snapshot.docs.map(document => ({ uid: document.id })));
+  const eligibleAccounts = new Map(accounts.users
+    .filter(account => !account.disabled
+      && hasVerifiedEmail(account)
+      && callerRole({ token: account.customClaims || {} }) === "learner")
+    .map(account => [account.uid, account]));
+  return {
+    learners: snapshot.docs.filter(document => eligibleAccounts.has(document.id)).map(document => {
+      const profile = document.data();
+      return {
+        uid: document.id,
+        email: profile.email || "",
+        displayName: profile.displayName || "",
+        track: profile.track || "",
+        lastLoginAt: profile.lastLoginAt?.toMillis?.() || null
+      };
+    }),
+    tracks: Object.keys(tracks)
+  };
+});
+
+exports.assignStaffRole = onCall(async request => {
+  const user = requireSignedIn(request);
+  requireAdmin(user);
+
+  const uid = requiredText(request.data?.uid, "Account", 128);
+  if (!/^[A-Za-z0-9_-]+$/.test(uid)) {
+    throw new HttpsError("invalid-argument", "The account identifier is invalid.");
+  }
+  const role = request.data?.role;
+  if (!["mentor", "hr_manager", "hr_executive"].includes(role)) {
+    throw new HttpsError("invalid-argument", "Choose Team Leader, HR Manager, or HR Executive.");
+  }
+
+  const selectedTracks = request.data?.mentorTracks;
+  let assignedTracks = [];
+  if (role === "mentor") {
+    if (!Array.isArray(selectedTracks) || !selectedTracks.length
+      || selectedTracks.length > Object.keys(tracks).length
+      || selectedTracks.some(track => typeof track !== "string" || !validTrack(track))
+      || new Set(selectedTracks).size !== selectedTracks.length) {
+      throw new HttpsError("invalid-argument", "Assign a Team Leader to one or more valid internship tracks.");
+    }
+    assignedTracks = selectedTracks;
+  } else if (selectedTracks !== undefined && (!Array.isArray(selectedTracks) || selectedTracks.length)) {
+    throw new HttpsError("invalid-argument", "Internship track access can only be assigned to Team Leaders.");
+  }
+
+  const profileRefForTarget = profileRef(uid);
+  const [account, profileSnapshot] = await Promise.all([
+    auth.getUser(uid),
+    profileRefForTarget.get()
+  ]);
+  if (account.disabled || !hasVerifiedEmail(account)) {
+    throw new HttpsError("failed-precondition", "The account must be active and have a verified email address.");
+  }
+  if (!profileSnapshot.exists
+    || profileSnapshot.get("role") !== "learner"
+    || callerRole({ token: account.customClaims || {} }) !== "learner") {
+    throw new HttpsError("failed-precondition", "Only an unassigned intern account can receive a staff role.");
+  }
+
+  const existingClaims = account.customClaims || {};
+  await auth.setCustomUserClaims(uid, {
+    ...existingClaims,
+    role,
+    mentorTracks: assignedTracks
+  });
+  try {
+    await profileRefForTarget.set({
+      role,
+      mentorTracks: assignedTracks,
+      roleAssignedBy: user.uid,
+      roleAssignedAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp()
+    }, { merge: true });
+  } catch (error) {
+    try {
+      await auth.setCustomUserClaims(uid, existingClaims);
+    } catch (rollbackError) {
+      console.error("Staff role assignment failed and its claims could not be rolled back.", {
+        uid,
+        error,
+        rollbackError
+      });
+      throw new HttpsError(
+        "internal",
+        "The role could not be fully saved. Contact an administrator before retrying."
+      );
+    }
+    console.error("Staff role assignment failed; the temporary role claim was rolled back.", { uid, error });
+    throw new HttpsError("internal", "The role could not be saved. Please retry the assignment.");
+  }
+
+  return {
+    uid,
+    role,
+    mentorTracks: assignedTracks,
+    requiresSignIn: true
+  };
 });
 
 exports.updateDisplayName = onCall(async request => {

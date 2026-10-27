@@ -1,0 +1,77 @@
+.team-leader-page .team-stats{grid-template-columns:repeat(5,minmax(0,1fr))}
+.team-leader-page .trend-down{color:#ff994b}
+.team-leader-page .team-overview{grid-template-columns:1.04fr 1.08fr .96fr}
+.team-leader-page .team-detail{grid-template-columns:1.22fr 1fr .9fr}
+.team-leader-page .team-donut{width:120px;height:120px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;position:relative;background:conic-gradient(#00d3a0 0 77%,#ff4958 77% 87%,#178ff5 87% 100%)}
+.team-leader-page .team-donut:before{content:"";position:absolute;inset:15px;border-radius:50%;background:#061426}
+.team-leader-page .team-donut div{z-index:1;display:grid;text-align:center}
+.team-leader-page .team-donut strong{font-size:19px}
+.team-leader-page .team-donut span{color:#8ba3bc;font-size:8px}
+.team-leader-page .team-domain-legend{gap:15px}
+.team-leader-page .team-domain-legend li{grid-template-columns:10px minmax(0,1fr) 24px;font-size:9px}
+.team-leader-page .team-domain-legend b{font-size:9px}
+.team-leader-page .c-active{background:#00d3a0}
+.team-leader-page .c-inactive{background:#ff4958}
+.team-leader-page .c-completion{background:#178ff5}
+.team-leader-page .team-bar-chart{height:148px}
+.team-leader-page .team-bar-chart svg{height:123px}
+.team-leader-page .assigned-bars{fill:#168ff5}
+.team-leader-page .completed-bars{fill:#00d3a0}
+.team-leader-page .team-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+.team-leader-page .team-actions a{position:relative;min-height:57px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;padding:6px 8px;border:1px solid #123756;border-radius:7px;background:linear-gradient(135deg,#071d32,#061629);color:#d4e5f4;font-size:8px;text-align:left;transition:border-color .15s,background .15s}
+.team-leader-page .team-actions a:hover{border-color:#168fcc;background:#09213a}
+.team-leader-page .team-actions a>span{color:#13bfff;font-size:14px}
+.team-leader-page .team-actions a>b{position:absolute;right:7px;top:6px;color:#65b5e3;font-size:14px}
+.team-leader-page .deadline-row{min-height:34px}
+.team-leader-page .deadline-panel{padding-bottom:8px}
+.team-leader-page .deadline-row .date-badge{width:34px;height:27px}
+.team-leader-page .team-task-tag{color:#c19bff;background:rgba(121,48,255,.2)}
+.team-leader-page .team-report-tag{color:#ff747e;background:rgba(235,52,75,.18)}
+.team-leader-page .attendance-ring{width:99px;height:99px}
+.team-leader-page .intern-heading small,.team-leader-page .panel-heading h2 small{color:#92abc4;font-size:8px;font-weight:500}
+.team-leader-page .table-status.hold{color:#ffc35c;background:rgba(255,170,30,.13)}
+.team-leader-page .table-status.complete{color:#58b7ff;background:rgba(48,143,255,.14)}
+.team-leader-page .export-button:disabled{opacity:.42;cursor:not-allowed}
+.team-leader-page .row-menu{font-size:8px}
+.team-leader-page .module-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.team-leader-page .operational-link{border-color:#16618b}
+@media(max-width:1100px){
+  .team-leader-page .team-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .team-leader-page .team-overview{grid-template-columns:1fr 1fr}
+  .team-leader-page .team-overview .actions-panel{grid-column:1/-1}
+  .team-leader-page .team-detail{grid-template-columns:1fr 1fr}
+  .team-leader-page .team-detail .attendance-panel{grid-column:1/-1}
+  .team-leader-page .attendance-ring{margin:4px auto}
+  .team-leader-page .attendance-legend{max-width:300px;margin:auto}
+}
+@media(max-width:760px){
+  .team-leader-page .team-overview{grid-template-columns:1fr 1fr}
+  .team-leader-page .team-overview .domain-panel{grid-column:1/-1}
+  .team-leader-page .team-detail{grid-template-columns:1fr}
+  .team-leader-page .team-detail .attendance-panel{grid-column:auto}
+  .team-leader-page .team-detail .attendance-ring{margin:8px auto}
+  .team-leader-page .team-detail .attendance-legend{max-width:100%}
+  .team-leader-page .module-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .team-leader-page .team-table-tools{flex-wrap:wrap}
+}
+@media(max-width:480px){
+  .team-leader-page .team-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .team-leader-page .team-overview{grid-template-columns:1fr}
+  .team-leader-page .team-overview .domain-panel,.team-leader-page .team-overview .actions-panel{grid-column:auto}
+  .team-leader-page .team-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .team-leader-page .team-domain-legend{gap:10px}
+  .team-leader-page .module-grid{grid-template-columns:1fr}
+}
+.welcome-date{align-items:center;text-align:center}.welcome-date>span{font-size:14px}.welcome-date strong{align-self:center;font-size:22px}.welcome-date small{font-size:16px;font-weight:800}
+.welcome-date small[data-greeting="Good Afternoon"]{font-weight:400}
+.welcome-date .live-date-label{display:flex;align-items:center;justify-content:center;gap:6px}
+.welcome-date .live-date-label svg{width:16px;height:16px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:480px){.welcome-date{display:flex;flex-direction:column;align-items:center;min-width:150px;margin:13px auto 0}.welcome-date>span{font-size:13px}.welcome-date strong{font-size:20px}.welcome-date small{font-size:15px}}
+.welcome-art{width:190px;height:145px;flex:0 0 190px}
+.welcome-art .orbit{width:158px;height:100px}
+.welcome-art .orbit-b{width:115px;height:142px}
+.welcome-art .welcome-logo{position:relative;z-index:1;width:82px;height:82px;object-fit:contain;filter:drop-shadow(0 0 12px rgba(0,194,255,.7))}
+.welcome-chip{position:absolute;z-index:2;padding:6px 9px;border:1px solid rgba(151,218,255,.25);border-radius:11px;background:rgba(10,32,68,.9);box-shadow:0 8px 20px rgba(0,0,0,.2);color:#e6f7ff;font-size:10px;font-weight:750;white-space:nowrap}
+.chip-learn{top:0;right:0}.chip-grow{right:4px;bottom:2px}.chip-build{left:0;bottom:12px}
+@media(max-width:760px){.welcome-art{width:170px;height:135px;flex-basis:170px}.welcome-art .welcome-logo{width:76px;height:76px}}
+@media(max-width:480px){.welcome-art{position:relative;inset:auto;width:190px;height:145px;margin:5px auto;opacity:1}.welcome-art .welcome-logo{width:80px;height:80px}}

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#030914">
+  <title>HR Dashboard | IntelliCore</title>
+  <link rel="icon" type="image/png" href="Photos/favicon.png">
+  <link rel="stylesheet" href="admin-dashboard.css">
+  <link rel="stylesheet" href="dashboard-background.css">
+</head>
+<body>
+  <canvas id="icWorkspaceNeuralCanvas" class="dashboard-background-canvas" aria-hidden="true"></canvas>
+  <div class="auth-state" id="authState" role="status">Verifying staff access…</div>
+  <div class="dashboard-shell" id="dashboardShell" hidden>
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#overview" aria-label="IntelliCore HR dashboard">
+        <img src="Photos/favicon.png" alt="">
+        <span><strong>Intelli<span>Core</span></strong><small>Innovation at the Fore</small></span>
+      </a>
+      <nav class="side-nav" aria-label="HR dashboard">
+        <a class="nav-link active" href="#overview"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg> Dashboard</a>
+        <div class="nav-group-label">INTERNSHIP MANAGEMENT</div>
+        <a class="nav-link" href="#interns"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.5A4.5 4.5 0 0 1 7 14h4a4.5 4.5 0 0 1 4.5 4.5V20M16 5a3.5 3.5 0 0 1 0 6.5M17 14a4.5 4.5 0 0 1 4.5 4.5V20"/></svg> Interns <b class="chevron">⌄</b></a>
+        <a class="nav-link" href="#interns" data-capability="manageInterns"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.5A4.5 4.5 0 0 1 7 14h4a4.5 4.5 0 0 1 4.5 4.5V20M19 8v6m-3-3h6"/></svg> Add Intern</a>
+        <a class="nav-link" href="#recruitment" data-capability="recruitment"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="15" rx="2"/><path d="M8 6V4h8v2M3 11h18M10 11v2h4v-2"/></svg> Recruitment &amp; Applications</a>
+        <a class="nav-link" href="#domains"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg> Domains / Departments</a>
+        <a class="nav-link" href="#staff" data-capability="tasks"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M5 21v-2a7 7 0 0 1 14 0v2M5 12l-2 2 2 2m14-4 2 2-2 2"/></svg> Team Leaders</a>
+        <a class="nav-link" href="#tasks" data-capability="tasks"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h12M9 12h12M9 18h12"/><path d="m3 6 1.5 1.5L7 5m-4 7 1.5 1.5L7 11m-4 7 1.5 1.5L7 17"/></svg> Tasks &amp; Projects</a>
+        <a class="nav-link" href="#attendance" data-capability="attendance"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Attendance</a>
+        <a class="nav-link" href="#certificates" data-capability="certificates"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="m8 14-1 8 5-3 5 3-1-8"/></svg> Certificates</a>
+        <a class="nav-link" href="#reports" data-capability="reports"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10m8 10V4m8 16v-7"/></svg> Reports</a>
+        <div class="nav-group-label">COMMUNICATION</div>
+        <a class="nav-link" href="#announcements" data-capability="announcements"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11v2l13 5V6L3 11Z"/><path d="M6 14v4a2 2 0 0 0 2 2h2l-2-5m8-7 4-2v12l-4-2"/></svg> Announcements</a>
+        <a class="nav-link" href="#activity"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"/></svg> Messages</a>
+        <a class="nav-link" href="#activity"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg> Notifications</a>
+        <a class="nav-link" href="#deadlines"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4m8-4v4M3 10h18m-13 4h3m3 0h3m-9 3h3"/></svg> Meetings</a>
+        <a class="nav-link" href="#activity" data-capability="reports"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.6 2.6 0 1 1 4.7 1.5c-1.2 1.2-2.2 1.4-2.2 3m0 3h.01"/></svg> Support Requests</a>
+        <div class="nav-group-label">TOOLS</div>
+        <a class="nav-link" href="#profile"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg> Email Templates</a>
+        <a class="nav-link" href="#interns"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3H5a2 2 0 0 0-2 2v4m12-6h4a2 2 0 0 1 2 2v4M3 15v4a2 2 0 0 0 2 2h4m12-6v4a2 2 0 0 1-2 2h-4"/></svg> Bulk Actions</a>
+        <a class="nav-link" href="#domains"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg> Resources</a>
+        <div class="nav-group-label">SETTINGS</div>
+        <a class="nav-link" href="#profile"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.7a8 8 0 0 1-1.7 1l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.7-1l-1.7.7-1.4-2.4 1.4-1.1a7 7 0 0 1 0-2l-1.4-1.1 1.4-2.4 1.7.7a8 8 0 0 1 1.7-1l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.7 1l1.7-.7 1.4 2.4-1.4 1.1a7 7 0 0 1 0 2Z"/></svg> Profile Settings</a>
+        <button class="nav-link nav-button" id="sidebarLogout" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5m5 5H3m9-9h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7"/></svg> Logout</button>
+      </nav>
+      <div class="sidebar-foot"><span class="online-dot"></span> Role-secured staff session</div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <button class="mobile-menu" id="mobileMenu" type="button" aria-label="Open dashboard navigation">☰</button>
+        <label class="global-search"><span aria-hidden="true">⌕</span><input id="globalSearch" type="search" placeholder="Search interns, domains, tasks, people…" aria-label="Search dashboard"><kbd>⌘ K</kbd></label>
+        <div class="topbar-actions">
+          <button class="notification-button" id="notificationButton" type="button" aria-label="Notifications, 5 unread"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span class="notification-count" aria-hidden="true">5</span></button>
+          <span class="topbar-divider"></span>
+          <div class="user-chip"><span class="user-avatar" id="userAvatar">IC</span><span class="user-details"><strong id="userName">Staff</strong><small id="userRole">HR Portal</small></span></div>
+          <a class="operational-link" href="dashboard.html?workspace=operations">Open secure workspace <span aria-hidden="true">↗</span></a>
+        </div>
+      </header>
+
+      <div class="content">
+        <section class="welcome-banner" id="overview">
+          <div class="welcome-copy">
+            <div class="eyebrow"><span class="pulse-dot"></span> <span id="dashboardRoleLabel">HR DASHBOARD</span><span class="preview-label">UI PREVIEW · SAMPLE DATA</span></div>
+            <h1>Manage. Guide. <span>Grow.</span></h1>
+            <p id="welcomeCopy">Handle interns, assign tasks, track progress and build a productive team.</p>
+            <div class="welcome-meta"><span id="roleScope">HR Portal · Role-based access</span><span class="access-pill">Authorized scope</span></div>
+          </div>
+          <div class="welcome-art" aria-hidden="true"><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><img class="welcome-logo" src="Photos/favicon.png" alt=""><div class="welcome-chip-track"><span class="welcome-chip chip-learn"><span>Learn</span></span><span class="welcome-chip chip-grow"><span>Grow</span></span><span class="welcome-chip chip-build"><span>Build</span></span></div></div>
+          <div class="welcome-date"><span class="live-date-label"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 9h18M7 13h.01M12 13h.01M17 13h.01M7 17h.01M12 17h.01"/></svg><span data-live-date>Loading date…</span></span><strong data-live-time>--:--:--</strong><small data-live-greeting>Good Morning!</small></div>
+        </section>
+
+        <div class="sample-notice"><span>ⓘ</span><p><strong>Dashboard preview.</strong> KPIs and activity below are sample data, not live records. Use <a href="dashboard.html?workspace=operations">the secure workspace</a> for currently connected intern, attendance and training tools.</p></div>
+
+        <section class="stats-grid" aria-label="HR summary">
+          <article class="stat-card"><span class="stat-icon blue"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.3A4.7 4.7 0 0 1 7.2 14h3.6a4.7 4.7 0 0 1 4.7 4.7V20M16 4.8a3.5 3.5 0 0 1 0 6.7M17 14.2a4.6 4.6 0 0 1 4.5 4.5V20"/></svg></span><div><small>Interns</small><strong>124</strong><span class="trend">↑ 12% <em>from last month</em></span></div></article>
+          <article class="stat-card"><span class="stat-icon green"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.3A4.7 4.7 0 0 1 7.2 14h3.6a4.7 4.7 0 0 1 4.7 4.7V20M16 4.8a3.5 3.5 0 0 1 0 6.7M17 14.2a4.6 4.6 0 0 1 4.5 4.5V20"/></svg></span><div><small>Active Interns</small><strong>108</strong><span class="trend">↑ 8% <em>from last month</em></span></div></article>
+          <article class="stat-card"><span class="stat-icon violet">◈</span><div><small>Total Domains</small><strong>8</strong><span class="trend">Across all tracks</span></div></article>
+          <article class="stat-card"><span class="stat-icon amber"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5h6M8.5 10h7M8.5 14h3M15 15.5l1.5 1.5 3-3"/></svg></span><div><small>Pending Tasks</small><strong>32</strong><span class="trend">↑ 4 new</span></div></article>
+          <article class="stat-card"><span class="stat-icon cyan"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 9h18M8 14l2.5 2.5L16 11"/></svg></span><div><small>Attendance Rate</small><strong>89%</strong><span class="trend">↑ 5% <em>this month</em></span></div></article>
+          <article class="stat-card"><span class="stat-icon pink">✧</span><div><small>Certificates Issued</small><strong>96</strong><span class="trend">↑ 20% <em>this month</em></span></div></article>
+        </section>
+
+        <section class="overview-grid">
+          <article class="panel domain-panel" id="domains">
+            <div class="panel-heading"><div><h2>Interns by Domain</h2></div><select aria-label="Domain chart period"><option>This month</option><option>Last 6 months</option></select></div>
+            <div class="domain-chart-wrap">
+              <div class="donut-chart"><div><strong>124</strong><span>Total</span></div></div>
+              <ul class="legend">
+                <li><i class="c1"></i><span>Human Resources</span><b>28</b></li>
+                <li><i class="c2"></i><span>Graphic Design</span><b>20</b></li>
+                <li><i class="c3"></i><span>Web Development</span><b>18</b></li>
+                <li><i class="c4"></i><span>Digital Marketing</span><b>15</b></li>
+                <li><i class="c5"></i><span>Content Writing</span><b>12</b></li>
+                <li><i class="c6"></i><span>Business Analyst</span><b>10</b></li>
+                <li><i class="c7"></i><span>Operations &amp; Other</span><b>21</b></li>
+              </ul>
+            </div>
+          </article>
+          <article class="panel chart-panel" id="reports">
+            <div class="panel-heading"><div><h2>Internship Overview</h2></div><select aria-label="Intern overview period"><option>Last 6 Months</option><option>This year</option></select></div>
+            <div class="line-chart" role="img" aria-label="Illustrative line chart showing intern and active intern counts increasing from May to October">
+              <div class="chart-y-labels"><span>200</span><span>150</span><span>100</span><span>50</span><span>0</span></div>
+              <svg viewBox="0 0 520 170" preserveAspectRatio="none" aria-hidden="true">
+                <defs><linearGradient id="areaBlue" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#159cff" stop-opacity=".24"/><stop offset="1" stop-color="#159cff" stop-opacity="0"/></linearGradient><linearGradient id="areaGreen" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#00d6a0" stop-opacity=".16"/><stop offset="1" stop-color="#00d6a0" stop-opacity="0"/></linearGradient></defs>
+                <path class="grid-lines" d="M0 12H520 M0 48H520 M0 84H520 M0 120H520 M0 156H520"/>
+                <path fill="url(#areaBlue)" d="M8 145 L105 111 L202 86 L299 65 L396 44 L512 28 L512 160 L8 160Z"/><path fill="url(#areaGreen)" d="M8 151 L105 131 L202 116 L299 101 L396 86 L512 78 L512 160 L8 160Z"/>
+                <path class="line-blue" d="M8 145 L105 111 L202 86 L299 65 L396 44 L512 28"/><path class="line-green" d="M8 151 L105 131 L202 116 L299 101 L396 86 L512 78"/>
+                <g class="points-blue"><circle cx="8" cy="145" r="4"/><circle cx="105" cy="111" r="4"/><circle cx="202" cy="86" r="4"/><circle cx="299" cy="65" r="4"/><circle cx="396" cy="44" r="4"/><circle cx="512" cy="28" r="4"/></g>
+                <g class="points-green"><circle cx="8" cy="151" r="4"/><circle cx="105" cy="131" r="4"/><circle cx="202" cy="116" r="4"/><circle cx="299" cy="101" r="4"/><circle cx="396" cy="86" r="4"/><circle cx="512" cy="78" r="4"/></g>
+              </svg>
+              <div class="chart-x-labels"><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span></div>
+            </div>
+            <div class="chart-legend"><span><i class="legend-blue"></i>Total interns</span><span><i class="legend-green"></i>Active interns</span></div>
+          </article>
+          <article class="panel actions-panel">
+            <div class="panel-heading"><div><h2>Quick Actions</h2></div></div>
+            <div class="action-grid">
+              <button type="button" data-preview-action="Add intern"><span>♙+</span>Add Intern <b>›</b></button>
+              <button type="button" data-preview-action="Assign task"><span>▤</span>Assign Task <b>›</b></button>
+              <button type="button" data-preview-action="Create domain"><span>◈</span>Create Domain <b>›</b></button>
+              <button type="button" data-preview-action="Mark attendance"><span>▦</span>Mark Attendance <b>›</b></button>
+              <button type="button" data-preview-action="Send announcement"><span>➤</span>Send Announcement <b>›</b></button>
+              <button type="button" data-preview-action="Generate certificate"><span>✧</span>Generate Certificate <b>›</b></button>
+            </div>
+          </article>
+        </section>
+
+        <section class="detail-grid">
+          <article class="panel activity-panel" id="activity">
+            <div class="panel-heading"><div><h2>Recent Intern Activity</h2></div><a href="#activity" class="view-link">View all ↗</a></div>
+            <ol class="activity-list">
+              <li><span class="staff-avatar avatar-1">PS</span><span><strong>Priya Sharma <small>submitted task · Poster Design</small></strong></span><time>10 min ago</time></li>
+              <li><span class="staff-avatar avatar-2">RV</span><span><strong>Rahul Verma <small>marked attendance</small></strong></span><time>32 min ago</time></li>
+              <li><span class="staff-avatar avatar-3">SY</span><span><strong>Sneha Yadav <small>completed a task</small></strong></span><time>1 hour ago</time></li>
+              <li><span class="staff-avatar avatar-4">AK</span><span><strong>Aman Kumar <small>joined as Web Development Intern</small></strong></span><time>2 hours ago</time></li>
+              <li><span class="staff-avatar avatar-5">RS</span><span><strong>Riya Singh <small>submitted task · Blog Content</small></strong></span><time>3 hours ago</time></li>
+            </ol>
+          </article>
+          <article class="panel deadline-panel" id="deadlines">
+            <div class="panel-heading"><div><h2>Upcoming Deadlines</h2></div><a href="#deadlines" class="view-link">View all ↗</a></div>
+            <div class="deadline-list">
+              <div class="deadline-row"><span class="date-badge"><small>OCT</small><b>26</b></span><span><strong>Social Media Campaign</strong><small>Graphic Design Interns</small></span><b class="tag task-tag">Task</b></div>
+              <div class="deadline-row"><span class="date-badge"><small>OCT</small><b>27</b></span><span><strong>Blog Content Submission</strong><small>Content Writing Interns</small></span><b class="tag task-tag">Task</b></div>
+              <div class="deadline-row"><span class="date-badge"><small>OCT</small><b>28</b></span><span><strong>Weekly Report</strong><small>All Interns</small></span><b class="tag report-tag">Report</b></div>
+              <div class="deadline-row"><span class="date-badge"><small>OCT</small><b>30</b></span><span><strong>Attendance Update</strong><small>HR Team</small></span><b class="tag internal-tag">Internal</b></div>
+              <div class="deadline-row"><span class="date-badge"><small>NOV</small><b>02</b></span><span><strong>Certificate Review</strong><small>Operations Team</small></span><b class="tag review-tag">Review</b></div>
+            </div>
+          </article>
+          <article class="panel attendance-panel" id="attendance">
+            <div class="panel-heading"><div><h2>Attendance Overview</h2></div><select aria-label="Attendance period"><option>This Month</option><option>Last month</option></select></div>
+            <div class="attendance-ring"><div><strong>89%</strong><span>Overall Attendance</span></div></div>
+            <div class="attendance-legend"><span><i class="present-dot"></i><b>Present</b><small>108</small></span><span><i class="absent-dot"></i><b>Absent</b><small>10</small></span><span><i class="leave-dot"></i><b>Leave</b><small>6</small></span></div>
+          </article>
+        </section>
+
+        <section class="panel intern-panel" id="interns">
+          <div class="panel-heading intern-heading"><div><h2>All Interns</h2></div><div class="table-tools"><input id="internSearch" type="search" placeholder="Search interns…" aria-label="Search sample interns"><select aria-label="Filter by domain"><option>All Domains</option><option>Web Development</option><option>Graphic Design</option></select><select aria-label="Filter by status"><option>All Status</option><option>Active</option><option>Inactive</option></select><select aria-label="Filter by period"><option>This Month</option><option>Last 6 months</option></select><button type="button" class="export-button" id="exportButton">⇩ Export</button></div></div>
+          <div class="table-scroll"><table><thead><tr><th>#</th><th>Name</th><th>Domain</th><th>Role</th><th>Status</th><th>Attendance</th><th>Join Date</th><th>End Date</th><th>Tasks</th><th>Actions</th></tr></thead><tbody id="internRows">
+            <tr><td>01</td><td><span class="table-avatar">PS</span>Priya Sharma</td><td>Graphic Design</td><td>Intern</td><td><span class="table-status active">Active</span></td><td>92%</td><td>2026-10-23</td><td>2026-11-23</td><td>5/6</td><td><button class="row-menu" data-preview-action="Open intern record" type="button" aria-label="Open Priya Sharma sample record">•••</button></td></tr>
+            <tr><td>02</td><td><span class="table-avatar">RV</span>Rahul Verma</td><td>Web Development</td><td>Intern</td><td><span class="table-status active">Active</span></td><td>88%</td><td>2026-10-22</td><td>2026-11-22</td><td>4/5</td><td><button class="row-menu" data-preview-action="Open intern record" type="button" aria-label="Open Rahul Verma sample record">•••</button></td></tr>
+            <tr><td>03</td><td><span class="table-avatar">SY</span>Sneha Yadav</td><td>Human Resources</td><td>Intern</td><td><span class="table-status active">Active</span></td><td>95%</td><td>2026-10-21</td><td>2026-11-21</td><td>6/6</td><td><button class="row-menu" data-preview-action="Open intern record" type="button" aria-label="Open Sneha Yadav sample record">•••</button></td></tr>
+            <tr><td>04</td><td><span class="table-avatar">AM</span>Aman Kumar</td><td>Digital Marketing</td><td>Intern</td><td><span class="table-status active">Active</span></td><td>90%</td><td>2026-10-20</td><td>2026-11-20</td><td>4/5</td><td><button class="row-menu" data-preview-action="Open intern record" type="button" aria-label="Open Aman Kumar sample record">•••</button></td></tr>
+            <tr><td>05</td><td><span class="table-avatar">RS</span>Riya Singh</td><td>Content Writing</td><td>Intern</td><td><span class="table-status inactive">Inactive</span></td><td>76%</td><td>2026-10-18</td><td>2026-11-18</td><td>3/6</td><td><button class="row-menu" data-preview-action="Open intern record" type="button" aria-label="Open Riya Singh sample record">•••</button></td></tr>
+          </tbody></table><p class="empty-search" id="emptySearch" hidden>No sample interns match your search.</p></div>
+        </section>
+
+        <section class="module-grid" aria-label="HR workspace modules">
+          <article class="module-card" id="recruitment"><span>▣</span><div><small>PEOPLE</small><h2>Recruitment &amp; Applications</h2><p>Preview application stages, interview coordination and hiring follow-ups.</p></div><b>›</b></article>
+          <article class="module-card" id="staff"><span>♜</span><div><small>TEAM COORDINATION</small><h2>Team Leaders</h2><p>Preview assignments, team workload and domain coordination.</p></div><b>›</b></article>
+          <article class="module-card" id="tasks"><span>☑</span><div><small>WORK MANAGEMENT</small><h2>Tasks &amp; Projects</h2><p>Preview assigned tasks, reviews and due dates. Use your secure workspace for connected training tools.</p></div><b>›</b></article>
+          <article class="module-card" id="certificates"><span>✧</span><div><small>INTERN RECORDS</small><h2>Certificates</h2><p>Certificate data and issuance controls are not connected in this preview.</p></div><b>›</b></article>
+          <article class="module-card" id="announcements"><span>➤</span><div><small>COMMUNICATION</small><h2>Announcements</h2><p>Preview company and domain announcement management.</p></div><b>›</b></article>
+          <article class="module-card" id="profile"><span>◎</span><div><small>YOUR ACCOUNT</small><h2>Profile &amp; Settings</h2><p id="profileEmail">Signed in with an authorized staff account.</p></div><b>›</b></article>
+        </section>
+        <footer class="page-footer">IntelliCore HR Dashboard <span>Illustrative preview · Role-gated · Management actions are not connected</span></footer>
+      </div>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="dashboard-visuals.js" defer></script>
+  <script src="live-clock.js" defer></script>
+  <script type="module" src="admin-dashboard.js"></script>
+</body>
+</html>

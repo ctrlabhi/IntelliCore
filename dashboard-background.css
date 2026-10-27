@@ -1,0 +1,170 @@
+body {
+  isolation: isolate;
+}
+
+.dashboard-background-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.dashboard-shell,
+.auth-state {
+  position: relative;
+  z-index: 1;
+}
+
+.welcome-art,
+.ic-hero-orbit {
+  isolation: isolate;
+}
+
+.welcome-art .orbit,
+.ic-hero-orbit .ic-orbit-ring {
+  transform-origin: center;
+}
+
+.welcome-art .orbit-a,
+.ic-hero-orbit .ring-one {
+  animation: dashboard-rope-wave 12s ease-in-out infinite;
+}
+
+.welcome-art .orbit-b,
+.ic-hero-orbit .ring-two {
+  animation: dashboard-rope-wave-reverse 15s ease-in-out infinite;
+}
+
+.welcome-chip-track {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  width: 146px;
+  height: 146px;
+  margin: -73px 0 0 -73px;
+  border-radius: 50%;
+  animation: dashboard-chip-orbit 64s linear infinite;
+  pointer-events: none;
+}
+
+.welcome-chip-track .welcome-chip,
+.welcome-chip-track .orbit-chip {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: max-content;
+  min-width: 0;
+  height: 20px;
+  padding: 0 4px;
+  border: 1px solid rgba(151, 218, 255, .32);
+  border-radius: 999px;
+  background: rgba(10, 32, 68, .94);
+  box-shadow: 0 5px 14px rgba(0, 0, 0, .24), inset 0 0 8px rgba(48, 171, 255, .08);
+  color: #e6f7ff;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1;
+  white-space: nowrap;
+  animation: dashboard-chip-counter-orbit 64s linear infinite;
+  will-change: transform;
+}
+
+.welcome-chip-track .welcome-chip > span,
+.welcome-chip-track .orbit-chip > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.welcome-chip-track svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.welcome-chip-track .chip-learn,
+.welcome-chip-track .chip-one { top: 0; left: 50%; }
+.welcome-chip-track .chip-grow,
+.welcome-chip-track .chip-two { right: 0; bottom: 0; }
+.welcome-chip-track .chip-build,
+.welcome-chip-track .chip-three { bottom: 0; left: 0; }
+
+.welcome-chip-track .welcome-chip,
+.welcome-chip-track .orbit-chip {
+  transform: translate(-50%, -50%);
+}
+
+.sidebar .nav-link > svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 17px;
+  color: #87b9e8;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 3px rgba(35, 162, 255, .2));
+  transition: color .16s ease, filter .16s ease, transform .16s ease;
+}
+
+.sidebar .nav-link:hover > svg,
+.sidebar .nav-link.active > svg {
+  color: #68e0ff;
+  filter: drop-shadow(0 0 5px rgba(0, 201, 255, .55));
+  transform: scale(1.06);
+}
+
+.ic-workspace-nav .nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.ic-workspace-nav .nav-link > svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@keyframes dashboard-rope-wave {
+  0%, 100% { transform: rotate(-25deg) scaleY(.88); }
+  50% { transform: rotate(-19deg) scaleY(1.12); }
+}
+
+@keyframes dashboard-rope-wave-reverse {
+  0%, 100% { transform: rotate(38deg) scaleY(1.1); }
+  50% { transform: rotate(44deg) scaleY(.9); }
+}
+
+@keyframes dashboard-chip-orbit {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes dashboard-chip-counter-orbit {
+  to { rotate: -360deg; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome-art .orbit-a,
+  .welcome-art .orbit-b,
+  .ic-hero-orbit .ring-one,
+  .ic-hero-orbit .ring-two,
+  .welcome-chip-track,
+  .welcome-chip-track .welcome-chip,
+  .welcome-chip-track .orbit-chip {
+    animation: none !important;
+  }
+}

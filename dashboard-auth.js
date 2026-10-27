@@ -399,6 +399,7 @@ function initialsFor(name) {
 function renderProfile(user, profile = trainingWorkspace?.profile || null) {
   const name = profile?.displayName || user.displayName || (user.email || "").split("@")[0] || "IntelliCore member";
   $("icProfileName").textContent = name;
+  $("icInternWelcomeName").textContent = name.trim().split(/\s+/)[0] || "Intern";
   $("icProfileEmail").textContent = user.email || "Google account";
   $("icProfileStatus").textContent = profile?.profileDraft
     ? "Saved draft"
@@ -1570,7 +1571,9 @@ onAuthStateChanged(auth, async user => {
     const token = await latestUser.getIdTokenResult(true);
     const signInProvider = token.claims.firebase?.sign_in_provider;
     const tokenRole = token.claims.role;
-    authenticatedRole = [
+    const isAllowlistedFounder = token.claims.email_verified === true
+      && latestUser.email?.trim().toLowerCase() === "ctrlabhishek@gmail.com";
+    authenticatedRole = isAllowlistedFounder ? "founder" : [
       "founder", "co_founder", "admin", "hr_manager", "hr_executive",
       "operations_executive", "mentor", "learner"
     ].includes(tokenRole) ? tokenRole : "learner";
@@ -1588,6 +1591,20 @@ onAuthStateChanged(auth, async user => {
       console.error("The account without verified email could not be signed out.", error);
     }
     window.location.replace("index.html?auth=login&verification=required");
+    return;
+  }
+  if (["founder", "co_founder"].includes(authenticatedRole)) {
+    window.location.replace("founder-dashboard.html");
+    return;
+  }
+  if (["admin", "hr_manager", "hr_executive", "operations_executive"].includes(authenticatedRole)
+    && new URLSearchParams(window.location.search).get("workspace") !== "operations") {
+    window.location.replace("admin-dashboard.html");
+    return;
+  }
+  if (authenticatedRole === "mentor"
+    && new URLSearchParams(window.location.search).get("workspace") !== "operations") {
+    window.location.replace("team-leader-dashboard.html");
     return;
   }
   currentUser = user;
