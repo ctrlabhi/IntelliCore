@@ -8,12 +8,12 @@
   <title>TL Dashboard | IntelliCore</title>
   <link rel="icon" type="image/png" href="Photos/favicon.png">
   <link rel="stylesheet" href="founder-dashboard.css">
-  <link rel="stylesheet" href="team-leader-dashboard.css">
+  <link rel="stylesheet" href="tl-dashboard.css">
   <link rel="stylesheet" href="dashboard-background.css">
 </head>
 <body class="team-leader-page">
   <canvas id="icWorkspaceNeuralCanvas" class="dashboard-background-canvas" aria-hidden="true"></canvas>
-  <div class="auth-state" id="authState" role="status">Verifying Team Leader access…</div>
+  <div class="auth-state" id="authState" role="status">Verifying TL Dashboard access…</div>
   <div class="dashboard-shell" id="dashboardShell" hidden>
     <aside class="sidebar" id="sidebar">
       <a class="brand" href="#overview" aria-label="IntelliCore TL dashboard">
@@ -148,7 +148,7 @@
           </tbody></table><p class="empty-search" id="emptySearch" hidden>No sample interns match your filters.</p></div>
         </section>
 
-        <section class="module-grid" aria-label="Team Leader modules">
+        <section class="module-grid" aria-label="TL Dashboard modules">
           <article class="module-card" id="completion"><span>✧</span><div><small>COMPLETION</small><h2>Certificates &amp; Completion</h2><p>Preview completion checks and recommendations. Certificate issuance stays with authorized HR/Admin.</p></div><b>›</b></article>
           <article class="module-card" id="announcements"><span>➤</span><div><small>MY DOMAIN</small><h2>Announcements</h2><p>Preview team notices. Company-wide publishing is reserved for authorized Admin/HR roles.</p></div><b>›</b></article>
           <article class="module-card" id="profile"><span>◎</span><div><small>YOUR ACCOUNT</small><h2>Profile &amp; Settings</h2><p id="profileEmail">Signed in with an authorized Team Leader account.</p></div><b>›</b></article>
@@ -160,6 +160,6 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="dashboard-visuals.js" defer></script>
   <script src="live-clock.js" defer></script>
-  <script type="module" src="team-leader-dashboard.js"></script>
+  <script type="module" src="tl-dashboard.js"></script>
 </body>
 </html>

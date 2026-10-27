@@ -90,7 +90,7 @@ onAuthStateChanged(auth, async user => {
     $("authState").hidden = true;
     $("dashboardShell").hidden = false;
   } catch (error) {
-    console.error("Team Leader dashboard access could not be verified.", error);
+    console.error("TL Dashboard access could not be verified.", error);
     $("authState").textContent = "Access could not be verified. Please return to sign in and try again.";
   }
 });
@@ -100,7 +100,7 @@ async function logout() {
     await signOut(auth);
     window.location.replace("index.html");
   } catch (error) {
-    console.error("Team Leader dashboard sign-out failed.", error);
+    console.error("TL Dashboard sign-out failed.", error);
     showToast("Sign out failed. Please try again.");
   }
 }

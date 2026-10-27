@@ -41,7 +41,7 @@ Current project
   dashboard. Users cannot assign themselves a staff role from the client;
   Founder/Co-founder assignment is enforced by server-side callable Functions.
 - Mentor accounts (the currently provisioned role used for Team Leaders) open
-  `team-leader-dashboard.html`. Its example metrics are illustrative and its
+  `tl-dashboard.html`. Its example metrics are illustrative and its
   track selector is limited to the account's authorized mentor-track claims.
   Task assignment and submission review links open the existing secure
   workspace; other Team Leader workflows remain preview-only.
@@ -79,11 +79,11 @@ Files to publish
 - founder-dashboard.css
 - founder-dashboard.js
 - hr-dashboard.html
-- admin-dashboard.css
-- admin-dashboard.js
-- team-leader-dashboard.html
-- team-leader-dashboard.css
-- team-leader-dashboard.js
+- hr-dashboard.css
+- hr-dashboard.js
+- tl-dashboard.html
+- tl-dashboard.css
+- tl-dashboard.js
 - live-clock.js
 - functions/
 - firebase.json

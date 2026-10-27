@@ -21,19 +21,19 @@ const staffRoles = {
   },
   hr_manager: {
     label: "HR Manager",
-    display: "HR MANAGER DASHBOARD",
+    display: "HR DASHBOARD",
     scope: "HR workspace · Authorized HR scope",
     capabilities: ["manageInterns", "recruitment", "attendance", "reports", "tasks", "certificates", "announcements", "export"]
   },
   hr_executive: {
     label: "HR Executive",
-    display: "HR EXECUTIVE DASHBOARD",
+    display: "HR DASHBOARD",
     scope: "HR workspace · Assigned processes",
     capabilities: ["recruitment", "attendance", "reports", "certificates", "announcements"]
   },
   operations_executive: {
     label: "Operations Executive",
-    display: "OPERATIONS DASHBOARD",
+    display: "HR DASHBOARD",
     scope: "Operations workspace · Operational scope",
     capabilities: ["attendance", "reports", "tasks", "announcements"]
   }

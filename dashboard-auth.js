@@ -1604,7 +1604,7 @@ onAuthStateChanged(auth, async user => {
   }
   if (authenticatedRole === "mentor"
     && new URLSearchParams(window.location.search).get("workspace") !== "operations") {
-    window.location.replace("team-leader-dashboard.html");
+    window.location.replace("tl-dashboard.html");
     return;
   }
   currentUser = user;
