@@ -30,7 +30,7 @@ Current project
   after the target signs in again. Other organization-wide management actions
   on this page are not connected to live data or write operations.
 - Admin, HR Manager, HR Executive, and Operations Executive accounts open
-  `admin-dashboard.html`, presented as the shared role-gated HR Dashboard.
+  `hr-dashboard.html`, presented as the shared role-gated HR Dashboard.
   Its KPIs and
   records are illustrative. The existing operational tools remain available
   from its "Open secure workspace" link at `dashboard.html?workspace=operations`.
@@ -78,7 +78,7 @@ Files to publish
 - founder-dashboard.html
 - founder-dashboard.css
 - founder-dashboard.js
-- admin-dashboard.html
+- hr-dashboard.html
 - admin-dashboard.css
 - admin-dashboard.js
 - team-leader-dashboard.html

@@ -1599,7 +1599,7 @@ onAuthStateChanged(auth, async user => {
   }
   if (["admin", "hr_manager", "hr_executive", "operations_executive"].includes(authenticatedRole)
     && new URLSearchParams(window.location.search).get("workspace") !== "operations") {
-    window.location.replace("admin-dashboard.html");
+    window.location.replace("hr-dashboard.html");
     return;
   }
   if (authenticatedRole === "mentor"

@@ -152,16 +152,21 @@ $("exportButton").addEventListener("click", () => {
   showToast("Export is disabled in this sample-data preview.");
 });
 
-$("internSearch").addEventListener("input", event => {
-  const query = event.target.value.trim().toLowerCase();
+function filterSampleInterns() {
+  const query = $("internSearch").value.trim().toLowerCase();
+  const domain = $("domainFilter").value;
   let visibleRows = 0;
   $("internRows").querySelectorAll("tr").forEach(row => {
-    const matches = row.textContent.toLowerCase().includes(query);
+    const matches = row.textContent.toLowerCase().includes(query)
+      && (!domain || row.cells[2]?.textContent.trim() === domain);
     row.hidden = !matches;
     if (matches) visibleRows += 1;
   });
   $("emptySearch").hidden = visibleRows !== 0;
-});
+}
+
+$("internSearch").addEventListener("input", filterSampleInterns);
+$("domainFilter").addEventListener("change", filterSampleInterns);
 
 $("globalSearch").addEventListener("keydown", event => {
   if (event.key === "Enter" && event.currentTarget.value.trim()) {
