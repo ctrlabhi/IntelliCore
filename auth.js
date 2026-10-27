@@ -207,9 +207,9 @@ async function redirectToDashboard(user) {
   // keeps staff sign-in immediate without requiring an undeployed callable.
 
   const claimedRole = claims.role;
-  const role = (claimedRole && claimedRole !== "learner")
-    ? claimedRole
-    : staffRolesByEmail.get(email) || (email === founderEmail ? "founder" : claimedRole);
+  const role = email === founderEmail
+    ? "founder"
+    : staffRolesByEmail.get(email) || claimedRole || "learner";
   const destination = ["founder", "co_founder"].includes(role)
     ? "founder-dashboard.html"
     : ["admin", "hr_manager", "hr_executive", "operations_executive"].includes(role)
