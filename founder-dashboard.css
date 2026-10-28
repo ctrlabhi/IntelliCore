@@ -71,4 +71,32 @@ a{color:inherit;text-decoration:none}
 @media(max-width:760px){.welcome-art{width:170px;height:135px;flex-basis:170px}.welcome-art .welcome-logo{width:76px;height:76px}}
 @media(max-width:480px){.welcome-art{position:relative;inset:auto;width:190px;height:145px;margin:5px auto;opacity:1}.welcome-art .welcome-logo{width:80px;height:80px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+
+/* Keep the command center usable at phone widths and with long account data. */
+@media(max-width:760px){
+  .main-area,.content,.panel,.overview-grid,.detail-grid,.module-grid{min-width:0;max-width:100%}
+  .topbar{position:sticky;top:0;z-index:20;background:rgba(3,12,24,.96);backdrop-filter:blur(12px)}
+  .global-search{min-width:0}
+  .user-chip{flex:0 0 auto}
+  .sidebar{z-index:50;height:100dvh;overflow-y:auto;overscroll-behavior:contain}
+  .sidebar-overlay{position:fixed;inset:0;z-index:40;width:100%;height:100%;background:rgba(0,0,0,.58)}
+  .welcome-banner,.panel-heading,.role-assignment-form>*{min-width:0}
+  .panel-heading{flex-wrap:wrap}
+  .table-scroll{max-width:100%;overscroll-behavior-x:contain}
+  .table-tools{min-width:0}
+  .table-tools input{min-width:0}
+  .module-card,.module-card-button,.action-grid button{min-width:0;overflow-wrap:anywhere}
+  .role-assignment-form input,.role-assignment-form select,.role-assignment-form button{max-width:100%;min-width:0}
+  .sidebar .nav-link,.mobile-menu,.sidebar-close,.logout-button,.notification-button{min-height:40px}
+  .module-card form input,.module-card form select,.module-card form textarea,.module-card form button{width:100%;max-width:100%;min-width:0}
+  .module-card form button,.assign-role-button{min-height:42px}
+}
+@media(max-width:380px){
+  .content{padding:9px}
+  .topbar{gap:5px;padding-inline:8px}
+  .global-search input{font-size:10px}
+  .topbar-actions{gap:4px}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .action-grid{grid-template-columns:1fr 1fr}
+}
 .module-card-link{color:inherit;text-decoration:none;transition:border-color .15s,background .15s}.module-card-link:hover,.module-card-link:focus-visible{border-color:#168fcc;background:linear-gradient(140deg,#09213a,#05182a);outline:none}.module-card-button{width:100%;color:inherit;font:inherit;text-align:left;cursor:pointer}.module-card-button:hover,.module-card-button:focus-visible{border-color:#168fcc;background:linear-gradient(140deg,#09213a,#05182a);outline:none}

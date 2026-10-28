@@ -37,7 +37,7 @@
         <a class="nav-link" href="#certificates"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="m8 14-1 8 5-3 5 3-1-8"/></svg> Certificates &amp; Documents</a>
         <a class="nav-link" href="#announcements"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11v2l13 5V6L3 11Z"/><path d="M6 14v4a2 2 0 0 0 2 2h2l-2-5m8-7 4-2v12l-4-2"/></svg> Announcements</a>
         <a class="nav-link" href="#reports"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10m8 10V4m8 16v-7"/></svg> Reports &amp; Analytics</a>
-        <a class="nav-link" href="#approvals"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg> Approvals Center <b class="nav-count">4</b></a>
+        <a class="nav-link" href="#approvals"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg> Approvals Center <b class="nav-count" id="founderApprovalCount" hidden>0</b></a>
         <a class="nav-link" href="#audit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12s3.2-7 9-7 9 7 9 7-3.2 7-9 7-9-7-9-7Z"/><circle cx="12" cy="12" r="3"/></svg> Audit Logs</a>
         <div class="nav-group-label">ADMINISTRATION</div>
         <a class="nav-link" href="#integrations"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7V5a2 2 0 0 1 4 0v14a2 2 0 0 1-4 0v-2m4-8h4a2 2 0 0 1 0 4h-8a2 2 0 0 1 0-4h4"/></svg> Integrations</a>
@@ -82,14 +82,14 @@
 
         <section class="overview-grid">
           <article class="panel domain-panel" id="domains">
-            <div class="panel-heading"><div><span class="panel-kicker">ORGANIZATION</span><h2>Interns by Domain</h2></div><select aria-label="Domain chart period"><option>This month</option><option>Last 6 months</option></select></div>
+            <div class="panel-heading"><div><span class="panel-kicker">ORGANIZATION</span><h2>Interns by Domain</h2></div><span class="chart-period-label">All registered profiles</span></div>
             <div class="domain-chart-wrap">
               <div class="donut-chart"><div><strong id="founderDomainTotal">—</strong><span>Total</span></div></div>
               <ul class="legend" id="founderDomainLegend"><li>Loading live domain counts…</li></ul>
             </div>
           </article>
           <article class="panel chart-panel" id="reports">
-            <div class="panel-heading"><div><span class="panel-kicker">WORKFORCE</span><h2>Monthly Intern Overview</h2></div><select aria-label="Intern overview period"><option>Last 6 months</option><option>This year</option></select></div>
+            <div class="panel-heading"><div><span class="panel-kicker">WORKFORCE</span><h2>Monthly Intern Overview</h2></div><select id="founderOverviewPeriod" aria-label="Intern overview period"><option value="6">Last 6 months</option><option value="12">Last 12 months</option></select></div>
             <div class="line-chart" id="founderLiveOverview" role="status" aria-label="Live workforce totals">
               <div class="chart-y-labels"><span>200</span><span>150</span><span>100</span><span>50</span><span>0</span></div>
               <svg viewBox="0 0 520 170" preserveAspectRatio="none" aria-hidden="true">

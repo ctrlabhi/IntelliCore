@@ -84,6 +84,7 @@
         <a href="#workspaceHome" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Intern Dashboard</a>
         <a href="#icProfile" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
         <a href="#icTrainingSection" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="m3 6 1 1 2-2m-3 7 1 1 2-2m-3 7 1 1 2-2"/></svg>My Tasks</a>
+        <a href="#icApplications" class="nav-link">My Applications</a>
         <a href="#icAttendancePanel" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Attendance</a>
         <div class="ic-sidebar-group-label">LEARNING</div>
         <a href="#icProjects" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 7 9-4 9 4-9 4-9-4Z"/><path d="m5 11 7 3 7-3M5 15l7 3 7-3"/></svg>My Projects</a>
@@ -122,6 +123,7 @@
         <li><a href="#workspaceHome" class="mobile-nav-link">Intern dashboard <span>→</span></a></li>
         <li><a href="#icProfile" class="mobile-nav-link">My profile <span>→</span></a></li>
         <li><a href="#icTrainingSection" class="mobile-nav-link">My tasks <span>→</span></a></li>
+        <li><a href="#icApplications" class="mobile-nav-link">My applications <span>→</span></a></li>
         <li><a href="#icAttendancePanel" class="mobile-nav-link">Attendance <span>→</span></a></li>
       </ul>
       <p class="mobile-nav-group">LEARNING</p>
@@ -259,6 +261,19 @@
       </div>
       <div id="icTrainingTasks" class="ic-training-tasks"><div class="ic-activity-empty"><strong>Loading your assignments…</strong></div></div>
     </section>
+    <section class="ic-workspace-panel ic-applications-panel" id="icApplications" aria-labelledby="icApplicationsTitle">
+      <div class="ic-panel-heading"><div><span class="ic-muted-label">PRIVATE TO YOUR ACCOUNT</span><h3 id="icApplicationsTitle">My Application Tracker</h3><p>Keep your personal application notes and status in one place. These records are visible only to you.</p></div></div>
+      <form class="ic-application-form" id="icApplicationForm">
+        <input type="hidden" name="recordId">
+        <label>Organisation<input name="organisation" required maxlength="120" autocomplete="organization" placeholder="Company or organisation"></label>
+        <label>Role or application title<input name="title" required maxlength="100" placeholder="e.g. Web Developer Intern"></label>
+        <label>Application date<input name="date" type="date" required></label>
+        <label>Status<select name="status" required><option>Applied</option><option>Under review</option><option>Shortlisted</option><option>Interview Scheduled</option><option>Selected</option><option>Rejected</option><option>Withdrawn</option></select></label>
+        <div class="ic-application-form-actions"><button type="submit" class="ic-primary-button" id="icApplicationSubmit">Save application</button><button type="button" class="ic-outline-button" id="icApplicationCancel" hidden>Cancel edit</button></div>
+        <p class="ic-application-form-message" id="icApplicationMessage" role="status" aria-live="polite"></p>
+      </form>
+      <div class="ic-application-list" id="icApplicationsList"><div class="ic-activity-empty"><strong>Loading your applications…</strong></div></div>
+    </section>
     <section class="ic-workspace-panel ic-progress-panel" id="icProgressPanel" aria-labelledby="icProgressTitle">
       <div class="ic-panel-heading"><div><h3 id="icProgressTitle">My Progress</h3><p>Based on approved training assignments.</p></div></div>
       <div class="ic-progress-chart-wrap">
@@ -299,7 +314,7 @@
         <p id="icAdminRoleDescription">Interns are organised by domain. Inactive enrolled interns are listed separately.</p>
       </div>
       <div class="ic-intern-directory-wrap" id="icInternDirectoryWrap" hidden><h3>Intern profiles by domain</h3><p class="ic-admin-section-copy">Name, domain, duration, phone number, email and last login for each intern.</p><div id="icInternDirectory" class="ic-staff-data-list"></div><button type="button" class="ic-outline-button ic-load-more-interns" id="icLoadMoreInterns" hidden>Load more interns</button></div>
-      <div class="ic-inactive-interns-wrap" id="icInactiveInternsWrap" hidden><h3>Inactive enrolled interns <span class="ic-inactive-count" id="icInactiveInternCount">0</span></h3><p class="ic-admin-section-copy">No login for at least 7 days. Deactivation keeps their internship, attendance and training records.</p><div id="icInactiveInterns" class="ic-staff-data-list"></div></div>
+      <div class="ic-inactive-interns-wrap" id="icInactiveInternsWrap" hidden><h3>Inactive enrolled interns <span class="ic-inactive-count" id="icInactiveInternCount">0</span></h3><p class="ic-admin-section-copy">Deactivated accounts are listed here. Admins can restore access; internship, attendance and training records are retained.</p><div id="icInactiveInterns" class="ic-staff-data-list"></div></div>
       <div class="ic-intern-directory-wrap" id="icAttendanceReportWrap" hidden><h3>Daily attendance</h3><div id="icAttendanceReport" class="ic-staff-data-list"></div></div>
     </section>
 
@@ -344,7 +359,7 @@
       <div class="ic-profile-dialog-content">
         <span class="ic-muted-label">START YOUR JOURNEY</span>
         <h2 id="icInternshipDialogTitle">Build your internship profile</h2>
-        <p id="icInternshipDialogDescription">Choose your domain, duration, and start date. The end date is calculated automatically; saved dates remain a draft until trusted activation.</p>
+        <p id="icInternshipDialogDescription">Choose your domain, duration, and start date. Your profile and workspace will be ready as soon as you save.</p>
         <label class="ic-form-field">Full name<input id="icInternshipName" name="displayName" required minlength="2" maxlength="80" autocomplete="name" placeholder="Your full name"></label>
         <label class="ic-form-field">Email address<input id="icInternshipEmail" type="email" autocomplete="email" readonly aria-readonly="true"></label>
         <label class="ic-form-field">Gender<select id="icInternshipGender" name="gender" required><option value="">Choose an option</option><option value="Female">Female</option><option value="Male">Male</option></select></label>

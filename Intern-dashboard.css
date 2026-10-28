@@ -1725,6 +1725,20 @@
   .ic-workspace-page .ic-dashboard-notifications{width:27px}
   .ic-workspace-page .ic-welcome-actions{width:100%;justify-content:flex-start}
 }
+.ic-application-form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:14px;border:1px solid #12314a;border-radius:12px;background:rgba(3,17,31,.55)}
+.ic-application-form>label{display:grid;align-content:start;gap:6px;color:#9eb5cc;font-size:.72rem}
+.ic-application-form input,.ic-application-form select{width:100%;min-height:40px;padding:8px 10px;border:1px solid #183a56;border-radius:8px;background:#041426;color:#e7f3ff;font:inherit}
+.ic-application-form-actions{display:flex;align-items:center;gap:8px;grid-column:1/-1}
+.ic-application-form-message{grid-column:1/-1;margin:0;color:#8eabc4;font-size:.75rem}
+.ic-application-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.ic-application-card{display:grid;gap:8px;padding:13px;border:1px solid #12314a;border-radius:11px;background:linear-gradient(145deg,#061a2c,#041323);color:#dcecff}
+.ic-application-card>div:first-child{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.ic-application-card h4{margin:0;font-size:.88rem}
+.ic-application-card p{margin:0;color:#9db3c9;font-size:.75rem}
+.ic-application-status{padding:4px 8px;border-radius:999px;background:rgba(43,155,255,.14);color:#83d1ff;font-size:.66rem;white-space:nowrap}
+.ic-application-card-actions{display:flex;gap:8px}
+@media(max-width:760px){.ic-application-form{grid-template-columns:repeat(2,minmax(0,1fr))}.ic-application-list{grid-template-columns:1fr}}
+@media(max-width:420px){.ic-application-form{grid-template-columns:1fr}.ic-application-form-actions{flex-wrap:wrap}}
 /* Keep the intern welcome banner aligned with the Founder dashboard header. */
 .ic-workspace-page .ic-workspace-hero{min-height:123px!important;padding:18px 24px!important;border-radius:13px!important;background:radial-gradient(ellipse at 58% 50%,rgba(0,116,195,.15),transparent 42%),linear-gradient(110deg,#061328,#07152a 54%,#06182c)!important}
 .ic-workspace-page .ic-workspace-hero:before,.ic-workspace-page .ic-workspace-hero:after{content:"";position:absolute;border:1px solid rgba(0,157,255,.13);width:270px;height:160px;border-radius:50%;right:29%;top:-90px;transform:rotate(-25deg);pointer-events:none}
@@ -2152,3 +2166,30 @@
 .ic-workspace-page .ic-intern-profile-row strong.is-profile-active{padding:3px 9px;border-radius:999px;background:rgba(0,211,160,.14);color:#00dba7!important}
 .ic-workspace-page .ic-attendance-history{max-height:none;overflow:visible}
 @media(max-width:760px){.ic-workspace-page .ic-attendance-calendar-body{grid-template-columns:minmax(0,1fr);gap:12px}.ic-workspace-page .ic-attendance-calendar-legend{grid-template-columns:repeat(3,minmax(0,1fr))}.ic-workspace-page .ic-attendance-calendar-legend>span{grid-template-columns:8px minmax(0,1fr);gap:4px;padding:5px;font-size:.58rem}.ic-workspace-page .ic-attendance-calendar-legend>span>strong{grid-column:2}.ic-workspace-page .ic-workspace-welcome#icProfile{grid-column:1/-1}}
+
+/* Small-screen workspace polish: keep every panel and control inside the viewport. */
+.ic-workspace-page{overflow-x:hidden}
+.ic-workspace-page .ic-workspace-main,.ic-workspace-page .ic-workspace-main *{min-width:0}
+.ic-workspace-page .ic-workspace-panel,.ic-workspace-page .ic-stat-card,.ic-workspace-page .ic-training-task{overflow-wrap:anywhere}
+@media(max-width:760px){
+  .ic-workspace-page .container{width:min(100% - 24px,100%)}
+  .ic-workspace-page .site-header .header-inner{min-height:62px}
+  .ic-workspace-page .ic-workspace-main{padding-top:12px}
+  .ic-workspace-page .ic-workspace-hero{border-radius:14px}
+  .ic-workspace-page .ic-workspace-stats{gap:9px}
+  .ic-workspace-page .ic-stat-card{min-height:86px;padding:11px}
+  .ic-workspace-page .ic-workspace-panel,.ic-workspace-page .ic-training-section,.ic-workspace-page .ic-progress-panel,.ic-workspace-page .ic-attendance-panel{padding:14px!important}
+  .ic-workspace-page .ic-domain-group,.ic-workspace-page .ic-intern-card{max-width:100%}
+  .ic-workspace-page .ic-admin-hierarchy{flex-wrap:wrap;gap:10px}
+  .ic-workspace-page .ic-workspace-panel table{display:block;max-width:100%;overflow-x:auto}
+  .ic-workspace-page .ic-record-dialog{width:min(100% - 20px,560px);max-height:calc(100dvh - 24px);overflow-y:auto}
+  .ic-workspace-page input,.ic-workspace-page select,.ic-workspace-page textarea,.ic-workspace-page button{max-width:100%}
+}
+@media(max-width:420px){
+  .ic-workspace-page .container{width:calc(100% - 18px)}
+  .ic-workspace-page .ic-workspace-stats{gap:7px}
+  .ic-workspace-page .ic-stat-card{grid-template-columns:28px minmax(0,1fr);gap:7px;padding:9px;font-size:.7rem}
+  .ic-workspace-page .ic-stat-icon{width:28px;height:28px}
+  .ic-workspace-page .ic-training-task-heading{align-items:flex-start;flex-direction:column;gap:7px}
+  .ic-workspace-page .ic-attendance-calendar-legend{grid-template-columns:1fr}
+}

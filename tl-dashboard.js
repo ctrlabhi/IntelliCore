@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebas
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
 import {
   collection, collectionGroup, doc, getDoc, getDocs, getFirestore, limit,
-  query, serverTimestamp, setDoc, where
+  query, serverTimestamp, setDoc, startAfter, where
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -26,6 +26,19 @@ let liveAssignments = [];
 let liveAttendance = [];
 let refreshTimer = null;
 function timestampMillis(value) { return value?.toMillis?.() || (typeof value === "number" ? value : Date.parse(value || "") || 0); }
+async function fetchAllDocs(buildQuery) {
+  const documents = [];
+  let cursor = null;
+  while (true) {
+    const pageSize = 500;
+    const page = await getDocs(buildQuery(cursor, pageSize));
+    documents.push(...page.docs);
+    if (page.size < pageSize) break;
+    cursor = page.docs.at(-1) || null;
+    if (!cursor) break;
+  }
+  return documents;
+}
 function internStatus(intern) {
   const today = indiaDate();
   if (intern.accountStatus === "deactivated") return "Deactivated";
@@ -63,7 +76,8 @@ function renderLiveTeam() {
   const month = $("tlAttendancePeriod").value;
   const today = indiaDate();
   const monthRecords = liveAttendance.filter(item => item.attendanceDate?.startsWith(month));
-  const presentUids = new Set(monthRecords.map(item => item.uid));
+  const attendanceByIntern = new Map();
+  monthRecords.forEach(item => attendanceByIntern.set(item.uid, (attendanceByIntern.get(item.uid) || 0) + 1));
   const completedTasks = liveAssignments.filter(item => ["approved", "completed"].includes(item.status)).length;
   const pendingTasks = liveAssignments.filter(item => ["assigned", "submitted", "changes_requested"].includes(item.status)).length;
   const possible = liveInterns.reduce((sum, intern) => sum + expectedWorkdays(intern, month), 0);
@@ -83,13 +97,14 @@ function renderLiveTeam() {
   $("tlDomainCompletion").textContent = `${completion}%`;
   $("tlTaskSummary").innerHTML = `<strong>${liveAssignments.length}</strong> assigned · <strong>${completedTasks}</strong> approved · <strong>${pendingTasks}</strong> awaiting work or review`;
   const taskById = window.IntelliCoreCurriculum?.taskById;
+  const internByUid = new Map(liveInterns.map(intern => [intern.uid, intern]));
   const tasksByIntern = new Map();
   liveAssignments.forEach(task => tasksByIntern.set(task.assignedToUid, [...(tasksByIntern.get(task.assignedToUid) || []), task]));
   $("internRows").innerHTML = filteredInterns().map((intern, index) => {
     const status = internStatus(intern);
     const className = status === "Active" ? "active" : status === "Completed" ? "complete" : "hold";
     const tasks = tasksByIntern.get(intern.uid) || [];
-    const present = monthRecords.filter(item => item.uid === intern.uid).length;
+    const present = attendanceByIntern.get(intern.uid) || 0;
     const expected = expectedWorkdays(intern, month);
     const rate = expected ? Math.min(100, Math.round(present / expected * 100)) : 0;
     return `<tr data-status="${escapeHtml(status)}"><td>${String(index + 1).padStart(2, "0")}</td><td><span class="table-avatar">${escapeHtml((intern.displayName || intern.email || "I").split(/\s+/).map(part => part[0]).slice(0, 2).join("").toUpperCase())}</span>${escapeHtml(intern.displayName || "Intern")}</td><td>${escapeHtml(intern.email || "—")}</td><td><span class="table-status ${className}">${escapeHtml(status)}</span></td><td>${rate}% (${present})</td><td>${tasks.filter(task => ["approved", "completed"].includes(task.status)).length}/${tasks.length}</td><td>${escapeHtml(intern.internshipStartDate || "—")}</td><td>${escapeHtml(intern.internshipEndDate || "—")}</td><td><a class="row-menu" href="Intern-dashboard.html?workspace=operations#icTrainingSection" aria-label="Open training workspace">↗</a></td></tr>`;
@@ -103,12 +118,12 @@ function renderLiveTeam() {
     const title = taskTitles?.get(task.taskId)?.title || task.taskId;
     const day = task.dueDate.slice(8, 10);
     const monthName = new Intl.DateTimeFormat("en", { month: "short", timeZone: "UTC" }).format(new Date(`${task.dueDate}T00:00:00Z`)).toUpperCase();
-    const intern = liveInterns.find(item => item.uid === task.assignedToUid);
+    const intern = internByUid.get(task.assignedToUid);
     return `<div class="deadline-row"><span class="date-badge"><small>${monthName}</small><b>${day}</b></span><span><strong>${escapeHtml(title)}</strong><small>${escapeHtml(intern?.displayName || intern?.email || "Intern")}</small></span><b class="tag team-task-tag">Task</b></div>`;
   }).join("") : "<p>No upcoming assigned-task deadlines.</p>";
   const activity = [
-    ...liveAssignments.map(task => ({ at: timestampMillis(task.updatedAt || task.assignedAt), intern: liveInterns.find(item => item.uid === task.assignedToUid), detail: `Task ${task.status || "updated"}` })),
-    ...liveAttendance.map(record => ({ at: timestampMillis(record.checkedInAt), intern: liveInterns.find(item => item.uid === record.uid), detail: `Checked in · ${record.attendanceDate}` }))
+    ...liveAssignments.map(task => ({ at: timestampMillis(task.updatedAt || task.assignedAt), intern: internByUid.get(task.assignedToUid), detail: `Task ${task.status || "updated"}` })),
+    ...liveAttendance.map(record => ({ at: timestampMillis(record.checkedInAt), intern: internByUid.get(record.uid), detail: `Checked in · ${record.attendanceDate}` }))
   ].filter(item => item.at).sort((a, b) => b.at - a.at).slice(0, 8);
   $("liveTeamActivity").innerHTML = activity.length ? activity.map((item, index) => {
     const name = item.intern?.displayName || item.intern?.email || "Intern";
@@ -132,15 +147,15 @@ async function loadLiveTeam() {
   const selectedTracks = activeTrackList();
   if (!selectedTracks.length) throw new Error("No authorized internship tracks are assigned to this Team Leader account.");
   const [profilePages, taskPages, attendancePages] = await Promise.all([
-    Promise.all(selectedTracks.map(track => getDocs(query(collection(db, "profiles"), where("role", "==", "learner"), where("track", "==", track), limit(500))))),
-    Promise.all(selectedTracks.map(track => getDocs(query(collection(db, "trainingAssignments"), where("track", "==", track), limit(500))))),
-    Promise.all(selectedTracks.map(track => getDocs(query(collectionGroup(db, "attendance"), where("track", "==", track), limit(2000))))
+    Promise.all(selectedTracks.map(track => fetchAllDocs((cursor, pageSize) => query(collection(db, "profiles"), where("role", "==", "learner"), where("track", "==", track), ...(cursor ? [startAfter(cursor)] : []), limit(pageSize))))),
+    Promise.all(selectedTracks.map(track => fetchAllDocs((cursor, pageSize) => query(collection(db, "trainingAssignments"), where("track", "==", track), ...(cursor ? [startAfter(cursor)] : []), limit(pageSize))))),
+    Promise.all(selectedTracks.map(track => fetchAllDocs((cursor, pageSize) => query(collectionGroup(db, "attendance"), where("track", "==", track), ...(cursor ? [startAfter(cursor)] : []), limit(pageSize)))))
   ]);
-  const profiles = new Map(profilePages.flatMap(page => page.docs).map(snapshot => [snapshot.id, { uid: snapshot.id, ...snapshot.data() }]));
+  const profiles = new Map(profilePages.flat().map(snapshot => [snapshot.id, { uid: snapshot.id, ...snapshot.data() }]));
   liveInterns = [...profiles.values()].sort((a, b) => (a.displayName || a.email || "").localeCompare(b.displayName || b.email || ""));
-  const assignments = new Map(taskPages.flatMap(page => page.docs).map(snapshot => [snapshot.id, { id: snapshot.id, ...snapshot.data() }]));
+  const assignments = new Map(taskPages.flat().map(snapshot => [snapshot.id, { id: snapshot.id, ...snapshot.data() }]));
   liveAssignments = [...assignments.values()];
-  const attendance = new Map(attendancePages.flatMap(page => page.docs).map(snapshot => [snapshot.ref.path, {
+  const attendance = new Map(attendancePages.flat().map(snapshot => [snapshot.ref.path, {
     uid: snapshot.ref.parent.parent?.id || "", attendanceDate: snapshot.get("attendanceDate") || snapshot.id,
     checkedInAt: snapshot.get("checkedInAt") || null
   }]));
@@ -302,11 +317,16 @@ $("statusFilter").addEventListener("change", filterInterns);
 $("exportButton").addEventListener("click", () => {
   const rows = [["Name", "Email", "Track", "Status", "Attendance", "Tasks completed", "Tasks assigned", "Start", "End"]];
   const month = $("tlAttendancePeriod").value;
+  const assignmentsByIntern = new Map();
+  liveAssignments.forEach(task => assignmentsByIntern.set(task.assignedToUid, [...(assignmentsByIntern.get(task.assignedToUid) || []), task]));
+  const attendanceByIntern = new Map();
+  liveAttendance.filter(item => item.attendanceDate?.startsWith(month))
+    .forEach(item => attendanceByIntern.set(item.uid, (attendanceByIntern.get(item.uid) || 0) + 1));
   filteredInterns().forEach(intern => {
-    const tasks = liveAssignments.filter(task => task.assignedToUid === intern.uid);
-    const attendance = liveAttendance.filter(item => item.uid === intern.uid && item.attendanceDate?.startsWith(month));
+    const tasks = assignmentsByIntern.get(intern.uid) || [];
+    const attendance = attendanceByIntern.get(intern.uid) || 0;
     const expected = expectedWorkdays(intern, month);
-    rows.push([intern.displayName, intern.email, intern.track, internStatus(intern), `${expected ? Math.min(100, Math.round(attendance.length / expected * 100)) : 0}%`, tasks.filter(task => ["approved", "completed"].includes(task.status)).length, tasks.length, intern.internshipStartDate, intern.internshipEndDate]);
+    rows.push([intern.displayName, intern.email, intern.track, internStatus(intern), `${expected ? Math.min(100, Math.round(attendance / expected * 100)) : 0}%`, tasks.filter(task => ["approved", "completed"].includes(task.status)).length, tasks.length, intern.internshipStartDate, intern.internshipEndDate]);
   });
   const csv = rows.map(row => row.map(value => `"${String(value ?? "").replaceAll('"', '""')}"`).join(",")).join("\r\n");
   const url = URL.createObjectURL(new Blob(["\ufeff", csv], { type: "text/csv;charset=utf-8" }));

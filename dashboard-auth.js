@@ -4,11 +4,12 @@ import {
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
 import {
   collection, collectionGroup, connectFirestoreEmulator, doc, getDoc, getDocs, initializeFirestore,
-  limit, orderBy, query, runTransaction, serverTimestamp, setDoc, startAfter, where
+  limit, orderBy, query, runTransaction, serverTimestamp, setDoc, startAfter, where, deleteDoc
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 import {
   connectStorageEmulator, getBlob, getStorage, ref, uploadBytes
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-storage.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-functions.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCEhvxTrpDORuCByXDtlgNNHbpa5fnuud0",
@@ -29,6 +30,9 @@ if (useFirebaseEmulators) {
   connectFirestoreEmulator(db, "127.0.0.1", 8080);
 }
 const storage = getStorage(app);
+const functions = getFunctions(app);
+const saveInternshipProfile = httpsCallable(functions, "saveInternshipProfile");
+const setInternAccountStatus = httpsCallable(functions, "setInternAccountStatus");
 if (useFirebaseEmulators) connectStorageEmulator(storage, "127.0.0.1", 9199);
 const $ = id => document.getElementById(id);
 const sparkStaffRolesByEmail = new Map([
@@ -77,6 +81,7 @@ function createLocalTrainingWorkspace(user, profile) {
     catalog: [],
     reviewQueue: [],
     attendance: [],
+    applications: [],
     activeInternship: null,
     activeMeeting: null,
     internDirectory: [],
@@ -104,6 +109,7 @@ function createFirebaseDraftWorkspace(user, profile) {
     catalog: [],
     reviewQueue: [],
     attendance: [],
+    applications: [],
     activeInternship: null,
     activeMeeting: null,
     internDirectory: [],
@@ -259,7 +265,7 @@ async function connectWorkspace(user, profileSetupError = null) {
     if (trainingWorkspace?.profile.localOnly) {
       notice("Your profile is saved on this device only. It is not synced to your IntelliCore account.");
     } else if (trainingWorkspace?.profile.profileDraft) {
-      notice("Your profile draft is saved. Wait for HR or Founder to activate it.");
+      notice("Your profile setup is saved. Finish setup to activate your workspace.");
     } else {
       notice(`Your secure profile or workspace could not be loaded. ${trainingResult.reason?.message || "Check your Firestore rules and connection."}`, true);
     }
@@ -685,9 +691,7 @@ function renderTraining() {
   ].includes(role);
   const canViewAttendance = ["founder", "co_founder", "admin", "hr_manager", "operations_executive"].includes(role);
   const canManageTraining = ["founder", "co_founder", "admin", "hr_manager", "mentor"].includes(role);
-  const canManageInternAccounts = [
-    "founder", "co_founder", "admin", "hr_manager", "hr_executive", "operations_executive"
-  ].includes(role);
+  const canManageInternAccounts = ["founder", "co_founder", "admin"].includes(role);
 
   $("icAttendancePanel").hidden = !isIntern;
   $("icTrainingSection").hidden = false;
@@ -726,15 +730,15 @@ function renderTraining() {
     ? "Your internship profile"
     : "Build your internship profile";
   $("icInternshipDialogDescription").textContent = profile.profileDraft
-    ? "Your saved details are ready. The end date follows your selected duration; trusted processing is required to activate the internship."
+    ? "Your saved details are ready. Saving this profile will activate your internship workspace."
     : hasInternshipProfile
     ? "Update your personal details below. Domain, duration, and dates stay fixed while your internship is active."
-    : "Enter your details, choose your domain and duration, and select a start date. HR or Founder will activate your saved draft.";
+    : "Enter your details, choose your domain and duration, and select a start date. Your workspace activates when you save.";
   $("icInternshipPeriodPreview").textContent = profile.profileDraft
     ? `Profile draft saved to Firebase. Proposed period: ${profile.internshipStartDate} through ${profile.internshipEndDate}.`
     : hasInternshipProfile
     ? `Active from ${profile.internshipStartDate} through ${profile.internshipEndDate}. Contact HR if your domain or duration needs to change.`
-    : "Your selected dates are a proposed internship period. Attendance starts only after trusted activation.";
+    : "Your selected dates become your internship period when you save your profile.";
   $("icBuildProfileButton").textContent = hasRequiredProfile ? "Edit profile" : "Build your profile";
 
   const internshipActive = Boolean(activeInternship);
@@ -743,7 +747,7 @@ function renderTraining() {
       ? `Attendance check-in is enabled for this internship. ${profile.track} · ${profile.durationMonths} month${profile.durationMonths === 1 ? "" : "s"} · ${profile.internshipStartDate} to ${profile.internshipEndDate}`
       : `Attendance is recorded automatically once per login day (Sunday excluded). ${profile.track} · ${profile.durationMonths} month${profile.durationMonths === 1 ? "" : "s"} · ${profile.internshipStartDate} to ${profile.internshipEndDate}`
     : profile.profileDraft
-      ? "Your selected internship dates are saved as a draft. Attendance begins only after trusted activation."
+      ? "Your saved profile will activate attendance and training when you continue."
       : "Complete your internship profile to activate attendance tracking.";
   $("icAttendanceStatStatus").textContent = profile.profileDraft
     ? "Draft saved"
@@ -753,7 +757,7 @@ function renderTraining() {
     ? hasInternshipProfile ? `${attendance.length} check-in${attendance.length === 1 ? "" : "s"}` : "Not enrolled"
     : canViewAttendance ? `${attendanceReport.length} check-ins` : "Staff view";
   $("icAttendanceStatDetail").textContent = profile.profileDraft
-    ? "Attendance requires trusted activation"
+    ? "Save your profile to activate attendance"
     : profile.localOnly
       ? "Available after secure profile sync"
     : isIntern
@@ -778,7 +782,7 @@ function renderTraining() {
     ? "View or edit your internship profile"
     : "Complete your internship profile");
   $("icAttendanceMessage").textContent = profile.profileDraft
-    ? "Your profile is saved as a draft. Attendance will begin only after trusted profile activation."
+    ? "Continue your profile setup to activate attendance and training."
     : profile.localOnly
       ? "This profile is saved on this device only. Sync it to your account before using attendance."
     : isCheckedIn
@@ -831,7 +835,7 @@ function renderTraining() {
   $("icTrainingTrack").textContent = profile.track
     || (role === "mentor" ? profile.mentorTracks.join(", ") || "No tracks assigned" : ["founder", "co_founder", "admin"].includes(role) ? "All tracks" : "Track pending");
   $("icTrainingIntro").textContent = profile.profileDraft
-    ? "Your profile and selected dates are saved. HR or Founder activation will unlock training and attendance."
+    ? "Your profile is saved. Continue setup to activate training and attendance."
     : profile.localOnly
       ? "Profile saved on this device. Secure training data is not synced."
     : role === "learner"
@@ -841,7 +845,7 @@ function renderTraining() {
     : `Signed in with ${role} access for your authorised training tracks.`;
 
   if (profile.profileDraft) {
-    tasksElement.innerHTML = '<div class="ic-activity-empty"><strong>Profile draft saved</strong><p>HR or Founder must activate your internship before assigned training and attendance begin.</p></div>';
+    tasksElement.innerHTML = '<div class="ic-activity-empty"><strong>Finish setting up your profile</strong><p>Save your profile to activate your internship workspace, training and attendance.</p></div>';
   } else if (profile.localOnly) {
     tasksElement.innerHTML = '<div class="ic-activity-empty"><strong>Your dashboard is ready</strong><p>Training assignments will appear after this profile is securely synced to your IntelliCore account.</p></div>';
   } else if (!profile.track && role === "learner") {
@@ -925,7 +929,7 @@ function renderTraining() {
     const domainOrder = [...tracksForDashboard, "Profile pending"];
     const directoryMarkup = domainOrder
       .filter(domain => groupedInterns.has(domain))
-      .map(domain => `<section class="ic-domain-group"><h4>${escapeHtml(domain)} <span>${groupedInterns.get(domain).length}</span></h4>${groupedInterns.get(domain).map(intern => renderInternCard(intern, false)).join("")}</section>`)
+      .map(domain => `<section class="ic-domain-group"><h4>${escapeHtml(domain)} <span>${groupedInterns.get(domain).length}</span></h4>${groupedInterns.get(domain).map(intern => renderInternCard(intern, canManageInternAccounts)).join("")}</section>`)
       .join("");
     $("icInternDirectory").innerHTML = directoryMarkup
       || '<div class="ic-activity-empty"><strong>No active intern profiles yet</strong><p>Intern profiles will be grouped here under their selected domain.</p></div>';
@@ -1046,7 +1050,7 @@ async function refreshTrainingWorkspace() {
       }
     };
   };
-  const [personalAssignmentSnapshot, attendanceSnapshot, meetingSnapshot] = await Promise.all([
+  const [personalAssignmentSnapshot, attendanceSnapshot, meetingSnapshot, applicationSnapshot] = await Promise.all([
     getDocs(query(
       collection(db, "trainingAssignments"),
       where("assignedToUid", "==", user.uid),
@@ -1058,7 +1062,8 @@ async function refreshTrainingWorkspace() {
       orderBy("attendanceDate", "desc"),
       limit(200)
     )),
-    getDoc(doc(db, "organization", "currentMeeting"))
+    getDoc(doc(db, "organization", "currentMeeting")),
+    getDocs(collection(db, "users", user.uid, "workspaceRecords"))
   ]);
   let profileView = profile;
   if (role === "learner" && !internshipProfileComplete(profile)) {
@@ -1067,6 +1072,9 @@ async function refreshTrainingWorkspace() {
   }
   const today = indiaDateString();
   const assignments = personalAssignmentSnapshot.docs.map(toAssignment);
+  const applications = applicationSnapshot.docs.map(document => ({ id: document.id, ...document.data() }))
+    .filter(record => record.category === "applications")
+    .sort((a, b) => Number(b.updatedAt || 0) - Number(a.updatedAt || 0));
   const attendance = attendanceSnapshot.docs.map(document => ({
     attendanceDate: document.get("attendanceDate"),
     checkedInAt: document.get("checkedInAt")?.toMillis?.() || null
@@ -1192,6 +1200,7 @@ async function refreshTrainingWorkspace() {
     catalog: taskCatalog,
     reviewQueue,
     attendance,
+    applications,
     activeInternship: Boolean(
       profile.internshipStatus === "active"
       && profile.internshipStartDate
@@ -1225,6 +1234,7 @@ function renderAdditionalWorkspace() {
   $("icProjectsList").innerHTML = projects.length
     ? projects.map(item => `<article><strong>${escapeHtml(item.task.title)}</strong><p>${escapeHtml(item.track)} · ${escapeHtml(item.status.replaceAll("_", " "))}${item.dueDate ? ` · Due ${escapeHtml(item.dueDate)}` : ""}</p><a href="#icTrainingSection">Open assigned work ↗</a></article>`).join("")
     : "<strong>No projects yet</strong><p>New mentor assignments will appear here.</p>";
+  renderApplicationTracker();
   const status = certificateRequest?.status || "Not requested";
   $("icCertificateStatus").textContent = status.replaceAll("_", " ").replace(/^./, char => char.toUpperCase());
   $("icCertificateDetail").textContent = certificateRequest?.feedback
@@ -1237,6 +1247,25 @@ function renderAdditionalWorkspace() {
   $("icCertificateEligibility").setAttribute("aria-label", certificateRequest
     ? `Certificate request ${status}`
     : "Request certificate review after your internship ends");
+}
+
+function renderApplicationTracker() {
+  const list = $("icApplicationsList");
+  if (!list) return;
+  const applications = trainingWorkspace?.applications || [];
+  list.innerHTML = applications.length ? applications.map(application =>
+    `<article class="ic-application-card"><div><h4>${escapeHtml(application.title)}</h4><span class="ic-application-status">${escapeHtml(application.status)}</span></div><p>${escapeHtml(application.organisation)}</p><p>Applied ${escapeHtml(application.date)}</p><div class="ic-application-card-actions"><button type="button" class="ic-outline-button" data-application-edit="${escapeHtml(application.id)}">Edit</button><button type="button" class="ic-outline-button" data-application-delete="${escapeHtml(application.id)}">Delete</button></div></article>`
+  ).join("") : '<div class="ic-activity-empty"><strong>No applications saved</strong><p>Add an application above to keep a private record of its status.</p></div>';
+}
+
+function resetApplicationForm() {
+  const form = $("icApplicationForm");
+  form.reset();
+  form.elements.recordId.value = "";
+  form.elements.date.value = indiaDateString();
+  $("icApplicationSubmit").textContent = "Save application";
+  $("icApplicationCancel").hidden = true;
+  $("icApplicationMessage").textContent = "";
 }
 
 async function requestCertificateReview() {
@@ -1434,36 +1463,7 @@ async function reviewTrainingTask(assignmentId, decision, feedback) {
 
 async function changeInternAccountStatus(uid, status) {
   if (!["active", "deactivated"].includes(status)) throw new Error("Choose a valid account status.");
-  const profileRef = doc(db, "profiles", uid);
-  await runTransaction(db, async transaction => {
-    const profileSnapshot = await transaction.get(profileRef);
-    if (!profileSnapshot.exists() || profileSnapshot.get("role") !== "learner") {
-      throw new Error("The intern profile was not found.");
-    }
-    const profile = profileSnapshot.data();
-    if (profile.internshipStatus !== "active" || !profile.internshipStartDate || !profile.internshipEndDate) {
-      throw new Error("Only an active internship profile can have access changed.");
-    }
-    if (status === "deactivated") {
-      const lastLogin = profile.lastLoginAt?.toMillis?.() || 0;
-      if (!lastLogin || Date.now() - lastLogin < 7 * 24 * 60 * 60 * 1000) {
-        throw new Error("Access can be deactivated after 7 days without an intern login.");
-      }
-      transaction.update(profileRef, {
-        accountStatus: "deactivated",
-        deactivatedAt: serverTimestamp(),
-        deactivatedBy: auth.currentUser.uid,
-        updatedAt: serverTimestamp()
-      });
-    } else {
-      transaction.update(profileRef, {
-        accountStatus: "active",
-        reactivatedAt: serverTimestamp(),
-        reactivatedBy: auth.currentUser.uid,
-        updatedAt: serverTimestamp()
-      });
-    }
-  });
+  await setInternAccountStatus({ uid, status });
 }
 
 async function startSharedMeeting() {
@@ -1539,7 +1539,7 @@ function updateInternshipPeriodPreview() {
   const isActiveProfileDate = $("icInternshipStartDate").disabled;
   $("icInternshipPeriodPreview").textContent = isActiveProfileDate
     ? `Active internship period: ${startDate} through ${end}. Dates cannot be changed here.`
-    : `Proposed internship period: ${startDate} through ${end}. Attendance begins only after trusted activation.`;
+    : `Internship period preview: ${startDate} through ${end}. Saving your profile activates the workspace.`;
   selectedAttendanceMonth = startDate.slice(0, 7);
   internshipPeriodPreview = isActiveProfileDate ? null : { startDate, endDate: end };
   renderAttendanceCalendar(trainingWorkspace?.attendance || [], internshipPeriodPreview);
@@ -1600,6 +1600,80 @@ function renderAll() {
   renderTraining();
 }
 function bindEvents() {
+  resetApplicationForm();
+  $("icApplicationForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    if (!form.reportValidity()) return;
+    const data = new FormData(form);
+    const recordId = String(data.get("recordId") || "");
+    const existing = trainingWorkspace?.applications?.find(item => item.id === recordId);
+    const submit = $("icApplicationSubmit");
+    submit.disabled = true;
+    $("icApplicationMessage").textContent = "Saving your private application record…";
+    try {
+      const recordRef = existing
+        ? doc(db, "users", currentUser.uid, "workspaceRecords", existing.id)
+        : doc(collection(db, "users", currentUser.uid, "workspaceRecords"));
+      const record = {
+        id: recordRef.id,
+        category: "applications",
+        title: String(data.get("title") || "").trim(),
+        organisation: String(data.get("organisation") || "").trim(),
+        date: String(data.get("date") || ""),
+        status: String(data.get("status") || "Applied"),
+        createdAt: existing?.createdAt || Date.now(),
+        updatedAt: Date.now()
+      };
+      await setDoc(recordRef, record);
+      trainingWorkspace.applications = [
+        ...(trainingWorkspace.applications || []).filter(item => item.id !== record.id), record
+      ].sort((a, b) => b.updatedAt - a.updatedAt);
+      renderApplicationTracker();
+      resetApplicationForm();
+      notice(existing ? "Application details updated." : "Application saved to your private tracker.");
+    } catch (error) {
+      console.error("The private application record could not be saved.", error);
+      $("icApplicationMessage").textContent = error.message || "Could not save this application. Check your connection and retry.";
+    } finally {
+      submit.disabled = false;
+    }
+  });
+  $("icApplicationCancel").addEventListener("click", resetApplicationForm);
+  $("icApplicationsList").addEventListener("click", async event => {
+    const editButton = event.target.closest("[data-application-edit]");
+    const deleteButton = event.target.closest("[data-application-delete]");
+    const id = editButton?.dataset.applicationEdit || deleteButton?.dataset.applicationDelete;
+    const application = trainingWorkspace?.applications?.find(item => item.id === id);
+    if (!application) return;
+    if (editButton) {
+      const form = $("icApplicationForm");
+      form.elements.recordId.value = application.id;
+      form.elements.organisation.value = application.organisation || "";
+      form.elements.title.value = application.title || "";
+      form.elements.date.value = application.date || "";
+      form.elements.status.value = application.status || "Applied";
+      $("icApplicationSubmit").textContent = "Update application";
+      $("icApplicationCancel").hidden = false;
+      $("icApplicationMessage").textContent = `Editing ${application.title}.`;
+      $("icApplications").scrollIntoView({ behavior: "smooth", block: "start" });
+      form.elements.organisation.focus({ preventScroll: true });
+      return;
+    }
+    if (!deleteButton || !confirm(`Delete the application record for ${application.title}?`)) return;
+    deleteButton.disabled = true;
+    try {
+      await deleteDoc(doc(db, "users", currentUser.uid, "workspaceRecords", application.id));
+      trainingWorkspace.applications = trainingWorkspace.applications.filter(item => item.id !== application.id);
+      if ($("icApplicationForm").elements.recordId.value === application.id) resetApplicationForm();
+      renderApplicationTracker();
+      notice("Application record deleted.");
+    } catch (error) {
+      console.error("The private application record could not be deleted.", error);
+      notice(error.message || "Could not delete this application record.");
+      deleteButton.disabled = false;
+    }
+  });
   $("icCertificateEligibility").addEventListener("click", async event => {
     const button = event.currentTarget;
     if (button.disabled) return;
@@ -1730,9 +1804,23 @@ function bindEvents() {
         && previousProfile?.internshipEndDate
         && !profileIsDraft
       );
-      const savedProfile = activeProfile
-        ? await updateClientPersonalProfile(currentUser, profile)
-        : await saveClientProfileDraft(currentUser, profile);
+      let savedProfile;
+      if (activeProfile) {
+        savedProfile = await updateClientPersonalProfile(currentUser, profile);
+      } else {
+        // Keep the selected date range with the account, then activate it through
+        // the server-validated learner callable so it is immediately usable.
+        await saveClientProfileDraft(currentUser, profile);
+        await saveInternshipProfile({
+          displayName: profile.displayName,
+          gender: profile.gender,
+          phone: profile.phone,
+          track: profile.track,
+          durationMonths: profile.durationMonths
+        });
+        await refreshTrainingWorkspace();
+        savedProfile = trainingWorkspace.profile;
+      }
       authenticatedRole = "learner";
       $("icCancelInternshipEdit").click();
       const existingWorkspace = trainingWorkspace || {
@@ -1751,17 +1839,19 @@ function bindEvents() {
           ...profile,
           ...savedProfile,
           localOnly: false,
-          profileDraft: !activeProfile,
+          profileDraft: false,
           role: "learner"
         },
-        activeInternship: activeProfile,
+        activeInternship: Boolean(savedProfile.internshipStatus === "active"
+          && savedProfile.internshipStartDate <= indiaDateString()
+          && savedProfile.internshipEndDate >= indiaDateString()),
         sparkLimited: false
       };
       selectedAttendanceMonth = savedProfile.internshipStartDate.slice(0, 7);
       renderAll();
       notice(activeProfile
         ? "Your personal profile details were saved. Internship dates and enrollment remain unchanged."
-        : "Your profile draft was saved securely. HR or the Founder can activate the internship from the Pending Activations page.");
+        : "Your internship profile is active. Your workspace, training and attendance are ready.");
     } catch (error) {
       console.error("The secure internship profile could not be saved.", error);
       const code = typeof error?.code === "string" ? error.code : "";
@@ -1769,7 +1859,7 @@ function bindEvents() {
         ? error.message
         : "Unknown Firebase error.";
       const userMessage = /(?:learner|intern) profile is not ready/i.test(message)
-        ? "This response came from an older internship-save service. Reload the latest dashboard files; on Spark, profile setup saves a private draft and requires the updated Firestore rules."
+        ? "The profile service needs an update. Please try again shortly or contact IntelliCore support."
         : message;
       formError.textContent = `Could not save your internship profile${code ? ` (${code})` : ""}: ${userMessage}`;
       formError.hidden = false;
@@ -2267,6 +2357,19 @@ onAuthStateChanged(auth, async user => {
     await ensureClientProfile(user);
     if (auth.currentUser?.uid !== user.uid) return;
     await currentUser.reload();
+    // Finish onboarding for existing saved drafts as well. The callable checks
+    // the signed-in learner and validates every field before activating access.
+    if (trainingWorkspace?.profile?.profileDraft) {
+      const draft = trainingWorkspace.profile;
+      await saveInternshipProfile({
+        displayName: draft.displayName,
+        gender: draft.gender,
+        phone: draft.phone,
+        track: draft.track,
+        durationMonths: Number(draft.durationMonths)
+      });
+      trainingWorkspace = null;
+    }
   } catch (error) {
     profileSetupError = error;
     console.error("The secured account profile could not be initialised.", error);

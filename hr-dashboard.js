@@ -89,11 +89,11 @@ function millis(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-async function fetchAllDocs(buildQuery, maxRecords = 5000) {
+async function fetchAllDocs(buildQuery) {
   const docs = [];
   let cursor = null;
-  while (docs.length < maxRecords) {
-    const pageLimit = Math.min(500, maxRecords - docs.length);
+  while (true) {
+    const pageLimit = 500;
     const page = await getDocs(buildQuery(cursor, pageLimit));
     docs.push(...page.docs);
     if (page.size < pageLimit) break;

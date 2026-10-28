@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebas
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
 import {
   collection, collectionGroup, doc, getDoc, getDocs, getFirestore, limit, orderBy, query, runTransaction,
-  serverTimestamp, setDoc, where
+  serverTimestamp, setDoc, startAfter, where
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -32,6 +32,7 @@ let founderAssignments = [];
 let founderAttendance = [];
 let founderDraftUids = new Set();
 let founderPendingCertificates = 0;
+let founderOverviewMonths = 6;
 
 function showToast(message) {
   const toast = $("toast");
@@ -44,8 +45,11 @@ function showToast(message) {
 function updateFounderNotificationBadge() {
   const total = founderDraftUids.size + founderPendingCertificates;
   const badge = $("notificationButton").querySelector(".notification-count");
+  const approvalCount = $("founderApprovalCount");
   badge.textContent = total > 99 ? "99+" : String(total);
   badge.hidden = total === 0;
+  approvalCount.textContent = total > 99 ? "99+" : String(total);
+  approvalCount.hidden = total === 0;
   $("notificationButton").setAttribute("aria-label", total
     ? `${total} pending approval${total === 1 ? "" : "s"}`
     : "No pending approvals");
@@ -69,6 +73,61 @@ function workdaysBetween(startValue, endValue) {
   }
   return count;
 }
+async function fetchAllDocs(buildQuery) {
+  const documents = [];
+  let cursor = null;
+  while (true) {
+    const pageSize = 500;
+    const page = await getDocs(buildQuery(cursor, pageSize));
+    documents.push(...page.docs);
+    if (page.size < pageSize) break;
+    cursor = page.docs.at(-1) || null;
+    if (!cursor) break;
+  }
+  return documents;
+}
+function renderFounderCharts(today) {
+  const domainColors = ["#09c9ed", "#1687f8", "#c9dd19", "#ff9024", "#8145ee", "#ff719e", "#169ddb", "#00d3a0"];
+  const counts = tracks.map(track => founderInterns.filter(profile => profile.track === track).length);
+  const total = counts.reduce((sum, count) => sum + count, 0);
+  let offset = 0;
+  const slices = counts.map((count, index) => {
+    const from = total ? offset / total * 100 : 0;
+    offset += count;
+    const to = total ? offset / total * 100 : 0;
+    return `${domainColors[index]} ${from}% ${to}%`;
+  });
+  $("founderDomainTotal").textContent = String(founderInterns.length);
+  $("founderDomainLegend").innerHTML = tracks.map((track, index) =>
+    `<li><i style="background:${domainColors[index]}"></i><span>${escapeHtml(track.replace(/ Intern$/, ""))}</span><b>${counts[index]}</b></li>`
+  ).join("");
+  $("founderDomainTotal").closest(".donut-chart").style.background = total
+    ? `conic-gradient(${slices.join(",")})`
+    : "conic-gradient(#29445c 0 100%)";
+
+  const monthCount = founderOverviewMonths;
+  const months = [];
+  const [year, month] = today.split("-").map(Number);
+  for (let ago = monthCount - 1; ago >= 0; ago -= 1) {
+    const date = new Date(Date.UTC(year, month - 1 - ago, 1));
+    const key = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+    const monthEnd = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).toISOString().slice(0, 10);
+    const end = monthEnd > today ? today : monthEnd;
+    const totalAtEnd = founderInterns.filter(profile => profile.internshipStartDate && profile.internshipStartDate <= end).length;
+    const activeAtEnd = founderInterns.filter(profile => profile.accountStatus !== "deactivated"
+      && profile.internshipStatus === "active" && profile.internshipStartDate <= end
+      && profile.internshipEndDate >= end).length;
+    months.push({ key, label: new Intl.DateTimeFormat("en", { month: "short", timeZone: "UTC" }).format(date), total: totalAtEnd, active: activeAtEnd });
+  }
+  const maxValue = Math.max(1, ...months.map(item => item.total));
+  const y = value => 154 - value / maxValue * 138;
+  const x = index => months.length === 1 ? 260 : 8 + index * (504 / (months.length - 1));
+  const pointsFor = field => months.map((item, index) => `${x(index)},${y(item[field])}`).join(" ");
+  const areaFor = field => `M${months.map((item, index) => `${x(index)} ${y(item[field])}`).join(" L")} L512 160 L8 160 Z`;
+  const ticks = [maxValue, Math.round(maxValue * .75), Math.round(maxValue * .5), Math.round(maxValue * .25), 0];
+  $("founderLiveOverview").innerHTML = `<div class="chart-y-labels">${ticks.map(value => `<span>${value}</span>`).join("")}</div><svg viewBox="0 0 520 170" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="areaBlue" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#159cff" stop-opacity=".24"/><stop offset="1" stop-color="#159cff" stop-opacity="0"/></linearGradient><linearGradient id="areaGreen" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#00d6a0" stop-opacity=".16"/><stop offset="1" stop-color="#00d6a0" stop-opacity="0"/></linearGradient></defs><path class="grid-lines" d="M0 12H520 M0 48H520 M0 84H520 M0 120H520 M0 156H520"/><path fill="url(#areaBlue)" d="${areaFor("total")}"/><path fill="url(#areaGreen)" d="${areaFor("active")}"/><polyline class="line-blue" points="${pointsFor("total")}"/><polyline class="line-green" points="${pointsFor("active")}"/><g class="points-blue">${months.map((item, index) => `<circle cx="${x(index)}" cy="${y(item.total)}" r="3"/>`).join("")}</g><g class="points-green">${months.map((item, index) => `<circle cx="${x(index)}" cy="${y(item.active)}" r="3"/>`).join("")}</g></svg><div class="chart-x-labels">${months.map(item => `<span>${item.label}</span>`).join("")}</div>`;
+  $("founderLiveOverview").setAttribute("aria-label", `Monthly enrolled and active internship counts for the last ${monthCount} months`);
+}
 function renderFounderOverview() {
   const today = indiaDate();
   const month = today.slice(0, 7);
@@ -85,10 +144,7 @@ function renderFounderOverview() {
   $("founderStaffCount").textContent = String(founderStaff.length);
   $("founderPendingTaskCount").textContent = String(pendingTasks);
   $("founderAttendanceRate").textContent = `${rate}%`;
-  $("founderDomainTotal").textContent = String(founderInterns.length);
-  const counts = new Map(tracks.map(track => [track, founderInterns.filter(profile => profile.track === track).length]));
-  $("founderDomainLegend").innerHTML = tracks.map((track, index) => `<li><i class="c${index + 1}"></i><span>${escapeHtml(track.replace(/ Intern$/, ""))}</span><b>${counts.get(track)}</b></li>`).join("");
-  $("founderLiveOverview").textContent = `${activeInterns.length} active internships from ${founderInterns.length} registered learner profiles. ${founderStaff.length} staff roles are assigned.`;
+  renderFounderCharts(today);
   $("founderStaffList").innerHTML = founderStaff.length
     ? founderStaff.map((profile, index) => `<div class="staff-row"><span class="staff-avatar avatar-${index % 5 + 1}">${escapeHtml((profile.displayName || profile.email || "S").split(/\s+/).map(part => part[0]).slice(0, 2).join("").toUpperCase())}</span><span class="person"><strong>${escapeHtml(profile.displayName || profile.email || "Staff member")}</strong><small>${escapeHtml(profile.role.replaceAll("_", " "))}${profile.role === "mentor" && profile.mentorTracks?.length ? ` · ${escapeHtml(profile.mentorTracks.join(", "))}` : ""}</small></span></div>`).join("")
     : "<p>No staff roles have been assigned yet.</p>";
@@ -116,20 +172,21 @@ function renderFounderOverview() {
 }
 async function loadFounderOverview() {
   const [learners, staff, assignments, attendance, certificates] = await Promise.all([
-    getDocs(query(collection(db, "profiles"), where("role", "==", "learner"), limit(1000))),
-    getDocs(query(collection(db, "profiles"), where("role", "in", ["mentor", "hr_manager", "hr_executive", "operations_executive", "admin", "co_founder"]), limit(500))),
-    getDocs(query(collection(db, "trainingAssignments"), limit(1000))),
-    getDocs(query(collectionGroup(db, "attendance"), orderBy("attendanceDate", "desc"), limit(1000))),
-    getDocs(query(collection(db, "certificateRequests"), where("status", "==", "requested"), limit(100)))
+    fetchAllDocs((cursor, pageSize) => query(collection(db, "profiles"), where("role", "==", "learner"), ...(cursor ? [startAfter(cursor)] : []), limit(pageSize))),
+    fetchAllDocs((cursor, pageSize) => query(collection(db, "profiles"), where("role", "in", ["mentor", "hr_manager", "hr_executive", "operations_executive", "admin", "co_founder"]), ...(cursor ? [startAfter(cursor)] : []), limit(pageSize))),
+    fetchAllDocs((cursor, pageSize) => query(collection(db, "trainingAssignments"), ...(cursor ? [startAfter(cursor)] : []), limit(pageSize))),
+    fetchAllDocs((cursor, pageSize) => query(collectionGroup(db, "attendance"), orderBy("attendanceDate", "desc"), ...(cursor ? [startAfter(cursor)] : []), limit(pageSize))),
+    fetchAllDocs((cursor, pageSize) => query(collection(db, "certificateRequests"), where("status", "==", "requested"), ...(cursor ? [startAfter(cursor)] : []), limit(pageSize)))
   ]);
-  founderInterns = learners.docs.map(snapshot => ({ uid: snapshot.id, ...snapshot.data() }));
-  founderStaff = staff.docs.map(snapshot => ({ uid: snapshot.id, ...snapshot.data() }));
-  founderAssignments = assignments.docs.map(snapshot => ({ id: snapshot.id, ...snapshot.data(), taskTitle: window.IntelliCoreCurriculum?.taskById?.get(snapshot.get("taskId"))?.title || snapshot.get("taskId") }));
-  founderAttendance = attendance.docs.map(snapshot => ({
+  founderInterns = learners.map(snapshot => ({ uid: snapshot.id, ...snapshot.data() }));
+  founderStaff = staff.map(snapshot => ({ uid: snapshot.id, ...snapshot.data() }));
+  founderAssignments = assignments.map(snapshot => ({ id: snapshot.id, ...snapshot.data(), taskTitle: window.IntelliCoreCurriculum?.taskById?.get(snapshot.get("taskId"))?.title || snapshot.get("taskId") }));
+  const internByUid = new Map(founderInterns.map(profile => [profile.uid, profile]));
+  founderAttendance = attendance.map(snapshot => ({
     uid: snapshot.ref.parent.parent?.id || "", attendanceDate: snapshot.get("attendanceDate") || snapshot.id,
     checkedInAt: snapshot.get("checkedInAt") || null,
-    displayName: founderInterns.find(profile => profile.uid === snapshot.ref.parent.parent?.id)?.displayName || "",
-    email: founderInterns.find(profile => profile.uid === snapshot.ref.parent.parent?.id)?.email || ""
+    displayName: internByUid.get(snapshot.ref.parent.parent?.id)?.displayName || "",
+    email: internByUid.get(snapshot.ref.parent.parent?.id)?.email || ""
   }));
   const pendingProfiles = founderInterns.filter(profile => profile.internshipStatus !== "active" && profile.accountStatus !== "deactivated");
   const draftSnapshots = await Promise.all(pendingProfiles.map(async profile => {
@@ -137,14 +194,14 @@ async function loadFounderOverview() {
     return draft.exists() ? profile.uid : "";
   }));
   founderDraftUids = new Set(draftSnapshots.filter(Boolean));
-  founderPendingCertificates = certificates.size;
+  founderPendingCertificates = certificates.length;
   updateFounderNotificationBadge();
   const approvals = [
     ...[...founderDraftUids].map(uid => {
       const profile = founderInterns.find(item => item.uid === uid);
       return `<div class="approval-row"><span class="approval-mark amber">↗</span><span><strong>Internship activation</strong><small>${escapeHtml(profile?.displayName || profile?.email || "Intern")}</small></span><a class="tag amber-tag" href="hr-dashboard.html?view=pending-activation">Review</a></div>`;
     }),
-    ...certificates.docs.map(snapshot => `<div class="approval-row"><span class="approval-mark violet">✧</span><span><strong>Certificate request</strong><small>${escapeHtml(snapshot.get("displayName") || snapshot.get("email") || "Intern")}</small></span><button class="tag violet-tag" type="button" data-founder-certificate="${escapeHtml(snapshot.id)}">Approve</button></div>`)
+    ...certificates.map(snapshot => `<div class="approval-row"><span class="approval-mark violet">✧</span><span><strong>Certificate request</strong><small>${escapeHtml(snapshot.get("displayName") || snapshot.get("email") || "Intern")}</small></span><button class="tag violet-tag" type="button" data-founder-certificate="${escapeHtml(snapshot.id)}">Approve</button></div>`)
   ];
   $("founderApprovalList").innerHTML = approvals.length ? approvals.slice(0, 10).join("") : "<p>No profile activations or certificate requests are waiting.</p>";
   const currentDomain = $("domainFilter").value;
@@ -186,12 +243,11 @@ async function loadRoleAssignmentCandidates() {
   setRoleAssignmentStatus("Loading unassigned intern accounts…");
 
   try {
-    const candidateSnapshot = await getDocs(query(
-      collection(db, "profiles"),
-      where("role", "==", "learner"),
-      limit(200)
+    const candidateDocs = await fetchAllDocs((cursor, pageSize) => query(
+      collection(db, "profiles"), where("role", "==", "learner"),
+      ...(cursor ? [startAfter(cursor)] : []), limit(pageSize)
     ));
-    const learners = candidateSnapshot.docs
+    const learners = candidateDocs
       .map(document => ({ uid: document.id, ...document.data() }))
       .filter(profile => profile.accountStatus !== "deactivated")
       .sort((a, b) => (a.displayName || a.email || "").localeCompare(b.displayName || b.email || ""));
@@ -462,6 +518,10 @@ function filterFounderInterns() { renderFounderOverview(); }
 
 $("internSearch").addEventListener("input", filterFounderInterns);
 $("domainFilter").addEventListener("change", filterFounderInterns);
+$("founderOverviewPeriod").addEventListener("change", event => {
+  founderOverviewMonths = Number(event.currentTarget.value) === 12 ? 12 : 6;
+  renderFounderOverview();
+});
 
 $("globalSearch").addEventListener("keydown", event => {
   if (event.key === "Enter" && event.currentTarget.value.trim()) {

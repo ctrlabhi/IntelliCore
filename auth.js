@@ -7,7 +7,9 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   GoogleAuthProvider,
+  getRedirectResult,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   sendEmailVerification,
   sendPasswordResetEmail,
@@ -36,6 +38,7 @@ if (useFirebaseEmulators) {
   connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
 }
 const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: "select_account" });
 const staffRolesByEmail = new Map([
   ["thesumitsah47@gmail.com", "admin"],
   ["tanu65159@gmail.com", "operations_executive"],
@@ -219,6 +222,23 @@ async function redirectToDashboard(user) {
         : "Intern-dashboard.html";
   window.location.replace(`${destination}${useFirebaseEmulators ? "?firebaseEmulator=1" : ""}`);
 }
+async function startGoogleRedirect() {
+  const returnUrl = new URL(window.location.href);
+  returnUrl.searchParams.set("auth", "login");
+  window.history.replaceState({}, "", returnUrl);
+  await signInWithRedirect(auth, googleProvider);
+}
+
+// Mobile browsers handle Google OAuth more reliably as a full-page flow than
+// as a popup. Resolve its result on return so the user goes straight to their
+// role-specific dashboard without having to submit the email/password form.
+getRedirectResult(auth).then(result => {
+  if (result?.user) return redirectToDashboard(result.user);
+  return null;
+}).catch(error => {
+  console.error("Google sign-in redirect could not be completed.", error);
+  message(errorMessage(error));
+});
 
 $("loginTrigger")?.addEventListener("click", openModal);
 $("closeLoginModal")?.addEventListener("click", closeModal);
@@ -396,10 +416,25 @@ $("icGoogleSignIn")?.addEventListener("click", async () => {
     await setPersistence(auth, $("icRemember").checked
       ? browserLocalPersistence
       : browserSessionPersistence);
+    const useRedirect = window.matchMedia("(max-width: 768px), (pointer: coarse)").matches;
+    if (useRedirect) {
+      await startGoogleRedirect();
+      return;
+    }
     const credential = await signInWithPopup(auth, googleProvider);
     await redirectToDashboard(credential.user);
   } catch (error) {
-    message(errorMessage(error));
+    if (error.code === "auth/popup-blocked" || error.code === "auth/operation-not-supported-in-this-environment") {
+      try {
+        await startGoogleRedirect();
+        return;
+      } catch (redirectError) {
+        console.error("Google sign-in redirect fallback failed.", redirectError);
+        message(errorMessage(redirectError));
+      }
+    } else {
+      message(errorMessage(error));
+    }
   } finally {
     authActionInProgress = false;
     setLoading(button, false, idleLabel);

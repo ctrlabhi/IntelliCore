@@ -815,7 +815,7 @@ exports.getMoreInternDirectory = onCall(async request => {
 
 exports.setInternAccountStatus = onCall(async request => {
   const user = requireSignedIn(request);
-  requireAnyRole(user, internManagerRoles, "Only authorised IntelliCore staff can manage intern account access.");
+  requireAnyRole(user, [...superAdminRoles, "admin"], "Only an administrator can manage intern account access.");
   const uid = requiredText(request.data?.uid, "Intern account", 128);
   if (!/^[A-Za-z0-9_-]+$/.test(uid)) {
     throw new HttpsError("invalid-argument", "The intern account identifier is invalid.");
@@ -842,10 +842,6 @@ exports.setInternAccountStatus = onCall(async request => {
   }
   const account = await auth.getUser(uid);
   if (status === "deactivated") {
-    const lastLoginAt = lastLoginMillis(profile, account);
-    if (!lastLoginAt || lastLoginAt > Date.now() - 7 * 24 * 60 * 60 * 1000) {
-      throw new HttpsError("failed-precondition", "Only enrolled interns who have not logged in for at least 7 days can be deactivated.");
-    }
     if (account.disabled) {
       await ref.set({
         accountStatus: "deactivated",
