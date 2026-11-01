@@ -29,9 +29,12 @@
   function updateClock() {
     const now = new Date();
     const date = dateFormatter.format(now);
-    const time = timeFormatter.formatToParts(now)
-      .map(part => part.type === 'dayPeriod' ? part.value.toUpperCase() : part.value)
+    const timeParts = timeFormatter.formatToParts(now);
+    const timeValue = timeParts
+      .filter(part => part.type !== 'dayPeriod')
+      .map(part => part.value)
       .join('');
+    const dayPeriod = timeParts.find(part => part.type === 'dayPeriod');
     const hour = Number(hourFormatter.format(now));
     const greeting = hour < 12
       ? 'Good Morning'
@@ -41,7 +44,15 @@
           ? 'Good Evening'
           : 'Good Night';
     dateElements.forEach(element => { element.textContent = date; });
-    timeElements.forEach(element => { element.textContent = time; });
+    timeElements.forEach(element => {
+      element.replaceChildren(document.createTextNode(timeValue));
+      if (dayPeriod) {
+        const period = document.createElement('span');
+        period.className = 'live-time-period';
+        period.textContent = dayPeriod.value.toUpperCase();
+        element.append(period);
+      }
+    });
     greetingElements.forEach(element => {
       element.textContent = `${greeting}!`;
       element.dataset.greeting = greeting;

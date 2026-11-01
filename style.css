@@ -4983,6 +4983,26 @@ main,
 }
 
 /* Slow rope-like motion for the decorative upper banner rings. */
+.welcome-date strong {
+  white-space: nowrap;
+}
+
+.welcome-date .live-time-period {
+  display: inline-block;
+  margin-left: 3px;
+  font-size: 0.48em;
+  font-weight: 800;
+  line-height: 1;
+  vertical-align: super;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 480px) {
+  .welcome-date .live-time-period {
+    margin-left: 2px;
+  }
+}
+
 .welcome-banner::before,
 .welcome-banner::after {
   display: none;
