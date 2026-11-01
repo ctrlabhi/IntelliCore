@@ -70,6 +70,40 @@ a{color:inherit;text-decoration:none}
 .chip-learn{top:0;right:0}.chip-grow{right:4px;bottom:2px}.chip-build{left:0;bottom:12px}
 @media(max-width:760px){.welcome-art{width:170px;height:135px;flex-basis:170px}.welcome-art .welcome-logo{width:76px;height:76px}}
 @media(max-width:480px){.welcome-art{position:relative;inset:auto;width:190px;height:145px;margin:5px auto;opacity:1}.welcome-art .welcome-logo{width:80px;height:80px}}
+
+/* Keep the welcome banner visually consistent with the index page at every screen size. */
+.welcome-banner{min-height:0;justify-content:space-between;padding:14px 22px}
+.welcome-art{width:150px;height:112px;flex-basis:150px;align-self:center;margin:auto 0}
+.welcome-art .orbit{width:118px;height:72px}.welcome-art .orbit-b{width:78px;height:112px}
+.welcome-art .welcome-logo{width:82px;height:82px}
+.welcome-copy p{white-space:normal}
+@media(max-width:760px){
+  .welcome-banner{min-height:0;width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;gap:10px}
+  .welcome-art{width:110px;height:86px;flex-basis:110px}
+  .welcome-art .orbit{width:108px;height:68px}.welcome-art .orbit-b{width:72px;height:108px}.welcome-art .welcome-logo{width:62px;height:62px}
+  .welcome-date{min-width:108px;padding:8px}.welcome-date strong{font-size:16px}
+}
+@media(max-width:480px){
+  .welcome-banner{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;gap:7px}
+  .welcome-copy{flex:1;min-width:0;text-align:left}.welcome-copy h1{font-size:17px;margin:0 0 2px;line-height:1.1;white-space:nowrap}.welcome-copy p{max-width:none;font-size:7px;line-height:1.3}
+  .welcome-art{position:relative;inset:auto;width:62px;height:62px;flex-basis:62px;margin:0;opacity:1}.welcome-art .orbit{width:58px;height:36px}.welcome-art .orbit-b{width:38px;height:58px}.welcome-art .welcome-logo{width:38px;height:38px}.welcome-chip{display:none}
+  .welcome-date{flex:0 0 94px;min-width:94px;margin:0;padding:7px 5px;gap:2px}.welcome-date>span{font-size:8px;white-space:nowrap}.welcome-date strong{font-size:13px;white-space:nowrap}.welcome-date small{font-size:9px;white-space:nowrap}.welcome-date .live-date-label svg{width:11px;height:11px}
+}
+@media(max-width:360px){
+  .welcome-banner{padding:7px 6px;gap:5px}.welcome-copy h1{font-size:14px}.welcome-copy p{font-size:6px}
+  .welcome-art{width:50px;height:50px;flex-basis:50px}.welcome-art .orbit{width:48px;height:30px}.welcome-art .orbit-b{width:30px;height:48px}.welcome-art .welcome-logo{width:32px;height:32px}
+  .welcome-date{flex-basis:82px;min-width:82px;padding:6px 3px}.welcome-date>span{font-size:7px}.welcome-date strong{font-size:11px}.welcome-date small{font-size:8px}
+}
+@media(max-width:480px){
+  .content{padding:8px}
+  .welcome-banner{width:100%;min-height:78px;display:flex;align-items:center;justify-content:space-between;padding:8px 10px;gap:7px}
+  .welcome-copy{flex:1;min-width:0;text-align:left}.welcome-copy h1{margin:0;font-size:17px;line-height:1.1;white-space:nowrap}.welcome-copy h1 span{white-space:nowrap}.welcome-copy p{display:none}
+  .welcome-art{position:relative;inset:auto;width:62px;height:62px;flex:0 0 62px;margin:0;opacity:1}.welcome-art .orbit{width:58px;height:36px}.welcome-art .orbit-b{width:38px;height:58px}.welcome-art .welcome-logo{width:38px;height:38px}.welcome-chip{display:none}
+  .welcome-date{flex:0 0 94px;min-width:94px;margin:0;padding:7px 5px;gap:2px;display:flex;flex-direction:column;align-items:center}.welcome-date>span{font-size:8px;white-space:nowrap}.welcome-date strong{font-size:13px;white-space:nowrap}.welcome-date small{font-size:9px;white-space:nowrap}.welcome-date .live-date-label{grid-column:auto}.welcome-date .live-date-label svg{width:11px;height:11px}
+}
+@media(max-width:360px){
+  .welcome-banner{min-height:72px;padding:7px 6px;gap:5px}.welcome-copy h1{font-size:14px}.welcome-art{width:50px;height:50px;flex-basis:50px}.welcome-art .orbit{width:48px;height:30px}.welcome-art .orbit-b{width:30px;height:48px}.welcome-art .welcome-logo{width:32px;height:32px}.welcome-date{flex-basis:82px;min-width:82px;padding:6px 3px}.welcome-date>span{font-size:7px}.welcome-date strong{font-size:11px}.welcome-date small{font-size:8px}
+}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
 
 /* Keep the command center usable at phone widths and with long account data. */

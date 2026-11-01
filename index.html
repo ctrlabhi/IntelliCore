@@ -158,13 +158,18 @@
     <section class="hero-section">
       <canvas id="neuralCanvas"></canvas>
       <div class="container hero-content">
-        <h1 class="hero-title">
-          Intelligence at the Core,<br />
-          <span class="gradient-text">Innovation at the Fore.</span>
-        </h1>
+        <section class="welcome-banner" aria-label="Welcome and live date and time">
+          <div class="welcome-copy">
+            <h1><span class="mobile-welcome-greeting">Welcome to</span> <span class="mobile-welcome-name">IntelliCore!</span></h1>
+            <p>Intelligence at the Core, Innovation at the Fore.</p>
+          </div>
+          <div class="welcome-art" aria-hidden="true"><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><img class="welcome-logo" src="Photos/favicon.png" alt=""><div class="welcome-chip-track"><span class="welcome-chip chip-learn"><span>Learn</span></span><span class="welcome-chip chip-grow"><span>Grow</span></span><span class="welcome-chip chip-build"><span>Build</span></span></div></div>
+          <div class="welcome-date"><span class="live-date-label"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 9h18M7 13h.01M12 13h.01M17 13h.01M7 17h.01M12 17h.01"/></svg><span data-live-date>Loading date…</span></span><strong data-live-time>--:--:--</strong><small data-live-greeting>Good Morning!</small></div>
+        </section>
 
-        <div class="hero-welcome-pill">
-          <span>&#128075; Welcome to the Team! We’re so glad you’re here. Let’s build something Great &ndash; together.</span>
+        <div class="hero-team-message">
+          <span aria-hidden="true">👋</span>
+          <span>Welcome to the Team! We’re so glad you’re here. Let’s build something Great – together.</span>
         </div>
 
         <p class="hero-description">
@@ -1382,6 +1387,7 @@
   <!-- ==========================================================================
        JAVASCRIPT: ALL INTERACTIVE FEATURES
        ========================================================================== -->
+  <script src="live-clock.js" defer></script>
   <script src="script.js" defer></script>
 <script src="login-modal.js" defer></script>
 <script type="module" src="auth.js?v=20261028-google-mobile-redirect"></script>
