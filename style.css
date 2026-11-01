@@ -5031,6 +5031,142 @@ main,
   z-index: 2;
 }
 
+/* Mobile clock and artwork balance. */
+@media (max-width: 480px) {
+  .welcome-banner {
+    min-height: 112px;
+    padding: 10px 8px;
+    gap: 6px;
+  }
+
+  .welcome-copy {
+    flex: 1 1 112px;
+  }
+
+  .welcome-copy h1 {
+    font-size: clamp(18px, 5.4vw, 22px);
+    margin-bottom: 6px;
+  }
+
+  .welcome-copy p {
+    max-width: 150px;
+    font-size: 9px;
+    line-height: 1.35;
+  }
+
+  .welcome-art {
+    width: 76px;
+    height: 84px;
+    flex-basis: 76px;
+  }
+
+  .welcome-art .orbit-a,
+  .welcome-art .orbit {
+    width: 72px;
+    height: 46px;
+  }
+
+  .welcome-art .orbit-b {
+    width: 46px;
+    height: 76px;
+  }
+
+  .welcome-art .welcome-logo {
+    width: 50px;
+    height: 50px;
+  }
+
+  .welcome-date {
+    flex: 0 0 108px;
+    min-width: 108px;
+    padding: 7px 6px;
+    border-radius: 10px;
+  }
+
+  .welcome-date .live-date-label {
+    width: 100%;
+    gap: 3px;
+  }
+
+  .welcome-date .live-date-label svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .welcome-date > span {
+    font-size: 8px;
+    line-height: 1.2;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .welcome-date strong {
+    font-size: 14px;
+    line-height: 1.25;
+  }
+
+  .welcome-date small {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 360px) {
+  .welcome-banner {
+    min-height: 106px;
+    padding-inline: 5px;
+    gap: 4px;
+  }
+
+  .welcome-copy {
+    flex-basis: 96px;
+  }
+
+  .welcome-copy h1 {
+    font-size: 17px;
+  }
+
+  .welcome-copy p {
+    max-width: 112px;
+    font-size: 8px;
+  }
+
+  .welcome-art {
+    width: 58px;
+    height: 68px;
+    flex-basis: 58px;
+  }
+
+  .welcome-art .orbit-a,
+  .welcome-art .orbit {
+    width: 56px;
+    height: 36px;
+  }
+
+  .welcome-art .orbit-b {
+    width: 36px;
+    height: 58px;
+  }
+
+  .welcome-art .welcome-logo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .welcome-date {
+    flex-basis: 92px;
+    min-width: 92px;
+    padding-inline: 4px;
+  }
+
+  .welcome-date strong {
+    font-size: 12px;
+  }
+
+  .welcome-date small {
+    font-size: 9px;
+  }
+}
+
 @media (max-width: 760px) {
   .welcome-banner::before {
     width: 210px;
