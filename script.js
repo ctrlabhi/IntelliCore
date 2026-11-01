@@ -66,6 +66,7 @@
       document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape') {
           if (contactModal && contactModal.classList.contains('active')) setContactModalOpen(false);
+          if (partnershipModal && partnershipModal.classList.contains('active')) closePartnershipModal();
           if (mobileDrawer && mobileDrawer.classList.contains('active')) setMobileDrawerOpen(false);
         }
       });
@@ -108,7 +109,7 @@
       const rocketRunner = document.getElementById('rocketRunner');
       const siteHeader = document.getElementById('siteHeader');
       const navLinks = document.querySelectorAll('.desktop-nav .nav-link');
-      const trackedSections = ['about', 'services', 'vision', 'journey', 'tracks', 'gains', 'expectations', 'team', 'faq']
+      const trackedSections = ['about', 'services', 'partnership', 'vision', 'journey', 'tracks', 'gains', 'expectations', 'team', 'faq']
         .map(id => document.getElementById(id))
         .filter(Boolean);
 
@@ -167,6 +168,100 @@
 
       /* Header stays visible; no scroll-direction listener is needed. */
       if (siteHeader) siteHeader.classList.remove('header-hidden');
+
+      /* ----------------------------------------------------------------------
+         2. ANIMATED STARFIELD THROUGHOUT THE PAGE
+         ---------------------------------------------------------------------- */
+      const starCanvas = document.getElementById('globalStarfield');
+      if (starCanvas) {
+        const starCtx = starCanvas.getContext('2d');
+        let stars = [];
+        let starFrame = null;
+        let lastStarFrame = 0;
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function resizeStarfield() {
+          const dpr = Math.min(window.devicePixelRatio || 1, 2);
+          const width = window.innerWidth;
+          const height = window.innerHeight;
+          starCanvas.width = Math.round(width * dpr);
+          starCanvas.height = Math.round(height * dpr);
+          starCanvas.style.width = width + 'px';
+          starCanvas.style.height = height + 'px';
+          starCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+          const count = Math.min(260, Math.max(90, Math.round((width * height) / 6200)));
+          stars = Array.from({ length: count }, function (_, index) {
+            const palette = ['#b9efff', '#ffffff', '#63b8ff', '#8adcf5'];
+            return {
+              x: Math.random() * width,
+              y: Math.random() * height,
+              radius: Math.random() * 1.15 + 0.25,
+              speed: Math.random() * 0.12 + 0.025,
+              alpha: Math.random() * 0.55 + 0.25,
+              pulse: Math.random() * Math.PI * 2,
+              pulseSpeed: Math.random() * 0.018 + 0.008,
+              color: palette[index % palette.length]
+            };
+          });
+        }
+
+        function drawStarfield(timestamp) {
+          starFrame = null;
+          if (timestamp - lastStarFrame < 40) {
+            starFrame = requestAnimationFrame(drawStarfield);
+            return;
+          }
+          lastStarFrame = timestamp;
+          starCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+          stars.forEach(function (star) {
+            star.pulse += star.pulseSpeed;
+            if (!reduceMotion) {
+              star.y -= star.speed;
+              if (star.y < -2) {
+                star.y = window.innerHeight + 2;
+                star.x = Math.random() * window.innerWidth;
+              }
+            }
+
+            const twinkle = star.alpha + Math.sin(star.pulse) * 0.16;
+            starCtx.globalAlpha = Math.max(0.08, twinkle);
+            starCtx.beginPath();
+            starCtx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+            starCtx.fillStyle = star.color;
+            starCtx.fill();
+          });
+
+          const networkLimit = Math.min(72, stars.length);
+          for (let i = 0; i < networkLimit; i++) {
+            for (let j = i + 1; j < networkLimit; j++) {
+              const a = stars[i];
+              const b = stars[j];
+              const dx = a.x - b.x;
+              const dy = a.y - b.y;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              if (distance < 138) {
+                starCtx.globalAlpha = (1 - distance / 138) * 0.1;
+                starCtx.beginPath();
+                starCtx.strokeStyle = '#4ccfff';
+                starCtx.lineWidth = 0.5;
+                starCtx.moveTo(a.x, a.y);
+                starCtx.lineTo(b.x, b.y);
+                starCtx.stroke();
+              }
+            }
+          }
+          starCtx.globalAlpha = 1;
+
+          if (!reduceMotion) starFrame = requestAnimationFrame(drawStarfield);
+        }
+
+        resizeStarfield();
+        window.addEventListener('resize', resizeStarfield);
+        if (reduceMotion) drawStarfield(performance.now());
+        else starFrame = requestAnimationFrame(drawStarfield);
+      }
 
       /* ----------------------------------------------------------------------
          2. INTERACTIVE NEURAL PARTICLE CANVAS IN HERO
@@ -1087,6 +1182,111 @@
             answerWrap.style.maxHeight = answerWrap.scrollHeight + 24 + 'px';
           }
         });
+      });
+
+      /* Partnership category dialogs */
+      const partnershipModal = document.getElementById('partnershipModal');
+      const partnershipModalClose = document.getElementById('partnershipModalClose');
+      const partnershipModalSecondary = document.getElementById('partnershipModalSecondary');
+      const partnershipModalTitle = document.getElementById('partnershipModalTitle');
+      const partnershipModalContent = document.getElementById('partnershipModalContent');
+      const partnershipModalIcon = document.getElementById('partnershipModalIcon');
+      const partnershipEmailLink = document.getElementById('partnershipEmailLink');
+      let partnershipTrigger = null;
+
+      const partnershipDetails = {
+        'Technology Partnership': {
+          about: 'Collaborate with IntelliCore to align complementary technology capabilities and deliver stronger technical solutions.',
+          opportunities: ['Technology integration', 'Technical expertise sharing', 'Joint technology solutions', 'Innovation initiatives', 'Technical collaboration'],
+          offer: ['Collaborative technical planning', 'Software and integration expertise', 'Project execution support', 'Clear communication and shared delivery processes'],
+          benefits: ['Expanded technology capability', 'Shared innovation opportunities', 'Access to complementary expertise', 'Potential for scalable long-term collaboration'],
+          together: ['Define technical objectives and integration scope', 'Assign responsibilities and milestones', 'Review progress through structured collaboration', 'Plan continued initiatives based on project outcomes']
+        },
+        'Development Partnership': {
+          about: 'Build digital products together through structured software development collaboration across web, mobile and custom systems.',
+          opportunities: ['Website development', 'Mobile application development', 'Custom software development', 'Project outsourcing', 'Joint project execution'],
+          offer: ['Product and technical planning', 'Web and application engineering support', 'Defined delivery workflows', 'Transparent project coordination'],
+          benefits: ['Flexible development capacity', 'Shared project ownership', 'Consistent technical collaboration', 'Opportunities to expand solution delivery'],
+          together: ['Discuss requirements and delivery scope', 'Agree on roles, technology and milestones', 'Execute development with regular reviews', 'Support launch, refinement and next phases']
+        },
+        'Educational Partnership': {
+          about: 'Create practical learning pathways that connect educational communities with technology, industry practices and project-based learning.',
+          opportunities: ['College and university tie-ups', 'Internship opportunities', 'Technical workshops', 'Student development programs', 'Industry-oriented projects'],
+          offer: ['Industry-aligned learning sessions', 'Practical project guidance', 'Program and workshop collaboration', 'Mentorship-oriented engagement'],
+          benefits: ['Relevant practical exposure for students', 'Industry-academic collaboration opportunities', 'Flexible program structures', 'Shared growth in technical education'],
+          together: ['Identify institution goals and learner needs', 'Design a suitable program or workshop format', 'Define schedules, resources and responsibilities', 'Review outcomes and explore future programs']
+        },
+        'Marketing & Referral Partnership': {
+          about: 'Explore mutually aligned marketing and referral collaboration that creates business opportunities while respecting transparent commercial arrangements.',
+          opportunities: ['Business referrals', 'Lead sharing', 'Digital marketing collaboration', 'Joint promotional campaigns', 'Mutually agreed referral arrangements'],
+          offer: ['Campaign coordination support', 'Qualified opportunity communication', 'Marketing collaboration planning', 'Clear agreement-based referral processes'],
+          benefits: ['Expanded business reach', 'Shared promotional opportunities', 'Transparent lead collaboration', 'Potential for recurring referral relationships'],
+          together: ['Agree on audience and referral fit', 'Define campaign or lead-sharing terms', 'Coordinate communications responsibly', 'Measure and review collaboration outcomes']
+        },
+        'Startup Collaboration': {
+          about: 'Support startups with practical technology planning and development from early product concepts through application delivery.',
+          opportunities: ['MVP development', 'Product development', 'Technical consultation', 'Application development', 'Startup technology support'],
+          offer: ['Product discovery and technical guidance', 'MVP and application implementation', 'Scalable development planning', 'Iterative collaboration and review'],
+          benefits: ['Focused technology support', 'Flexible engagement models', 'Early-stage implementation guidance', 'Pathways for product iteration and growth'],
+          together: ['Clarify product vision and current stage', 'Prioritize the initial build scope', 'Agree on delivery and review cycles', 'Plan ongoing product improvements']
+        },
+        'Corporate Partnership': {
+          about: 'Partner with IntelliCore on enterprise initiatives, digital transformation and dependable long-term technology support.',
+          opportunities: ['Enterprise software solutions', 'Business automation', 'Long-term technology support', 'Digital transformation', 'Enterprise project collaboration'],
+          offer: ['Enterprise solution planning', 'Business process automation support', 'Project governance and communication', 'Technology delivery and ongoing collaboration'],
+          benefits: ['Structured technology engagement', 'Flexible project collaboration', 'Improved digital process opportunities', 'Long-term support planning'],
+          together: ['Assess business and technology priorities', 'Define scope, governance and success criteria', 'Plan phased delivery and communication', 'Support implementation and future initiatives']
+        }
+      };
+
+      function partnershipList(items) {
+        return '<ul>' + items.map(function (item) {
+          return '<li>' + item.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</li>';
+        }).join('') + '</ul>';
+      }
+
+      function closePartnershipModal() {
+        if (!partnershipModal) return;
+        partnershipModal.classList.remove('active');
+        partnershipModal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        if (partnershipTrigger) partnershipTrigger.focus();
+      }
+
+      function openPartnershipModal(category, trigger) {
+        const detail = partnershipDetails[category];
+        if (!detail || !partnershipModal) return;
+        partnershipTrigger = trigger;
+        partnershipModalTitle.textContent = category;
+        if (partnershipModalIcon && trigger) {
+          const cardIcon = trigger.closest('.partnership-card')?.querySelector('.partnership-icon');
+          partnershipModalIcon.innerHTML = '';
+          if (cardIcon) partnershipModalIcon.appendChild(cardIcon.querySelector('svg').cloneNode(true));
+        }
+        partnershipModalContent.innerHTML =
+          '<section><h3>About This Partnership</h3><p>' + detail.about + '</p></section>' +
+          '<section><h3>Collaboration Opportunities</h3>' + partnershipList(detail.opportunities) + '</section>' +
+          '<section><h3>What We Can Offer</h3>' + partnershipList(detail.offer) + '</section>' +
+          '<section><h3>Benefits of Partnership</h3>' + partnershipList(detail.benefits) + '</section>' +
+          '<section><h3>How We Can Work Together</h3>' + partnershipList(detail.together) + '</section>';
+
+        const subject = 'Partnership Inquiry - ' + category;
+        const body = 'Dear IntelliCore Team,\n\nWe are interested in exploring a potential partnership with IntelliCore.\n\nOrganization Name:\nContact Person:\nOrganization Website:\nPartnership Category: ' + category + '\nProposed Collaboration:\n\nWe would appreciate an opportunity to discuss potential collaboration.\n\nRegards,\n[Your Name]';
+        partnershipEmailLink.href = 'mailto:info@intellicoretechnologies.in?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+        const partnershipModalEmail = partnershipModal.querySelector('.partnership-modal-email');
+        if (partnershipModalEmail) partnershipModalEmail.href = partnershipEmailLink.href;
+        partnershipModal.classList.add('active');
+        partnershipModal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        const partnershipModalScroll = partnershipModal.querySelector('.partnership-modal-scroll');
+        if (partnershipModalScroll) partnershipModalScroll.scrollTop = 0;
+        setTimeout(function () { partnershipModalClose.focus(); }, 50);
+      }
+
+      if (partnershipModalClose) partnershipModalClose.addEventListener('click', closePartnershipModal);
+      if (partnershipModalSecondary) partnershipModalSecondary.addEventListener('click', closePartnershipModal);
+      if (partnershipModal) partnershipModal.addEventListener('click', function (event) {
+        if (event.target === partnershipModal) closePartnershipModal();
       });
 
       /* ----------------------------------------------------------------------

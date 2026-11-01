@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IntelliCore | IT Solutions & Internship Programs</title>
+  <title>IntelliCore</title>
   <meta name="description" content="IntelliCore — Intelligence at the Core, Innovation at the Fore. Emerging IT Startup delivering innovative technology solutions and industry-backed internship training." />
   <meta name="keywords" content="IntelliCore, IT internship, web development internship, data analyst internship, business analyst internship, digital marketing internship, software development, India">
   <meta name="theme-color" content="#050813">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="IntelliCore | Build Skills. Work on Live Projects. Grow Your Career.">
+  <meta property="og:title" content="IntelliCore">
   <meta property="og:description" content="Explore 8 internship tracks and professional IT solutions designed for real-world growth.">
   <meta property="og:url" content="https://intellicoretechnologies.in/">
   <meta property="og:image" content="https://intellicoretechnologies.in/Photos/favicon.png">
   <link rel="icon" type="image/png" href="/favicon.png?v=4" />
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20261101-spacing">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -29,6 +29,7 @@
   </script>
 </head>
 <body>
+  <canvas id="globalStarfield" class="global-starfield" aria-hidden="true"></canvas>
   <a class="skip-link" href="#top">Skip to main content</a>
 
   <!-- 1. TOP SCROLL PROGRESS TRACK WITH ANIMATED BLUE ROCKET -->
@@ -142,6 +143,7 @@
     <ul class="mobile-nav-list">
       <li><a href="#about" class="mobile-nav-link">Who We Are &amp; Vision <span>&rarr;</span></a></li>
       <li><a href="#services" class="mobile-nav-link">IT Solutions &amp; Services <span>&rarr;</span></a></li>
+      <li><a href="#partnership" class="mobile-nav-link">Partnership &amp; Collaboration <span>&rarr;</span></a></li>
       <li><a href="#vision" class="mobile-nav-link">Our Core Values <span>&rarr;</span></a></li>
       <li><a href="#journey" class="mobile-nav-link">9-Step Induction Journey <span>&rarr;</span></a></li>
       <li><a href="#tracks" class="mobile-nav-link">Internship Roles &amp; Tracks <span>&rarr;</span></a></li>
@@ -255,10 +257,12 @@
     <!-- 4. ABOUT INTELLICORE, OUR VISION & INTERNSHIP EXPERIENCE (#about - PDF SLIDES 3, 4 & 6) -->
     <section class="section" id="about">
       <div class="container">
+        <div class="section-header about-section-header">
+          <div class="eyebrow">About IntelliCore</div>
+          <h2>Who We <span class="gradient-text">Are</span></h2>
+        </div>
         <div class="about-grid">
           <div>
-            <div class="eyebrow">About IntelliCore</div>
-            <h2>Who We <span class="gradient-text">Are</span></h2>
             <p style="margin-top: 1rem;">
               <strong>IntelliCore</strong> is an emerging IT startup with a vision to build innovative technology solutions while creating opportunities for talented students and professionals to learn, grow, and contribute.
             </p>
@@ -446,6 +450,138 @@
         </div>
       </div>
     </section>
+
+    <!-- 6. PARTNERSHIP & COLLABORATION -->
+    <section class="section partnership-section" id="partnership">
+      <div class="container">
+        <div class="section-header partnership-header">
+          <div class="eyebrow">Partnership &amp; Collaboration</div>
+          <h2>Let's Grow <span class="gradient-text">Together.</span></h2>
+          <p class="partnership-subheading">Build. Collaborate. Innovate.</p>
+          <p>At IntelliCore, we believe meaningful partnerships drive innovation, create new opportunities and build long-term business relationships. We welcome companies, startups, educational institutions, agencies and organizations to collaborate with us.</p>
+          <a href="#partnership-categories" class="btn btn-primary partnership-main-cta">Explore Partnership Opportunities</a>
+        </div>
+
+        <div class="partnership-categories-grid" id="partnership-categories">
+          <article class="glass-card partnership-card">
+            <div class="partnership-card-heading">
+              <div class="partnership-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2v6M12 16v6M4.93 4.93l4.24 4.24M14.83 14.83l4.24 4.24M2 12h6M16 12h6M4.93 19.07l4.24-4.24M14.83 9.17l4.24-4.24"/><circle cx="12" cy="12" r="3"/></svg></div>
+              <h3>Technology Partnership</h3>
+            </div>
+            <p>Connect technical strengths and create innovative solutions through shared expertise and integration.</p>
+            <ul class="partnership-card-details"><li>Technology integration</li><li>Joint solution development</li></ul>
+          </article>
+          <article class="glass-card partnership-card">
+            <div class="partnership-card-heading">
+              <div class="partnership-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+              <h3>Development Partnership</h3>
+            </div>
+            <p>Collaborate on websites, applications, software projects and complete joint development engagements.</p>
+            <ul class="partnership-card-details"><li>Web and application development</li><li>Project outsourcing support</li></ul>
+          </article>
+          <article class="glass-card partnership-card">
+            <div class="partnership-card-heading">
+              <div class="partnership-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+              <h3>Educational Partnership</h3>
+            </div>
+            <p>Build industry-focused programs, workshops and practical learning opportunities for institutions.</p>
+            <ul class="partnership-card-details"><li>Workshops and internships</li><li>Industry-oriented projects</li></ul>
+          </article>
+          <article class="glass-card partnership-card">
+            <div class="partnership-card-heading">
+              <div class="partnership-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51 15.42 17.5M15.41 6.51 8.59 10.49"/></svg></div>
+              <h3>Marketing &amp; Referral Partnership</h3>
+            </div>
+            <p>Share business opportunities, leads and digital campaigns through aligned referral collaboration.</p>
+            <ul class="partnership-card-details"><li>Lead sharing and referrals</li><li>Joint promotional campaigns</li></ul>
+          </article>
+          <article class="glass-card partnership-card">
+            <div class="partnership-card-heading">
+              <div class="partnership-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19 9 14l4 4 7-10"/><path d="M15 8h5v5"/></svg></div>
+              <h3>Startup Collaboration</h3>
+            </div>
+            <p>Move from product idea to scalable technology with practical technical and product support.</p>
+            <ul class="partnership-card-details"><li>MVP and product development</li><li>Technical consultation support</li></ul>
+          </article>
+          <article class="glass-card partnership-card">
+            <div class="partnership-card-heading">
+              <div class="partnership-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V4h8v3M3 12h18M12 12v8"/></svg></div>
+              <h3>Corporate Partnership</h3>
+            </div>
+            <p>Support enterprise software, automation, transformation and long-term technology initiatives.</p>
+            <ul class="partnership-card-details"><li>Enterprise software solutions</li><li>Automation and long-term support</li></ul>
+          </article>
+        </div>
+
+        <div class="partnership-subsection">
+          <div class="partnership-section-heading">
+            <div class="eyebrow">Why IntelliCore</div>
+            <h2>Why Partner With <span class="gradient-text">IntelliCore?</span></h2>
+          </div>
+          <div class="partnership-benefits-grid">
+            <article><h3>Technology-Driven Solutions</h3><p>Practical technology approaches aligned with each collaboration's objectives.</p></article>
+            <article><h3>Flexible Collaboration Models</h3><p>Partnership structures designed around scope, role and working preferences.</p></article>
+            <article><h3>Professional Project Execution</h3><p>Structured planning, defined responsibilities and clear project workflows.</p></article>
+            <article><h3>Shared Growth Opportunities</h3><p>Explore mutually beneficial initiatives and new business possibilities.</p></article>
+            <article><h3>Transparent Communication</h3><p>Open discussions, defined milestones and consistent information sharing.</p></article>
+            <article><h3>Long-Term Business Relationships</h3><p>Build sustainable collaboration through trust, clarity and dependable delivery.</p></article>
+          </div>
+        </div>
+
+        <div class="partnership-subsection">
+          <div class="partnership-section-heading">
+            <div class="eyebrow">The Process</div>
+            <h2>How Partnership <span class="gradient-text">Works</span></h2>
+          </div>
+          <div class="partnership-timeline">
+            <article><span>1</span><div><strong>Explore Opportunities</strong><p>Identify the partnership category that fits your goals.</p></div></article>
+            <article><span>2</span><div><strong>Connect via Email</strong><p>Share your organization details and collaboration idea.</p></div></article>
+            <article><span>3</span><div><strong>Initial Discussion</strong><p>Discuss requirements, priorities and potential alignment.</p></div></article>
+            <article><span>4</span><div><strong>Proposal Evaluation</strong><p>Review scope, responsibilities, feasibility and proposed value.</p></div></article>
+            <article><span>5</span><div><strong>Define Partnership Terms</strong><p>Agree on project terms, communication and deliverables.</p></div></article>
+            <article><span>6</span><div><strong>Start Collaboration</strong><p>Begin the agreed partnership with a structured plan.</p></div></article>
+          </div>
+        </div>
+
+        <div class="partnership-subsection">
+          <div class="partnership-section-heading">
+            <div class="eyebrow">Partnership Network</div>
+            <h2>Who Can Partner With <span class="gradient-text">Us?</span></h2>
+          </div>
+          <div class="partner-types-grid">
+            <article><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V4h8v3"/></svg><h3>IT Companies</h3></article>
+            <article><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19 9 14l4 4 7-10"/><path d="M15 8h5v5"/></svg><h3>Startups</h3></article>
+            <article><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg><h3>Colleges &amp; Universities</h3></article>
+            <article><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v7M12 15v7M2 12h7M15 12h7"/></svg><h3>Digital Marketing Agencies</h3></article>
+            <article><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 20v-5h6v5"/></svg><h3>Corporate Organizations</h3></article>
+            <article><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7h-9M17 3l3 4-3 4M4 17h9M7 13l-3 4 3 4"/></svg><h3>Technology Consultants</h3></article>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="partnership-modal-backdrop" id="partnershipModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="partnershipModalTitle">
+      <div class="partnership-modal-card">
+        <button type="button" class="partnership-modal-close" id="partnershipModalClose" aria-label="Close partnership details">&times;</button>
+        <div class="partnership-modal-scroll">
+        <div class="partnership-modal-header">
+          <div class="partnership-modal-icon" id="partnershipModalIcon" aria-hidden="true"></div>
+          <div>
+            <div class="partnership-modal-kicker">Partnership Opportunity</div>
+            <h2 id="partnershipModalTitle">Partnership</h2>
+          </div>
+        </div>
+        <div class="partnership-modal-content" id="partnershipModalContent"></div>
+        <div class="partnership-modal-actions">
+          <a href="#" class="partnership-modal-primary" id="partnershipEmailLink">Connect via Email</a>
+        </div>
+        <a class="partnership-modal-email" href="mailto:info@intellicoretechnologies.in" aria-label="Email IntelliCore">
+          <strong>info@intellicoretechnologies.in</strong>
+        </a>
+        </div>
+      </div>
+    </div>
 
     <!-- 6. CORE VALUES (#vision - PDF SLIDE 5) -->
     <section class="section" id="vision">
@@ -1207,69 +1343,96 @@
       <div class="container">
         <div class="section-header">
           <div class="eyebrow">Frequently Asked Questions</div>
-          <h2>Everything You Need to <span class="gradient-text">Know</span></h2>
-          <p>Answers to common questions about the IntelliCore Internship Program, roles, certificates, and application process.</p>
+          <h2>Partnership <span class="gradient-text">FAQ</span></h2>
+          <p>Clear answers to common questions about collaborating with IntelliCore.</p>
         </div>
 
         <div class="faq-container" id="faqAccordion">
           <div class="faq-item open">
             <button type="button" class="faq-question-btn" aria-expanded="true">
-              <span>1. What is the stipend and career opportunity structure at IntelliCore?</span>
+              <span>Who can partner with IntelliCore?</span>
               <span class="faq-icon-wrap">+</span>
             </button>
             <div class="faq-answer-wrap" style="max-height: 240px;">
               <div class="faq-answer-inner">
-                IntelliCore provides a live-project training and mentorship internship. As stated in our official induction deck, outstanding contributors may also be considered for future paid roles, leadership opportunities, or long-term collaboration as IntelliCore continues to grow.
+                Companies, startups, colleges and universities, digital marketing agencies, corporate organizations and technology consultants may explore collaboration opportunities with IntelliCore.
               </div>
             </div>
           </div>
 
           <div class="faq-item">
             <button type="button" class="faq-question-btn" aria-expanded="false">
-              <span>2. Which domains and roles can I apply for?</span>
+              <span>Is there any partnership fee?</span>
               <span class="faq-icon-wrap">+</span>
             </button>
             <div class="faq-answer-wrap">
               <div class="faq-answer-inner">
-                You can apply for any of our 8 core internship tracks: Business Analyst Intern, Web Development Intern, Data Analyst Intern, Digital Marketing Intern, Graphic Designer Intern, Social Media Intern, Content Writing Intern, or Human Resources Intern.
+                Any commercial or referral arrangement is discussed and agreed based on the partnership's scope. There is no standard fee across every collaboration model.
               </div>
             </div>
           </div>
 
           <div class="faq-item">
             <button type="button" class="faq-question-btn" aria-expanded="false">
-              <span>3. Who is eligible to apply for the internship program?</span>
+              <span>Can startups collaborate with IntelliCore?</span>
               <span class="faq-icon-wrap">+</span>
             </button>
             <div class="faq-answer-wrap">
               <div class="faq-answer-inner">
-                Talented students (B.Tech, BCA, MCA, B.Sc, BBA, MBA, B.Des, B.A., and allied streams), fresh graduates, and aspiring professionals who are eager to learn, work on live projects, and build practical industry experience are welcome to apply.
+                Yes. Startups can discuss MVP development, product engineering, technical consultation, application development and startup technology support.
               </div>
             </div>
           </div>
 
           <div class="faq-item">
             <button type="button" class="faq-question-btn" aria-expanded="false">
-              <span>4. Will I receive an Internship Completion Certificate and Letter of Recommendation?</span>
+              <span>Do you offer educational partnerships?</span>
               <span class="faq-icon-wrap">+</span>
             </button>
             <div class="faq-answer-wrap">
               <div class="faq-answer-inner">
-                Yes! Upon successfully completing your assigned tasks and internship tenure, you will receive an official IntelliCore Internship Completion Certificate as well as a Letter of Recommendation (LOR) to strengthen your resume and LinkedIn profile.
+                IntelliCore welcomes educational collaboration through college and university tie-ups, workshops, internships, student development programs and industry-oriented projects.
               </div>
             </div>
           </div>
 
           <div class="faq-item">
             <button type="button" class="faq-question-btn" aria-expanded="false">
-              <span>5. How do I submit my application?</span>
+              <span>Can international organizations collaborate?</span>
               <span class="faq-icon-wrap">+</span>
             </button>
             <div class="faq-answer-wrap">
               <div class="faq-answer-inner">
-                Simply click the "Apply Now" button in the application section below to open our official application form, fill in your details and preferred internship role, and submit the form.
+                International organizations may initiate a partnership discussion. Feasibility, communication arrangements, legal requirements and project scope would be evaluated together.
               </div>
             </div>
+          </div>
+
+          <div class="faq-item">
+            <button type="button" class="faq-question-btn" aria-expanded="false"><span>How do we initiate a partnership?</span><span class="faq-icon-wrap">+</span></button>
+            <div class="faq-answer-wrap"><div class="faq-answer-inner">Send an email to info@intellicoretechnologies.in with your organization details, relevant partnership category and a brief collaboration proposal.</div></div>
+          </div>
+
+          <div class="faq-item">
+            <button type="button" class="faq-question-btn" aria-expanded="false"><span>Are partnership agreements available?</span><span class="faq-icon-wrap">+</span></button>
+            <div class="faq-answer-wrap"><div class="faq-answer-inner">Formal agreements can be considered when the partnership scope, responsibilities and commercial terms are clear and mutually accepted by both parties.</div></div>
+          </div>
+
+          <div class="faq-item">
+            <button type="button" class="faq-question-btn" aria-expanded="false"><span>How long does the review process take?</span><span class="faq-icon-wrap">+</span></button>
+            <div class="faq-answer-wrap"><div class="faq-answer-inner">Review timing depends on the proposal's scope and required evaluations. The team will communicate next steps after the initial discussion.</div></div>
+          </div>
+        </div>
+
+        <div class="partnership-cta" id="partnership-contact-email">
+          <div>
+            <div class="eyebrow">Start a Conversation</div>
+            <h2>Have a Partnership Idea?</h2>
+            <p>Let's explore opportunities to collaborate, innovate and grow together.</p>
+          </div>
+          <div class="partnership-cta-actions">
+            <a class="btn btn-primary" href="#partnership-email-detail">Connect With IntelliCore</a>
+            <a class="partnership-email" id="partnership-email-detail" href="mailto:info@intellicoretechnologies.in">info@intellicoretechnologies.in</a>
           </div>
         </div>
       </div>
