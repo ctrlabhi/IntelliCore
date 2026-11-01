@@ -801,12 +801,52 @@
       });
 
       const trackApplyLinks = document.querySelectorAll('.track-apply-link');
+      function scrollToApplication(trackName, waitForModalClose) {
+        if (trackName && portalTrackSelect) {
+          portalTrackSelect.value = trackName;
+          portalTrackSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        const selectedBar = document.querySelector('.selected-track-bar');
+        const applyNowButton = document.getElementById('directApplyNowLink');
+        const target = applyNowButton || selectedBar || document.getElementById('apply');
+
+        if (!target) return;
+
+        if (selectedBar) {
+          selectedBar.classList.remove('track-selected-pulse');
+          void selectedBar.offsetWidth;
+          selectedBar.classList.add('track-selected-pulse');
+          window.setTimeout(function () {
+            selectedBar.classList.remove('track-selected-pulse');
+          }, 1800);
+        }
+
+        if (window.location.hash !== '#apply') {
+          history.replaceState(null, '', '#apply');
+        }
+
+        const performScroll = function () {
+          window.requestAnimationFrame(function () {
+            target.scrollIntoView({
+              behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+              block: 'end',
+              inline: 'nearest'
+            });
+          });
+        };
+
+        window.setTimeout(performScroll, waitForModalClose ? 180 : 0);
+      }
+
       trackApplyLinks.forEach(function (link) {
-        link.addEventListener('click', function () {
+        link.addEventListener('click', function (event) {
+          event.preventDefault();
           const chosen = link.getAttribute('data-select-track');
           if (chosen && portalTrackSelect) {
             portalTrackSelect.value = chosen;
           }
+          scrollToApplication(chosen);
         });
       });
 
@@ -938,8 +978,7 @@
       if (jdModalApply) jdModalApply.addEventListener('click', function () {
         if (currentJdTrack && portalTrackSelect) portalTrackSelect.value = currentJdTrack;
         setJdModalOpen(false, jdCardTrigger);
-        const applySection = document.getElementById('apply');
-        if (applySection) applySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        scrollToApplication(currentJdTrack, true);
       });
       document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape' && jdModal && jdModal.classList.contains('active')) {

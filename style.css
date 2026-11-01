@@ -204,6 +204,7 @@
       padding: clamp(1.8rem, 3vw, 2.8rem) 0;
       position: relative;
       z-index: 2;
+      scroll-margin-top: calc(var(--header-height) + 18px);
     }
 
     .section-header {
@@ -2619,6 +2620,17 @@
       flex-wrap: wrap;
     }
 
+    .selected-track-bar.track-selected-pulse {
+      border-color: rgba(0, 210, 255, 0.9);
+      box-shadow: 0 0 0 3px rgba(0, 210, 255, 0.12), 0 0 28px rgba(0, 210, 255, 0.2);
+      animation: track-selected-pulse 0.8s ease-in-out 2;
+    }
+
+    @keyframes track-selected-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.018); }
+    }
+
     .selected-track-label {
       font-size: 0.88rem;
       color: var(--text-secondary);
@@ -2944,6 +2956,38 @@
       :root {
         --header-height: 70px;
       }
+      .section {
+        padding-top: 1.25rem;
+        padding-bottom: 1.25rem;
+      }
+      .section-header {
+        margin-bottom: 1rem;
+      }
+      .hero-section {
+        min-height: auto;
+        padding: calc(var(--header-height) + 0.75rem) 0 1.75rem;
+        align-items: flex-start;
+      }
+      #tracks {
+        padding-top: 1rem;
+      }
+      #tracks .section-header h2 {
+        line-height: 1.15;
+      }
+      .apply-portal-card {
+        padding: 1.35rem 1rem;
+      }
+      .final-message-banner {
+        margin-bottom: 1rem;
+        padding: 1rem;
+      }
+      .apply-steps-grid {
+        margin: 1rem 0;
+        gap: 0.75rem;
+      }
+      .selected-track-bar {
+        margin-bottom: 1rem;
+      }
       .services-grid {
         align-items: start;
       }
@@ -2997,6 +3041,94 @@
       }
       .about-visual-card img {
         height: 280px;
+      }
+    }
+
+    /* Welcome banner typography and balanced responsive spacing */
+    @media (min-width: 761px) {
+      .welcome-banner {
+        margin-bottom: 1.25rem;
+        padding: 18px 24px;
+      }
+      .welcome-copy h1 {
+        font-size: clamp(38px, 3.25vw, 44px);
+        letter-spacing: -1.7px;
+        line-height: 1.08;
+        margin-bottom: 8px;
+      }
+      .welcome-copy p {
+        font-size: clamp(13px, 1vw, 15px);
+        line-height: 1.45;
+        letter-spacing: 0.01em;
+      }
+      .welcome-art {
+        height: 118px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .hero-section {
+        padding-bottom: 1.75rem;
+      }
+      .welcome-banner {
+        margin-bottom: 1rem;
+      }
+      .welcome-copy h1 {
+        font-size: clamp(19px, 5vw, 24px);
+        line-height: 1.12;
+        letter-spacing: -0.55px;
+        margin-bottom: 5px;
+      }
+      .welcome-copy p {
+        font-size: clamp(9px, 2.25vw, 11px);
+        line-height: 1.42;
+        white-space: normal;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-section {
+        padding-top: calc(var(--header-height) + 0.45rem);
+        padding-bottom: 1.35rem;
+      }
+      .welcome-banner {
+        min-height: 84px;
+        margin-bottom: 0.85rem;
+        padding: 10px 9px;
+        gap: 8px;
+      }
+      .welcome-copy {
+        padding-left: 1px;
+      }
+      .welcome-copy h1 {
+        font-size: clamp(18px, 5vw, 21px);
+        line-height: 1.1;
+        margin-bottom: 5px;
+      }
+      .welcome-copy p {
+        max-width: 220px;
+        font-size: clamp(9px, 2.55vw, 10.5px);
+        line-height: 1.38;
+      }
+      .welcome-art {
+        display: none;
+      }
+      .welcome-date {
+        align-self: center;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .welcome-banner {
+        min-height: 78px;
+        padding: 8px 7px;
+      }
+      .welcome-copy h1 {
+        font-size: 17px;
+      }
+      .welcome-copy p {
+        max-width: 195px;
+        font-size: 9px;
       }
     }
   
@@ -3731,3 +3863,45 @@ body.ic-modal-open{overflow:hidden}
 }
 
 .brand-logo .brand-text { gap: 3px; }
+
+/* Compact section rhythm: keep headings close to their content on desktop and mobile. */
+.section:not(.hero-section) {
+  padding-top: clamp(0.75rem, 1.25vw, 1.1rem);
+  padding-bottom: clamp(0.75rem, 1.25vw, 1.1rem);
+}
+
+.section-header {
+  margin-bottom: clamp(0.65rem, 1.3vw, 0.95rem);
+}
+
+.section-header .eyebrow,
+.eyebrow {
+  margin-bottom: 0.45rem;
+}
+
+.section-header > h2,
+.section-header h2 {
+  margin-top: 0;
+  margin-bottom: 0.35rem;
+}
+
+.section-header > p {
+  margin-top: 0;
+  line-height: 1.55;
+}
+
+@media (max-width: 760px) {
+  .section:not(.hero-section) {
+    padding-top: 0.55rem;
+    padding-bottom: 0.65rem;
+  }
+
+  .section-header {
+    margin-bottom: 0.65rem;
+  }
+
+  .section-header .eyebrow,
+  .eyebrow {
+    margin-bottom: 0.35rem;
+  }
+}
