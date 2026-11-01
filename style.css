@@ -1208,14 +1208,53 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 1.4rem;
+      align-items: start;
     }
 
     .service-card {
       padding: 1.75rem 1.5rem;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      justify-content: flex-start;
+      height: auto;
+      align-self: start;
       border-top: 3px solid var(--accent-cyan);
+      text-align: left;
+    }
+
+    .service-card-body {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .service-card-heading {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      width: 100%;
+      margin-bottom: 0.65rem;
+    }
+
+    .service-card-heading .service-icon-wrap {
+      margin-bottom: 0;
+      flex-shrink: 0;
+    }
+
+    .service-card h3 {
+      min-height: 0;
+      width: 100%;
+      margin-bottom: 0;
+      text-align: left;
+      line-height: 1.25;
+    }
+
+    .service-card-desc {
+      margin-top: 0;
+      margin-bottom: 0;
+      font-size: 0.88rem;
+      line-height: 1.55;
+      text-align: left;
     }
 
     .service-icon-wrap {
@@ -1232,7 +1271,7 @@
     }
 
     .service-list {
-      margin-top: 1rem;
+      margin-top: 0.55rem;
       padding-top: 0.9rem;
       border-top: 1px solid rgba(56, 189, 248, 0.12);
       display: flex;
@@ -1240,6 +1279,8 @@
       gap: 0.4rem;
       font-size: 0.82rem;
       color: var(--text-secondary);
+      width: 100%;
+      text-align: left;
     }
 
     /* ==========================================================================
@@ -1672,11 +1713,20 @@
     }
 
     .track-card {
-      padding: 1.6rem 1.45rem;
+      padding: 2.65rem 1.45rem 1.6rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      position: relative;
+      cursor: pointer;
       transition: opacity 0.28s ease, transform 0.28s ease, border-color var(--transition-smooth), box-shadow var(--transition-smooth);
+    }
+
+    .track-card:hover,
+    .track-card:focus-visible {
+      border-color: rgba(0, 210, 255, 0.38);
+      box-shadow: 0 18px 38px rgba(0, 0, 0, 0.28), 0 0 28px rgba(0, 210, 255, 0.08);
+      transform: translateY(-4px);
     }
 
     .track-card.hidden-track {
@@ -1689,6 +1739,26 @@
       justify-content: space-between;
       gap: 0.75rem;
       margin-bottom: 1.1rem;
+    }
+
+    .track-card-heading {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 0.95rem;
+    }
+
+    .track-card-heading-copy {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.4rem;
+    }
+
+    .track-card-heading-copy .track-title {
+      margin-bottom: 0;
     }
 
     .track-role-icon {
@@ -1705,15 +1775,20 @@
     }
 
     .track-category-tag {
-      font-size: 0.7rem;
+      position: absolute;
+      top: 0.72rem;
+      right: 1.1rem;
+      font-size: 0.62rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      padding: 0.26rem 0.7rem;
+      padding: 0.2rem 0.52rem;
       border-radius: var(--radius-pill);
       background: rgba(58, 134, 255, 0.14);
       border: 1px solid rgba(58, 134, 255, 0.32);
       color: #72a8ff;
+      line-height: 1.2;
+      white-space: nowrap;
     }
 
     .track-title {
@@ -1731,6 +1806,7 @@
     .tech-stack-list {
       display: flex;
       flex-wrap: wrap;
+      justify-content: flex-start;
       gap: 0.4rem;
       margin-bottom: 1.25rem;
     }
@@ -1747,20 +1823,197 @@
     }
 
     .track-apply-link {
-      display: inline-flex;
+      width: 100%;
+      display: flex;
       align-items: center;
-      gap: 0.45rem;
+      justify-content: center;
       font-size: 0.88rem;
       font-weight: 700;
       color: var(--accent-cyan);
       padding-top: 0.85rem;
       border-top: 1px solid rgba(56, 189, 248, 0.14);
-      transition: gap var(--transition-fast), color var(--transition-fast);
+      transition: color var(--transition-fast);
     }
 
     .track-apply-link:hover {
-      gap: 0.75rem;
       color: var(--accent-green);
+    }
+
+    .jd-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 2200;
+      display: grid;
+      place-items: center;
+      padding: 1rem;
+      background: rgba(2, 6, 15, 0.78);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity .28s ease, visibility .28s ease;
+    }
+
+    .jd-modal-backdrop.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .jd-modal-card {
+      position: relative;
+      width: min(760px, 100%);
+      max-height: min(86vh, 820px);
+      overflow-y: auto;
+      padding: clamp(1.25rem, 3vw, 2rem);
+      border-radius: 22px;
+      border: 1px solid rgba(0, 210, 255, 0.38);
+      background: linear-gradient(145deg, rgba(10, 20, 43, 0.98), rgba(4, 9, 21, 0.99));
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.58), 0 0 35px rgba(0, 210, 255, 0.12);
+      transform: translateY(22px) scale(.97);
+      opacity: 0;
+      transition: transform .34s cubic-bezier(.16, 1, .3, 1), opacity .24s ease;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 210, 255, .45) transparent;
+    }
+
+    .jd-modal-backdrop.active .jd-modal-card {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    .jd-modal-close {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      background: rgba(8, 18, 38, 0.92);
+      color: var(--text-primary);
+      font-size: 1.45rem;
+      line-height: 1;
+    }
+
+    .jd-modal-kicker {
+      display: inline-block;
+      margin-bottom: .55rem;
+      color: var(--accent-cyan);
+      font-size: .75rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .jd-modal-header h2 {
+      padding-right: 2.5rem;
+      margin-bottom: .85rem;
+      font-size: clamp(1.45rem, 3vw, 2rem);
+    }
+
+    .jd-modal-meta {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: .6rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .jd-meta-item {
+      min-width: 0;
+      padding: .7rem;
+      border-radius: 10px;
+      border: 1px solid rgba(56, 189, 248, 0.18);
+      background: rgba(56, 189, 248, 0.06);
+    }
+
+    .jd-meta-item span {
+      display: block;
+      color: var(--text-muted);
+      font-size: .68rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .jd-meta-item strong {
+      display: block;
+      margin-top: .15rem;
+      color: var(--text-primary);
+      font-size: .82rem;
+    }
+
+    .jd-modal-content h3 {
+      margin: 1rem 0 .45rem;
+      color: var(--text-primary);
+      font-size: 1rem;
+    }
+
+    .jd-modal-content p {
+      font-size: .88rem;
+      line-height: 1.65;
+    }
+
+    .jd-modal-content ul {
+      display: grid;
+      gap: .42rem;
+      margin-top: .3rem;
+      padding-left: 1.1rem;
+    }
+
+    .jd-modal-content li {
+      color: var(--text-secondary);
+      font-size: .86rem;
+      line-height: 1.55;
+      list-style: disc;
+    }
+
+    .jd-modal-actions {
+      position: sticky;
+      bottom: -2rem;
+      display: flex;
+      justify-content: flex-end;
+      gap: .75rem;
+      margin-top: 1.4rem;
+      padding: 1rem 0 0;
+      background: linear-gradient(180deg, transparent, rgba(4, 9, 21, .98) 35%);
+    }
+
+    .jd-modal-secondary,
+    .jd-modal-primary {
+      min-height: 44px;
+      padding: .72rem 1.05rem;
+      border-radius: 10px;
+      font-weight: 800;
+    }
+
+    .jd-modal-secondary {
+      border: 1px solid rgba(56, 189, 248, .28);
+      background: rgba(56, 189, 248, .06);
+      color: var(--text-primary);
+    }
+
+    .jd-modal-primary {
+      background: var(--gradient-cyan-blue);
+      color: #020817;
+    }
+
+    @media (max-width: 600px) {
+      .jd-modal-backdrop { align-items: end; padding: .5rem; }
+      .jd-modal-card { max-height: 92vh; border-radius: 18px; }
+      .comm-modal-card {
+        width: 100%;
+        max-height: min(82vh, 620px);
+        padding: 1.15rem 1rem 1rem;
+        border-radius: 18px;
+      }
+      .comm-modal-card .jd-modal-header {
+        margin-bottom: 0.85rem;
+      }
+      .comm-modal-card .jd-modal-content h3 {
+        margin-top: 0.85rem;
+      }
+      .jd-modal-meta { grid-template-columns: repeat(2, 1fr); }
+      .jd-modal-actions { bottom: -1rem; }
+      .jd-modal-secondary, .jd-modal-primary { flex: 1; }
     }
 
     /* ==========================================================================
@@ -1775,11 +2028,27 @@
 
     .gain-card {
       padding: 1.75rem 1.6rem;
+      transition: transform var(--transition-smooth), border-color var(--transition-smooth), box-shadow var(--transition-smooth);
+    }
+
+    .gain-card:hover,
+    .gain-card:focus-visible {
+      transform: translateY(-5px);
+      border-color: rgba(0, 210, 255, 0.38);
+      box-shadow: 0 18px 38px rgba(2, 6, 23, 0.38), 0 0 24px rgba(0, 210, 255, 0.07);
+    }
+
+    .gain-card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      margin-bottom: 0.75rem;
     }
 
     .gain-icon {
       width: 50px;
       height: 50px;
+      flex: 0 0 50px;
       border-radius: 14px;
       background: rgba(5, 242, 175, 0.12);
       border: 1px solid rgba(5, 242, 175, 0.32);
@@ -1787,11 +2056,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 1.1rem;
     }
 
     .gain-card h3 {
       margin-bottom: 0.5rem;
+    }
+
+    .gain-card-header h3 {
+      margin: 0;
+      line-height: 1.25;
     }
 
     .golden-callout-banner {
@@ -2036,13 +2309,46 @@
     }
 
     .comm-card {
-      padding: 1.65rem 1.45rem;
+      position: relative;
+      padding: 2.65rem 1.45rem 1.65rem;
       text-align: left;
+      transition: transform var(--transition-smooth), border-color var(--transition-smooth), box-shadow var(--transition-smooth);
+    }
+
+    .gain-card,
+    .comm-card {
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    @media (hover: none), (pointer: coarse) {
+      .gain-card:hover,
+      .comm-card:hover {
+        transform: none;
+      }
+      .jd-modal-backdrop {
+        touch-action: manipulation;
+      }
+    }
+
+    .comm-card:hover,
+    .comm-card:focus-visible {
+      transform: translateY(-5px);
+      border-color: rgba(0, 210, 255, 0.38);
+      box-shadow: 0 18px 38px rgba(2, 6, 23, 0.38), 0 0 24px rgba(0, 210, 255, 0.08);
+    }
+
+    .comm-card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 0.85rem;
     }
 
     .comm-icon {
       width: 48px;
       height: 48px;
+      flex: 0 0 48px;
       border-radius: 13px;
       background: rgba(0, 210, 255, 0.15);
       border: 1px solid rgba(0, 210, 255, 0.38);
@@ -2050,15 +2356,28 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 1.1rem;
+    }
+
+    .comm-card-header h3 {
+      margin: 0;
+      line-height: 1.25;
     }
 
     .comm-tag {
+      position: absolute;
+      top: 0.72rem;
+      right: 1rem;
       display: inline-block;
       font-family: var(--font-mono);
-      font-size: 0.72rem;
+      font-size: 0.62rem;
       color: var(--accent-cyan);
-      margin-bottom: 0.35rem;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .comm-modal-card {
+      width: min(620px, 100%);
+      max-height: min(78vh, 680px);
     }
 
     /* ==========================================================================
@@ -2103,6 +2422,18 @@
       object-fit: cover;
       border-radius: 15px;
       display: block;
+    }
+
+    .team-photo-frame .team-profile-link {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 15px;
+      overflow: hidden;
+    }
+
+    .team-photo-abhishek .team-profile-link img {
+      object-position: center 35%;
     }
 
     .team-dept-pill {
@@ -2612,6 +2943,17 @@
     @media (max-width: 600px) {
       :root {
         --header-height: 70px;
+      }
+      .services-grid {
+        align-items: start;
+      }
+      .service-card {
+        height: auto;
+        align-self: start;
+      }
+      .service-card h3,
+      .service-card-desc {
+        min-height: 0;
       }
       .header-actions .btn-primary {
         padding: 0.55rem 0.95rem;

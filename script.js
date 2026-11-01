@@ -556,6 +556,250 @@
         });
       });
 
+      /* ----------------------------------------------------------------------
+         "WHAT YOU WILL GAIN" DETAIL POPUPS
+         ---------------------------------------------------------------------- */
+      const gainModal = document.getElementById('gainModal');
+      const gainModalTitle = document.getElementById('gainModalTitle');
+      const gainModalContent = document.getElementById('gainModalContent');
+      const gainModalClose = document.getElementById('gainModalClose');
+      const gainModalCloseSecondary = document.getElementById('gainModalCloseSecondary');
+      let gainTrigger = null;
+
+      const gainDetails = {
+        'hands-on': {
+          title: 'Hands-on Industry Experience',
+          intro: 'You will learn how professional teams turn ideas into practical work. Instead of only studying concepts, you will apply your domain skills to structured startup tasks, tools, reviews, and deadlines.',
+          sections: [
+            ['What You Will Do', ['Work from clear briefs and real project requirements', 'Use professional tools, workflow trackers, and approved processes', 'Receive feedback through reviews, meetings, and task updates', 'Improve deliverables through testing, revision, and documentation']],
+            ['Professional Practices', ['Ownership, communication, accountability, and time management', 'Version control, presentation, reporting, and quality checks where relevant', 'Collaboration with designers, developers, analysts, marketers, and mentors']]
+          ]
+        },
+        'live-projects': {
+          title: 'Exposure to Live Projects',
+          intro: 'Internship assignments are designed around active IntelliCore initiatives and meaningful project deliverables. You will see how ideas move through planning, execution, review, and completion.',
+          sections: [
+            ['Project Exposure', ['Take part in current web, app, data, design, marketing, content, or HR work', 'Understand project goals, scope, dependencies, responsibilities, and quality expectations', 'Collaborate with teammates on deliverables that can support your portfolio']],
+            ['Portfolio Value', ['Document your process and final contribution responsibly', 'Prepare work samples without exposing confidential or proprietary information', 'Build concrete examples that demonstrate practical ability to recruiters']]
+          ]
+        },
+        'mentorship': {
+          title: 'Professional Mentorship',
+          intro: 'IntelliCore mentors help you understand expectations, improve your work, and build stronger professional habits throughout the internship.',
+          sections: [
+            ['Mentor Support', ['Clear guidance before starting assigned tasks', 'Task reviews, constructive feedback, and improvement suggestions', 'Help with tools, workflows, prioritization, and technical or domain questions', 'Career guidance based on your performance and interests']],
+            ['How to Use It', ['Prepare questions and share progress regularly', 'Accept feedback with an improvement mindset', 'Track your learning, completed work, and open action items']]
+          ]
+        },
+        'skills': {
+          title: 'Enhanced Technical & Soft Skills',
+          intro: 'The internship helps you develop both role-specific capabilities and workplace skills needed to perform successfully in a professional environment.',
+          sections: [
+            ['Technical Development', ['Strengthen tools, methods, and concepts connected to your selected internship track', 'Learn quality checks, documentation, problem-solving, and practical execution']],
+            ['Professional Skills', ['Communication, active listening, teamwork, and reporting', 'Ownership, punctuality, prioritization, agile habits, and time management', 'Confidence when presenting work, receiving feedback, and solving challenges']]
+          ]
+        },
+        'certificate': {
+          title: 'Internship Completion Certificate',
+          intro: 'Successful interns can receive an official IntelliCore Internship Completion Certificate after completing the program requirements and assigned work satisfactorily.',
+          sections: [
+            ['Certificate Eligibility', ['Complete the assigned internship tenure', 'Submit required tasks, project work, or assessments on time', 'Maintain professional communication and follow company guidelines', 'Complete the internship exit and feedback process']],
+            ['What It Confirms', ['Your selected internship role and tenure', 'Successful project and learning participation', 'Validated practical contribution subject to your final performance review']]
+          ]
+        },
+        'recommendation': {
+          title: 'Letter of Recommendation',
+          intro: 'A performance-based Letter of Recommendation may recognize interns who demonstrate exceptional contribution, reliability, learning, and professional growth.',
+          sections: [
+            ['Selection Factors', ['Quality and consistency of completed work', 'Ownership, initiative, communication, and teamwork', 'Attendance, deadlines, and adherence to professional standards', 'Positive response to feedback and continuous improvement']],
+            ['How It Helps', ['Strengthens your resume, LinkedIn profile, and future applications', 'Provides credible professional feedback on your contributions', 'May highlight your strongest responsibilities and verified skills']]
+          ]
+        }
+      };
+
+      function setGainModalOpen(isOpen, trigger) {
+        if (!gainModal) return;
+        gainModal.classList.toggle('active', isOpen);
+        gainModal.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+        document.querySelectorAll('.gain-card.is-touching, .comm-card.is-touching').forEach(function (card) {
+          card.classList.remove('is-touching');
+        });
+        if (isOpen && gainModalClose) setTimeout(function () { gainModalClose.focus(); }, 50);
+        if (!isOpen && trigger) trigger.focus();
+      }
+
+      function openGainModal(key, card) {
+        const detail = gainDetails[key];
+        if (!detail || !gainModal) return;
+        gainTrigger = card;
+        gainModalTitle.textContent = detail.title;
+        gainModalContent.innerHTML = '<h3>Overview</h3><p>' + detail.intro + '</p>' +
+          detail.sections.map(function (section) {
+            return '<h3>' + section[0] + '</h3>' + listHtml(section[1]);
+          }).join('');
+        gainModal.querySelector('.gain-modal-card').scrollTop = 0;
+        setGainModalOpen(true, card);
+      }
+
+      document.querySelectorAll('.gain-card[data-gain]').forEach(function (card) {
+        const key = card.getAttribute('data-gain');
+        card.addEventListener('pointerdown', function () { card.classList.add('is-touching'); });
+        card.addEventListener('pointerup', function () { card.classList.remove('is-touching'); });
+        card.addEventListener('pointercancel', function () { card.classList.remove('is-touching'); });
+        card.addEventListener('pointerleave', function () { card.classList.remove('is-touching'); });
+        card.addEventListener('touchend', function (event) {
+          event.preventDefault();
+          card.classList.remove('is-touching');
+          openGainModal(key, card);
+        }, { passive: false });
+        card.addEventListener('click', function (event) {
+          if (event.detail === 0 || !window.matchMedia('(pointer: coarse)').matches) {
+            openGainModal(key, card);
+          }
+        });
+        card.addEventListener('keydown', function (event) {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openGainModal(key, card);
+          }
+        });
+      });
+
+      if (gainModalClose) gainModalClose.addEventListener('click', function () { setGainModalOpen(false, gainTrigger); });
+      if (gainModalCloseSecondary) gainModalCloseSecondary.addEventListener('click', function () { setGainModalOpen(false, gainTrigger); });
+      if (gainModal) gainModal.addEventListener('click', function (event) {
+        if (event.target === gainModal) setGainModalOpen(false, gainTrigger);
+      });
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && gainModal && gainModal.classList.contains('active')) {
+          setGainModalOpen(false, gainTrigger);
+        }
+      });
+      document.addEventListener('pointerup', function () {
+        document.querySelectorAll('.gain-card.is-touching, .comm-card.is-touching').forEach(function (card) {
+          card.classList.remove('is-touching');
+        });
+      });
+
+      /* ----------------------------------------------------------------------
+         COMMUNICATION & MENTOR SUPPORT DETAIL POPUPS
+         ---------------------------------------------------------------------- */
+      const commModal = document.getElementById('commModal');
+      const commModalTitle = document.getElementById('commModalTitle');
+      const commModalContent = document.getElementById('commModalContent');
+      const commModalClose = document.getElementById('commModalClose');
+      const commModalCloseSecondary = document.getElementById('commModalCloseSecondary');
+      let commTrigger = null;
+
+      const commDetails = {
+        questions: {
+          title: 'Ask Questions',
+          intro: 'Questions are an important part of learning. Reach out whenever a requirement, tool, concept, deadline, or project task is unclear. Mentors want you to ask early so small blockers do not become larger problems.',
+          sections: [
+            ['Before You Ask', ['Read the assigned brief and review available documentation', 'Check the work you have already completed and the exact point where you are blocked', 'Try one or two relevant resources without spending excessive time stuck']],
+            ['What to Share', ['Describe the task and what you are trying to achieve', 'Share the error, feedback, or unclear requirement clearly', 'Explain what you have tried and what outcome you expected', 'Attach a screenshot or relevant project excerpt only when it is appropriate and approved']],
+            ['Best Practice', ['Use the official team communication channel or your mentor meeting', 'Keep messages concise, factual, respectful, and focused on the issue', 'Confirm the agreed solution and next action before closing the conversation']],
+            ['Response Expectations', ['Ask non-urgent questions during normal working hours', 'Allow reasonable time for your mentor to review and respond', 'Share urgent blockers early with the correct owner and expected deadline']]
+          ]
+        },
+        ideas: {
+          title: 'Share Your Ideas',
+          intro: 'Fresh perspectives are valuable at IntelliCore. You can contribute suggestions for improving design, workflows, campaigns, research, code quality, communication, or the intern experience.',
+          sections: [
+            ['How to Contribute', ['Prepare a clear problem statement and your proposed improvement', 'Explain the expected benefit, effort, and possible risk', 'Share examples or a simple prototype when useful']],
+            ['Professional Discussion', ['Respect existing plans and project priorities', 'Listen to feedback and refine your idea collaboratively', 'Record agreed action points and ownership after team discussions']],
+            ['Examples', ['Suggest a cleaner workflow or reusable project template', 'Recommend a design, content, testing, or reporting improvement', 'Propose a tool that could save time or improve quality']]
+          ]
+        },
+        guidance: {
+          title: 'Get Guidance',
+          intro: 'Use structured mentor support for project direction, skill development, task feedback, and career planning. Guidance is most effective when progress and expectations are communicated regularly.',
+          sections: [
+            ['Mentor Sessions', ['Review task progress and completed deliverables', 'Discuss challenges and choose the next clear action', 'Ask for feedback on technical quality and professional habits', 'Clarify any domain-specific or career-related questions']],
+            ['How to Prepare', ['Keep a short progress update ready', 'List specific questions before the meeting', 'Take notes and follow up on agreed commitments']],
+            ['Receiving Feedback', ['Listen without interrupting and ask for examples when needed', 'Separate implementation mistakes from personal ability', 'Convert feedback into an action plan and request a follow-up review']]
+          ]
+        },
+        connected: {
+          title: 'Stay Connected',
+          intro: 'Consistent communication keeps the internship team aligned. Share updates through official workspace channels, meetings, and scheduled check-ins while maintaining confidentiality.',
+          sections: [
+            ['Stay Updated', ['Attend scheduled team meetings and mentor check-ins', 'Respond to reasonable work messages within the agreed response time', 'Update task status, completed work, blockers, and next steps', 'Follow the communication schedule shared by your mentor or HR team']],
+            ['Professional Communication', ['Use clear language and respect availability and time zones', 'Avoid sharing passwords, private data, or confidential project information publicly', 'Escalate urgent blockers through the correct communication channel']],
+            ['Communication Channels', ['Use formal channels for tasks, decisions, deadlines, and feedback', 'Use calls only when conversation or real-time clarification is faster', 'Maintain a written summary of important decisions and commitments']]
+          ]
+        }
+      };
+
+      function setCommModalOpen(isOpen, trigger) {
+        if (!commModal) return;
+        commModal.classList.toggle('active', isOpen);
+        commModal.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+        document.querySelectorAll('.gain-card.is-touching, .comm-card.is-touching').forEach(function (card) {
+          card.classList.remove('is-touching');
+        });
+        if (isOpen && commModalClose) setTimeout(function () { commModalClose.focus(); }, 50);
+        if (!isOpen && trigger) trigger.focus();
+      }
+
+      function openCommModal(key, card) {
+        const detail = commDetails[key];
+        if (!detail || !commModal) return;
+        commTrigger = card;
+        commModalTitle.textContent = detail.title;
+        commModalContent.innerHTML = '<h3>Overview</h3><p>' + detail.intro + '</p>' +
+          detail.sections.map(function (section) {
+            return '<h3>' + section[0] + '</h3>' + listHtml(section[1]);
+          }).join('');
+        commModal.querySelector('.comm-modal-card').scrollTop = 0;
+        setCommModalOpen(true, card);
+      }
+
+      document.querySelectorAll('.comm-card[data-comm]').forEach(function (card) {
+        const key = card.getAttribute('data-comm');
+        card.addEventListener('pointerdown', function () {
+          card.classList.add('is-touching');
+        });
+        card.addEventListener('pointerup', function () {
+          card.classList.remove('is-touching');
+        });
+        card.addEventListener('pointercancel', function () {
+          card.classList.remove('is-touching');
+        });
+        card.addEventListener('pointerleave', function () {
+          card.classList.remove('is-touching');
+        });
+        card.addEventListener('touchend', function (event) {
+          event.preventDefault();
+          card.classList.remove('is-touching');
+          openCommModal(key, card);
+        }, { passive: false });
+        card.addEventListener('click', function (event) {
+          if (event.detail === 0 || !window.matchMedia('(pointer: coarse)').matches) {
+            openCommModal(key, card);
+          }
+        });
+        card.addEventListener('keydown', function (event) {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openCommModal(key, card);
+          }
+        });
+      });
+
+      if (commModalClose) commModalClose.addEventListener('click', function () { setCommModalOpen(false, commTrigger); });
+      if (commModalCloseSecondary) commModalCloseSecondary.addEventListener('click', function () { setCommModalOpen(false, commTrigger); });
+      if (commModal) commModal.addEventListener('click', function (event) {
+        if (event.target === commModal) setCommModalOpen(false, commTrigger);
+      });
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && commModal && commModal.classList.contains('active')) {
+          setCommModalOpen(false, commTrigger);
+        }
+      });
+
       const trackApplyLinks = document.querySelectorAll('.track-apply-link');
       trackApplyLinks.forEach(function (link) {
         link.addEventListener('click', function () {
@@ -564,6 +808,143 @@
             portalTrackSelect.value = chosen;
           }
         });
+      });
+
+      /* ----------------------------------------------------------------------
+         INTERNSHIP JOB DESCRIPTION MODAL
+         ---------------------------------------------------------------------- */
+      const jdModal = document.getElementById('jdModal');
+      const jdModalTitle = document.getElementById('jdModalTitle');
+      const jdModalMeta = document.getElementById('jdModalMeta');
+      const jdModalContent = document.getElementById('jdModalContent');
+      const jdModalClose = document.getElementById('jdModalClose');
+      const jdModalCloseSecondary = document.getElementById('jdModalCloseSecondary');
+      const jdModalApply = document.getElementById('jdModalApply');
+      let currentJdTrack = '';
+      let jdCardTrigger = null;
+
+      const internshipJDs = {
+        'Human Resources Intern': {
+          about: 'IntelliCore is a growing IT company building innovative digital solutions worldwide. The Human Resources Intern will support recruitment, onboarding, employee engagement, and everyday HR operations in a dynamic remote startup environment.',
+          responsibilities: ['Assist with end-to-end recruitment, including sourcing, screening, and interview scheduling', 'Post openings on LinkedIn, job portals, and recruitment platforms', 'Coordinate candidates and hiring managers throughout the hiring process', 'Maintain candidate databases, HR records, and recruitment trackers', 'Support onboarding, orientation, and employee engagement activities', 'Draft offer letters, internship letters, and HR documents', 'Help with employer branding and administrative HR operations'],
+          eligibility: ['Students, freshers, or graduates from HR, BBA, MBA, B.Com, Psychology, Management, or related fields', 'Strong written and verbal communication skills', 'Organized, detail-oriented, and comfortable managing multiple tasks', 'Familiarity with MS Excel, Google Workspace, or HR tools is an advantage'],
+          gains: ['Internship Completion Certificate', 'Performance-based Letter of Recommendation', 'Practical IT recruitment and HR operations experience', 'Flexible remote hours and professional mentorship']
+        },
+        'Business Analyst Intern': {
+          about: 'The Business Analyst Intern bridges business needs and technology teams. You will document requirements, analyze data, support solution planning, and help convert project ideas into clear, practical deliverables.',
+          responsibilities: ['Gather and document business requirements through calls, research, and stakeholder meetings', 'Create BRD, FRD, use cases, process flows, and user stories', 'Analyze business data to identify trends, gaps, and improvement opportunities', 'Work with developers and designers to clarify requirements and solution scope', 'Support sprint planning, backlog review, testing, and change documentation', 'Prepare reports, presentations, and client-ready project updates'],
+          eligibility: ['Students or graduates from Business, Management, IT, Economics, Commerce, or related fields', 'Strong analytical, documentation, and communication skills', 'Basic knowledge of Excel, PowerPoint, SQL, or Jira is an advantage', 'Interest in software products and solving real business problems'],
+          gains: ['Internship Completion Certificate', 'Hands-on experience across the complete business analysis lifecycle', 'Exposure to product, technology, and client communication', 'Mentorship and performance-based recommendation']
+        },
+        'Web Development Intern': {
+          about: 'Join IntelliCore as a Web Development Intern and build responsive, accessible web experiences. You will work alongside designers and senior developers on real production-oriented projects using modern web technologies.',
+          responsibilities: ['Build responsive interfaces using HTML, CSS, and JavaScript', 'Integrate frontend components with APIs and existing backend services', 'Fix bugs, improve performance, accessibility, and cross-browser compatibility', 'Participate in code reviews, Git workflows, and sprint discussions', 'Test features across desktop and mobile devices', 'Document implementation details and reusable components'],
+          eligibility: ['Students or graduates with basic frontend or full-stack development knowledge', 'Familiarity with HTML, CSS, JavaScript; React, Node.js, or databases are beneficial', 'Understanding of Git, APIs, responsive design, or debugging is a plus', 'A learning mindset, ownership, and ability to work remotely'],
+          gains: ['Internship Completion Certificate', 'Real project and portfolio experience', 'Guidance on clean code, Git, testing, and deployment', 'Performance-based Letter of Recommendation']
+        },
+        'Data Analyst Intern': {
+          about: 'The Data Analyst Intern helps IntelliCore transform raw data into useful business insights. You will clean datasets, build reports, create dashboards, and communicate findings that support product and business decisions.',
+          responsibilities: ['Collect, clean, validate, and organize datasets from multiple sources', 'Perform exploratory analysis and identify meaningful trends or anomalies', 'Create dashboards and reports using Excel, Power BI, Tableau, or similar tools', 'Write SQL queries to extract and analyze data', 'Support KPI tracking, data documentation, and presentation of insights', 'Work with stakeholders to define metrics and answer business questions'],
+          eligibility: ['Students or graduates from Data Science, Statistics, Mathematics, IT, Commerce, or related fields', 'Working knowledge of Excel and any BI or visualization tool', 'Basic SQL and analytical reasoning skills', 'Curiosity, attention to detail, and clear communication'],
+          gains: ['Internship Completion Certificate', 'Hands-on dashboards, reporting, and SQL experience', 'Exposure to practical business metrics and data workflows', 'Mentorship and recommendation based on performance']
+        },
+        'Digital Marketing Intern': {
+          about: 'As a Digital Marketing Intern, you will support IntelliCore campaigns across search, social, email, and content channels. The role combines creativity with analytical thinking to grow awareness, engagement, and qualified leads.',
+          responsibilities: ['Plan and execute digital campaigns across LinkedIn, Instagram, and Google channels', 'Research keywords, competitors, audience segments, and market trends', 'Create campaign briefs, ad copy, landing-page content, and performance reports', 'Assist with SEO, content calendars, email marketing, and lead tracking', 'Monitor campaign metrics and suggest data-driven optimizations', 'Coordinate with design and content teams for brand-consistent assets'],
+          eligibility: ['Students or graduates from Marketing, Business, Communications, or related fields', 'Understanding of social media, content marketing, SEO, or paid advertising', 'Good writing skills and familiarity with analytics tools are helpful', 'Creative, organized, and comfortable with measurable goals'],
+          gains: ['Internship Completion Certificate', 'Live campaign and analytics experience', 'Portfolio-ready case studies and measurable achievements', 'Performance-based recommendation and flexible remote work']
+        },
+        'Graphic Designer Intern': {
+          about: 'The Graphic Designer Intern creates clear, modern visual communication for IntelliCore projects and campaigns. You will turn ideas into polished graphics while learning brand consistency, design systems, and production workflows.',
+          responsibilities: ['Design social posts, banners, presentations, brochures, and marketing creatives', 'Create visuals that follow IntelliCore branding and accessibility guidelines', 'Develop layout concepts, illustrations, icons, and reusable design assets', 'Collaborate with marketing, content, and development teams', 'Prepare final files in suitable formats and maintain organized source assets', 'Iterate designs using feedback and present your creative decisions'],
+          eligibility: ['Students or beginners in Graphic Design, Multimedia, Fine Arts, or related disciplines', 'Working knowledge of Canva, Figma, Photoshop, Illustrator, or similar tools', 'Strong eye for typography, color, layout, and visual hierarchy', 'Basic motion or UI design skills are helpful but not mandatory'],
+          gains: ['Internship Completion Certificate', 'A professional portfolio with real brand projects', 'Feedback from marketing and design professionals', 'Performance-based recommendation']
+        },
+        'Social Media Intern': {
+          about: 'The Social Media Intern manages day-to-day content and community activity across IntelliCore channels. You will build an engaging online presence through planned posts, trend research, community support, and performance analysis.',
+          responsibilities: ['Create and maintain social media content calendars', 'Write captions, schedule posts, and publish platform-appropriate content', 'Research trends, hashtags, audiences, and engagement opportunities', 'Respond to comments and messages professionally', 'Track reach, engagement, followers, clicks, and conversions', 'Suggest campaign and content ideas based on performance insights'],
+          eligibility: ['Students or graduates from Marketing, Media, Communications, or related fields', 'Strong writing skills and familiarity with major social platforms', 'Basic knowledge of Canva, analytics, scheduling tools, or short-form video', 'Creative, responsive, consistent, and comfortable working remotely'],
+          gains: ['Internship Completion Certificate', 'Hands-on social media planning and community management', 'Content portfolio and analytics experience', 'Mentorship and recommendation based on performance']
+        },
+        'Content Writing Intern': {
+          about: 'The Content Writing Intern develops clear, useful, and search-friendly content for IntelliCore websites, campaigns, and social channels. You will research topics, adapt tone by audience, and collaborate on content that communicates technical ideas simply.',
+          responsibilities: ['Research and write blogs, website copy, social posts, and campaign content', 'Adapt content for brand voice, target audience, and search intent', 'Proofread and edit articles for clarity, grammar, consistency, and accuracy', 'Perform basic keyword and competitor research for content planning', 'Coordinate headlines, metadata, visuals, and publishing requirements with teams', 'Track content feedback and improve drafts through revisions'],
+          eligibility: ['Students or graduates from English, Journalism, Communications, Marketing, or related fields', 'Excellent written English and strong research skills', 'Basic understanding of SEO and content tools is an advantage', 'Attention to deadlines, detail, and feedback'],
+          gains: ['Internship Completion Certificate', 'Published content and a professional writing portfolio', 'SEO, brand writing, and editorial workflow experience', 'Flexible remote work and performance-based recommendation']
+        }
+      };
+
+      function listHtml(items) {
+        return '<ul>' + items.map(function (item) {
+          return '<li>' + item.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</li>';
+        }).join('') + '</ul>';
+      }
+
+      function setJdModalOpen(isOpen, card) {
+        if (!jdModal) return;
+        jdModal.classList.toggle('active', isOpen);
+        jdModal.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+        if (isOpen && jdModalClose) {
+          jdModal.querySelector('.jd-modal-card').scrollTop = 0;
+          setTimeout(function () { jdModalClose.focus(); }, 50);
+        } else if (!isOpen && card) {
+          card.focus();
+        }
+      }
+
+      function openJdModal(trackName, card) {
+        const jd = internshipJDs[trackName];
+        if (!jd || !jdModal) return;
+        currentJdTrack = trackName;
+        jdCardTrigger = card;
+        jdModalTitle.textContent = trackName;
+        jdModalMeta.innerHTML = [
+          '<div class="jd-meta-item"><span>Location</span><strong>Remote</strong></div>',
+          '<div class="jd-meta-item"><span>Duration</span><strong>3–6 Months</strong></div>',
+          '<div class="jd-meta-item"><span>Start Date</span><strong>Immediate</strong></div>',
+          '<div class="jd-meta-item"><span>Stipend</span><strong>Unpaid</strong></div>'
+        ].join('');
+        jdModalContent.innerHTML =
+          '<h3>About the Role</h3><p>' + jd.about + '</p>' +
+          '<h3>Key Responsibilities</h3>' + listHtml(jd.responsibilities) +
+          '<h3>Who Can Apply</h3>' + listHtml(jd.eligibility) +
+          '<h3>What You&apos;ll Gain</h3>' + listHtml(jd.gains) +
+          '<h3>Why Join IntelliCore?</h3><p>Work with a fast-growing technology startup, build real-world experience, receive mentorship, and contribute to meaningful projects while developing career-ready skills.</p>';
+        setJdModalOpen(true, card);
+      }
+
+      trackCards.forEach(function (card) {
+        const trackName = card.getAttribute('data-track-name');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-label', 'Open full job description for ' + trackName);
+        card.addEventListener('click', function (event) {
+          if (!event.target.closest('.track-apply-link')) openJdModal(trackName, card);
+        });
+        card.addEventListener('keydown', function (event) {
+          if ((event.key === 'Enter' || event.key === ' ') && !event.target.closest('.track-apply-link')) {
+            event.preventDefault();
+            openJdModal(trackName, card);
+          }
+        });
+      });
+
+      if (jdModalClose) jdModalClose.addEventListener('click', function () { setJdModalOpen(false, jdCardTrigger); });
+      if (jdModalCloseSecondary) jdModalCloseSecondary.addEventListener('click', function () { setJdModalOpen(false, jdCardTrigger); });
+      if (jdModal) jdModal.addEventListener('click', function (event) {
+        if (event.target === jdModal) setJdModalOpen(false, jdCardTrigger);
+      });
+      if (jdModalApply) jdModalApply.addEventListener('click', function () {
+        if (currentJdTrack && portalTrackSelect) portalTrackSelect.value = currentJdTrack;
+        setJdModalOpen(false, jdCardTrigger);
+        const applySection = document.getElementById('apply');
+        if (applySection) applySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && jdModal && jdModal.classList.contains('active')) {
+          setJdModalOpen(false, jdCardTrigger);
+        }
       });
 
       const footerTrackLinks = document.querySelectorAll('[data-footer-track]');
