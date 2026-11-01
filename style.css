@@ -92,6 +92,69 @@
       transition: color var(--transition-fast);
     }
 
+    .skip-link {
+      position: fixed;
+      top: 0.75rem;
+      left: 0.75rem;
+      z-index: 3000;
+      transform: translateY(-180%);
+      padding: 0.65rem 1rem;
+      border-radius: 8px;
+      background: var(--accent-cyan);
+      color: #020817;
+      font-weight: 800;
+      transition: transform var(--transition-fast);
+    }
+
+    .skip-link:focus {
+      transform: translateY(0);
+    }
+
+    :focus-visible {
+      outline: 3px solid rgba(0, 210, 255, 0.8);
+      outline-offset: 3px;
+    }
+
+    .back-to-top-btn {
+      position: fixed;
+      right: clamp(0.8rem, 2vw, 1.5rem);
+      bottom: clamp(0.8rem, 2vw, 1.5rem);
+      z-index: 900;
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 210, 255, 0.55);
+      background: rgba(5, 12, 28, 0.94);
+      color: var(--accent-cyan);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.38), 0 0 18px rgba(0, 210, 255, 0.18);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(12px);
+      transition: opacity var(--transition-fast), visibility var(--transition-fast), transform var(--transition-fast), background var(--transition-fast);
+    }
+
+    .back-to-top-btn.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .back-to-top-btn:hover {
+      background: var(--accent-cyan);
+      color: #020817;
+    }
+
+    .team-profile-link {
+      display: block;
+      color: inherit;
+    }
+
+    .team-profile-link:hover {
+      color: var(--accent-cyan);
+    }
+
     button {
       font-family: inherit;
       cursor: pointer;
@@ -2581,6 +2644,13 @@
         width: 100%;
       }
       .hero-cta-group .btn {
+        width: 100%;
+      }
+      .selected-track-bar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+      .selected-track-select {
         width: 100%;
       }
       .about-visual-card img {

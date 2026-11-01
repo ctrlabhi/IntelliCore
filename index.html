@@ -3,12 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IntelliCore</title>
+  <title>IntelliCore | IT Solutions & Internship Programs</title>
   <meta name="description" content="IntelliCore — Intelligence at the Core, Innovation at the Fore. Emerging IT Startup delivering innovative technology solutions and industry-backed internship training." />
+  <meta name="keywords" content="IntelliCore, IT internship, web development internship, data analyst internship, business analyst internship, digital marketing internship, software development, India">
+  <meta name="theme-color" content="#050813">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="IntelliCore | Build Skills. Work on Live Projects. Grow Your Career.">
+  <meta property="og:description" content="Explore 8 internship tracks and professional IT solutions designed for real-world growth.">
+  <meta property="og:url" content="https://intellicoretechnologies.in/">
+  <meta property="og:image" content="https://intellicoretechnologies.in/Photos/favicon.png">
   <link rel="icon" type="image/png" href="/favicon.png?v=4" />
   <link rel="stylesheet" href="style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "IntelliCore",
+    "url": "https://intellicoretechnologies.in/",
+    "logo": "https://intellicoretechnologies.in/Photos/favicon.png",
+    "email": "Info@IntelliCoreTechnologies.in",
+    "sameAs": [
+      "https://www.linkedin.com/company/intellicoretechnologies"
+    ]
+  }
+  </script>
 </head>
 <body>
+  <a class="skip-link" href="#top">Skip to main content</a>
 
   <!-- 1. TOP SCROLL PROGRESS TRACK WITH ANIMATED BLUE ROCKET -->
   <div class="scroll-progress-wrap" aria-hidden="true">
@@ -154,7 +175,7 @@
   </div>
 
   <!-- 3. HERO SECTION (PDF SLIDE 1 + CORPORATE IT STARTUP POSITIONING) -->
-  <main id="top">
+  <main id="top" tabindex="-1">
     <section class="hero-section">
       <canvas id="neuralCanvas"></canvas>
       <div class="container hero-content">
@@ -591,14 +612,14 @@
 
         <!-- Category Filter Bar -->
         <div class="filter-bar" role="tablist" aria-label="Internship Track Categories">
-          <button type="button" class="filter-pill active" data-filter="all" aria-pressed="true">All (8)</button>
-          <button type="button" class="filter-pill" data-filter="Web & App" aria-pressed="false">Web &amp; App (2)</button>
-          <button type="button" class="filter-pill" data-filter="Data & AI" aria-pressed="false">Data &amp; AI (2)</button>
-          <button type="button" class="filter-pill" data-filter="Business & Growth" aria-pressed="false">Business &amp; Growth (4)</button>
+          <button type="button" class="filter-pill active" data-filter="all" aria-pressed="true" aria-controls="tracksGrid">All (8)</button>
+          <button type="button" class="filter-pill" data-filter="Web & App" aria-pressed="false" aria-controls="tracksGrid">Web &amp; App (2)</button>
+          <button type="button" class="filter-pill" data-filter="Data & AI" aria-pressed="false" aria-controls="tracksGrid">Data &amp; AI (2)</button>
+          <button type="button" class="filter-pill" data-filter="Business & Growth" aria-pressed="false" aria-controls="tracksGrid">Business &amp; Growth (4)</button>
         </div>
 
         <!-- 8 Official Internship Roles from PDF Slide 7 -->
-        <div class="tracks-grid" id="tracksGrid">
+        <div class="tracks-grid" id="tracksGrid" role="tabpanel">
           <!-- 1. Business Analyst Intern -->
           <article class="glass-card track-card" data-category="Data & AI" data-track-name="Business Analyst Intern">
             <div>
@@ -1021,10 +1042,12 @@
           <!-- 1. Abhishek Kumar -->
           <article class="glass-card team-card">
             <div class="team-photo-frame">
-              <img src="Photos/Abhishek.jpeg"/>
+              <a class="team-profile-link" href="https://www.linkedin.com/in/ctrlabhi/" target="_blank" rel="noopener noreferrer" aria-label="Open Abhishek Kumar's LinkedIn profile">
+                <img src="Photos/Abhishek.jpeg" alt="Abhishek Kumar" loading="lazy"/>
+              </a>
             </div>
             <span class="team-dept-pill">Founder &amp; CEO</span>
-            <h3 class="team-name">Abhishek Kumar</h3>
+            <h3 class="team-name"><a class="team-profile-link" href="https://www.linkedin.com/in/ctrlabhi/" target="_blank" rel="noopener noreferrer">Abhishek Kumar</a></h3>
             <!-- <div class="team-role">Founder &amp; CEO</div> -->
             <p class="team-bio">Leads IntelliCore's vision to build innovative IT solutions while creating real-world growth opportunities for emerging talent.</p>
           </article>
@@ -1032,17 +1055,19 @@
            <!-- 2. Ashita Rohilla -->
           <article class="glass-card team-card">
             <div class="team-photo-frame">
-              <img src="Photos/Ashita Rohilla.jpeg"/>
-            </div>
-            <span class="team-dept-pill">Human Resources Manager</span>
-            <h3 class="team-name">Ashita Rohilla</h3>
+               <a class="team-profile-link" href="https://www.linkedin.com/in/ashita-rohilla-a242171b5/" target="_blank" rel="noopener noreferrer" aria-label="Open Ashita Rohilla's LinkedIn profile">
+                 <img src="Photos/Ashita Rohilla.jpeg" alt="Ashita Rohilla" loading="lazy"/>
+               </a>
+             </div>
+             <span class="team-dept-pill">Human Resources Manager</span>
+             <h3 class="team-name"><a class="team-profile-link" href="https://www.linkedin.com/in/ashita-rohilla-a242171b5/" target="_blank" rel="noopener noreferrer">Ashita Rohilla</a></h3>
             <p class="team-bio">Drives talent acquisition, employee engagement, and organizational culture, ensuring IntelliCore attracts, nurtures, and retains top-tier engineering professionals.</p>
           </article>
 
           <!-- 3. Mahak Rawat -->
           <article class="glass-card team-card">
             <div class="team-photo-frame">
-              <img src="Photos/Mahak.jpeg"/>
+              <img src="Photos/Mahak.jpeg" alt="Mahak" loading="lazy"/>
             </div>
             <span class="team-dept-pill">Human Resources Executive</span>
             <h3 class="team-name">Mahak Rawat</h3>
@@ -1053,7 +1078,7 @@
           <!-- 4. Tanya Tyagi -->
           <article class="glass-card team-card">
             <div class="team-photo-frame">
-              <img src="Photos/Tanya.jpeg"/>
+              <img src="Photos/Tanya.jpeg" alt="Tanya" loading="lazy"/>
             </div>
             <span class="team-dept-pill">Operations Executive</span>
             <h3 class="team-name">Tanya Tyagi</h3>
@@ -1063,7 +1088,7 @@
           <!-- 5. Sumit Kumar -->
           <article class="glass-card team-card">
             <div class="team-photo-frame">
-              <img src="Photos/Sumit.jpeg"/>
+              <img src="Photos/Sumit.jpeg" alt="Sumit Singh" loading="lazy"/>
             </div>
             <span class="team-dept-pill">Web Developer</span>
             <h3 class="team-name">Sumit Kumar</h3>
@@ -1074,7 +1099,7 @@
           <!-- 6. Astuty Srivastava -->
           <article class="glass-card team-card extra-mentor">
             <div class="team-photo-frame">
-               <img src="Photos/Astuty.jpg"/>
+               <img src="Photos/Astuty.jpg" alt="Astuty Srivastava" loading="lazy"/>
             </div>
             <span class="team-dept-pill">Data Analyst</span>
             <h3 class="team-name">Astuty Srivastava</h3>
@@ -1085,7 +1110,7 @@
           <!-- 7. Chanda Kumawat -->
           <article class="glass-card team-card extra-mentor">
             <div class="team-photo-frame">
-              <img src="Photos/Chanda.jpeg"/>
+              <img src="Photos/Chanda.jpeg" alt="Chanda Kumawat" loading="lazy"/>
             </div>
             <span class="team-dept-pill">Business Analyst</span>
             <h3 class="team-name">Chanda Kumawat</h3>
@@ -1096,7 +1121,7 @@
           <!-- 8. Tara Chand Suthar -->
           <article class="glass-card team-card extra-mentor">
             <div class="team-photo-frame">
-            <img src="Photos/Tara.jpg"/> 
+            <img src="Photos/Tara.jpg" alt="Tara Chand Suthar" loading="lazy"/>
             </div>
             <span class="team-dept-pill">Graphic Designer</span>
             <h3 class="team-name">Tara Chand Suthar</h3>
@@ -1260,6 +1285,11 @@
       </div>
     </section>
   </main>
+
+<!-- Back to top control -->
+<button type="button" class="back-to-top-btn" id="backToTopBtn" aria-label="Back to top" title="Back to top">
+  <span aria-hidden="true">&uarr;</span>
+</button>
 
 <!-- 15. PROFESSIONAL FOOTER -->
 <footer class="site-footer ic-final-footer" style="padding: 2.6rem 0 1.6rem;">

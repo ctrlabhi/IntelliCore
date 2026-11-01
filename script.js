@@ -731,4 +731,16 @@
           if (e.target === policyModal) policyModal.classList.remove('active');
         });
       }
+      const backToTopBtn = document.getElementById('backToTopBtn');
+      if (backToTopBtn) {
+        function updateBackToTop() {
+          backToTopBtn.classList.toggle('visible', window.scrollY > 550);
+        }
+        window.addEventListener('scroll', updateBackToTop, { passive: true });
+        updateBackToTop();
+        backToTopBtn.addEventListener('click', function () {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
+
     })();
