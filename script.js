@@ -391,7 +391,7 @@
           highlights: [
             'Hands-on industry experience & exposure to live projects',
             'Professional mentorship & enhanced technical/soft skills',
-            'Official Experience Certificate upon completion',
+            'Official Internship Completion Certificate upon completion',
             'Letter of Recommendation & future paid role consideration'
           ]
         },
@@ -534,7 +534,9 @@
 
       function filterTracks(category) {
         filterPills.forEach(function (pill) {
-          pill.classList.toggle('active', pill.getAttribute('data-filter') === category);
+          const isActive = pill.getAttribute('data-filter') === category;
+          pill.classList.toggle('active', isActive);
+          pill.setAttribute('aria-pressed', isActive ? 'true' : 'false');
         });
 
         trackCards.forEach(function (card) {
@@ -702,7 +704,7 @@
         openPrivacyBtn.addEventListener('click', function () {
           policyModalTitle.textContent = 'IntelliCore Candidate Privacy Policy';
           policyModalBody.innerHTML =
-            '<p style="margin-bottom:0.75rem;">IntelliCore collects candidate information through our official application portal strictly for evaluating internship applications, issuing verified Experience Certificates, and facilitating mentor onboarding.</p>' +
+            '<p style="margin-bottom:0.75rem;">IntelliCore collects candidate information through our official application portal strictly for evaluating internship applications, issuing verified Internship Completion Certificates, and facilitating mentor onboarding.</p>' +
             '<p>We never sell or share candidate data with third parties. All internal project repositories and applicant records are safeguarded under strict access controls.</p>';
           policyModal.classList.add('active');
         });
@@ -713,7 +715,7 @@
           policyModalTitle.textContent = 'Internship Terms & Code of Conduct';
           policyModalBody.innerHTML =
             '<p style="margin-bottom:0.75rem;">By participating in the IntelliCore Internship Program, interns agree to uphold our 6 Core Values: Integrity & Professionalism, Continuous Learning, Teamwork & Collaboration, Responsibility & Accountability, Innovation & Creativity, and Respect for Everyone.</p>' +
-            '<p>Interns must maintain confidentiality regarding company projects and information, attend scheduled meetings, and complete assigned tasks on time to qualify for the Experience Certificate and Letter of Recommendation.</p>';
+            '<p>Interns must maintain confidentiality regarding company projects and information, attend scheduled meetings, and complete assigned tasks on time to qualify for the Internship Completion Certificate and Letter of Recommendation.</p>';
           policyModal.classList.add('active');
         });
       }
