@@ -4214,6 +4214,20 @@ body.ic-modal-open{overflow:hidden}
 @media(min-width:701px) and (max-width:900px) {
  .brand-sublabel { font-size:.52rem; }
 }
+@media (min-width:1151px) and (max-width:1360px) {
+  .header-inner { gap:.5rem; }
+  .brand-logo { gap:8px; }
+  .brand-emblem { width:48px !important; height:48px !important; }
+  .brand-name { font-size:1.15rem; }
+  .brand-sublabel { font-size:.58rem; }
+  .desktop-nav { gap:0; }
+  .desktop-nav .nav-link {
+    padding:.38rem .34rem;
+    font-size:.68rem;
+  }
+  .header-actions { gap:.35rem; }
+  .contact-us-btn { padding-inline:.7rem; }
+}
 @media(max-width:390px) {
  .ic-footer-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.5rem 1rem; }
  .ic-footer-about,.ic-footer-connect { grid-column:1/-1; }
@@ -4413,7 +4427,7 @@ body.ic-modal-open{overflow:hidden}
 }
 
 .brand-logo .brand-text { gap: 3px; }
-.brand-sublabel { display: none !important; }
+.brand-sublabel { display: block !important; }
 
 /* Final header-to-hero spacing: keep one consistent gap at every screen size. */
 :root { --header-height: 64px; }
@@ -4470,6 +4484,50 @@ body.ic-modal-open{overflow:hidden}
   }
 }
 
+/* Welcome banner typography and copy-to-orbit spacing */
+.welcome-banner {
+  gap: clamp(8px, 1vw, 14px);
+}
+
+.welcome-copy h1 {
+  font-size: clamp(2.45rem, 3.45vw, 3.15rem);
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+  margin: 0 0 12px;
+}
+
+.welcome-copy p {
+  font-size: clamp(0.94rem, 0.72vw, 1.08rem);
+  line-height: 1.45;
+  letter-spacing: 0.012em;
+  margin-top: 0;
+}
+
+@media (max-width: 760px) {
+  .welcome-copy h1 {
+    font-size: clamp(1.55rem, 5vw, 2.15rem);
+    margin-bottom: 9px;
+  }
+
+  .welcome-copy p {
+    font-size: clamp(0.78rem, 2.5vw, 0.95rem);
+    line-height: 1.42;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-copy h1 {
+    font-size: clamp(1.1rem, 4.9vw, 1.38rem);
+    line-height: 1.1;
+    margin-bottom: 7px;
+  }
+
+  .welcome-copy p {
+    font-size: clamp(0.58rem, 2.15vw, 0.68rem);
+    line-height: 1.38;
+  }
+}
+
 /* Compact section rhythm: keep headings close to their content on desktop and mobile. */
 .section:not(.hero-section) {
   padding-top: clamp(0.75rem, 1.25vw, 1.1rem);
@@ -4509,5 +4567,490 @@ body.ic-modal-open{overflow:hidden}
   .section-header .eyebrow,
   .eyebrow {
     margin-bottom: 0.35rem;
+  }
+}
+
+/* Mobile containment and brand tagline consistency. */
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+.site-header,
+.header-inner,
+.brand-logo,
+main,
+.section,
+.container,
+.hero-content,
+.welcome-banner,
+.ic-final-footer,
+.ic-footer-grid,
+.mobile-drawer {
+  max-width: 100%;
+}
+
+.brand-logo {
+  min-width: 0;
+}
+
+.brand-sublabel {
+  display: block !important;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+.stepper-timeline-scroll,
+.stepper-wrapper {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.mobile-drawer {
+  width: min(310px, 88vw);
+}
+
+@media (max-width: 600px) {
+  .header-inner {
+    gap: 0.35rem;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .brand-logo {
+    gap: 6px;
+  }
+
+  .brand-emblem {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .brand-name {
+    font-size: 1rem;
+  }
+
+  .brand-sublabel {
+    font-size: 0.46rem;
+    line-height: 1.05;
+    white-space: nowrap;
+  }
+
+  .header-actions {
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .contact-us-btn {
+    min-width: 54px;
+    padding-inline: 8px;
+    white-space: nowrap;
+  }
+
+  .hamburger-btn {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+  }
+
+  .container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+/* Welcome logo and animated orbit artwork. */
+.welcome-art {
+  width: 180px;
+  height: 150px;
+  flex-basis: 180px;
+}
+
+.welcome-art .orbit-a,
+.welcome-art .orbit {
+  width: 178px;
+  height: 108px;
+}
+
+.welcome-art .orbit-b {
+  width: 108px;
+  height: 160px;
+}
+
+.welcome-art .welcome-logo {
+  width: 96px;
+  height: 96px;
+  z-index: 2;
+  animation: welcomeLogoFloat 4s ease-in-out infinite;
+}
+
+.welcome-art .welcome-chip-track {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+}
+
+.welcome-art .chip-grow {
+  right: 1px;
+  bottom: 20px;
+}
+
+@keyframes welcomeOrbitA {
+  from { transform: rotate(-25deg); }
+  to { transform: rotate(335deg); }
+}
+
+@keyframes welcomeOrbitB {
+  from { transform: rotate(38deg); }
+  to { transform: rotate(-322deg); }
+}
+
+@keyframes welcomeLogoFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.025); }
+}
+
+.welcome-art .orbit-a {
+  animation: welcomeOrbitA 16s linear infinite;
+}
+
+.welcome-art .orbit-b {
+  animation: welcomeOrbitB 12s linear infinite;
+}
+
+.welcome-art .orbit-a::after,
+.welcome-art .orbit-b::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #5edcff;
+  box-shadow: 0 0 12px rgba(94, 220, 255, 0.95);
+  left: 50%;
+  top: -4px;
+  transform: translateX(-50%);
+}
+
+.welcome-art .orbit-b::after {
+  background: #a77cff;
+  box-shadow: 0 0 12px rgba(167, 124, 255, 0.95);
+}
+
+@media (max-width: 760px) {
+  .welcome-art {
+    width: 128px;
+    height: 112px;
+    flex-basis: 128px;
+  }
+
+  .welcome-art .orbit-a,
+  .welcome-art .orbit {
+    width: 126px;
+    height: 78px;
+  }
+
+  .welcome-art .orbit-b {
+    width: 78px;
+    height: 118px;
+  }
+
+  .welcome-art .welcome-logo {
+    width: 72px;
+    height: 72px;
+  }
+
+  .welcome-art .chip-grow {
+    right: 0;
+    bottom: 14px;
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-art {
+    width: 72px;
+    height: 72px;
+    flex: 0 0 72px;
+    display: grid;
+  }
+
+  .welcome-art .orbit-a,
+  .welcome-art .orbit {
+    width: 68px;
+    height: 44px;
+  }
+
+  .welcome-art .orbit-b {
+    width: 44px;
+    height: 68px;
+  }
+
+  .welcome-art .welcome-logo {
+    width: 46px;
+    height: 46px;
+  }
+
+  .welcome-art .welcome-chip:not(.chip-grow),
+  .welcome-art .orbit-a::after,
+  .welcome-art .orbit-b::after {
+    display: none;
+  }
+
+  .welcome-art .chip-grow {
+    right: -3px;
+    bottom: 6px;
+    padding: 3px 5px;
+    font-size: 7px;
+  }
+}
+
+@media (max-width: 360px) {
+  .welcome-art {
+    width: 58px;
+    height: 62px;
+    flex-basis: 58px;
+  }
+
+  .welcome-art .orbit-a,
+  .welcome-art .orbit {
+    width: 56px;
+    height: 36px;
+  }
+
+  .welcome-art .orbit-b {
+    width: 36px;
+    height: 56px;
+  }
+
+  .welcome-art .welcome-logo {
+    width: 38px;
+    height: 38px;
+  }
+}
+
+/* Mobile welcome banner: keep the complete desktop-style content visible. */
+@media (max-width: 760px) {
+  .welcome-banner {
+    min-height: 112px;
+    gap: 7px;
+    padding: 10px 8px;
+  }
+
+  .welcome-copy h1 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 5px;
+    font-size: clamp(20px, 5.6vw, 25px);
+    line-height: 1.08;
+    margin-bottom: 8px;
+    white-space: normal;
+  }
+
+  .welcome-copy h1 .mobile-welcome-greeting,
+  .welcome-copy h1 .mobile-welcome-name,
+  .welcome-copy h1 .mobile-welcome-name span {
+    white-space: nowrap;
+  }
+
+  .welcome-copy p {
+    max-width: 230px;
+    font-size: clamp(9px, 2.35vw, 11px);
+    line-height: 1.42;
+    white-space: normal;
+  }
+
+  .welcome-art {
+    display: grid;
+    width: 82px;
+    height: 92px;
+    flex: 0 0 82px;
+  }
+
+  .welcome-art .orbit-a,
+  .welcome-art .orbit {
+    width: 80px;
+    height: 50px;
+  }
+
+  .welcome-art .orbit-b {
+    width: 50px;
+    height: 82px;
+  }
+
+  .welcome-art .welcome-logo {
+    width: 54px;
+    height: 54px;
+  }
+
+  .welcome-art .welcome-chip:not(.chip-grow) {
+    display: none;
+  }
+
+  .welcome-art .chip-grow {
+    right: -1px;
+    bottom: 10px;
+    padding: 3px 5px;
+    font-size: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-banner {
+    min-height: 104px;
+    align-items: center;
+  }
+
+  .welcome-copy {
+    flex: 1 1 145px;
+    min-width: 0;
+  }
+
+  .welcome-copy h1 {
+    font-size: clamp(21px, 5.9vw, 24px);
+    margin-bottom: 7px;
+  }
+
+  .welcome-copy p {
+    max-width: 180px;
+    font-size: clamp(9px, 2.6vw, 11px);
+  }
+
+  .welcome-date {
+    flex: 0 0 86px;
+    min-width: 86px;
+  }
+
+  .welcome-date > span {
+    font-size: 8px;
+  }
+
+  .welcome-date strong {
+    font-size: 12px;
+  }
+
+  .welcome-date small {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 360px) {
+  .welcome-banner {
+    min-height: 96px;
+    padding-inline: 5px;
+  }
+
+  .welcome-copy h1 {
+    font-size: clamp(18px, 5.8vw, 21px);
+  }
+
+  .welcome-copy p {
+    max-width: 150px;
+  }
+
+  .welcome-art {
+    width: 64px;
+    height: 78px;
+    flex-basis: 64px;
+  }
+
+  .welcome-art .orbit-a,
+  .welcome-art .orbit {
+    width: 62px;
+    height: 40px;
+  }
+
+  .welcome-art .orbit-b {
+    width: 40px;
+    height: 64px;
+  }
+
+  .welcome-art .welcome-logo {
+    width: 44px;
+    height: 44px;
+  }
+
+  .welcome-date {
+    flex-basis: 78px;
+    min-width: 78px;
+  }
+}
+
+/* Slow rope-like motion for the decorative upper banner rings. */
+.welcome-banner::before,
+.welcome-banner::after {
+  display: none;
+  animation: none;
+}
+
+@keyframes welcomeBannerRingSwing {
+  0%, 100% {
+    transform: translate3d(0, -12px, 0) rotate(-25deg) scaleX(0.985);
+  }
+  25% {
+    transform: translate3d(3px, 5px, 0) rotate(-20deg) scaleX(1);
+  }
+  50% {
+    transform: translate3d(0, 22px, 0) rotate(-25deg) scaleX(1.015);
+  }
+  75% {
+    transform: translate3d(-3px, 5px, 0) rotate(-30deg) scaleX(1);
+  }
+}
+
+@keyframes welcomeBannerRingSwingSoft {
+  0%, 100% {
+    transform: translate3d(0, 8px, 0) rotate(25deg);
+  }
+  50% {
+    transform: translate3d(-5px, 20px, 0) rotate(31deg);
+  }
+}
+
+.welcome-banner::before {
+  z-index: 0;
+  transform-origin: 50% 100%;
+  animation: welcomeBannerRingSwing 7.5s ease-in-out infinite;
+}
+
+.welcome-banner::after {
+  z-index: 0;
+  transform-origin: 50% 100%;
+  animation: welcomeBannerRingSwingSoft 9.5s ease-in-out infinite;
+}
+
+.welcome-copy,
+.welcome-art,
+.welcome-date {
+  z-index: 2;
+}
+
+@media (max-width: 760px) {
+  .welcome-banner::before {
+    width: 210px;
+    height: 125px;
+    right: 28%;
+    top: -64px;
+  }
+
+  .welcome-banner::after {
+    width: 150px;
+    height: 92px;
+    right: 32%;
+    top: -42px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome-banner::before,
+  .welcome-banner::after {
+    animation-duration: 0.001ms;
+    animation-iteration-count: 1;
   }
 }

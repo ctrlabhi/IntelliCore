@@ -936,12 +936,17 @@
 
       trackApplyLinks.forEach(function (link) {
         link.addEventListener('click', function (event) {
-          event.preventDefault();
           const chosen = link.getAttribute('data-select-track');
           if (chosen && portalTrackSelect) {
             portalTrackSelect.value = chosen;
           }
-          scrollToApplication(chosen);
+          if (chosen) {
+            try {
+              sessionStorage.setItem('intellicoreSelectedTrack', chosen);
+            } catch (storageError) {
+              // Continue to the Google Form even if storage is unavailable.
+            }
+          }
         });
       });
 
@@ -1073,7 +1078,14 @@
       if (jdModalApply) jdModalApply.addEventListener('click', function () {
         if (currentJdTrack && portalTrackSelect) portalTrackSelect.value = currentJdTrack;
         setJdModalOpen(false, jdCardTrigger);
-        scrollToApplication(currentJdTrack, true);
+        if (currentJdTrack) {
+          try {
+            sessionStorage.setItem('intellicoreSelectedTrack', currentJdTrack);
+          } catch (storageError) {
+            // Continue to the Google Form even if storage is unavailable.
+          }
+        }
+        window.location.href = 'https://forms.gle/a1Ww2m1i32pUN2e1A';
       });
       document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape' && jdModal && jdModal.classList.contains('active')) {
