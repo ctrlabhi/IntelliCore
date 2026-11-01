@@ -5094,19 +5094,19 @@ main,
   }
 
   .welcome-date > span {
-    font-size: 8px;
+    font-size: 7px;
     line-height: 1.2;
-    text-align: left;
-    white-space: normal;
+    text-align: center;
+    white-space: nowrap;
   }
 
   .welcome-date strong {
-    font-size: 14px;
+    font-size: 13px;
     line-height: 1.25;
   }
 
   .welcome-date small {
-    font-size: 10px;
+    font-size: 9px;
   }
 }
 
