@@ -206,6 +206,16 @@
           });
         }
 
+        let isStarfieldScrolling = false;
+        let starfieldScrollTimer = null;
+        window.addEventListener('scroll', function () {
+          isStarfieldScrolling = true;
+          if (starfieldScrollTimer) clearTimeout(starfieldScrollTimer);
+          starfieldScrollTimer = setTimeout(function () {
+            isStarfieldScrolling = false;
+          }, 110);
+        }, { passive: true });
+
         function drawStarfield(timestamp) {
           starFrame = null;
           if (timestamp - lastStarFrame < 40) {
@@ -233,26 +243,31 @@
             starCtx.fill();
           });
 
-          const networkLimit = Math.min(72, stars.length);
-          for (let i = 0; i < networkLimit; i++) {
-            for (let j = i + 1; j < networkLimit; j++) {
-              const a = stars[i];
-              const b = stars[j];
-              const dx = a.x - b.x;
-              const dy = a.y - b.y;
-              const distance = Math.sqrt(dx * dx + dy * dy);
-              if (distance < 138) {
-                starCtx.globalAlpha = (1 - distance / 138) * 0.1;
-                starCtx.beginPath();
-                starCtx.strokeStyle = '#4ccfff';
-                starCtx.lineWidth = 0.5;
-                starCtx.moveTo(a.x, a.y);
-                starCtx.lineTo(b.x, b.y);
-                starCtx.stroke();
+          // Optimize constellation connections: pause during active scroll gestures to keep 60/120fps fluid,
+          // and keep network limit compact on mobile devices.
+          const isMobileViewport = window.innerWidth <= 768;
+          const networkLimit = isMobileViewport ? Math.min(20, stars.length) : Math.min(60, stars.length);
+          if (!isStarfieldScrolling) {
+            for (let i = 0; i < networkLimit; i++) {
+              for (let j = i + 1; j < networkLimit; j++) {
+                const a = stars[i];
+                const b = stars[j];
+                const dx = a.x - b.x;
+                const dy = a.y - b.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < 138) {
+                  starCtx.globalAlpha = (1 - distance / 138) * 0.1;
+                  starCtx.beginPath();
+                  starCtx.strokeStyle = '#4ccfff';
+                  starCtx.lineWidth = 0.5;
+                  starCtx.moveTo(a.x, a.y);
+                  starCtx.lineTo(b.x, b.y);
+                  starCtx.stroke();
+                }
               }
             }
+            starCtx.globalAlpha = 1;
           }
-          starCtx.globalAlpha = 1;
 
           if (!reduceMotion) starFrame = requestAnimationFrame(drawStarfield);
         }
@@ -1363,6 +1378,41 @@
           if (e.target === policyModal) policyModal.classList.remove('active');
         });
       }
+      /* ----------------------------------------------------------------------
+         PERFORMANCE-OPTIMIZED SMOOTH NAVIGATION & SCROLL SYSTEM
+         Enables pure 120Hz/60Hz hardware compositor scrolling without any wheel-blocking,
+         plus silky-smooth anchor navigation with dynamic header offset compensation.
+         ---------------------------------------------------------------------- */
+      function smoothScrollTo(destTop) {
+        const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+        const clamped = Math.max(0, Math.min(destTop, maxScroll));
+        window.scrollTo({
+          top: clamped,
+          behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+        });
+      }
+      window.smoothScrollTo = smoothScrollTo;
+
+      // Fluid smooth scrolling for all internal anchor links
+      document.addEventListener('click', function (e) {
+        const anchor = e.target.closest('a[href^="#"]');
+        if (!anchor) return;
+        const targetHash = anchor.getAttribute('href');
+        if (!targetHash || targetHash === '#' || targetHash === '#!') return;
+        const destEl = document.querySelector(targetHash);
+        if (!destEl) return;
+
+        e.preventDefault();
+        const headerEl = document.getElementById('siteHeader');
+        const hOffset = headerEl ? headerEl.offsetHeight : 68;
+        const destPos = destEl.getBoundingClientRect().top + (window.scrollY || 0) - hOffset - 12;
+        smoothScrollTo(destPos);
+
+        if (history.pushState) {
+          history.pushState(null, '', targetHash);
+        }
+      });
+
       const backToTopBtn = document.getElementById('backToTopBtn');
       if (backToTopBtn) {
         function updateBackToTop() {
@@ -1371,8 +1421,7 @@
         window.addEventListener('scroll', updateBackToTop, { passive: true });
         updateBackToTop();
         backToTopBtn.addEventListener('click', function () {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          smoothScrollTo(0);
         });
       }
-
     })();

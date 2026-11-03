@@ -574,9 +574,22 @@
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      -webkit-overflow-scrolling: touch;
     }
 
     body {
+      background-color: transparent;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: clip;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
       background-color: var(--bg-primary);
       background-image:
         radial-gradient(circle at 10% 12%, rgba(0, 210, 255, 0.14) 0%, transparent 34%),
@@ -584,10 +597,9 @@
         radial-gradient(circle at 48% 58%, rgba(0, 210, 255, 0.07) 0%, transparent 42%),
         radial-gradient(circle at 82% 82%, rgba(131, 56, 236, 0.06) 0%, transparent 38%),
         linear-gradient(180deg, #050a18 0%, #07101f 48%, #050813 100%);
-      overflow-x: hidden;
-      min-height: 100vh;
-      position: relative;
-      background-attachment: fixed;
+      pointer-events: none;
+      transform: translate3d(0, 0, 0);
+      will-change: transform;
     }
 
     .global-starfield {
@@ -1449,8 +1461,8 @@
     .welcome-banner{position:relative;width:100%;min-height:0;margin:0 0 1rem;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px 22px;text-align:left;border:1px solid rgba(19,123,195,.35);border-radius:13px;overflow:hidden;background:radial-gradient(ellipse at 58% 50%,rgba(0,116,195,.15),transparent 42%),linear-gradient(110deg,#061328,#07152a 54%,#06182c);scroll-margin-top:65px}
     .welcome-banner:before,.welcome-banner:after{content:"";position:absolute;border:1px solid rgba(0,157,255,.13);width:270px;height:160px;border-radius:50%;right:29%;top:-90px;transform:rotate(-25deg);pointer-events:none}.welcome-banner:after{width:190px;height:115px;right:33%;top:-60px;transform:rotate(25deg)}
     .welcome-copy{position:relative;z-index:1;flex:1;min-width:0}.welcome-copy h1{font-size:clamp(23px,3vw,32px);letter-spacing:-1.1px;line-height:1.12;margin:7px 0 4px}.welcome-copy h1 span{color:#1ccfff}    .welcome-copy p{margin:0;color:#a8bdd5;font-size:11px;white-space:nowrap}.welcome-meta{margin-top:10px;display:flex;align-items:center;gap:9px;color:#78a4c7;font-size:9px}.access-pill{border:1px solid rgba(0,211,160,.3);border-radius:9px;background:rgba(0,211,160,.1);color:#14d7ad;padding:2px 8px}
-    .welcome-art{--chip-orbit-r:74px;width:210px;height:160px;position:relative;display:grid;place-items:center;align-self:center;flex:0 0 210px;margin:auto 0}.welcome-art .orbit{position:absolute;border:1px solid rgba(0,210,255,.65);box-shadow:0 0 16px rgba(0,205,255,.4), inset 0 0 10px rgba(0,205,255,.15);width:184px;height:118px;border-radius:50%;transform:rotate(-25deg)}.welcome-art .orbit-b{width:118px;height:184px;transform:rotate(38deg);border:1px solid rgba(167,124,255,.7);box-shadow:0 0 16px rgba(167,124,255,.45), inset 0 0 10px rgba(167,124,255,.15)}.welcome-logo{position:relative;z-index:2;width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 0 16px rgba(0,194,255,.8))}.welcome-chip{position:absolute;left:50%;top:50%;transform-origin:0 0;z-index:3;padding:4px 11px;border-radius:999px;font-size:10px;font-weight:750;letter-spacing:.02em;white-space:nowrap;background:rgba(6,22,46,.94);box-shadow:0 6px 18px rgba(0,0,0,.35);pointer-events:none;animation:chipCircularOrbit 15s linear infinite}.chip-learn{color:#6fe4ff;border:1px solid rgba(0,210,255,.5);box-shadow:0 4px 14px rgba(0,210,255,.22);animation-delay:0s}.chip-grow{color:#6effcd;border:1px solid rgba(0,225,165,.5);box-shadow:0 4px 14px rgba(0,225,165,.22);animation-delay:-10s}.chip-build{color:#a5cfff;border:1px solid rgba(90,160,255,.5);box-shadow:0 4px 14px rgba(90,160,255,.22);animation-delay:-5s}
-    .welcome-date{position:relative;z-index:1;min-width:137px;padding:12px 14px;border:1px solid rgba(41,127,178,.3);border-radius:10px;background:rgba(3,17,33,.52);display:flex;flex-direction:column;gap:4px;align-items:center;text-align:center}.welcome-date>span{font-size:14px;color:#9eb8d2}.welcome-date strong{align-self:center;font-size:22px;letter-spacing:.6px;color:#f4fbff}.welcome-date small{font-size:16px;font-weight:400;color:#b0c5d9}.welcome-date .live-date-label{display:flex;align-items:center;justify-content:center;gap:6px}.welcome-date .live-date-label svg{width:16px;height:16px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    .welcome-art{--chip-orbit-r:74px;width:210px;height:160px;position:relative;display:grid;place-items:center;align-self:center;flex:0 0 210px;margin:auto 0}.welcome-art .orbit{position:absolute;border:1px solid rgba(0,210,255,.65);box-shadow:0 0 16px rgba(0,205,255,.4), inset 0 0 10px rgba(0,205,255,.15);width:184px;height:118px;border-radius:50%;transform:rotate(-25deg)}.welcome-art .orbit-b{width:118px;height:184px;transform:rotate(38deg);border:1px solid rgba(167,124,255,.7);box-shadow:0 0 16px rgba(167,124,255,.45), inset 0 0 10px rgba(167,124,255,.15)}.welcome-logo{position:relative;z-index:2;width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 0 16px rgba(0,194,255,.8))}.welcome-chip{position:absolute;left:50%;top:50%;transform-origin:0 0;z-index:3;padding:4px 11px;border-radius:999px;font-size:10px;font-weight:750;letter-spacing:.02em;white-space:nowrap;background:rgba(6,22,46,.94);box-shadow:0 6px 18px rgba(0,0,0,.35);pointer-events:none;animation:chipCircularOrbit 15s linear infinite}.chip-learn{color:#6effcd;border:1px solid rgba(0,210,255,.5);box-shadow:0 4px 14px rgba(0,210,255,.22);animation-delay:0s}.chip-grow{color:#6effcd;border:1px solid rgba(0,225,165,.5);box-shadow:0 4px 14px rgba(0,225,165,.22);animation-delay:-10s}.chip-build{color:#6effcd;border:1px solid rgba(90,160,255,.5);box-shadow:0 4px 14px rgba(90,160,255,.22);animation-delay:-5s}
+    .welcome-date{position:relative;z-index:1;min-width:137px;padding:12px 14px;border:1px solid rgba(41,127,178,.3);border-radius:10px;background:rgba(3,17,33,.52);display:flex;flex-direction:column;gap:4px;align-items:center;text-align:center}.welcome-date>span{font-size:14px;color:#9eb8d2}.welcome-date strong{align-self:center;font-size:22px;letter-spacing:.6px;color:#1ccfff;text-shadow:0 0 10px rgba(28,207,255,0.35)}.welcome-date small{font-size:16px;font-weight:400;color:#b0c5d9}.welcome-date .live-date-label{display:flex;align-items:center;justify-content:center;gap:6px}.welcome-date .live-date-label svg{width:16px;height:16px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 
     .hero-description {
       max-width: 780px;
@@ -4495,8 +4507,8 @@ html,
 body {
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
   overflow-x: clip;
+  -webkit-overflow-scrolling: touch;
 }
 
 .site-header,
@@ -4600,13 +4612,13 @@ main,
 .welcome-art .orbit-a,
 .welcome-art .orbit {
   position: absolute;
-  border: 1px solid rgba(0, 210, 255, 0.65);
-  box-shadow: 0 0 16px rgba(0, 205, 255, 0.4), inset 0 0 10px rgba(0, 205, 255, 0.15);
+  border: 1px solid rgba(0, 210, 255, 0.45);
+  box-shadow: 0 0 6px rgba(0, 205, 255, 0.18), inset 0 0 4px rgba(0, 205, 255, 0.08);
   width: 196px;
   height: 126px;
   border-radius: 50%;
   transform: rotate(-25deg);
-  animation: welcomeOrbitA 16s linear infinite;
+  animation: welcomeOrbitA 16s linear infinite !important;
 }
 
 .welcome-art .orbit-b {
@@ -4615,28 +4627,35 @@ main,
   height: 196px;
   border-radius: 50%;
   transform: rotate(38deg);
-  border: 1px solid rgba(167, 124, 255, 0.7);
-  box-shadow: 0 0 16px rgba(167, 124, 255, 0.45), inset 0 0 10px rgba(167, 124, 255, 0.15);
-  animation: welcomeOrbitB 12s linear infinite;
+  border: 1px solid rgba(167, 124, 255, 0.45);
+  box-shadow: 0 0 6px rgba(167, 124, 255, 0.18), inset 0 0 4px rgba(167, 124, 255, 0.08);
+  animation: welcomeOrbitB 12s linear infinite !important;
 }
 
-.welcome-art .orbit-a::after,
+.welcome-art .orbit-a::after {
+  content: "";
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #5edcff;
+  box-shadow: 0 0 5px rgba(94, 220, 255, 0.7);
+  transform: translate(-50%, -50%) !important;
+  animation: orbitDotRevolveA 10s linear infinite !important;
+  will-change: left, top;
+}
+
 .welcome-art .orbit-b::after {
   content: "";
   position: absolute;
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: #5edcff;
-  box-shadow: 0 0 12px rgba(94, 220, 255, 0.95);
-  left: 50%;
-  top: -4px;
-  transform: translateX(-50%);
-}
-
-.welcome-art .orbit-b::after {
-  background: #a77cff;
-  box-shadow: 0 0 12px rgba(167, 124, 255, 0.95);
+  background: #c084fc;
+  box-shadow: 0 0 5px rgba(192, 132, 252, 0.7);
+  transform: translate(-50%, -50%) !important;
+  animation: orbitDotRevolveB 8s linear infinite !important;
+  will-change: left, top;
 }
 
 .welcome-art .welcome-logo {
@@ -4695,26 +4714,36 @@ main,
   will-change: transform;
 }
 
-/* Learn leads, Grow chases Learn (-10s / 240deg), Build chases Grow (-5s / 120deg) */
+/* Learn, Grow, and Build all share the vibrant Grow accent color (#6effcd) */
 .welcome-chip.chip-learn {
-  color: #6fe4ff;
-  border: 1px solid rgba(0, 210, 255, 0.5);
-  box-shadow: 0 4px 14px rgba(0, 210, 255, 0.22);
-  animation-delay: 0s;
+  color: #6effcd !important;
+  border: 1px solid rgba(0, 225, 165, 0.5) !important;
+  box-shadow: 0 4px 14px rgba(0, 225, 165, 0.22) !important;
+  animation-delay: 0s !important;
 }
 
 .welcome-chip.chip-grow {
-  color: #6effcd;
-  border: 1px solid rgba(0, 225, 165, 0.5);
-  box-shadow: 0 4px 14px rgba(0, 225, 165, 0.22);
-  animation-delay: -10s;
+  color: #6effcd !important;
+  border: 1px solid rgba(0, 225, 165, 0.5) !important;
+  box-shadow: 0 4px 14px rgba(0, 225, 165, 0.22) !important;
+  animation-delay: -5s !important;
 }
 
 .welcome-chip.chip-build {
-  color: #a5cfff;
-  border: 1px solid rgba(90, 160, 255, 0.5);
-  box-shadow: 0 4px 14px rgba(90, 160, 255, 0.22);
-  animation-delay: -5s;
+  color: #6effcd !important;
+  border: 1px solid rgba(0, 225, 165, 0.5) !important;
+  box-shadow: 0 4px 14px rgba(0, 225, 165, 0.22) !important;
+  animation-delay: -10s !important;
+}
+
+@keyframes orbitGlowA {
+  0%, 100% { box-shadow: 0 0 16px rgba(0, 205, 255, 0.4), inset 0 0 10px rgba(0, 205, 255, 0.15); }
+  50% { box-shadow: 0 0 24px rgba(0, 205, 255, 0.65), inset 0 0 14px rgba(0, 205, 255, 0.25); }
+}
+
+@keyframes orbitGlowB {
+  0%, 100% { box-shadow: 0 0 16px rgba(167, 124, 255, 0.45), inset 0 0 10px rgba(167, 124, 255, 0.15); }
+  50% { box-shadow: 0 0 24px rgba(167, 124, 255, 0.7), inset 0 0 14px rgba(167, 124, 255, 0.25); }
 }
 
 @keyframes welcomeOrbitA {
@@ -4726,6 +4755,85 @@ main,
   from { transform: rotate(38deg); }
   to { transform: rotate(-322deg); }
 }
+@keyframes orbitDotRevolveA {
+  0.00% { left: 50.00%; top: 0.00%; }
+  2.78% { left: 58.68%; top: 0.76%; }
+  5.56% { left: 67.10%; top: 3.02%; }
+  8.33% { left: 75.00%; top: 6.70%; }
+  11.11% { left: 82.14%; top: 11.70%; }
+  13.89% { left: 88.30%; top: 17.86%; }
+  16.67% { left: 93.30%; top: 25.00%; }
+  19.44% { left: 96.98%; top: 32.90%; }
+  22.22% { left: 99.24%; top: 41.32%; }
+  25.00% { left: 100.00%; top: 50.00%; }
+  27.78% { left: 99.24%; top: 58.68%; }
+  30.56% { left: 96.98%; top: 67.10%; }
+  33.33% { left: 93.30%; top: 75.00%; }
+  36.11% { left: 88.30%; top: 82.14%; }
+  38.89% { left: 82.14%; top: 88.30%; }
+  41.67% { left: 75.00%; top: 93.30%; }
+  44.44% { left: 67.10%; top: 96.98%; }
+  47.22% { left: 58.68%; top: 99.24%; }
+  50.00% { left: 50.00%; top: 100.00%; }
+  52.78% { left: 41.32%; top: 99.24%; }
+  55.56% { left: 32.90%; top: 96.98%; }
+  58.33% { left: 25.00%; top: 93.30%; }
+  61.11% { left: 17.86%; top: 88.30%; }
+  63.89% { left: 11.70%; top: 82.14%; }
+  66.67% { left: 6.70%; top: 75.00%; }
+  69.44% { left: 3.02%; top: 67.10%; }
+  72.22% { left: 0.76%; top: 58.68%; }
+  75.00% { left: 0.00%; top: 50.00%; }
+  77.78% { left: 0.76%; top: 41.32%; }
+  80.56% { left: 3.02%; top: 32.90%; }
+  83.33% { left: 6.70%; top: 25.00%; }
+  86.11% { left: 11.70%; top: 17.86%; }
+  88.89% { left: 17.86%; top: 11.70%; }
+  91.67% { left: 25.00%; top: 6.70%; }
+  94.44% { left: 32.90%; top: 3.02%; }
+  97.22% { left: 41.32%; top: 0.76%; }
+  100.00% { left: 50.00%; top: 0.00%; }
+}
+
+@keyframes orbitDotRevolveB {
+  0.00% { left: 50.00%; top: 100.00%; }
+  2.78% { left: 58.68%; top: 99.24%; }
+  5.56% { left: 67.10%; top: 96.98%; }
+  8.33% { left: 75.00%; top: 93.30%; }
+  11.11% { left: 82.14%; top: 88.30%; }
+  13.89% { left: 88.30%; top: 82.14%; }
+  16.67% { left: 93.30%; top: 75.00%; }
+  19.44% { left: 96.98%; top: 67.10%; }
+  22.22% { left: 99.24%; top: 58.68%; }
+  25.00% { left: 100.00%; top: 50.00%; }
+  27.78% { left: 99.24%; top: 41.32%; }
+  30.56% { left: 96.98%; top: 32.90%; }
+  33.33% { left: 93.30%; top: 25.00%; }
+  36.11% { left: 88.30%; top: 17.86%; }
+  38.89% { left: 82.14%; top: 11.70%; }
+  41.67% { left: 75.00%; top: 6.70%; }
+  44.44% { left: 67.10%; top: 3.02%; }
+  47.22% { left: 58.68%; top: 0.76%; }
+  50.00% { left: 50.00%; top: 0.00%; }
+  52.78% { left: 41.32%; top: 0.76%; }
+  55.56% { left: 32.90%; top: 3.02%; }
+  58.33% { left: 25.00%; top: 6.70%; }
+  61.11% { left: 17.86%; top: 11.70%; }
+  63.89% { left: 11.70%; top: 17.86%; }
+  66.67% { left: 6.70%; top: 25.00%; }
+  69.44% { left: 3.02%; top: 32.90%; }
+  72.22% { left: 0.76%; top: 41.32%; }
+  75.00% { left: 0.00%; top: 50.00%; }
+  77.78% { left: 0.76%; top: 58.68%; }
+  80.56% { left: 3.02%; top: 67.10%; }
+  83.33% { left: 6.70%; top: 75.00%; }
+  86.11% { left: 11.70%; top: 82.14%; }
+  88.89% { left: 17.86%; top: 88.30%; }
+  91.67% { left: 25.00%; top: 93.30%; }
+  94.44% { left: 32.90%; top: 96.98%; }
+  97.22% { left: 41.32%; top: 99.24%; }
+  100.00% { left: 50.00%; top: 100.00%; }
+}
 
 @keyframes welcomeLogoFloat {
   0%, 100% { transform: translateY(0) scale(1); }
@@ -4735,6 +4843,11 @@ main,
 /* Decorative upper banner ring and clock live styling */
 .welcome-date strong {
   white-space: nowrap;
+  color: #1ccfff !important;
+  text-shadow: 0 0 10px rgba(28, 207, 255, 0.35);
+}
+.welcome-date .live-time-period {
+  color: #1ccfff !important;
 }
 
 .welcome-date .live-time-period {
@@ -4887,8 +5000,8 @@ main,
     height: 76px !important;
     border-radius: 50% !important;
     transform: rotate(-25deg);
-    border: 1px solid rgba(0, 210, 255, 0.65) !important;
-    box-shadow: 0 0 12px rgba(0, 205, 255, 0.4), inset 0 0 8px rgba(0, 205, 255, 0.15) !important;
+    border: 1px solid rgba(0, 210, 255, 0.45) !important;
+    box-shadow: 0 0 5px rgba(0, 205, 255, 0.18), inset 0 0 3px rgba(0, 205, 255, 0.08) !important;
     animation: welcomeOrbitA 16s linear infinite !important;
   }
 
@@ -4898,16 +5011,28 @@ main,
     height: 120px !important;
     border-radius: 50% !important;
     transform: rotate(38deg);
-    border: 1px solid rgba(167, 124, 255, 0.7) !important;
-    box-shadow: 0 0 12px rgba(167, 124, 255, 0.45), inset 0 0 8px rgba(167, 124, 255, 0.15) !important;
+    border: 1px solid rgba(167, 124, 255, 0.45) !important;
+    box-shadow: 0 0 5px rgba(167, 124, 255, 0.18), inset 0 0 3px rgba(167, 124, 255, 0.08) !important;
     animation: welcomeOrbitB 12s linear infinite !important;
   }
 
   .welcome-art .orbit-a::after,
   .welcome-art .orbit-b::after {
-    width: 6px !important;
-    height: 6px !important;
-    top: -3px !important;
+    width: 5px !important;
+    height: 5px !important;
+    transform: translate(-50%, -50%) !important;
+  }
+
+  .welcome-art .orbit-a::after {
+    background: #5edcff !important;
+    box-shadow: 0 0 4px rgba(94, 220, 255, 0.65) !important;
+    animation: orbitDotRevolveA 10s linear infinite !important;
+  }
+
+  .welcome-art .orbit-b::after {
+    background: #c084fc !important;
+    box-shadow: 0 0 4px rgba(192, 132, 252, 0.65) !important;
+    animation: orbitDotRevolveB 8s linear infinite !important;
   }
 
   .welcome-art .welcome-logo {
@@ -4925,13 +5050,30 @@ main,
     position: absolute !important;
     left: 50% !important;
     top: 50% !important;
+    transform-origin: 0 0 !important;
+    z-index: 3 !important;
     font-size: 7.5px !important;
     padding: 2px 6px !important;
     border-radius: 999px !important;
     font-weight: 750 !important;
     letter-spacing: 0.02em !important;
     white-space: nowrap !important;
-    animation: chipCircularOrbit 15s linear infinite !important;
+    animation-name: chipCircularOrbit !important;
+    animation-duration: 15s !important;
+    animation-timing-function: linear !important;
+    animation-iteration-count: infinite !important;
+  }
+
+  .welcome-chip.chip-learn {
+    animation-delay: 0s !important;
+  }
+
+  .welcome-chip.chip-grow {
+    animation-delay: -5s !important;
+  }
+
+  .welcome-chip.chip-build {
+    animation-delay: -10s !important;
   }
 
   .welcome-date {
@@ -4974,8 +5116,12 @@ main,
 
   .welcome-date strong {
     font-size: 15px !important;
-    color: #f4fbff !important;
+    color: #1ccfff !important;
+    text-shadow: 0 0 8px rgba(28, 207, 255, 0.35) !important;
     line-height: 1.15 !important;
+  }
+  .welcome-date .live-time-period {
+    color: #1ccfff !important;
   }
 
   .welcome-date small {
@@ -5061,8 +5207,8 @@ main,
     height: clamp(36px, 10vw, 46px) !important;
     border-radius: 50% !important;
     transform: rotate(-25deg);
-    border: 1px solid rgba(0, 210, 255, 0.65) !important;
-    box-shadow: 0 0 8px rgba(0, 205, 255, 0.4), inset 0 0 5px rgba(0, 205, 255, 0.15) !important;
+    border: 1px solid rgba(0, 210, 255, 0.45) !important;
+    box-shadow: 0 0 4px rgba(0, 205, 255, 0.18), inset 0 0 3px rgba(0, 205, 255, 0.08) !important;
     animation: welcomeOrbitA 16s linear infinite !important;
   }
 
@@ -5072,21 +5218,28 @@ main,
     height: clamp(58px, 15.5vw, 74px) !important;
     border-radius: 50% !important;
     transform: rotate(38deg);
-    border: 1px solid rgba(167, 124, 255, 0.7) !important;
-    box-shadow: 0 0 8px rgba(167, 124, 255, 0.45), inset 0 0 5px rgba(167, 124, 255, 0.15) !important;
+    border: 1px solid rgba(167, 124, 255, 0.45) !important;
+    box-shadow: 0 0 4px rgba(167, 124, 255, 0.18), inset 0 0 3px rgba(167, 124, 255, 0.08) !important;
     animation: welcomeOrbitB 12s linear infinite !important;
   }
 
   .welcome-art .orbit-a::after,
   .welcome-art .orbit-b::after {
-    width: 4px !important;
-    height: 4px !important;
-    top: -2px !important;
-    box-shadow: 0 0 6px rgba(94, 220, 255, 0.95) !important;
+    width: clamp(4px, 1.2vw, 5px) !important;
+    height: clamp(4px, 1.2vw, 5px) !important;
+    transform: translate(-50%, -50%) !important;
+  }
+
+  .welcome-art .orbit-a::after {
+    background: #5edcff !important;
+    box-shadow: 0 0 3.5px rgba(94, 220, 255, 0.6) !important;
+    animation: orbitDotRevolveA 10s linear infinite !important;
   }
 
   .welcome-art .orbit-b::after {
-    box-shadow: 0 0 6px rgba(167, 124, 255, 0.95) !important;
+    background: #c084fc !important;
+    box-shadow: 0 0 3.5px rgba(192, 132, 252, 0.6) !important;
+    animation: orbitDotRevolveB 8s linear infinite !important;
   }
 
   .welcome-art .welcome-logo {
@@ -5121,7 +5274,23 @@ main,
     white-space: nowrap !important;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) !important;
     pointer-events: none !important;
-    animation: chipCircularOrbit 15s linear infinite !important;
+    animation-name: chipCircularOrbit !important;
+    animation-duration: 15s !important;
+    animation-timing-function: linear !important;
+    animation-iteration-count: infinite !important;
+    will-change: transform;
+  }
+
+  .welcome-chip.chip-learn {
+    animation-delay: 0s !important;
+  }
+
+  .welcome-chip.chip-grow {
+    animation-delay: -5s !important;
+  }
+
+  .welcome-chip.chip-build {
+    animation-delay: -10s !important;
   }
 
   /* Column 3: Right Date, Live Clock & Greeting Card */
@@ -5171,7 +5340,8 @@ main,
 
   .welcome-date strong {
     font-size: clamp(11.5px, 3.2vw, 15px) !important;
-    color: #f4fbff !important;
+    color: #1ccfff !important;
+    text-shadow: 0 0 6px rgba(28, 207, 255, 0.35) !important;
     letter-spacing: 0.25px !important;
     line-height: 1.15 !important;
     white-space: nowrap !important;
@@ -5181,6 +5351,7 @@ main,
   .welcome-date .live-time-period {
     font-size: 0.48em !important;
     margin-left: 1.5px !important;
+    color: #1ccfff !important;
   }
 
   .welcome-date small {
