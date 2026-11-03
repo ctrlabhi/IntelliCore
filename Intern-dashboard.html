@@ -8,63 +8,13 @@
   <title>Intern Dashboard | IntelliCore</title>
   <meta name="description" content="Your IntelliCore intern dashboard for your internship profile, assigned work, attendance, and progress." />
   <link rel="icon" type="image/png" href="favicon.png?v=4" />
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="Intern-dashboard.css?v=20261027-reference-attendance-layout" />
+  <link rel="stylesheet" href="style.css?v=20261103-clean-sync-v9" />
+  <link rel="stylesheet" href="Intern-dashboard.css?v=20261103-clean-sync-v9" />
 <link rel="stylesheet" href="dashboard-background.css" />
 </head>
 <body class="ic-workspace-page">
-<div class="scroll-progress-wrap" aria-hidden="true">
+  <div class="scroll-progress-wrap" aria-hidden="true">
     <div class="scroll-progress-bar" id="scrollProgressBar"></div>
-    <div class="rocket-runner" id="rocketRunner">
-      <div class="rocket-smoke"><span></span><span></span><span></span><span></span><span></span><span></span></div>
-      <svg viewBox="0 0 72 36" role="presentation" focusable="false" aria-label="Blue rocket">
-        <defs>
-          <linearGradient id="rocketHull" x1="0" y1="0" x2="0.2" y2="1">
-            <stop offset="0" stop-color="#f7fdff"/>
-            <stop offset=".2" stop-color="#b8eaff"/>
-            <stop offset=".48" stop-color="#318de9"/>
-            <stop offset=".72" stop-color="#1160bd"/>
-            <stop offset="1" stop-color="#082c70"/>
-          </linearGradient>
-          <linearGradient id="rocketNose" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stop-color="#6ecfff"/>
-            <stop offset=".72" stop-color="#dffaff"/>
-            <stop offset="1" stop-color="#ffffff"/>
-          </linearGradient>
-          <linearGradient id="rocketFin" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#39e7ff"/>
-            <stop offset="1" stop-color="#1551db"/>
-          </linearGradient>
-          <linearGradient id="rocketFire" x1="1" y1="0" x2="0" y2="0">
-            <stop offset="0" stop-color="#f4ffff"/>
-            <stop offset=".28" stop-color="#50eaff"/>
-            <stop offset=".68" stop-color="#078cff" stop-opacity=".88"/>
-            <stop offset="1" stop-color="#246bff" stop-opacity="0"/>
-          </linearGradient>
-          <radialGradient id="rocketWindow" cx="32%" cy="25%" r="80%">
-            <stop offset="0" stop-color="#eaffff"/>
-            <stop offset=".25" stop-color="#46e5ff"/>
-            <stop offset="1" stop-color="#06427f"/>
-          </radialGradient>
-        </defs>
-        <path d="M15 14 L22 14 L22 22 L15 22 Z" fill="#0b3b79" stroke="#7beaff" stroke-width=".8"/>
-        <g class="rocket-flame">
-          <path d="M16 18 L1 12 Q6 18 1 24 L16 20 Z" fill="url(#rocketFire)"/>
-          <path d="M16 18 L3 16.4 L9 18 L3 20 Z" fill="#f1ffff" opacity=".96"/>
-        </g>
-        <path d="M22 20 L15 29 L29 24 L29 20 Z" fill="url(#rocketFin)" stroke="#75e8ff" stroke-width=".65"/>
-        <path d="M22 16 L15 7 L29 12 L29 16 Z" fill="url(#rocketFin)" stroke="#75e8ff" stroke-width=".65"/>
-        <path d="M25 20 L21 26 L28 22" fill="none" stroke="#c8faff" stroke-width=".55" opacity=".85"/>
-        <path d="M19 18 C24 12 35 11 48 12 L59 14 L69 18 L59 22 L48 24 C35 25 24 24 19 18 Z" fill="url(#rocketHull)" stroke="#b8f4ff" stroke-width=".7"/>
-        <path d="M48 12 L59 14 L69 18 L59 22 L48 24 Q54 18 48 12 Z" fill="url(#rocketNose)" stroke="#e6fbff" stroke-width=".45"/>
-        <path d="M25 14.7 C34 12.8 44 13.2 53 15" fill="none" stroke="#ffffff" stroke-width=".8" stroke-linecap="round" opacity=".88"/>
-        <path d="M25 21.4 C34 23 43 22.8 51 21" fill="none" stroke="#052e75" stroke-width="1" stroke-linecap="round" opacity=".9"/>
-        <ellipse cx="39" cy="17.7" rx="3.7" ry="3.2" fill="#06295d" stroke="#d8fbff" stroke-width=".8"/>
-        <ellipse cx="39" cy="17.4" rx="2.45" ry="2.1" fill="url(#rocketWindow)"/>
-        <ellipse cx="38.2" cy="16.7" rx=".8" ry=".55" fill="#ffffff" opacity=".9"/>
-        <path d="M30 14.2 L29 21.8 M47 13.5 L46 22.5" stroke="#a4eaff" stroke-width=".45" opacity=".65"/>
-      </svg>
-    </div>
   </div>
   <canvas class="ic-workspace-neural-canvas dashboard-background-canvas" id="icWorkspaceNeuralCanvas" aria-hidden="true"></canvas>
   <div class="ic-workspace-topline"><span></span></div>
@@ -84,7 +34,7 @@
         <a href="#workspaceHome" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Intern Dashboard</a>
         <a href="#icProfile" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
         <a href="#icTrainingSection" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="m3 6 1 1 2-2m-3 7 1 1 2-2m-3 7 1 1 2-2"/></svg>My Tasks</a>
-        <a href="#icApplications" class="nav-link">My Applications</a>
+        <a href="#icApplications" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>My Applications</a>
         <a href="#icAttendancePanel" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Attendance</a>
         <div class="ic-sidebar-group-label">LEARNING</div>
         <a href="#icProjects" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 7 9-4 9 4-9 4-9-4Z"/><path d="m5 11 7 3 7-3M5 15l7 3 7-3"/></svg>My Projects</a>
@@ -148,20 +98,20 @@
       <p class="contact-modal-kicker">Get in touch</p>
       <h2 class="contact-modal-title" id="contactModalTitle">Contact Us<span style="color:var(--accent-cyan)">.</span></h2>
       <p class="contact-modal-copy">We’re here to help. Choose your preferred way to connect with our team.</p>
-      <a class="contact-detail-link email-link" href="mailto:Info@IntelliCoreTechonologies.in" aria-label="Email IntelliCore Technologies">
+      <a class="contact-detail-link email-link" href="mailto:Info@IntelliCoreTechnologies.in" aria-label="Email IntelliCore Technologies">
         <span class="contact-detail-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/></svg></span>
-        <span class="contact-detail-text"><span class="contact-detail-label">Email</span><span class="contact-detail-value">Info@IntelliCoreTechonologies.in</span></span>
-        <span aria-hidden="true" style="color:var(--text-muted);font-size:1.1rem">↗</span>
+        <span class="contact-detail-text"><span class="contact-detail-label">Email</span><span class="contact-detail-value">Info@IntelliCoreTechnologies.in</span></span>
+        <span aria-hidden="true" style="color:var(--text-muted);font-size:1.1rem">&rarr;</span>
       </a>
       <a class="contact-detail-link whatsapp-link" href="https://wa.me/919135010134" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp at 9135010134">
         <span class="contact-detail-icon" aria-hidden="true"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M20.02 7.1c-7.08 0-12.84 5.72-12.84 12.75 0 2.25.6 4.46 1.75 6.4L7.1 33l6.95-1.81a12.9 12.9 0 0 0 5.97 1.46h.01c7.08 0 12.84-5.72 12.84-12.75 0-3.41-1.34-6.61-3.76-9.02A12.8 12.8 0 0 0 20.02 7.1Zm0 23.4h-.01a10.7 10.7 0 0 1-5.45-1.49l-.39-.23-4.08 1.07 1.09-3.96-.25-.41a10.55 10.55 0 0 1-1.63-5.63c0-5.86 4.82-10.63 10.73-10.63 2.86 0 5.55 1.1 7.57 3.12a10.5 10.5 0 0 1 3.15 7.51c0 5.86-4.82 10.65-10.73 10.65Zm5.89-7.96c-.32-.16-1.9-.93-2.2-1.04-.3-.11-.52-.16-.73.16-.22.32-.84 1.04-1.02 1.25-.19.21-.38.24-.7.08-.32-.16-1.36-.5-2.59-1.58-.96-.84-1.61-1.89-1.79-2.21-.19-.32-.02-.5.13-.65.14-.15.32-.38.48-.56.16-.19.21-.32.32-.53.11-.21.05-.4-.03-.56-.08-.16-.73-1.73-1-2.37-.26-.62-.53-.53-.73-.54h-.62c-.21 0-.56.08-.85.4-.29.32-1.12 1.09-1.12 2.66s1.15 3.09 1.31 3.3c.16.21 2.27 3.45 5.49 4.84.77.33 1.36.53 1.82.68.77.24 1.46.2 2.01.12.61-.09 1.9-.77 2.17-1.52.27-.74.27-1.38.19-1.52-.08-.13-.29-.21-.61-.37Z"/></svg></span>
         <span class="contact-detail-text"><span class="contact-detail-label">WhatsApp</span><span class="contact-detail-value">+91 91350 10134</span></span>
-        <span aria-hidden="true" style="color:#25D366;font-size:1.1rem">↗</span>
+        <span aria-hidden="true" style="color:#25D366;font-size:1.1rem">&rarr;</span>
       </a>
     </div>
   </div>
 
-  <!-- 3. HERO SECTION (PDF SLIDE 1 + CORPORATE IT STARTUP POSITIONING) -->
+  <!-- HERO WELCOME BANNER -->
   
   <main class="ic-workspace-main" id="workspaceTop" aria-busy="true">
     <div class="ic-dashboard-topbar">
@@ -176,24 +126,38 @@
         <span class="ic-dashboard-user-divider" aria-hidden="true"></span>
         <span class="ic-dashboard-avatar" id="icDashboardInitial" aria-hidden="true">I</span>
         <span class="ic-dashboard-user-copy"><strong id="icDashboardUserName">Intern</strong><small id="icDashboardUserRole">Intern</small></span>
-        <button class="ic-topbar-logout" id="icHeaderLogout" type="button">Log out <span aria-hidden="true">↗</span></button>
+        <button class="ic-topbar-logout" id="icHeaderLogout" type="button">Log out <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
       </div>
     </div>
-    <section class="ic-workspace-hero" id="workspaceHome">
-      <div class="ic-workspace-hero-copy">
-        <h1><span class="ic-mobile-welcome-greeting">Welcome back, </span><span class="ic-mobile-welcome-name"><span id="icInternWelcomeName">Intern</span>!</span></h1>
+    <section class="welcome-banner" id="workspaceHome" aria-label="Welcome and live date and time">
+      <div class="welcome-copy">
+        <h1><span class="mobile-welcome-greeting">Welcome back, </span><span class="mobile-welcome-name"><span id="icInternWelcomeName">Intern</span>!</span></h1>
         <p>Keep learning, complete your tasks and grow with IntelliCore.</p>
-        <div class="ic-workspace-hero-meta"><span>◈ Intern Workspace</span><span class="ic-workspace-access-pill">Assigned access</span></div>
+        <div class="welcome-meta">
+          <span class="welcome-meta-pill">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="vertical-align:middle;margin-right:4px;"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Intern Workspace
+          </span>
+          <span class="access-pill">Assigned access</span>
+        </div>
       </div>
-      <div class="ic-hero-orbit" aria-hidden="true">
-        <div class="ic-orbit-ring ring-one"></div>
-        <div class="ic-orbit-ring ring-two"></div>
-        <img class="ic-hero-logo" src="Photos/favicon.png" alt="">
-        <span class="ic-hero-chip chip-learn">Learn</span>
-        <span class="ic-hero-chip chip-grow">Grow</span>
-        <span class="ic-hero-chip chip-build">Build</span>
+      <div class="welcome-art" aria-hidden="true">
+        <div class="orbit orbit-a"></div>
+        <div class="orbit orbit-b"></div>
+        <img class="welcome-logo" src="Photos/favicon.png" alt="IntelliCore">
+        <div class="welcome-chip-track">
+          <span class="welcome-chip chip-learn"><span>Learn</span></span>
+          <span class="welcome-chip chip-grow"><span>Grow</span></span>
+          <span class="welcome-chip chip-build"><span>Build</span></span>
+        </div>
       </div>
-      <div class="ic-live-clock" aria-label="Current date and time"><span class="live-date-label"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 9h18M7 13h.01M12 13h.01M17 13h.01M7 17h.01M12 17h.01"/></svg><span data-live-date>Loading date…</span></span><strong data-live-time>--:--:--</strong><small data-live-greeting>Good Morning!</small></div>
+      <div class="welcome-date">
+        <span class="live-date-label">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 9h18M7 13h.01M12 13h.01M17 13h.01M7 17h.01M12 17h.01"/></svg>
+          <span data-live-date>Loading date…</span>
+        </span>
+        <strong data-live-time>--:--:--</strong>
+        <small data-live-greeting>Good Morning!</small>
+      </div>
     </section>
 
     <section class="ic-workspace-welcome" id="icProfile" aria-label="My current internship">
@@ -233,10 +197,10 @@
     </section>
 
     <section class="ic-meeting-panel" id="icMeetingPanel" aria-label="Team meeting">
-      <div><span class="ic-meeting-icon" aria-hidden="true">◉</span><div><strong id="icMeetingTitle">Team meeting</strong><p id="icMeetingDescription">There is no active organisation-wide meeting right now.</p></div></div>
+      <div><span class="ic-meeting-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></span><div><strong id="icMeetingTitle">Team meeting</strong><p id="icMeetingDescription">There is no active organisation-wide meeting right now.</p></div></div>
       <div class="ic-meeting-actions">
         <span class="ic-meeting-status" id="icMeetingStatus">No active meeting</span>
-        <a class="ic-meet-button" id="icJoinMeetButton" href="#" target="_blank" rel="noopener noreferrer" hidden>Join Google Meet ↗</a>
+        <a class="ic-meet-button" id="icJoinMeetButton" href="#" target="_blank" rel="noopener noreferrer" hidden>Join Google Meet &rarr;</a>
         <button type="button" class="ic-meet-button ic-meet-admin-button" id="icStartMeetButton" hidden>Start meeting</button>
         <button type="button" class="ic-outline-button" id="icEndMeetButton" hidden>End meeting</button>
       </div>
@@ -319,32 +283,32 @@
     </section>
 
     <section class="ic-workspace-stats" aria-label="Internship summary">
-      <button type="button" class="ic-stat-card" data-workspace-view="training" aria-label="Open assigned training tasks"><span class="ic-stat-icon icon-blue">▤</span><span><span>Assigned Tasks</span><strong class="ic-stat-word" id="icAssignedTrainingCount">—</strong><small id="icTrainingProgress">Loading assigned tasks</small></span></button>
-      <div class="ic-stat-card"><span class="ic-stat-icon icon-teal">✓</span><span><span>Completed Tasks</span><strong class="ic-stat-word" id="icApprovedTrainingCount">—</strong><small>Approved by your mentor</small></span></div>
+      <button type="button" class="ic-stat-card" data-workspace-view="training" aria-label="Open assigned training tasks"><span class="ic-stat-icon icon-blue"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></span><span><span>Assigned Tasks</span><strong class="ic-stat-word" id="icAssignedTrainingCount">—</strong><small id="icTrainingProgress">Loading assigned tasks</small></span></button>
+      <div class="ic-stat-card"><span class="ic-stat-icon icon-teal"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span><span><span>Completed Tasks</span><strong class="ic-stat-word" id="icApprovedTrainingCount">—</strong><small>Approved by your mentor</small></span></div>
       <button type="button" class="ic-stat-card" data-workspace-view="attendance" aria-label="Open attendance"><span class="ic-stat-icon icon-amber"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 9h18M8 14l2.5 2.5L16 11"/></svg></span><span><span>Attendance</span><strong class="ic-stat-word" id="icAttendanceStatStatus">—</strong><small id="icAttendanceStatDetail">Recorded check-ins</small></span></button>
-      <button type="button" class="ic-stat-card" data-workspace-view="training" aria-label="Open internship progress"><span class="ic-stat-icon icon-blue">↗</span><span><span>Internship Progress</span><strong class="ic-stat-word" id="icInternshipProgress">—</strong><small>Based on approved training tasks</small></span></button>
-      <button type="button" class="ic-stat-card" id="icCertificateEligibility" aria-label="Request certificate review"><span class="ic-stat-icon icon-violet">✧</span><span><span>Certificate Status</span><strong class="ic-stat-word" id="icCertificateStatus">Not requested</strong><small id="icCertificateDetail">Request HR review after your internship ends</small></span></button>
+      <button type="button" class="ic-stat-card" data-workspace-view="training" aria-label="Open internship progress"><span class="ic-stat-icon icon-blue"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span><span><span>Internship Progress</span><strong class="ic-stat-word" id="icInternshipProgress">—</strong><small>Based on approved training tasks</small></span></button>
+      <button type="button" class="ic-stat-card" id="icCertificateEligibility" aria-label="Request certificate review"><span class="ic-stat-icon icon-violet"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></span><span><span>Certificate Status</span><strong class="ic-stat-word" id="icCertificateStatus">Not requested</strong><small id="icCertificateDetail">Request HR review after your internship ends</small></span></button>
     </section>
 
     <section class="ic-workspace-lower-grid ic-insights-grid" aria-label="Workspace details">
       <article class="ic-workspace-panel">
-        <div class="ic-panel-heading"><div><h3>Upcoming task deadlines</h3><p>Due dates for mentor-assigned work.</p></div><span class="ic-panel-symbol" aria-hidden="true">◷</span></div>
+        <div class="ic-panel-heading"><div><h3>Upcoming task deadlines</h3><p>Due dates for mentor-assigned work.</p></div><span class="ic-panel-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span></div>
         <div id="icUpcomingDeadlines" class="ic-activity-empty"><strong>Loading assigned task dates…</strong></div>
       </article>
       <article class="ic-workspace-panel">
-        <div class="ic-panel-heading"><div><h3>Profile checklist</h3><p>Complete your internship onboarding.</p></div><span class="ic-panel-symbol" aria-hidden="true">✓</span></div>
+        <div class="ic-panel-heading"><div><h3>Profile checklist</h3><p>Complete your internship onboarding.</p></div><span class="ic-panel-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span></div>
         <div id="icOnboardingChecklist" class="ic-onboarding-list" aria-live="polite">Loading account checklist…</div>
       </article>
       <article class="ic-workspace-panel" id="icNotifications">
-        <div class="ic-panel-heading"><div><h3>Recent Announcements</h3><p>Company and track updates.</p></div><span class="ic-panel-symbol" aria-hidden="true">♧</span></div>
+        <div class="ic-panel-heading"><div><h3>Recent Announcements</h3><p>Company and track updates.</p></div><span class="ic-panel-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg></span></div>
         <div id="icAnnouncementsList" class="ic-unavailable-state"><strong>No announcements yet</strong><p>There are no announcements for your internship track.</p></div>
       </article>
       <article class="ic-workspace-panel" id="icLearningResources">
-        <div class="ic-panel-heading"><div><h3>Learning Resources</h3><p>Resources shared for your internship.</p></div><span class="ic-panel-symbol" aria-hidden="true">▣</span></div>
+        <div class="ic-panel-heading"><div><h3>Learning Resources</h3><p>Resources shared for your internship.</p></div><span class="ic-panel-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15z"/></svg></span></div>
         <div id="icLearningResourcesList" class="ic-unavailable-state"><strong>No learning resources yet</strong><p>When resources are assigned to your track, they will appear here.</p></div>
       </article>
       <article class="ic-workspace-panel" id="icProjects">
-        <div class="ic-panel-heading"><div><h3>My Projects</h3><p>Projects assigned to your internship.</p></div><span class="ic-panel-symbol" aria-hidden="true">▱</span></div>
+        <div class="ic-panel-heading"><div><h3>My Projects</h3><p>Projects assigned to your internship.</p></div><span class="ic-panel-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span></div>
         <div id="icProjectsList" class="ic-unavailable-state"><strong>No projects yet</strong><p>New mentor assignments will appear here.</p></div>
       </article>
     </section>
@@ -376,64 +340,17 @@
       <div class="ic-dialog-actions"><button type="button" class="ic-outline-button" id="icCancelInternshipEdit">Cancel</button><button type="submit" class="ic-primary-button">Save my profile</button></div>
     </form>
   </div>
-<footer class="site-footer ic-final-footer" hidden style="padding: 2.6rem 0 1.6rem;">
-  <div class="container">
-    <div class="ic-footer-grid">
-      <div class="ic-footer-about">
-        <a class="ic-footer-brand" href="index.html#top" aria-label="IntelliCore home">
-          <img src="Photos/favicon.png" alt="IntelliCore logo">
-          <span><strong>Intelli<span>Core</span></strong><small>Innovation at the Fore</small></span>
-        </a>
-        <p>We build useful digital products and thoughtful technology solutions for businesses and emerging IT talent.</p>
-</div>
-      <div class="ic-footer-column">
-        <h3>Explore</h3>
-        <a href="index.html#about">Who We Are</a>
-        <a href="index.html#services">IT Solutions</a>
-        <a href="index.html#vision">Our Values</a>
-        <a href="index.html#journey">Induction Journey</a>
-        <a href="index.html#tracks">Internships</a>
-        <a href="index.html#gains">What You Gain</a>
-        <a href="index.html#team">Our Team</a>
-        <a href="index.html#faq">FAQs</a>
-      </div>
-      <div class="ic-footer-column ic-footer-services">
-        <h3>Our Services</h3>
-        <div><i>✧</i> Custom Software Development</div>
-        <div><i>▣</i> Web &amp; Mobile Applications</div>
-        <div><i>⌘</i> AI &amp; Data Solutions</div>
-        <div><i>◇</i> UI/UX Design</div>
-        <div><i>☁</i> Cloud Solutions</div>
-        <div><i>◎</i> Consulting &amp; Support</div>
-      </div>
-      <div class="ic-footer-column ic-footer-connect">
-        <h3>Let’s Connect</h3>
-        <p>Have a project, a question, or an idea worth building? Our inbox is open.</p>
-        <a class="ic-contact-card" href="mailto:Info@IntelliCoreTechnologies.in">
-          <span class="ic-contact-icon ic-email-icon" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><rect x="4" y="7" width="24" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m5.5 9 10.5 8 10.5-8M5.5 23l7.7-7m13.3 7-7.7-7" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></svg></span>
-          <span><small>Email</small><strong>Info@IntelliCoreTechnologies.in</strong></span>
-          <b aria-hidden="true">↗</b>
-        </a>
-        <a class="ic-contact-card" href="https://wa.me/919135010134" target="_blank" rel="noopener noreferrer">
-          <span class="ic-contact-icon ic-whatsapp-icon" aria-hidden="true">
-            <svg viewBox="0 0 32 32" width="25" height="25" fill="currentColor" aria-hidden="true"><path d="M16 3.2A12.5 12.5 0 0 0 5.25 22.1L3.5 28.5l6.55-1.72A12.5 12.5 0 1 0 16 3.2Zm0 22.7a10.1 10.1 0 0 1-5.15-1.41l-.37-.22-3.89 1.02 1.04-3.79-.24-.39A10.15 10.15 0 1 1 16 25.9Zm5.57-7.6c-.3-.15-1.78-.88-2.06-.98-.28-.1-.48-.15-.68.15-.2.3-.78.98-.95 1.18-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.46-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.68-1.63-.93-2.23-.24-.58-.49-.5-.68-.51h-.58c-.2 0-.52.08-.8.38-.28.3-1.05 1.03-1.05 2.51s1.08 2.91 1.23 3.11c.15.2 2.12 3.23 5.13 4.53.72.31 1.28.5 1.72.64.72.23 1.38.2 1.9.12.58-.09 1.78-.73 2.03-1.43.25-.7.25-1.3.18-1.43-.08-.13-.28-.2-.58-.35Z"/></svg>
-          </span>
-          <span><small>WhatsApp</small><strong>+91 91350 10134</strong></span>
-          <b aria-hidden="true">↗</b>
-        </a>
-        <a class="ic-contact-card" href="https://www.linkedin.com/company/intellicoretechnologies" target="_blank" rel="noopener noreferrer">
-          <span class="ic-contact-icon ic-linkedin-square" aria-hidden="true"><svg viewBox="3 2 18 20" role="presentation"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.12 20.45H3.56V9h3.56v11.45Z"/></svg></span>
-          <span><small>LinkedIn</small><strong>Follow IntelliCore</strong></span>
-          <b aria-hidden="true">↗</b>
-        </a>
-      </div>
+<footer class="ic-dashboard-footer">
+  <div class="ic-dashboard-footer-inner">
+    <div class="ic-dashboard-footer-brand">
+      <img src="Photos/favicon.png" alt="IntelliCore logo" width="20" height="20">
+      <span><strong>IntelliCore</strong> &bull; Intern Workspace</span>
     </div>
-    <div class="footer-bottom ic-footer-bottom" style="padding-top:1.25rem;">
-      <div>&copy; 2026 IntelliCore. All rights reserved.</div>
-      <div class="footer-legal-links">
-        <button type="button" id="openPrivacyBtn">Privacy Policy</button>
-        <button type="button" id="openTermsBtn">Internship Terms &amp; Code of Conduct</button>
-      </div>
+    <div class="ic-dashboard-footer-copy">&copy; 2026 IntelliCore. All rights reserved.</div>
+    <div class="ic-dashboard-footer-links">
+      <button type="button" id="openPrivacyBtn">Privacy Policy</button>
+      <button type="button" id="openTermsBtn">Code of Conduct</button>
+      <a href="mailto:Info@IntelliCoreTechnologies.in">Need Help?</a>
     </div>
   </div>
 </footer>

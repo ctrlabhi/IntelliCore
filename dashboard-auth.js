@@ -568,9 +568,8 @@ async function loadStoredProfilePhoto(user, name) {
     $("icProfilePhoto").alt = `${name}'s profile photo`;
     $("icProfilePhoto").hidden = false;
   } catch (error) {
-    if (error.code !== "storage/object-not-found") {
-      console.error("The saved profile photo could not be loaded.", error);
-      notice("Your profile photo could not be loaded. Check Storage setup and its security rules.");
+    if (!["storage/object-not-found", "storage/unauthorized"].includes(error.code)) {
+      console.warn("The saved profile photo could not be loaded.", error);
     }
   }
 }

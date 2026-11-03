@@ -1834,7 +1834,20 @@
   .ic-workspace-page .ic-dashboard-user-divider{display:none}
   .ic-workspace-page .ic-dashboard-user-copy{display:none}
   .ic-workspace-page .ic-topbar-logout{padding:0 8px;font-size:.62rem}
-  .ic-workspace-page .ic-workspace-welcome,.ic-workspace-page .ic-training-section,.ic-workspace-page .ic-progress-panel,.ic-workspace-page .ic-attendance-panel,.ic-workspace-page #icNotifications,.ic-workspace-page #icLearningResources{grid-column:1/-1}
+  .ic-workspace-page .welcome-banner,
+  .ic-workspace-page .ic-workspace-stats,
+  .ic-workspace-page .ic-workspace-welcome,
+  .ic-workspace-page .ic-training-section,
+  .ic-workspace-page .ic-progress-panel,
+  .ic-workspace-page .ic-attendance-panel,
+  .ic-workspace-page #icNotifications,
+  .ic-workspace-page #icLearningResources,
+  .ic-workspace-page .ic-applications-panel,
+  .ic-workspace-page .ic-meeting-panel,
+  .ic-workspace-page .ic-staff-panel,
+  .ic-workspace-page #icProjects {
+    grid-column: 1 / -1 !important;
+  }
   .ic-workspace-page .ic-workspace-hero-meta{font-size:.6rem}
   .ic-workspace-page .ic-final-footer{margin-left:0}
 }
@@ -2045,7 +2058,20 @@
 }
 @media(max-width:760px){
   .ic-workspace-page .ic-workspace-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .ic-workspace-page .ic-workspace-welcome,.ic-workspace-page .ic-training-section,.ic-workspace-page .ic-progress-panel,.ic-workspace-page .ic-attendance-panel,.ic-workspace-page #icNotifications,.ic-workspace-page #icLearningResources{grid-column:1/-1}
+  .ic-workspace-page .welcome-banner,
+  .ic-workspace-page .ic-workspace-stats,
+  .ic-workspace-page .ic-workspace-welcome,
+  .ic-workspace-page .ic-training-section,
+  .ic-workspace-page .ic-progress-panel,
+  .ic-workspace-page .ic-attendance-panel,
+  .ic-workspace-page #icNotifications,
+  .ic-workspace-page #icLearningResources,
+  .ic-workspace-page .ic-applications-panel,
+  .ic-workspace-page .ic-meeting-panel,
+  .ic-workspace-page .ic-staff-panel,
+  .ic-workspace-page #icProjects {
+    grid-column: 1 / -1 !important;
+  }
   .ic-workspace-page .ic-insights-grid>article:nth-child(1),.ic-workspace-page .ic-insights-grid>article:nth-child(2){grid-column:1/-1}
   .ic-workspace-page .ic-workspace-hero{padding-right:16px!important}
   .ic-workspace-page .ic-hero-quote{display:none}
@@ -2077,52 +2103,495 @@
 .ic-workspace-page .ic-attendance-calendar-legend i.is-upcoming{background:#496b91}
 .ic-workspace-page .ic-attendance-history{max-height:none;overflow:visible}
 
-.ic-workspace-page .ic-workspace-hero{display:flex;align-items:center;gap:20px;padding-right:24px!important}
-.ic-workspace-page .ic-workspace-hero-copy{flex:1 1 0;max-width:none;min-width:0}
-.ic-workspace-page .ic-hero-orbit{position:relative;inset:auto;flex:0 0 190px;width:190px;height:145px;transform:none}
-.ic-workspace-page .ic-hero-orbit .ring-one{width:158px;height:100px}
-.ic-workspace-page .ic-hero-orbit .ring-two{width:115px;height:142px}
-.ic-workspace-page .ic-live-clock{position:relative;inset:auto;flex:0 0 auto;align-items:center;width:max-content;max-width:100%;min-width:137px;margin:0;padding:12px 14px;transform:none;border:1px solid rgba(41,127,178,.3);border-radius:10px;background:rgba(3,17,33,.52);text-align:center}
-.ic-workspace-page .ic-live-clock>span{display:flex;align-items:center;justify-content:center;gap:6px;color:#9eb8d2;font-size:14px}
-.ic-workspace-page .ic-live-clock .live-date-label>span{white-space:nowrap}
-.ic-workspace-page .ic-live-clock strong{align-self:center;color:#eaf3ff;font-size:22px;letter-spacing:.6px}
-.ic-workspace-page .ic-live-clock small{color:#b0c5d9;font-size:16px;font-weight:400}
-@media(max-width:1100px){
-  .ic-workspace-page .ic-workspace-hero{gap:12px}
-  .ic-workspace-page .ic-hero-orbit{flex-basis:145px;width:145px;height:125px}
-  .ic-workspace-page .ic-hero-orbit .ring-one{width:125px;height:78px}
-  .ic-workspace-page .ic-hero-orbit .ring-two{width:92px;height:115px}
-  .ic-workspace-page .ic-live-clock{right:10px;min-width:108px;padding:9px}
-}
-@media(max-width:760px){
-  .ic-workspace-page .ic-workspace-hero{gap:10px}
-  .ic-workspace-page .ic-workspace-hero-copy{flex:1 1 0;max-width:none}
-  .ic-workspace-page .ic-hero-orbit{flex-basis:120px;width:120px;height:115px}
-  .ic-workspace-page .ic-hero-orbit .ring-one{width:135px;height:84px}
-  .ic-workspace-page .ic-hero-orbit .ring-two{width:100px;height:110px}
-  .ic-workspace-page .ic-live-clock{right:8px;min-width:104px;padding:8px}
-}
-@media(max-width:480px){
-  .ic-workspace-page .ic-workspace-hero{display:block;padding:15px!important}
-  .ic-workspace-page .ic-workspace-hero-copy{max-width:100%;padding-right:0}
-  .ic-workspace-page .ic-hero-orbit{display:grid;flex:none;width:190px;height:145px;margin:5px auto;opacity:1}
-  .ic-workspace-page .ic-hero-orbit .ring-one{width:158px;height:100px}
-  .ic-workspace-page .ic-hero-orbit .ring-two{width:115px;height:142px}
-  .ic-workspace-page .ic-live-clock{position:relative;inset:auto;display:flex;align-items:center;width:max-content;min-width:150px;margin:13px auto 0;padding:10px 12px;transform:none}
-  .ic-workspace-page .ic-live-clock>span{font-size:13px}
-  .ic-workspace-page .ic-live-clock strong{font-size:20px}
-  .ic-workspace-page .ic-live-clock small{font-size:15px}
+/* Intern Dashboard Welcome Banner - exact alignment with index.html orbit animation & mobile layout */
+.ic-workspace-page .welcome-banner {
+  grid-column: 1 / -1 !important;
+  order: 1 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 0 12px !important;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 24px;
+  text-align: left;
+  border: 1px solid rgba(19, 123, 195, 0.35);
+  border-radius: 14px;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 58% 50%, rgba(0, 116, 195, 0.16), transparent 42%),
+              linear-gradient(110deg, #061328, #07152a 54%, #06182c);
 }
 
-@media(min-width:761px) and (max-width:1100px){
-  .ic-workspace-page .ic-workspace-hero{gap:8px;padding:14px 16px!important}
-  .ic-workspace-page .ic-hero-orbit{flex:0 0 100px;width:100px;height:100px}
-  .ic-workspace-page .ic-hero-orbit .ring-one{width:105px;height:68px}
-  .ic-workspace-page .ic-hero-orbit .ring-two{width:78px;height:96px}
-  .ic-workspace-page .ic-live-clock{min-width:100px;padding:8px}
-  .ic-workspace-page .ic-live-clock>span{font-size:11px}
-  .ic-workspace-page .ic-live-clock strong{font-size:17px}
-  .ic-workspace-page .ic-live-clock small{font-size:12px}
+.ic-workspace-page .ic-applications-panel {
+  grid-column: 1 / -1 !important;
+  order: 14 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.ic-workspace-page section[id],
+.ic-workspace-page article[id] {
+  scroll-margin-top: 68px;
+}
+
+/* Dual-orbit rotating animation matching index.html */
+@keyframes icOrbitRotateA {
+  from { transform: rotate(-25deg); }
+  to { transform: rotate(335deg); }
+}
+
+@keyframes icOrbitRotateB {
+  from { transform: rotate(38deg); }
+  to { transform: rotate(-322deg); }
+}
+
+@keyframes icLogoFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.025); }
+}
+
+/* Ambient cosmic background rings sweeping across the welcome banner and over the greeting */
+.ic-workspace-page .welcome-banner::before,
+.ic-workspace-page .welcome-banner::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ic-workspace-page .welcome-banner::before {
+  border: 1px solid rgba(0, 160, 255, 0.16);
+  width: 540px;
+  height: 185px;
+  right: max(29.5%, 385px);
+  top: -95px;
+  transform: rotate(-22deg);
+  box-shadow: none;
+}
+
+.ic-workspace-page .welcome-banner::after {
+  border: 1px solid rgba(125, 175, 255, 0.13);
+  width: 390px;
+  height: 140px;
+  right: max(32.5%, 420px);
+  top: -65px;
+  transform: rotate(24deg);
+  box-shadow: none;
+}
+
+.ic-workspace-page .welcome-art {
+  --chip-orbit-r: 80px;
+  width: 216px;
+  height: 164px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  align-self: center;
+  flex: 0 0 216px;
+  margin: auto 0;
+}
+
+
+
+/* Orbits are clearly larger than the logo - logo has comfortable 26px+ clearance */
+.ic-workspace-page .welcome-art .orbit-a,
+.ic-workspace-page .welcome-art .orbit {
+  position: absolute;
+  border: 1px solid rgba(0, 210, 255, 0.65);
+  box-shadow: 0 0 16px rgba(0, 205, 255, 0.4), inset 0 0 10px rgba(0, 205, 255, 0.15);
+  width: 196px;
+  height: 126px;
+  border-radius: 50%;
+  transform: rotate(-25deg);
+  animation: icOrbitRotateA 16s linear infinite !important;
+}
+
+.ic-workspace-page .welcome-art .orbit-b {
+  position: absolute;
+  width: 126px;
+  height: 196px;
+  border-radius: 50%;
+  transform: rotate(38deg);
+  border: 1px solid rgba(167, 124, 255, 0.7);
+  box-shadow: 0 0 16px rgba(167, 124, 255, 0.45), inset 0 0 10px rgba(167, 124, 255, 0.15);
+  animation: icOrbitRotateB 12s linear infinite !important;
+}
+
+.ic-workspace-page .welcome-art .orbit-a::after,
+.ic-workspace-page .welcome-art .orbit-b::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #5edcff;
+  box-shadow: 0 0 12px rgba(94, 220, 255, 0.95);
+  left: 50%;
+  top: -4px;
+  transform: translateX(-50%);
+}
+
+.ic-workspace-page .welcome-art .orbit-b::after {
+  background: #a77cff;
+  box-shadow: 0 0 12px rgba(167, 124, 255, 0.95);
+}
+
+/* Center logo: enlarged moderately, completely untouched by orbits or chips */
+.ic-workspace-page .welcome-art .welcome-logo {
+  position: relative;
+  z-index: 2;
+  width: 74px;
+  height: 74px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 18px rgba(0, 194, 255, 0.85));
+  animation: icLogoFloat 4s ease-in-out infinite !important;
+}
+
+/* Perfectly aligned chip orbit: 3 chips chase each other along a circle at 120-degree intervals */
+.ic-workspace-page .welcome-art .welcome-chip-track {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+@keyframes chipCircularOrbit {
+  0% {
+    transform: rotate(0deg) translateY(calc(-1 * var(--chip-orbit-r, 80px))) rotate(0deg) translate(-50%, -50%);
+  }
+  25% {
+    transform: rotate(90deg) translateY(calc(-1 * var(--chip-orbit-r, 80px))) rotate(-90deg) translate(-50%, -50%);
+  }
+  50% {
+    transform: rotate(180deg) translateY(calc(-1 * var(--chip-orbit-r, 80px))) rotate(-180deg) translate(-50%, -50%);
+  }
+  75% {
+    transform: rotate(270deg) translateY(calc(-1 * var(--chip-orbit-r, 80px))) rotate(-270deg) translate(-50%, -50%);
+  }
+  100% {
+    transform: rotate(360deg) translateY(calc(-1 * var(--chip-orbit-r, 80px))) rotate(-360deg) translate(-50%, -50%);
+  }
+}
+
+.ic-workspace-page .welcome-chip {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: 0 0;
+  z-index: 3;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  background: rgba(6, 22, 46, 0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  animation: chipCircularOrbit 15s linear infinite !important;
+  will-change: transform;
+}
+
+/* Learn leads, Grow chases Learn (-10s / 240deg), Build chases Grow (-5s / 120deg) */
+.ic-workspace-page .welcome-chip.chip-learn {
+  color: #6fe4ff;
+  border: 1px solid rgba(0, 210, 255, 0.5);
+  box-shadow: 0 4px 14px rgba(0, 210, 255, 0.22);
+  animation-delay: 0s !important;
+}
+
+.ic-workspace-page .welcome-chip.chip-grow {
+  color: #6effcd;
+  border: 1px solid rgba(0, 225, 165, 0.5);
+  box-shadow: 0 4px 14px rgba(0, 225, 165, 0.22);
+  animation-delay: -10s !important;
+}
+
+.ic-workspace-page .welcome-chip.chip-build {
+  color: #a5cfff;
+  border: 1px solid rgba(90, 160, 255, 0.5);
+  box-shadow: 0 4px 14px rgba(90, 160, 255, 0.22);
+  animation-delay: -5s !important;
+}
+
+.ic-workspace-page .welcome-meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #78a4c7;
+  font-size: 9px;
+  font-weight: 700;
+}
+.ic-workspace-page .welcome-meta-pill svg {
+  color: #28bfff;
+}
+
+/* Tablet responsive alignment */
+@media (max-width: 760px) {
+  .ic-workspace-page .welcome-banner {
+    min-height: 0 !important;
+    padding: 12px 14px !important;
+    gap: 10px !important;
+  }
+  .ic-workspace-page .welcome-art {
+    --chip-orbit-r: 60px !important;
+    width: 160px !important;
+    height: 128px !important;
+    flex-basis: 160px !important;
+  }
+  .ic-workspace-page .welcome-art .orbit-a,
+  .ic-workspace-page .welcome-art .orbit {
+    width: 144px !important;
+    height: 92px !important;
+  }
+  .ic-workspace-page .welcome-art .orbit-b {
+    width: 92px !important;
+    height: 144px !important;
+  }
+  .ic-workspace-page .welcome-art .welcome-logo {
+    width: 52px !important;
+    height: 52px !important;
+  }
+  .ic-workspace-page .welcome-chip {
+    font-size: 8.5px !important;
+    padding: 3px 8px !important;
+  }
+  .ic-workspace-page .welcome-date {
+    min-width: 108px !important;
+    padding: 8px !important;
+  }
+  .ic-workspace-page .welcome-date strong {
+    font-size: 16px !important;
+  }
+  .ic-workspace-page .welcome-banner::before {
+    width: 360px !important;
+    height: 140px !important;
+    right: 28% !important;
+    top: -70px !important;
+  }
+  .ic-workspace-page .welcome-banner::after {
+    width: 250px !important;
+    height: 105px !important;
+    right: 32% !important;
+    top: -50px !important;
+  }
+}
+
+/* Mobile responsive alignment - Orbits remain significantly larger than the logo, all 3 chips cleanly aligned */
+@media (max-width: 480px) {
+  .ic-workspace-page .welcome-banner {
+    width: 100% !important;
+    min-height: 104px !important;
+    padding: 10px 8px !important;
+    gap: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    border-radius: 13px !important;
+  }
+  .ic-workspace-page .welcome-copy {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+  .ic-workspace-page .welcome-copy h1 {
+    font-size: clamp(14px, 4.35vw, 17px) !important;
+    line-height: 1.15 !important;
+    margin: 0 0 3px !important;
+    white-space: nowrap !important;
+  }
+  .ic-workspace-page .welcome-copy p {
+    font-size: clamp(6.5px, 2vw, 8px) !important;
+    line-height: 1.3 !important;
+    white-space: normal !important;
+    max-width: 155px !important;
+    margin: 0 !important;
+  }
+  .ic-workspace-page .welcome-meta {
+    margin-top: 4px !important;
+    display: flex !important;
+    gap: 4px !important;
+    flex-wrap: wrap !important;
+  }
+  .ic-workspace-page .welcome-meta-pill,
+  .ic-workspace-page .access-pill {
+    font-size: 7.5px !important;
+    padding: 1px 5px !important;
+  }
+  .ic-workspace-page .welcome-art {
+    --chip-orbit-r: 43px !important;
+    width: 104px !important;
+    height: 96px !important;
+    flex: 0 0 104px !important;
+    display: grid !important;
+    place-items: center !important;
+    position: relative !important;
+    margin: 0 !important;
+  }
+  .ic-workspace-page .welcome-art .orbit-a,
+  .ic-workspace-page .welcome-art .orbit {
+    width: 92px !important;
+    height: 60px !important;
+  }
+  .ic-workspace-page .welcome-art .orbit-b {
+    width: 60px !important;
+    height: 92px !important;
+  }
+  .ic-workspace-page .welcome-art .welcome-logo {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  .ic-workspace-page .welcome-chip {
+    display: inline-flex !important;
+    font-size: 7px !important;
+    padding: 2px 5px !important;
+  }
+  .ic-workspace-page .welcome-date {
+    flex: 0 0 94px !important;
+    min-width: 94px !important;
+    padding: 7px 5px !important;
+    border-radius: 9px !important;
+    gap: 2px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+  .ic-workspace-page .welcome-date .live-date-label {
+    gap: 3px !important;
+  }
+  .ic-workspace-page .welcome-date .live-date-label svg {
+    width: 11px !important;
+    height: 11px !important;
+  }
+  .ic-workspace-page .welcome-date > span {
+    font-size: 7.5px !important;
+    white-space: nowrap !important;
+  }
+  .ic-workspace-page .welcome-date strong {
+    font-size: 13px !important;
+    white-space: nowrap !important;
+  }
+  .ic-workspace-page .welcome-date small {
+    font-size: 8.5px !important;
+    white-space: nowrap !important;
+  }
+  .ic-workspace-page .welcome-banner::before {
+    width: 220px !important;
+    height: 100px !important;
+    right: 28% !important;
+    top: -50px !important;
+  }
+  .ic-workspace-page .welcome-banner::after {
+    width: 160px !important;
+    height: 75px !important;
+    right: 32% !important;
+    top: -35px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .ic-workspace-page .welcome-meta {
+    display: none !important;
+  }
+  .ic-workspace-page .welcome-banner {
+    padding: 7px 5px !important;
+    gap: 4px !important;
+  }
+  .ic-workspace-page .welcome-art {
+    --chip-orbit-r: 35px !important;
+    width: 86px !important;
+    height: 82px !important;
+    flex: 0 0 86px !important;
+  }
+  .ic-workspace-page .welcome-art .orbit-a {
+    width: 78px !important;
+    height: 52px !important;
+  }
+  .ic-workspace-page .welcome-art .orbit-b {
+    width: 52px !important;
+    height: 78px !important;
+  }
+  .ic-workspace-page .welcome-art .welcome-logo {
+    width: 28px !important;
+    height: 28px !important;
+  }
+  .ic-workspace-page .welcome-chip {
+    font-size: 6px !important;
+    padding: 1.5px 4px !important;
+  }
+  .ic-workspace-page .welcome-date {
+    flex: 0 0 80px !important;
+    min-width: 80px !important;
+    padding: 6px 3px !important;
+  }
+}
+
+/* Intern Workspace Clean Footer */
+.ic-workspace-page .ic-dashboard-footer {
+  margin-left: var(--ic-intern-sidebar-width, 186.4px);
+  margin-top: 32px;
+  padding: 20px 24px;
+  border-top: 1px solid rgba(19, 123, 195, 0.22);
+  color: #7d96b3;
+  font-size: 0.72rem;
+  background: rgba(3, 12, 24, 0.65);
+  backdrop-filter: blur(8px);
+}
+.ic-workspace-page .ic-dashboard-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+.ic-workspace-page .ic-dashboard-footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #d8e6f5;
+  font-size: 0.76rem;
+}
+.ic-workspace-page .ic-dashboard-footer-brand img {
+  border-radius: 4px;
+}
+.ic-workspace-page .ic-dashboard-footer-links {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.ic-workspace-page .ic-dashboard-footer-links button,
+.ic-workspace-page .ic-dashboard-footer-links a {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #7d96b3;
+  font: inherit;
+  font-size: 0.72rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+.ic-workspace-page .ic-dashboard-footer-links button:hover,
+.ic-workspace-page .ic-dashboard-footer-links a:hover {
+  color: #38c8ff;
+}
+@media (max-width: 760px) {
+  .ic-workspace-page .ic-dashboard-footer {
+    margin-left: 0;
+    padding: 16px 14px 18px;
+  }
+  .ic-workspace-page .ic-dashboard-footer-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
 }
 
 /* Match the reference layout for the internship summary and attendance calendar. */

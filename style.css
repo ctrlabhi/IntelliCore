@@ -1449,11 +1449,11 @@
     .welcome-banner{position:relative;width:100%;min-height:0;margin:0 0 1rem;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px 22px;text-align:left;border:1px solid rgba(19,123,195,.35);border-radius:13px;overflow:hidden;background:radial-gradient(ellipse at 58% 50%,rgba(0,116,195,.15),transparent 42%),linear-gradient(110deg,#061328,#07152a 54%,#06182c);scroll-margin-top:65px}
     .welcome-banner:before,.welcome-banner:after{content:"";position:absolute;border:1px solid rgba(0,157,255,.13);width:270px;height:160px;border-radius:50%;right:29%;top:-90px;transform:rotate(-25deg);pointer-events:none}.welcome-banner:after{width:190px;height:115px;right:33%;top:-60px;transform:rotate(25deg)}
     .welcome-copy{position:relative;z-index:1;flex:1;min-width:0}.welcome-copy h1{font-size:clamp(23px,3vw,32px);letter-spacing:-1.1px;line-height:1.12;margin:7px 0 4px}.welcome-copy h1 span{color:#1ccfff}    .welcome-copy p{margin:0;color:#a8bdd5;font-size:11px;white-space:nowrap}.welcome-meta{margin-top:10px;display:flex;align-items:center;gap:9px;color:#78a4c7;font-size:9px}.access-pill{border:1px solid rgba(0,211,160,.3);border-radius:9px;background:rgba(0,211,160,.1);color:#14d7ad;padding:2px 8px}
-    .welcome-art{width:150px;height:112px;position:relative;display:grid;place-items:center;align-self:center;flex:0 0 150px;margin:auto 0}.welcome-art .orbit{position:absolute;border:1px solid rgba(0,177,255,.43);width:118px;height:72px;border-radius:50%;transform:rotate(-25deg)}.welcome-art .orbit-b{width:78px;height:112px;transform:rotate(38deg);border-color:rgba(107,48,255,.55)}.welcome-logo{position:relative;z-index:1;width:82px;height:82px;object-fit:contain;filter:drop-shadow(0 0 12px rgba(0,194,255,.7))}.welcome-chip{position:absolute;z-index:2;padding:6px 9px;border:1px solid rgba(151,218,255,.25);border-radius:11px;background:rgba(10,32,68,.9);box-shadow:0 8px 20px rgba(0,0,0,.2);color:#e6f7ff;font-size:10px;font-weight:750;white-space:nowrap}.chip-learn{top:0;right:0}.chip-grow{right:4px;bottom:2px}.chip-build{left:0;bottom:12px}
+    .welcome-art{--chip-orbit-r:74px;width:210px;height:160px;position:relative;display:grid;place-items:center;align-self:center;flex:0 0 210px;margin:auto 0}.welcome-art .orbit{position:absolute;border:1px solid rgba(0,210,255,.65);box-shadow:0 0 16px rgba(0,205,255,.4), inset 0 0 10px rgba(0,205,255,.15);width:184px;height:118px;border-radius:50%;transform:rotate(-25deg)}.welcome-art .orbit-b{width:118px;height:184px;transform:rotate(38deg);border:1px solid rgba(167,124,255,.7);box-shadow:0 0 16px rgba(167,124,255,.45), inset 0 0 10px rgba(167,124,255,.15)}.welcome-logo{position:relative;z-index:2;width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 0 16px rgba(0,194,255,.8))}.welcome-chip{position:absolute;left:50%;top:50%;transform-origin:0 0;z-index:3;padding:4px 11px;border-radius:999px;font-size:10px;font-weight:750;letter-spacing:.02em;white-space:nowrap;background:rgba(6,22,46,.94);box-shadow:0 6px 18px rgba(0,0,0,.35);pointer-events:none;animation:chipCircularOrbit 15s linear infinite}.chip-learn{color:#6fe4ff;border:1px solid rgba(0,210,255,.5);box-shadow:0 4px 14px rgba(0,210,255,.22);animation-delay:0s}.chip-grow{color:#6effcd;border:1px solid rgba(0,225,165,.5);box-shadow:0 4px 14px rgba(0,225,165,.22);animation-delay:-10s}.chip-build{color:#a5cfff;border:1px solid rgba(90,160,255,.5);box-shadow:0 4px 14px rgba(90,160,255,.22);animation-delay:-5s}
     .welcome-date{position:relative;z-index:1;min-width:137px;padding:12px 14px;border:1px solid rgba(41,127,178,.3);border-radius:10px;background:rgba(3,17,33,.52);display:flex;flex-direction:column;gap:4px;align-items:center;text-align:center}.welcome-date>span{font-size:14px;color:#9eb8d2}.welcome-date strong{align-self:center;font-size:22px;letter-spacing:.6px;color:#f4fbff}.welcome-date small{font-size:16px;font-weight:400;color:#b0c5d9}.welcome-date .live-date-label{display:flex;align-items:center;justify-content:center;gap:6px}.welcome-date .live-date-label svg{width:16px;height:16px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-    @media(max-width:760px){.welcome-banner{min-height:0;padding:12px 14px;gap:10px}.welcome-copy{flex:1}.welcome-art{width:110px;height:86px;flex-basis:110px}.welcome-art .orbit{width:108px;height:68px}.welcome-art .orbit-b{width:72px;height:108px}.welcome-art .welcome-logo{width:62px;height:62px}.welcome-date{min-width:108px;padding:8px}.welcome-date strong{font-size:16px}.welcome-copy p{max-width:100%;white-space:nowrap;font-size:9px}}
-    @media(max-width:480px){.welcome-banner{width:100%;display:flex;align-items:center;justify-content:space-between;padding:8px 10px;gap:7px}.welcome-copy{flex:1;min-width:0;text-align:left}.welcome-copy h1{display:flex;align-items:center;flex-wrap:nowrap;margin:0 0 2px;font-size:clamp(14px,4.35vw,17px);line-height:1.1;white-space:nowrap;gap:4px}.welcome-copy h1 .mobile-welcome-greeting,.welcome-copy h1 .mobile-welcome-name,.welcome-copy h1 .mobile-welcome-name span{white-space:nowrap}.welcome-copy p{font-size:clamp(6px,1.75vw,7px);line-height:1.3;white-space:nowrap;max-width:none}.welcome-art{position:relative;inset:auto;width:62px;height:62px;flex:0 0 62px;margin:0}.welcome-art .orbit{width:58px;height:36px}.welcome-art .orbit-b{width:38px;height:58px}.welcome-logo{width:38px;height:38px}.welcome-chip{display:none}.welcome-date{flex:0 0 94px;min-width:94px;margin:0;padding:7px 5px;gap:2px}.welcome-date>span{font-size:8px;white-space:nowrap}.welcome-date .live-date-label{gap:4px}.welcome-date .live-date-label svg{width:11px;height:11px}.welcome-date strong{font-size:13px;white-space:nowrap}.welcome-date small{font-size:9px;white-space:nowrap}}
-    @media(max-width:360px){.welcome-banner{padding:7px 6px;gap:5px}.welcome-copy h1{font-size:clamp(13px,3.9vw,14px);gap:3px}.welcome-copy p{font-size:5.5px}.welcome-art{width:50px;height:50px;flex-basis:50px}.welcome-art .orbit{width:48px;height:30px}.welcome-art .orbit-b{width:30px;height:48px}.welcome-logo{width:32px;height:32px}.welcome-date{flex-basis:82px;min-width:82px;padding:6px 3px}.welcome-date>span{font-size:7px}.welcome-date strong{font-size:11px}.welcome-date small{font-size:8px}}
+    @media(max-width:760px){.welcome-banner{min-height:0;padding:12px 14px;gap:10px}.welcome-copy{flex:1}.welcome-art{width:140px;height:110px;flex-basis:140px}.welcome-art .orbit{width:114px;height:70px}.welcome-art .orbit-b{width:70px;height:114px}.welcome-art .welcome-logo{width:38px;height:38px}.welcome-date{min-width:108px;padding:8px}.welcome-date strong{font-size:16px}.welcome-copy p{max-width:100%;white-space:nowrap;font-size:9px}}
+    @media(max-width:480px){.welcome-banner{width:100%;display:flex;align-items:center;justify-content:space-between;padding:8px 10px;gap:7px}.welcome-copy{flex:1;min-width:0;text-align:left}.welcome-copy h1{display:flex;align-items:center;flex-wrap:nowrap;margin:0 0 2px;font-size:clamp(14px,4.35vw,17px);line-height:1.1;white-space:nowrap;gap:4px}.welcome-copy h1 .mobile-welcome-greeting,.welcome-copy h1 .mobile-welcome-name,.welcome-copy h1 .mobile-welcome-name span{white-space:nowrap}.welcome-copy p{font-size:clamp(6px,1.75vw,7px);line-height:1.3;white-space:nowrap;max-width:none}.welcome-art{position:relative;inset:auto;width:86px;height:80px;flex:0 0 86px;margin:0;display:grid;place-items:center}.welcome-art .orbit{width:74px;height:46px}.welcome-art .orbit-b{width:46px;height:74px}.welcome-logo{width:28px;height:28px}.welcome-date{flex:0 0 94px;min-width:94px;margin:0;padding:7px 5px;gap:2px}.welcome-date>span{font-size:8px;white-space:nowrap}.welcome-date .live-date-label{gap:4px}.welcome-date .live-date-label svg{width:11px;height:11px}.welcome-date strong{font-size:13px;white-space:nowrap}.welcome-date small{font-size:9px;white-space:nowrap}}
+    @media(max-width:360px){.welcome-banner{padding:7px 6px;gap:5px}.welcome-copy h1{font-size:clamp(13px,3.9vw,14px);gap:3px}.welcome-copy p{font-size:5.5px}.welcome-art{width:70px;height:66px;flex-basis:70px}.welcome-art .orbit{width:60px;height:38px}.welcome-art .orbit-b{width:38px;height:60px}.welcome-logo{width:22px;height:22px}.welcome-date{flex-basis:82px;min-width:82px;padding:6px 3px}.welcome-date>span{font-size:7px}.welcome-date strong{font-size:11px}.welcome-date small{font-size:8px}}
 
     .hero-description {
       max-width: 780px;
@@ -4666,60 +4666,37 @@ main,
 
 /* Welcome logo and animated orbit artwork. */
 .welcome-art {
-  width: 180px;
-  height: 150px;
-  flex-basis: 180px;
+  --chip-orbit-r: 80px;
+  width: 216px;
+  height: 164px;
+  flex: 0 0 216px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  align-self: center;
+  margin: auto 0;
 }
 
 .welcome-art .orbit-a,
 .welcome-art .orbit {
-  width: 178px;
-  height: 108px;
-}
-
-.welcome-art .orbit-b {
-  width: 108px;
-  height: 160px;
-}
-
-.welcome-art .welcome-logo {
-  width: 96px;
-  height: 96px;
-  z-index: 2;
-  animation: welcomeLogoFloat 4s ease-in-out infinite;
-}
-
-.welcome-art .welcome-chip-track {
   position: absolute;
-  inset: 0;
-  z-index: 3;
-}
-
-.welcome-art .chip-grow {
-  right: 1px;
-  bottom: 20px;
-}
-
-@keyframes welcomeOrbitA {
-  from { transform: rotate(-25deg); }
-  to { transform: rotate(335deg); }
-}
-
-@keyframes welcomeOrbitB {
-  from { transform: rotate(38deg); }
-  to { transform: rotate(-322deg); }
-}
-
-@keyframes welcomeLogoFloat {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-4px) scale(1.025); }
-}
-
-.welcome-art .orbit-a {
+  border: 1px solid rgba(0, 210, 255, 0.65);
+  box-shadow: 0 0 16px rgba(0, 205, 255, 0.4), inset 0 0 10px rgba(0, 205, 255, 0.15);
+  width: 196px;
+  height: 126px;
+  border-radius: 50%;
+  transform: rotate(-25deg);
   animation: welcomeOrbitA 16s linear infinite;
 }
 
 .welcome-art .orbit-b {
+  position: absolute;
+  width: 126px;
+  height: 196px;
+  border-radius: 50%;
+  transform: rotate(38deg);
+  border: 1px solid rgba(167, 124, 255, 0.7);
+  box-shadow: 0 0 16px rgba(167, 124, 255, 0.45), inset 0 0 10px rgba(167, 124, 255, 0.15);
   animation: welcomeOrbitB 12s linear infinite;
 }
 
@@ -4742,95 +4719,191 @@ main,
   box-shadow: 0 0 12px rgba(167, 124, 255, 0.95);
 }
 
+.welcome-art .welcome-logo {
+  position: relative;
+  z-index: 2;
+  width: 74px;
+  height: 74px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 18px rgba(0, 194, 255, 0.85));
+  animation: welcomeLogoFloat 4s ease-in-out infinite;
+}
+
+.welcome-art .welcome-chip-track {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+@keyframes chipCircularOrbit {
+  0% {
+    transform: rotate(0deg) translateY(calc(-1 * var(--chip-orbit-r, 80px))) rotate(0deg) translate(-50%, -50%);
+  }
+  25% {
+    transform: rotate(90deg) translateY(calc(-1 * var(--chip-orbit-r, 80px))) rotate(-90deg) translate(-50%, -50%);
+  }
+  50% {
+    transform: rotate(180deg) translateY(calc(-1 * var(--chip-orbit-r, 80px))) rotate(-180deg) translate(-50%, -50%);
+  }
+  75% {
+    transform: rotate(270deg) translateY(calc(-1 * var(--chip-orbit-r, 80px))) rotate(-270deg) translate(-50%, -50%);
+  }
+  100% {
+    transform: rotate(360deg) translateY(calc(-1 * var(--chip-orbit-r, 80px))) rotate(-360deg) translate(-50%, -50%);
+  }
+}
+
+.welcome-chip {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: 0 0;
+  z-index: 3;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  background: rgba(6, 22, 46, 0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  animation: chipCircularOrbit 15s linear infinite;
+  will-change: transform;
+}
+
+/* Learn leads, Grow chases Learn (-10s / 240deg), Build chases Grow (-5s / 120deg) */
+.welcome-chip.chip-learn {
+  color: #6fe4ff;
+  border: 1px solid rgba(0, 210, 255, 0.5);
+  box-shadow: 0 4px 14px rgba(0, 210, 255, 0.22);
+  animation-delay: 0s;
+}
+
+.welcome-chip.chip-grow {
+  color: #6effcd;
+  border: 1px solid rgba(0, 225, 165, 0.5);
+  box-shadow: 0 4px 14px rgba(0, 225, 165, 0.22);
+  animation-delay: -10s;
+}
+
+.welcome-chip.chip-build {
+  color: #a5cfff;
+  border: 1px solid rgba(90, 160, 255, 0.5);
+  box-shadow: 0 4px 14px rgba(90, 160, 255, 0.22);
+  animation-delay: -5s;
+}
+
+@keyframes welcomeOrbitA {
+  from { transform: rotate(-25deg); }
+  to { transform: rotate(335deg); }
+}
+
+@keyframes welcomeOrbitB {
+  from { transform: rotate(38deg); }
+  to { transform: rotate(-322deg); }
+}
+
+@keyframes welcomeLogoFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.025); }
+}
+
 @media (max-width: 760px) {
   .welcome-art {
-    width: 128px;
-    height: 112px;
-    flex-basis: 128px;
+    --chip-orbit-r: 60px !important;
+    width: 160px !important;
+    height: 128px !important;
+    flex-basis: 160px !important;
   }
 
   .welcome-art .orbit-a,
   .welcome-art .orbit {
-    width: 126px;
-    height: 78px;
+    width: 144px !important;
+    height: 92px !important;
   }
 
   .welcome-art .orbit-b {
-    width: 78px;
-    height: 118px;
+    width: 92px !important;
+    height: 144px !important;
   }
 
   .welcome-art .welcome-logo {
-    width: 72px;
-    height: 72px;
+    width: 52px !important;
+    height: 52px !important;
   }
 
-  .welcome-art .chip-grow {
-    right: 0;
-    bottom: 14px;
-    font-size: 9px;
+  .welcome-chip {
+    font-size: 8.5px !important;
+    padding: 3px 8px !important;
   }
 }
 
 @media (max-width: 480px) {
   .welcome-art {
-    width: 72px;
-    height: 72px;
-    flex: 0 0 72px;
-    display: grid;
+    --chip-orbit-r: 43px !important;
+    width: 104px !important;
+    height: 96px !important;
+    flex: 0 0 104px !important;
+    display: grid !important;
+    place-items: center !important;
+    position: relative !important;
+    margin: 0 !important;
   }
 
   .welcome-art .orbit-a,
   .welcome-art .orbit {
-    width: 68px;
-    height: 44px;
+    width: 92px !important;
+    height: 60px !important;
   }
 
   .welcome-art .orbit-b {
-    width: 44px;
-    height: 68px;
+    width: 60px !important;
+    height: 92px !important;
   }
 
   .welcome-art .welcome-logo {
-    width: 46px;
-    height: 46px;
+    width: 36px !important;
+    height: 36px !important;
   }
 
-  .welcome-art .welcome-chip:not(.chip-grow),
-  .welcome-art .orbit-a::after,
-  .welcome-art .orbit-b::after {
-    display: none;
-  }
-
-  .welcome-art .chip-grow {
-    right: -3px;
-    bottom: 6px;
-    padding: 3px 5px;
-    font-size: 7px;
+  .welcome-chip {
+    display: inline-flex !important;
+    font-size: 7px !important;
+    padding: 2px 5px !important;
   }
 }
 
 @media (max-width: 360px) {
   .welcome-art {
-    width: 58px;
-    height: 62px;
-    flex-basis: 58px;
+    --chip-orbit-r: 35px !important;
+    width: 86px !important;
+    height: 82px !important;
+    flex: 0 0 86px !important;
   }
 
   .welcome-art .orbit-a,
   .welcome-art .orbit {
-    width: 56px;
-    height: 36px;
+    width: 78px !important;
+    height: 52px !important;
   }
 
   .welcome-art .orbit-b {
-    width: 36px;
-    height: 56px;
+    width: 52px !important;
+    height: 78px !important;
   }
 
   .welcome-art .welcome-logo {
-    width: 38px;
-    height: 38px;
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .welcome-chip {
+    font-size: 6px !important;
+    padding: 1.5px 4px !important;
   }
 }
 
@@ -4866,39 +4939,7 @@ main,
     white-space: normal;
   }
 
-  .welcome-art {
-    display: grid;
-    width: 82px;
-    height: 92px;
-    flex: 0 0 82px;
-  }
 
-  .welcome-art .orbit-a,
-  .welcome-art .orbit {
-    width: 80px;
-    height: 50px;
-  }
-
-  .welcome-art .orbit-b {
-    width: 50px;
-    height: 82px;
-  }
-
-  .welcome-art .welcome-logo {
-    width: 54px;
-    height: 54px;
-  }
-
-  .welcome-art .welcome-chip:not(.chip-grow) {
-    display: none;
-  }
-
-  .welcome-art .chip-grow {
-    right: -1px;
-    bottom: 10px;
-    padding: 3px 5px;
-    font-size: 8px;
-  }
 }
 
 @media (max-width: 480px) {
@@ -4954,27 +4995,7 @@ main,
     max-width: 150px;
   }
 
-  .welcome-art {
-    width: 64px;
-    height: 78px;
-    flex-basis: 64px;
-  }
 
-  .welcome-art .orbit-a,
-  .welcome-art .orbit {
-    width: 62px;
-    height: 40px;
-  }
-
-  .welcome-art .orbit-b {
-    width: 40px;
-    height: 64px;
-  }
-
-  .welcome-art .welcome-logo {
-    width: 44px;
-    height: 44px;
-  }
 
   .welcome-date {
     flex-basis: 78px;
@@ -5003,46 +5024,34 @@ main,
   }
 }
 
+/* Ambient cosmic background rings sweeping across the welcome banner and over the greeting */
 .welcome-banner::before,
 .welcome-banner::after {
-  display: none;
-  animation: none;
-}
-
-@keyframes welcomeBannerRingSwing {
-  0%, 100% {
-    transform: translate3d(0, -12px, 0) rotate(-25deg) scaleX(0.985);
-  }
-  25% {
-    transform: translate3d(3px, 5px, 0) rotate(-20deg) scaleX(1);
-  }
-  50% {
-    transform: translate3d(0, 22px, 0) rotate(-25deg) scaleX(1.015);
-  }
-  75% {
-    transform: translate3d(-3px, 5px, 0) rotate(-30deg) scaleX(1);
-  }
-}
-
-@keyframes welcomeBannerRingSwingSoft {
-  0%, 100% {
-    transform: translate3d(0, 8px, 0) rotate(25deg);
-  }
-  50% {
-    transform: translate3d(-5px, 20px, 0) rotate(31deg);
-  }
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .welcome-banner::before {
-  z-index: 0;
-  transform-origin: 50% 100%;
-  animation: welcomeBannerRingSwing 7.5s ease-in-out infinite;
+  border: 1px solid rgba(0, 160, 255, 0.16);
+  width: 540px;
+  height: 185px;
+  right: max(29.5%, 385px);
+  top: -95px;
+  transform: rotate(-22deg);
+  box-shadow: none;
 }
 
 .welcome-banner::after {
-  z-index: 0;
-  transform-origin: 50% 100%;
-  animation: welcomeBannerRingSwingSoft 9.5s ease-in-out infinite;
+  border: 1px solid rgba(125, 175, 255, 0.13);
+  width: 390px;
+  height: 140px;
+  right: max(32.5%, 420px);
+  top: -65px;
+  transform: rotate(24deg);
+  box-shadow: none;
 }
 
 .welcome-copy,
@@ -5074,27 +5083,7 @@ main,
     line-height: 1.35;
   }
 
-  .welcome-art {
-    width: 76px;
-    height: 84px;
-    flex-basis: 76px;
-  }
 
-  .welcome-art .orbit-a,
-  .welcome-art .orbit {
-    width: 72px;
-    height: 46px;
-  }
-
-  .welcome-art .orbit-b {
-    width: 46px;
-    height: 76px;
-  }
-
-  .welcome-art .welcome-logo {
-    width: 50px;
-    height: 50px;
-  }
 
   .welcome-date {
     flex: 0 0 108px;
@@ -5150,27 +5139,7 @@ main,
     font-size: 8px;
   }
 
-  .welcome-art {
-    width: 58px;
-    height: 68px;
-    flex-basis: 58px;
-  }
 
-  .welcome-art .orbit-a,
-  .welcome-art .orbit {
-    width: 56px;
-    height: 36px;
-  }
-
-  .welcome-art .orbit-b {
-    width: 36px;
-    height: 58px;
-  }
-
-  .welcome-art .welcome-logo {
-    width: 40px;
-    height: 40px;
-  }
 
   .welcome-date {
     flex-basis: 92px;
@@ -5189,17 +5158,33 @@ main,
 
 @media (max-width: 760px) {
   .welcome-banner::before {
-    width: 210px;
-    height: 125px;
-    right: 28%;
-    top: -64px;
+    width: 360px !important;
+    height: 140px !important;
+    right: 28% !important;
+    top: -70px !important;
   }
 
   .welcome-banner::after {
-    width: 150px;
-    height: 92px;
-    right: 32%;
-    top: -42px;
+    width: 250px !important;
+    height: 105px !important;
+    right: 32% !important;
+    top: -50px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-banner::before {
+    width: 220px !important;
+    height: 100px !important;
+    right: 28% !important;
+    top: -50px !important;
+  }
+
+  .welcome-banner::after {
+    width: 160px !important;
+    height: 75px !important;
+    right: 32% !important;
+    top: -35px !important;
   }
 }
 
