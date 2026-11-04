@@ -4945,25 +4945,29 @@ main,
     flex: 1 1 0 !important;
     min-width: 0 !important;
     text-align: left !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
   }
 
   .welcome-copy h1 {
     display: block !important;
     margin: 0 0 6px !important;
-    font-size: clamp(16px, 3vw, 22px) !important;
+    font-size: clamp(20px, 3.2vw, 25px) !important;
     line-height: 1.15 !important;
     letter-spacing: -0.03em !important;
-    white-space: nowrap !important;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal !important;
+    overflow: visible !important;
   }
 
   .welcome-copy h1 .mobile-welcome-greeting {
+    display: inline !important;
     white-space: nowrap !important;
   }
 
   .welcome-copy h1 .mobile-welcome-name,
   .welcome-copy h1 .mobile-welcome-name span {
+    display: inline !important;
     white-space: nowrap !important;
     color: #1ccfff !important;
   }
@@ -4971,11 +4975,10 @@ main,
   .welcome-copy p {
     margin: 0 !important;
     color: #a8bdd5 !important;
-    font-size: clamp(8px, 1.4vw, 10.5px) !important;
+    font-size: clamp(11px, 1.8vw, 13.5px) !important;
     line-height: 1.35 !important;
-    white-space: nowrap !important;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal !important;
+    overflow: visible !important;
   }
 
   .welcome-art {
@@ -5151,37 +5154,44 @@ main,
 
   .welcome-copy h1 {
     display: block !important;
-    margin: 0 0 clamp(2px, 0.6vw, 4px) !important;
-    font-size: clamp(11px, 3vw, 14.5px) !important;
-    font-weight: 800 !important;
-    line-height: 1.15 !important;
-    letter-spacing: -0.035em !important;
-    white-space: nowrap !important;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    margin: 0 0 clamp(2.5px, 0.8vw, 4.5px) !important;
+    line-height: 1.14 !important;
+    letter-spacing: -0.025em !important;
+    white-space: normal !important;
+    overflow: visible !important;
   }
 
   .welcome-copy h1 .mobile-welcome-greeting {
+    display: block !important;
+    font-size: clamp(13.5px, 3.8vw, 17px) !important;
+    font-weight: 700 !important;
+    color: #f0f6fc !important;
+    line-height: 1.15 !important;
     white-space: nowrap !important;
-    color: inherit !important;
   }
 
   .welcome-copy h1 .mobile-welcome-name,
   .welcome-copy h1 .mobile-welcome-name span {
-    white-space: nowrap !important;
+    display: block !important;
+    font-size: clamp(16.5px, 4.8vw, 21.5px) !important;
+    font-weight: 800 !important;
     color: #1ccfff !important;
+    line-height: 1.12 !important;
+    white-space: nowrap !important;
+    letter-spacing: -0.03em !important;
+    text-shadow: 0 0 14px rgba(28, 207, 255, 0.32);
   }
 
   .welcome-copy p {
     margin: 0 !important;
     color: #a8bdd5 !important;
-    font-size: clamp(5.5px, 1.5vw, 7.5px) !important;
-    line-height: 1.25 !important;
-    letter-spacing: 0.01em !important;
-    white-space: nowrap !important;
+    font-size: clamp(9px, 2.5vw, 11.5px) !important;
+    line-height: 1.32 !important;
+    letter-spacing: 0.005em !important;
+    white-space: normal !important;
     max-width: 100% !important;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow: visible !important;
+    text-overflow: clip !important;
   }
 
   /* Column 2: Center IntelliCore Brain/Orbit Graphic */
