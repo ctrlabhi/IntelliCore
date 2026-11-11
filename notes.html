@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IntelliCore Notes AI — Instant YouTube Video to Notes &amp; PDF</title>
+  <meta name="description" content="Turn any YouTube video into comprehensive study notes, executive summaries, and downloadable PDF with official 10% visible IntelliCore watermark branding." />
+  <meta name="theme-color" content="#050813" />
+  <link rel="icon" type="image/png" href="favicon.png?v=4" />
+  <link rel="stylesheet" href="style.css?v=20261103-clean-sync-v9" />
+  <link rel="stylesheet" href="notes.css?v=20261111-v1" />
+  <!-- html2pdf library for direct client-side PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body class="notes-page">
+
+  <!-- Interactive Dynamic Background Starfield -->
+  <canvas id="notesStarfield" class="notes-starfield" aria-hidden="true"></canvas>
+
+  <!-- Navigation Header -->
+  <header class="notes-header">
+    <div class="notes-container notes-header-inner">
+      <a href="index.html" class="brand-logo" aria-label="IntelliCore Home">
+        <img class="brand-emblem" src="Photos/favicon.png" alt="IntelliCore logo" onerror="this.src='favicon.png'">
+        <div class="brand-text">
+          <span class="brand-name">Intelli<span>Core</span></span>
+          <span class="brand-sublabel">Innovation at the Fore</span>
+        </div>
+      </a>
+
+      <nav class="notes-nav-links" aria-label="Quick links">
+        <a href="index.html" class="notes-nav-link">Home</a>
+        <a href="index.html#services" class="notes-nav-link">IT Solutions</a>
+        <a href="index.html#tracks" class="notes-nav-link">Internships</a>
+        <a href="notes.html" class="notes-nav-link active">
+          AI Notes Studio <span class="notes-nav-badge">10% Watermark</span>
+        </a>
+      </nav>
+
+      <a href="index.html#tracks" class="notes-header-cta">
+        <span>Explore Programs</span> ↗
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="notes-container">
+
+    <!-- Hero Section -->
+    <section class="notes-hero">
+      <div class="hero-pill">
+        <span class="dot"></span>
+        <span>INTELLICORE AI LAB • 10% WATERMARK EMBEDDED</span>
+      </div>
+      <h1>Turn Any YouTube Video into<br>Structured Notes &amp; PDF</h1>
+      <p class="notes-hero-sub">
+        Paste any YouTube lecture, tutorial, podcast, or crash course URL. IntelliCore AI instantly synthesizes high-yield academic summaries, core concept glossaries, and timestamped breakdowns — complete with the official <strong>10% visible IntelliCore watermark</strong> in both view and downloadable PDF.
+      </p>
+    </section>
+
+    <!-- Studio Input Box -->
+    <section class="notes-studio-card">
+      <div class="yt-input-wrapper">
+        <div class="yt-input-icon" title="YouTube Link">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+          </svg>
+        </div>
+        <input
+          type="url"
+          id="ytUrlInput"
+          class="yt-url-input"
+          placeholder="Paste any YouTube video link (e.g. https://www.youtube.com/watch?v=... or https://youtu.be/...)"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <div class="input-actions">
+          <button type="button" class="btn-paste-clip" id="btnPasteClip" title="Paste link from clipboard">
+            <span>📋</span> Paste
+          </button>
+          <button type="button" class="btn-generate" id="btnGenerate">
+            <span>Generate Notes</span> ⚡
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Sample Buttons -->
+      <div class="quick-samples">
+        <span class="quick-samples-label">Quick Examples:</span>
+        <button type="button" class="sample-pill" data-sample-url="https://www.youtube.com/watch?v=kqtD5dpn9C8">
+          🐍 Python Crash Course
+        </button>
+        <button type="button" class="sample-pill" data-sample-url="https://www.youtube.com/watch?v=aircAruvnKk">
+          🧠 Neural Networks &amp; AI
+        </button>
+        <button type="button" class="sample-pill" data-sample-url="https://www.youtube.com/watch?v=8hly31xKli0">
+          DSA Algorithms Primer
+        </button>
+        <button type="button" class="sample-pill" data-sample-url="https://www.youtube.com/watch?v=M576WGiDBdQ">
+          🌐 Full-Stack Architecture
+        </button>
+      </div>
+
+      <!-- Controls & Options Grid -->
+      <div class="studio-options-grid">
+        <div class="option-group">
+          <label class="option-label" for="notesMode">
+            <span>📚</span> Notes Format
+          </label>
+          <select id="notesMode" class="option-select">
+            <option value="study_guide" selected>Comprehensive Academic Study Guide</option>
+            <option value="summary">Executive Summary &amp; Key Takeaways</option>
+            <option value="timestamps">Detailed Timestamped Breakdown</option>
+            <option value="flashcards">Active Recall Quiz &amp; Flashcards</option>
+          </select>
+        </div>
+
+        <div class="option-group">
+          <label class="option-label" for="notesLang">
+            <span>🌐</span> Language Output
+          </label>
+          <select id="notesLang" class="option-select">
+            <option value="en" selected>English (Global Academic)</option>
+            <option value="hinglish">Hinglish (Hindi + English)</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+          </select>
+        </div>
+
+        <div class="option-group">
+          <label class="option-label">
+            <span>🛡️</span> Watermark Branding
+          </label>
+          <div style="font-size: 0.88rem; color: var(--accent-cyan); display: flex; align-items: center; height: 100%; font-weight: 700;">
+            ✓ IntelliCore (10% Visibility Active)
+          </div>
+        </div>
+      </div>
+
+      <!-- Watermark specification note -->
+      <div class="watermark-spec-badge">
+        <div class="watermark-spec-left">
+          <span>🛡️</span>
+          <span><strong>Watermark Protection:</strong> Notes and exported PDFs will be stamped with <strong>IntelliCore</strong> at exactly 10% opacity across every page.</span>
+        </div>
+        <span class="watermark-spec-tag">10% OPACITY</span>
+      </div>
+
+      <!-- Advanced Toggle (Gemini API & Custom Transcript) -->
+      <button type="button" class="advanced-settings-toggle" id="advancedToggle">
+        Advanced: Use Gemini API Key or Paste Custom Transcript ▼
+      </button>
+
+      <div class="advanced-panel" id="advancedPanel">
+        <div class="advanced-input-group">
+          <label for="geminiApiKey">Optional: Google Gemini API Key (For Custom Neural Inference)</label>
+          <input
+            type="password"
+            id="geminiApiKey"
+            class="advanced-input"
+            placeholder="AIzaSy... (Leave blank to use built-in Intelligent Synthesizer)"
+          />
+          <div class="advanced-help">
+            Our built-in intelligent engine works immediately with zero keys! If you have a personal Google AI Studio key, you can enter it here for custom Gemini 1.5/2.0 Flash synthesis. <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Get a free key ↗</a>
+          </div>
+        </div>
+
+        <div class="advanced-input-group">
+          <label for="customTranscript">Optional: Paste Custom Video Transcript or Subtitles</label>
+          <textarea
+            id="customTranscript"
+            class="advanced-input"
+            rows="4"
+            placeholder="If captions on YouTube are restricted, you can paste transcript lines here to generate custom timestamped notes..."
+          ></textarea>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Video Preview Card (Appears once link is entered) -->
+    <section class="video-preview-card" id="videoPreviewCard">
+      <div class="video-thumb-wrap">
+        <img id="videoThumbImg" class="video-thumb-img" src="" alt="Video thumbnail">
+      </div>
+      <div class="video-preview-details">
+        <h3 class="video-preview-title" id="videoPreviewTitle">Video Title</h3>
+        <div class="video-preview-meta">
+          <span>Channel: <strong id="videoPreviewAuthor">Educator</strong></span>
+          <span class="video-meta-badge">YouTube</span>
+          <span class="video-meta-badge">HD</span>
+        </div>
+        <a id="videoPreviewLink" class="video-preview-link" href="#" target="_blank" rel="noopener">
+          <span>Watch Original Video on YouTube</span> ↗
+        </a>
+      </div>
+    </section>
+
+    <!-- Generation Progress State -->
+    <section class="generation-progress-box" id="generationProgressBox">
+      <div class="cyber-spinner"></div>
+      <h3 class="progress-title" id="progressTitle">Extracting Video Metadata...</h3>
+      <p class="progress-subtext" id="progressSubtext">Connecting to YouTube and preparing lecture breakdown</p>
+      
+      <div class="progress-steps-list">
+        <div class="progress-step-item" id="step1">
+          <span class="step-circle">1</span>
+          <span>Metadata Extraction</span>
+        </div>
+        <div class="progress-step-item" id="step2">
+          <span class="step-circle">2</span>
+          <span>Transcript Parsing</span>
+        </div>
+        <div class="progress-step-item" id="step3">
+          <span class="step-circle">3</span>
+          <span>AI Note Synthesis</span>
+        </div>
+        <div class="progress-step-item" id="step4">
+          <span class="step-circle">4</span>
+          <span>10% Watermark Application</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- The Generated Notes Section -->
+    <section class="notes-results-section" id="notesResultsSection">
+      
+      <!-- Action Toolbar -->
+      <div class="notes-action-toolbar">
+        <div class="toolbar-status">
+          <span class="badge-watermark-active">
+            <span class="pulse-dot"></span>
+            <span>IntelliCore 10% Watermark Embedded</span>
+          </span>
+          <span style="color: var(--text-muted); font-size: 0.8rem;">Ready for Export</span>
+        </div>
+
+        <div class="toolbar-actions">
+          <button type="button" class="btn-tool btn-primary-pdf" id="downloadPdfBtn" title="Download Print-ready PDF">
+            <span>📥</span> Download PDF
+          </button>
+          <button type="button" class="btn-tool" id="copyNotesBtn" title="Copy formatted markdown to clipboard">
+            <span>📋</span> Copy Notes
+          </button>
+          <button type="button" class="btn-tool" id="downloadMdBtn" title="Download Markdown (.md) file">
+            <span>💾</span> Download .MD
+          </button>
+          <button type="button" class="btn-tool" id="printNotesBtn" title="Direct Browser Print / Save to PDF">
+            <span>🖨️</span> Print
+          </button>
+          <button type="button" class="btn-tool" id="toggleEditBtn" title="Edit text inline before exporting">
+            <span>✏️</span> Edit Notes
+          </button>
+          <button type="button" class="btn-tool" id="toggleThemeBtn" title="Toggle between White and Dark preview">
+            <span>🌙</span> Dark Mode
+          </button>
+        </div>
+      </div>
+
+      <!-- The Printable / Exportable Document Sheet with 10% IntelliCore Watermark -->
+      <article class="document-sheet-wrap" id="notesDocument">
+        <!-- Rendered dynamically by notes.js with 10% visible IntelliCore watermark -->
+      </article>
+
+    </section>
+
+    <!-- FAQ & Features Section -->
+    <section class="notes-faq-section">
+      <h2 class="faq-title">Frequently Asked Questions</h2>
+      <div class="faq-grid">
+        <div class="faq-card">
+          <h3 class="faq-q"><span>❓</span> How does the YouTube link to Notes conversion work?</h3>
+          <p class="faq-a">
+            Simply paste any YouTube video link. IntelliCore AI parses the video stream, retrieves the lecture context and subtitles, and transforms the raw narrative into a structured, high-yield academic study guide with executive summaries, key glossaries, timestamped modules, and active recall flashcards.
+          </p>
+        </div>
+        <div class="faq-card">
+          <h3 class="faq-q"><span>🛡️</span> Where is the 10% visible IntelliCore watermark?</h3>
+          <p class="faq-a">
+            As strictly requested, every generated document and exported PDF features the official <strong>"IntelliCore"</strong> watermark rendered at 10% opacity (0.10 visibility). It provides clean copyright attribution without obstructing text readability.
+          </p>
+        </div>
+        <div class="faq-card">
+          <h3 class="faq-q"><span>📄</span> How do I save the notes as a PDF?</h3>
+          <p class="faq-a">
+            Click the glowing <strong>"Download PDF"</strong> button on the toolbar. The engine immediately compiles an A4 publication-quality PDF directly in your browser. You can also click "Print" to use your browser's native Save to PDF dialog.
+          </p>
+        </div>
+        <div class="faq-card">
+          <h3 class="faq-q"><span>✏️</span> Can I edit the notes before downloading?</h3>
+          <p class="faq-a">
+            Yes! Click the <strong>"Edit Notes"</strong> button on the toolbar to modify the title, executive summary, bullet points, or sections directly on the screen before downloading your final PDF.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="notes-footer">
+    <div class="notes-container">
+      <p>
+        &copy; 2026 <strong>IntelliCore Technologies</strong>. All rights reserved. •
+        <a href="index.html">IntelliCore Home</a> •
+        <a href="index.html#tracks">Internship Tracks</a> •
+        <a href="mailto:Info@IntelliCoreTechnologies.in">Support</a>
+      </p>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script src="notes.js?v=20261111-v1"></script>
+</body>
+</html>
