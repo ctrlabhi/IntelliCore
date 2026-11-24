@@ -1,6 +1,6 @@
 # IntelliCore V2.0 project progress
 
-**Updated on 2026-11-25 (Asia/Kolkata).** Phase 04 builds on `1fe8067` and preserves the handover schema and migration SQL. The onboarding and internship workflows are implemented and verified on isolated MySQL. Existing Docker Compose runtime and live Firebase sign-in remain unverified.
+**Updated on 2026-11-25 (Asia/Kolkata).** Phase 04 implementation checkpoint `b73e6c8` builds on `1fe8067` and preserves the handover schema and migration SQL. The onboarding and internship workflows are implemented and verified on isolated MySQL. Existing Docker Compose runtime and live Firebase sign-in remain unverified. [Phase 04 engineering report](PHASE_04_REPORT.md).
 
 ## Phase and checkpoint history
 
@@ -52,7 +52,7 @@ That reconciliation used a temporary copy without the repository environment fil
 
 | Check | Result | Evidence |
 | --- | --- | --- |
-| Prisma schema, client and migrations | PASS | Validated schema, generated Prisma Client 6.19.3, and applied all four original migrations on disposable MySQL 8.4.13. Prisma reported the database up to date. |
+| Prisma schema, client and migrations | PASS | Validated schema, generated Prisma Client 6.19.3, and applied all four original migrations from a fresh clone on disposable MySQL 8.4.13. Source and ledger checksums matched, and Prisma found no schema drift. |
 | Complete automated suite | PASS | **91 tests across 17 files**. This includes 17 unit tests, 35 in MySQL-dependent suites and 39 other HTTP and mocked integration tests. Firebase verification used fixtures. |
 | Browser workflow | PASS | Headless Edge with fixture Firebase identities, real Express APIs and disposable MySQL. Founder created a department and assigned a leader. Pending Intern submitted a draft at mobile width. HR approved and persisted enrollment. Team Leader saw their scoped roster. The intern saw their own enrollment. |
 | Runtime health and API documentation | PASS | Express over loopback returned success from `/health`, `/ready`, `/api-docs` and `/api-docs.json` against disposable MySQL. |
