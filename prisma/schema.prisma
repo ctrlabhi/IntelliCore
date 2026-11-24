@@ -54,6 +54,10 @@ model User {
   internshipApplications InternshipApplication[] @relation("ApplicantApplications")
   internships            Internship[]            @relation("InternEnrollments")
   assignedInternships    Internship[]            @relation("TeamLeaderInternships")
+  requestedAttendanceCorrections AttendanceCorrection[] @relation("AttendanceCorrectionRequester")
+  reviewedAttendanceCorrections  AttendanceCorrection[] @relation("AttendanceCorrectionReviewer")
+  reviewedDailyWorkReports       DailyWorkReport[]
+  reviewedLeaveRequests          LeaveRequest[]
 
   @@index([status])
   @@index([email])
@@ -278,10 +282,173 @@ model Internship {
   application        InternshipApplication @relation(fields: [applicationId], references: [id], onDelete: Restrict)
   department         Department            @relation(fields: [departmentId], references: [id], onDelete: Restrict)
   assignedTeamLeader User?                 @relation("TeamLeaderInternships", fields: [assignedTeamLeaderId], references: [id], onDelete: SetNull)
+  attendanceRecords  Attendance[]
+  attendanceEligibility AttendanceEligibility[]
+  dailyWorkReports   DailyWorkReport[]
+  leaveRequests      LeaveRequest[]
 
   @@index([userId])
   @@index([departmentId])
   @@index([assignedTeamLeaderId])
   @@index([internshipStatus])
   @@map("internships")
+}
+
+enum AttendanceSource {
+  DASHBOARD
+  CORRECTION
+}
+
+enum DailyWorkReportStatus {
+  DRAFT
+  SUBMITTED
+  REVIEWED
+}
+
+enum LeaveType {
+  SICK_LEAVE
+  CASUAL_LEAVE
+  EMERGENCY_LEAVE
+  OTHER
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum AttendanceCorrectionKind {
+  TIMESTAMPS
+  LATE_REPORT
+}
+
+enum AttendanceCorrectionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model AttendancePolicy {
+  id                  String   @id @default(uuid()) @db.VarChar(36)
+  name                String   @db.VarChar(100)
+  timezone            String   @default("Asia/Kolkata") @db.VarChar(64)
+  workingDays         Json     @map("working_days")
+  checkInTime         String   @default("09:30") @map("check_in_time") @db.Char(5)
+  checkOutTime        String   @default("18:30") @map("check_out_time") @db.Char(5)
+  reportDeadline      String   @default("20:00") @map("report_deadline") @db.Char(5)
+  graceMinutes        Int      @default(0) @map("grace_minutes")
+  requiresDailyReport Boolean  @default(true) @map("requires_daily_report")
+  effectiveFrom       DateTime @unique @map("effective_from") @db.Date
+  createdAt           DateTime @default(now()) @map("created_at")
+  attendanceRecords   Attendance[]
+
+  @@map("attendance_policies")
+}
+
+model AttendanceEligibility {
+  id           String    @id @default(uuid()) @db.VarChar(36)
+  internshipId String    @map("internship_id") @db.VarChar(36)
+  startsAt     DateTime  @map("starts_at")
+  endsAt       DateTime? @map("ends_at")
+  firstDate    DateTime  @map("first_date") @db.Date
+  lastDate     DateTime  @map("last_date") @db.Date
+  internship   Internship @relation(fields: [internshipId], references: [id], onDelete: Restrict)
+
+  @@index([internshipId, endsAt])
+  @@index([firstDate, lastDate])
+  @@map("attendance_eligibility")
+}
+
+model Attendance {
+  id            String           @id @default(uuid()) @db.VarChar(36)
+  internshipId  String           @map("internship_id") @db.VarChar(36)
+  businessDate  DateTime         @map("business_date") @db.Date
+  policyId      String           @map("policy_id") @db.VarChar(36)
+  checkInAt     DateTime?        @map("check_in_at")
+  checkOutAt    DateTime?        @map("check_out_at")
+  source        AttendanceSource @default(DASHBOARD)
+  revision      Int              @default(0)
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
+  internship    Internship       @relation(fields: [internshipId], references: [id], onDelete: Restrict)
+  policy        AttendancePolicy @relation(fields: [policyId], references: [id], onDelete: Restrict)
+  corrections   AttendanceCorrection[]
+
+  @@unique([internshipId, businessDate])
+  @@index([businessDate])
+  @@map("attendance")
+}
+
+model DailyWorkReport {
+  id                  String                @id @default(uuid()) @db.VarChar(36)
+  internshipId        String                @map("internship_id") @db.VarChar(36)
+  businessDate        DateTime              @map("business_date") @db.Date
+  workCompleted       String                @map("work_completed") @db.Text
+  learningSummary     String                @map("learning_summary") @db.Text
+  progressSummary     String                @map("progress_summary") @db.Text
+  blockers            String                @db.Text
+  nextDayPlan         String                @map("next_day_plan") @db.Text
+  status              DailyWorkReportStatus @default(DRAFT)
+  submittedAt         DateTime?             @map("submitted_at")
+  lateApprovedAt      DateTime?             @map("late_approved_at")
+  reviewedBy          String?               @map("reviewed_by") @db.VarChar(36)
+  reviewedAt          DateTime?             @map("reviewed_at")
+  reviewRemarks       String?               @map("review_remarks") @db.Text
+  createdAt           DateTime              @default(now()) @map("created_at")
+  updatedAt           DateTime              @updatedAt @map("updated_at")
+  internship          Internship            @relation(fields: [internshipId], references: [id], onDelete: Restrict)
+  reviewer            User?                 @relation(fields: [reviewedBy], references: [id], onDelete: SetNull)
+
+  @@unique([internshipId, businessDate])
+  @@index([businessDate, status])
+  @@map("daily_work_reports")
+}
+
+model LeaveRequest {
+  id                  String      @id @default(uuid()) @db.VarChar(36)
+  internshipId        String      @map("internship_id") @db.VarChar(36)
+  leaveType           LeaveType   @map("leave_type")
+  startDate           DateTime    @map("start_date") @db.Date
+  endDate             DateTime    @map("end_date") @db.Date
+  workingDays         Int         @map("working_days")
+  reason              String      @db.Text
+  status              LeaveStatus @default(PENDING)
+  reconciledActivity  Boolean     @default(false) @map("reconciled_activity")
+  reviewedBy          String?     @map("reviewed_by") @db.VarChar(36)
+  reviewedAt          DateTime?   @map("reviewed_at")
+  reviewRemarks       String?     @map("review_remarks") @db.Text
+  cancelledAt         DateTime?   @map("cancelled_at")
+  createdAt           DateTime    @default(now()) @map("created_at")
+  updatedAt           DateTime    @updatedAt @map("updated_at")
+  internship          Internship  @relation(fields: [internshipId], references: [id], onDelete: Restrict)
+  reviewer            User?       @relation(fields: [reviewedBy], references: [id], onDelete: SetNull)
+
+  @@index([internshipId, status, startDate, endDate])
+  @@index([status, startDate])
+  @@map("leave_requests")
+}
+
+model AttendanceCorrection {
+  id                 String                     @id @default(uuid()) @db.VarChar(36)
+  attendanceId       String                     @map("attendance_id") @db.VarChar(36)
+  requestedBy        String                     @map("requested_by") @db.VarChar(36)
+  kind               AttendanceCorrectionKind
+  originalValues     Json                       @map("original_values")
+  proposedChanges    Json                       @map("proposed_changes")
+  reason             String                     @db.Text
+  status             AttendanceCorrectionStatus @default(PENDING)
+  reviewedBy         String?                    @map("reviewed_by") @db.VarChar(36)
+  reviewedAt         DateTime?                  @map("reviewed_at")
+  resolutionRemarks  String?                    @map("resolution_remarks") @db.Text
+  createdAt          DateTime                   @default(now()) @map("created_at")
+  updatedAt          DateTime                   @updatedAt @map("updated_at")
+  attendance         Attendance                 @relation(fields: [attendanceId], references: [id], onDelete: Restrict)
+  requester          User                       @relation("AttendanceCorrectionRequester", fields: [requestedBy], references: [id], onDelete: Restrict)
+  reviewer           User?                      @relation("AttendanceCorrectionReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
+
+  @@index([attendanceId, status])
+  @@index([status, createdAt])
+  @@map("attendance_corrections")
 }

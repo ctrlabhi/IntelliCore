@@ -126,3 +126,27 @@ These operations use the development Firebase Bearer token and require a verifie
 
 List filters include `search`, `page` and `limit`. Application and enrollment lists accept `departmentId` and `status`. Enrollment lists also accept `teamLeaderId`, `commencementFrom` and `completionThrough`. Dates are `YYYY-MM-DD` business dates in Asia/Kolkata. Creation returns 201. Validation returns 400, unauthenticated requests return 401, denied actions return 403, out-of-scope details return 404, and duplicates or invalid transitions return 409. [OpenAPI definitions](../backend/src/config/phase04OpenApi.js).
 
+## Phase 05 attendance, leave and work reports
+
+Calls require verified development Firebase identity and active MySQL account state. Self routes derive the user from auth. All dates are IST business dates in `YYYY-MM-DD` format. Timestamp proposals require an explicit UTC offset. JSON lists return `items` and `pagination`. CSV uses `text/csv`.
+
+| Paths under `/api/v1` | Methods and scope |
+| --- | --- |
+| `/attendance/check-in`, `/attendance/check-out` | `POST`, empty body, active intern. Check-in records the server time in an eligible working window and provides a server opening time for early dashboard access. Checkout records an explicit same-IST-date event. Both are idempotent. |
+| `/attendance/me/today`, `/attendance/me`, `/attendance/me/summary` | `GET`, current own state, bounded history and summary. Live state, primary classification and independent flags are distinct fields. |
+| `/attendance`, `/attendance/summary`, `/attendance/:id` | `GET`, scoped list, aggregate and persisted record detail. Team Leaders are restricted to current assigned departments. Interns can read their own detail. |
+| `/attendance/export` | `GET`, approved Founder/HR scope, formula-safe CSV. |
+| `/attendance/policies` | `GET`, `POST`, primary Founder. Create an immutable future version with `name` and `effectiveFrom`, retaining approved schedule semantics. |
+| `/daily-work-reports/me/today` | `GET` current draft/submission; `PUT` save draft fields. Date and eligibility are determined on the server. |
+| `/daily-work-reports/me/today/submit` | `POST`, empty body, submit a complete current-day draft before 20:00 IST. |
+| `/daily-work-reports/me`, `/daily-work-reports`, `/daily-work-reports/:id` | `GET`, own history, authorized submitted report lists, and scoped report detail. |
+| `/daily-work-reports/:id/review` | `POST`, authorized Founder/HR review with `remarks`. |
+| `/leave-requests/me`, `/leave-requests/me/:id`, `/leave-requests`, `/leave-requests/:id` | `GET` own history/details or authorized staff list/detail. Detail shows whether activity requires reconciliation. |
+| `/leave-requests` | `POST`, own `internshipId`, `leaveType`, `startDate`, `endDate`, and `reason`. |
+| `/leave-requests/:id/cancel`, `/approve`, `/reject` | `POST` to full record path with action suffix. Cancellation is owner-only with empty body. Founder/HR review requires `remarks`. Explicit `reconcileActivity: true` is required for approval when timestamps exist. |
+| `/attendance-corrections/me`, `/attendance-corrections/me/:id`, `/attendance-corrections`, `/attendance-corrections/:id` | `GET`, own or authorized reviewer list and detail. |
+| `/attendance-corrections` | `POST`, own `internshipId`, `businessDate`, `reason` and `kind`. `TIMESTAMPS` proposes check-in or checkout in `proposedChanges`; `LATE_REPORT` proposes all five report fields under `proposedChanges`. |
+| `/attendance-corrections/:id/approve`, `/attendance-corrections/:id/reject` | `POST`, authorized Founder/HR review with `remarks` and an atomic audit decision. |
+
+Lists accept validated `from`, `to`, `internshipId`, `departmentId`, `search`, `status`, `page` and `limit` as applicable. Attendance also accepts `sort` as `asc` or `desc`. Leave adds `leaveType`. Attendance ranges support 31 days, summary and export support at most 250 enrollments, and a leave request may cover up to 90 calendar days. REST errors use the standard envelope. [Phase 05 OpenAPI](../backend/src/config/phase05OpenApi.js).
+

@@ -58,10 +58,12 @@ This specification enshrines the approved business rules and functional logic go
    - The first authenticated dashboard or workspace access by an intern on an active working day between 09:30 and 18:30 IST automatically records their daily check-in.
 4. **Automatic Check-Out:**
    - Logging out of the application records the check-out timestamp.
-   - If an intern fails to log out explicitly, an automated end-of-day cron job evaluates and records the session check-out at 18:30 IST.
+   - An open record after 18:30 IST carries a missing-checkout flag. The Phase 05 directive requires a real explicit logout event and supersedes synthetic checkout.
+   - Checkout lookup uses the current IST business date. Logout proceeds if checkout storage fails or the report is missing.
 5. **Mandatory Daily Work Report:**
-   - For an attendance record to transition from `checked_in` to `completed_present`, the intern must submit their Daily Work Report (DWR) summarizing tasks completed before 20:00 IST.
-   - Unsubmitted reports result in a `partial_attendance` or `absent` disposition upon end-of-day reconciliation.
+   - Submit work completed, learning, progress, blockers and the next working day's plan before 20:00 IST. A complete `PRESENT` day requires check-in, checkout and a submitted report.
+   - Past checked-in days with missing evidence are `INCOMPLETE`. An eligible completed shift with no check-in is `ABSENT`. Approved leave and weekends have distinct classifications.
+   - Attendance applies to eligible ongoing interns. Staff attendance and payroll deductions are outside this policy. Timestamp and late-report corrections require an authorized, audited decision. [Attendance operating rules](ATTENDANCE.md).
 
 ---
 
@@ -71,6 +73,7 @@ This specification enshrines the approved business rules and functional logic go
    - Interns can submit leave requests through the workspace with a stated reason and requested dates.
    - Every leave request requires formal review and approval by an authorized `hr_manager`.
    - Approved leaves preserve attendance records without penalty.
+   - Requests support sick, casual, emergency and other leave. Weekend days are excluded from leave totals, and approval over recorded activity requires explicit reconciliation with timestamps retained.
 2. **Internship Completion Workflow:**
    - Internship duration options: 1 month, 2 months, 3 months, or 6 months.
    - Upon reaching the calculated end date, the account transitions to `completion_pending`.

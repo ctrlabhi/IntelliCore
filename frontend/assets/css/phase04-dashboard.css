@@ -19,3 +19,9 @@
 .phase04 dd { margin: 0; }
 .phase04 [role="status"] { font-size: .9rem; }
 .phase04 [hidden], .phase04-disabled[hidden] { display: none !important; }
+.phase05 .phase05-attendance-status { display: inline-block; text-transform: capitalize; }
+.phase05-attendance-status[data-status="PRESENT"] { color: #79e2bb; }
+.phase05-attendance-status[data-status="INCOMPLETE"], .phase05-attendance-status[data-status="ABSENT"] { color: #ffc182; }
+.phase05-attendance-status[data-status="ON_LEAVE"], .phase05-attendance-status[data-status="WEEKLY_OFF"] { color: #a9c5ee; }
+.phase05 input[type="checkbox"] { width: 1rem; height: 1rem; min-height: 0; }
+.phase05 dd { white-space: pre-wrap; }

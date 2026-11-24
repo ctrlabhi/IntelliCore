@@ -68,3 +68,9 @@ For the complete suite, provision a disposable MySQL 8.4 database and a dedicate
 
 Fixture setup deploys the Prisma chain, seeds the catalog and creates a synthetic Founder in the isolated schema. The suite exercises real MySQL writes, foreign keys, concurrent transactions, audit rollback and ownership. Firebase verification is mocked. Browser tests with synthetic identities and actual development Firebase sign-in are separate checks.
 
+## Phase 05 additional coverage
+
+The same isolated database guard applies to `phase05MySql.test.js`. The real MySQL suite freezes the server clock at controlled IST boundaries while Prisma, Supertest, transaction locks, foreign keys, and audit writes remain real. Unit tests cover deterministic evaluation, partial historical eligibility, duration rounding and bounded logout failure.
+
+The browser verification used headless Edge with a synthetic authentication adapter and the real dashboard UI and APIs. It exercised automatic opening-time check-in, report submission, leave request and approval, explicit logout checkout, leader scope and Founder controls. Real development Firebase authentication remains a separate acceptance check. [Project progress](PROJECT_PROGRESS.md).
+

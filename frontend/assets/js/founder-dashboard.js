@@ -8,6 +8,7 @@
 import { authService } from '/services/auth.js';
 import { api } from '/services/api.js';
 import { mountPhase04 } from './phase04-dashboard.js';
+import { mountStaffAttendance } from './phase05-dashboard.js';
 
 const $ = (id) => document.getElementById(id);
 const authState = $('authState');
@@ -345,6 +346,7 @@ function renderFounderDashboard(context) {
     button.hidden = !canProvision;
   });
   mountPhase04($('interns'), context, 'founder', loadFounderStats);
+  mountStaffAttendance(context, $('interns'));
   loadLiveDashboardData(canProvision);
 }
 

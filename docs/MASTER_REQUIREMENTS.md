@@ -51,9 +51,10 @@
 ## Attendance, leave and learning
 
 - Monday through Friday are working days and Saturday/Sunday are weekly rest days. Business hours are 09:30–18:30 IST. Mark check-ins after 09:30:00 IST late, with zero grace period.
-- First authenticated intern workspace access within business hours on an active working day records daily check-in. Logout records checkout. Scheduled end-of-day processing supplies checkout at 18:30 IST when needed.
-- Interns submit a Daily Work Report before 20:00 IST to qualify for `completed_present` after check-in. Reconciliation without a report results in `partial_attendance` or `absent`. The approved rule leaves the exact split to the Phase 05 workflow specification.
-- Interns request leave with reason and dates. Authorized HR Manager review is required, and approved leave preserves attendance without penalty.
+- First authenticated intern workspace access in the eligible working window records check-in. Explicit logout records real UTC checkout for the current IST business date. After closing, a missing checkout is flagged. The Phase 05 directive supersedes synthetic end-of-day checkout.
+- Verified active interns submit a Daily Work Report before 20:00 IST. `PRESENT` requires check-in, checkout and a submitted report. Past checked-in days with missing evidence are `INCOMPLETE`. Eligible completed shifts without check-in are `ABSENT` based on historical eligibility.
+- Interns request leave with type, reason and dates. Authorized HR Manager or Founder review is required. Approved working days are `ON_LEAVE`, and approval over recorded activity requires an audited reconciliation that preserves timestamps.
+- Submitted reports, checkout evidence and historical policy and eligibility are preserved. Authorized corrections retain original values, proposals and reviewer decisions. Team Leader access follows active department scope. [Attendance operating rules](ATTENDANCE.md).
 - Provide task pacing, assigned work, submissions, reviews, curriculum resources and learning progress. Team Leaders oversee their assigned scope and interns access their own records. Preserve legitimate tracks, milestones, deliverables and rubrics from the legacy curriculum.
 
 ## Communications, meetings and completion artifacts

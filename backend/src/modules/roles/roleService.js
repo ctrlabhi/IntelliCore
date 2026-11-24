@@ -4,6 +4,7 @@ import logger from '../../config/logger.js';
 import { founderOnlyPermissions, isProtectedFounder } from '../../utils/founder.js';
 import { AppError } from '../../utils/errors.js';
 import { lockUser, transaction } from '../../utils/phase04.js';
+import { syncAttendanceEligibility } from '../attendance/eligibility.js';
 import { activeEnrollments, openApplications } from '../internships/internshipPolicy.js';
 
 const prisma = getPrismaClient();
@@ -188,6 +189,8 @@ export class RoleService {
           }
         });
       }
+
+      await syncAttendanceEligibility(tx, targetUserId);
 
       // 4. Audit Log
       await auditService.createAuditLog(tx, {

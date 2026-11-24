@@ -5,6 +5,7 @@ import { addCalendarMonths, lockDepartment, lockUser, readPage, requireActiveDep
 import { isProtectedFounder } from '../../utils/founder.js';
 import { departmentSummary } from '../departments/departmentService.js';
 import auditService from '../audit/auditService.js';
+import { syncAttendanceEligibility } from '../attendance/eligibility.js';
 import { assertNoOverlap, assertTeamLeader, editableApplications, ensureFound, openApplications } from './internshipPolicy.js';
 
 const prisma = getPrismaClient();
@@ -164,6 +165,7 @@ export function approveApplication(id, input, actor, requestId) {
     if (user.status === 'PENDING') {
       await tx.user.update({ where: { id: user.id }, data: { status: 'ACTIVE' } });
     }
+    await syncAttendanceEligibility(tx, user.id, now);
     const result = await applyDecision(tx, application, {
       departmentId, applicationStatus: 'APPROVED', reviewedBy: actor.id, reviewedAt: now, reviewRemarks: input.remarks
     }, actor, 'APPLICATION_APPROVED', requestId);

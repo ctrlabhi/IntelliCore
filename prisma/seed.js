@@ -99,7 +99,17 @@ const initialPermissions = [
   { code: 'internships:read_all', description: 'Read all internship records organization-wide' },
   { code: 'internships:read_department', description: 'Read interns within assigned departments' },
   { code: 'internships:manage', description: 'Update internship details, assign team leaders, terminate' },
-  { code: 'internships:approve_completion', description: 'Approve completion of internship' }
+  { code: 'internships:approve_completion', description: 'Approve completion of internship' },
+  { code: 'attendance:read_all', description: 'View organization attendance' },
+  { code: 'attendance:read_department', description: 'View attendance in assigned departments' },
+  { code: 'attendance:export', description: 'Export attendance within authorized scope' },
+  { code: 'attendance:manage_policy', description: 'Publish effective-dated attendance policy versions' },
+  { code: 'attendance:review_corrections', description: 'Review attendance and late-report corrections' },
+  { code: 'reports:read_all', description: 'View organization submitted daily reports' },
+  { code: 'reports:read_department', description: 'View submitted daily reports in assigned departments' },
+  { code: 'reports:review', description: 'Review submitted daily work reports' },
+  { code: 'leaves:read_all', description: 'View internship leave requests' },
+  { code: 'leaves:review', description: 'Approve, reject and reconcile internship leave requests' }
 ];
 
 const initialDepartments = [
@@ -175,6 +185,19 @@ const rolePermissionMatrix = {
   ]
 };
 
+const attendanceView = ['attendance:read_all', 'reports:read_all'];
+const attendanceReview = [...attendanceView, 'attendance:export', 'attendance:review_corrections',
+  'reports:review', 'leaves:read_all', 'leaves:review'];
+const attendanceGrants = {
+  FOUNDER: [...attendanceReview, 'attendance:manage_policy'],
+  CO_FOUNDER: attendanceView,
+  ADMIN: attendanceView,
+  HR_MANAGER: attendanceReview,
+  HR_EXECUTIVE: attendanceView,
+  OPERATIONS_EXECUTIVE: attendanceView,
+  TEAM_LEADER: ['attendance:read_department', 'reports:read_department']
+};
+
 async function seed() {
   console.log('🌱 Starting idempotent Prisma database seed...');
 
@@ -222,7 +245,8 @@ async function seed() {
   }
 
   // 4. Seed Role Permissions
-  for (const [roleCode, permCodes] of Object.entries(rolePermissionMatrix)) {
+  for (const [roleCode, basePermissions] of Object.entries(rolePermissionMatrix)) {
+    const permCodes = [...basePermissions, ...(attendanceGrants[roleCode] ?? [])];
     const roleId = roleMap.get(roleCode);
     if (!roleId) continue;
 

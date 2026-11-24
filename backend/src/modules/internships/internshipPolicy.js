@@ -69,11 +69,15 @@ export function internshipScope(req) {
   const own = { userId: req.user.id };
   if (req.user.status !== 'ACTIVE' || !req.roles.includes('TEAM_LEADER')
     || !req.permissions.includes('internships:read_department')) return own;
-  return { OR: [own, { department: { isActive: true, userDepartments: { some: {
-    userId: req.user.id, assignedRole: 'TEAM_LEADER', isActive: true,
+  return { OR: [own, teamLeaderDepartmentScope(req.user.id)] };
+}
+
+export function teamLeaderDepartmentScope(userId) {
+  return { department: { isActive: true, userDepartments: { some: {
+    userId, assignedRole: 'TEAM_LEADER', isActive: true,
     user: { status: 'ACTIVE', staffProfile: { employmentStatus: 'ACTIVE' },
       userRoles: { some: { role: { code: 'TEAM_LEADER' } } } }
-  } } } }] };
+  } } } };
 }
 
 export function ensureFound(record, message) {

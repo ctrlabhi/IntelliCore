@@ -5,13 +5,13 @@ const internshipStates = ['APPROVED', 'ONGOING', 'COMPLETION_REVIEW', 'COMPLETED
 const labelState = (state) => state.toLowerCase().replaceAll('_', ' ');
 const date = (value) => value?.slice(0, 10) ?? '';
 
-function node(tag, ...children) {
+export function node(tag, ...children) {
   const element = document.createElement(tag);
   element.append(...children.filter((child) => child !== null && child !== undefined));
   return element;
 }
 
-function field(name, label, { value = '', options, type = 'text', max, required = false } = {}) {
+export function field(name, label, { value = '', options, type = 'text', max, required = false } = {}) {
   const control = node(options ? 'select' : type === 'textarea' ? 'textarea' : 'input');
   if (options) {
     for (const [optionValue, optionLabel] of options) {
@@ -29,14 +29,14 @@ function field(name, label, { value = '', options, type = 'text', max, required 
   return node('label', label, control);
 }
 
-function button(label, action) {
+export function button(label, action) {
   const control = node('button', label);
   control.type = action ? 'button' : 'submit';
   if (action) control.addEventListener('click', action);
   return control;
 }
 
-function form(fields, label, submit, onChanged) {
+export function form(fields, label, submit, onChanged) {
   const enabled = button(label);
   const status = node('p');
   status.setAttribute('role', 'status');
@@ -60,7 +60,7 @@ function form(fields, label, submit, onChanged) {
   return element;
 }
 
-function disclosure(title, load) {
+export function disclosure(title, load) {
   const body = node('div');
   const details = node('details', node('summary', title), body);
   details.addEventListener('toggle', async () => {
@@ -79,7 +79,7 @@ function disclosure(title, load) {
   return details;
 }
 
-async function allItems(path, itemKey = 'items') {
+export async function allItems(path, itemKey = 'items') {
   const items = [];
   for (let page = 1; ; page += 1) {
     const separator = path.includes('?') ? '&' : '?';
@@ -89,7 +89,7 @@ async function allItems(path, itemKey = 'items') {
   }
 }
 
-function section(root, id, title) {
+export function section(root, id, title) {
   const element = node('section', node('h3', title));
   element.id = id;
   element.className = 'phase04-section';
@@ -97,7 +97,7 @@ function section(root, id, title) {
   return element;
 }
 
-function listing(root, path, render, { states, initialStatus = '', filters = [] } = {}) {
+export function listing(root, path, render, { states, initialStatus = '', filters = [] } = {}) {
   const search = field('search', 'Search', { type: 'search', max: 120 });
   const status = states && field('status', 'Status', {
     value: initialStatus, options: [['', 'All statuses'], ...states.map((state) => [state, labelState(state)])]
@@ -137,7 +137,9 @@ function listing(root, path, render, { states, initialStatus = '', filters = [] 
         page = Math.max(1, data.pagination.totalPages);
         return refresh();
       }
-      feedback.textContent = data.pagination.total ? `${data.pagination.total} records · Page ${page} of ${data.pagination.totalPages}` : 'No matching records.';
+      feedback.textContent = data.pagination.total
+        ? `${data.pagination.total} ${data.pagination.unit || 'records'} · Page ${page} of ${data.pagination.totalPages}`
+        : 'No matching records.';
       results.replaceChildren(...data.items.map(render));
       previous.disabled = page <= 1;
       next.disabled = page >= data.pagination.totalPages;
@@ -150,7 +152,7 @@ function listing(root, path, render, { states, initialStatus = '', filters = [] 
   return refresh;
 }
 
-function record(title, ...children) {
+export function record(title, ...children) {
   const article = node('article', node('h4', title), ...children);
   article.className = 'phase04-record';
   return article;

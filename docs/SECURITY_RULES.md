@@ -44,3 +44,10 @@
 | Existing-stack readiness | Target isolation, synthetic fixtures and live readiness passed on disposable MySQL. The app-container health check covers liveness. Existing Compose readiness and grants remain open. |
 
 Track verification results and follow-up under [Project progress](PROJECT_PROGRESS.md#outstanding-verification).
+
+## Phase 05 controls
+
+- Verified Firebase tokens and MySQL lifecycle state gate attendance. Self-service routes derive user identity from auth. Raw event timestamps come from the server. Proposed corrections require explicit administrative review.
+- User row locks serialize check-in, checkout, leave and corrections. Successful administrative decisions and audits share a transaction. Eligibility intervals and effective-dated policies preserve evidence for historical absence, and leave reconciliation retains recorded activity.
+- Team Leaders have read-only department scope for attendance and submitted reports. HR Managers and Founders can review leave and corrections. Policy administration requires the primary Founder. CSV export checks role and permission and neutralizes formula-like cells.
+- Drafts, proposal text and leave reasons stay within authorized endpoints. Summaries and export omit that content. Logout uses a bounded checkout attempt and proceeds with Firebase sign-out after a checkout failure or missing report. [Attendance operating rules](ATTENDANCE.md).

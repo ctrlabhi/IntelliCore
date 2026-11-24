@@ -3,6 +3,7 @@ import { AppError } from '../../utils/errors.js';
 import { businessToday, lockDepartment, lockUser, readPage, transaction } from '../../utils/phase04.js';
 import { departmentSummary } from '../departments/departmentService.js';
 import auditService from '../audit/auditService.js';
+import { syncAttendanceEligibility } from '../attendance/eligibility.js';
 import { activeEnrollments, assertNoOverlap, assertTeamLeader, effectiveStatus, ensureFound, statusFilter } from './internshipPolicy.js';
 
 const prisma = getPrismaClient();
@@ -53,6 +54,7 @@ async function editInternship(id, actor, requestId, action, buildUpdate, ownerOn
     const status = effectiveStatus(before, today);
     const data = await buildUpdate(tx, before, status, today);
     const updated = await tx.internship.update({ where: { id }, data, select: internshipSelect });
+    await syncAttendanceEligibility(tx, before.userId);
     await auditService.createAuditLog(tx, {
       actorUserId: actor.id, action, requestId, resourceType: 'INTERNSHIP', resourceId: id,
       beforeState: { status, commencementDate: before.commencementDate, expectedCompletionDate: before.expectedCompletionDate,

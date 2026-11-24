@@ -7,6 +7,7 @@
 
 import { authService } from '/services/auth.js';
 import { loadEnrollmentCounts, mountPhase04 } from './phase04-dashboard.js';
+import { mountStaffAttendance } from './phase05-dashboard.js';
 
 const $ = (id) => document.getElementById(id);
 const authState = $('authState');
@@ -100,6 +101,7 @@ function renderTLDashboard(context) {
   if (authState) authState.hidden = true;
   if (shell) shell.hidden = false;
   mountPhase04($('interns'), context, 'leader', () => loadEnrollmentCounts('tlInternCount', 'tlActiveCount'));
+  mountStaffAttendance(context, $('interns'));
 }
 
 authService.onAuthStateChanged((context) => {

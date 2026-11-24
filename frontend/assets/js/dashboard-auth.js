@@ -8,8 +8,14 @@
 import { authService } from '/services/auth.js';
 import { api } from '/services/api.js';
 import { mountPhase04 } from './phase04-dashboard.js';
+import { mountAttendance, stopAttendance } from './phase05-dashboard.js';
 
 const $ = (id) => document.getElementById(id);
+
+window.addEventListener('intelliCoreAttendanceNotice', (event) => {
+  const notice = $('phase05LogoutNotice');
+  if (notice) notice.textContent = event.detail;
+});
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -35,11 +41,15 @@ if (hamburgerBtn && mobileDrawer) {
 // Wire up logout buttons
 document.querySelectorAll('[data-action="logout"], #icHeaderLogout').forEach((btn) => {
   btn.addEventListener('click', async () => {
+    if (btn.disabled) return;
+    btn.disabled = true;
+    stopAttendance($('icAttendancePanel'));
     try {
       await authService.logout();
       window.location.replace('/');
     } catch (err) {
       console.error('[InternDashboard] Logout error:', err);
+      btn.disabled = false;
     }
   });
 });
@@ -88,12 +98,7 @@ function renderInternWorkspace(context) {
     tasksEl.textContent = 'Learning modules and assigned projects scheduled for Phase 06 integration.';
   }
 
-  const attendanceSummary = $('icAttendanceSummary');
-  if (attendanceSummary) {
-    attendanceSummary.textContent = 'Automated attendance logging will be activated in Phase 05.';
-  }
-
-  const unfinished = document.querySelectorAll('#icTrainingSection, #icMeetingPanel, #icAttendancePanel, #icProgressPanel, .ic-workspace-stats, .ic-workspace-lower-grid, .ic-dashboard-search, a[href="#icTrainingSection"], a[href="#icAttendancePanel"], a[href="#icProgressPanel"], a[href="#icNotifications"]');
+  const unfinished = document.querySelectorAll('#icTrainingSection, #icMeetingPanel, #icProgressPanel, .ic-workspace-stats, .ic-workspace-lower-grid, .ic-dashboard-search, a[href="#icTrainingSection"], a[href="#icProgressPanel"], a[href="#icNotifications"]');
   unfinished.forEach((element) => {
     element.classList.add('phase04-disabled');
     element.hidden = true;
@@ -116,6 +121,18 @@ function renderInternWorkspace(context) {
       // The enrollment list displays its own connection errors.
     }
   });
+  const attendance = $('icAttendancePanel');
+  const showAttendance = status === 'ACTIVE' && context.roles.length === 1 && context.roles[0] === 'INTERN';
+  document.querySelectorAll('a[href="#icAttendancePanel"]').forEach((link) => {
+    link.classList.add('phase04-disabled');
+    link.hidden = !showAttendance;
+  });
+  attendance.classList.add('phase04-disabled');
+  attendance.hidden = !showAttendance;
+  attendance.removeAttribute('aria-labelledby');
+  attendance.setAttribute('aria-label', 'Attendance, reports and leave');
+  if (showAttendance) mountAttendance(attendance, context, true);
+  else stopAttendance(attendance);
 }
 
 authService.onAuthStateChanged((context) => {

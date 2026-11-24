@@ -4,6 +4,7 @@ import logger from '../../config/logger.js';
 import { AppError } from '../../utils/errors.js';
 import { isProtectedFounder } from '../../utils/founder.js';
 import { lockUser, transaction } from '../../utils/phase04.js';
+import { syncAttendanceEligibility } from '../attendance/eligibility.js';
 import { activeEnrollments, openApplications } from '../internships/internshipPolicy.js';
 
 const prisma = getPrismaClient();
@@ -175,6 +176,8 @@ export class StaffService {
           assignedBy: createdBy
         }
       });
+
+      await syncAttendanceEligibility(tx, userId);
 
       // 7. Record Audit Log
       await auditService.createAuditLog(tx, {
@@ -463,6 +466,7 @@ export class StaffService {
         });
       }
 
+      await syncAttendanceEligibility(tx, staff.userId);
       await auditService.createAuditLog(tx, {
         actorUserId,
         action: 'STAFF_STATUS_UPDATED',

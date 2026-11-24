@@ -6,7 +6,8 @@ export const founderOnlyPermissions = [
   'roles:manage_permissions',
   'departments:create',
   'departments:update',
-  'departments:assign_staff'
+  'departments:assign_staff',
+  'attendance:manage_policy'
 ];
 
 export function matchesFounderIdentity(user) {

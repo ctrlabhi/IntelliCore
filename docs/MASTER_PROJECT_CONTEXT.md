@@ -1,6 +1,6 @@
 # IntelliCore V2.0 master project context
 
-**Updated on 2026-11-25 (Asia/Kolkata).** Phase 04 builds on the `1fe8067` handover checkpoint. Department administration, onboarding, application review, enrollment and the four dashboards are implemented. See [Project progress](PROJECT_PROGRESS.md) for verification and open checks.
+**Updated on 2026-11-25 (Asia/Kolkata).** Phase 05 extends checkpoint `75e329e` with attendance, leave, reports and corrections for eligible internships. [Project progress](PROJECT_PROGRESS.md).
 
 ## Product and repository
 
@@ -12,7 +12,7 @@ IntelliCore combines a public site and Notes AI utility with an internal interns
 | Dashboards | [frontend/pages/dashboards](../frontend/pages/dashboards) and [frontend/assets/js](../frontend/assets/js). Founder manages departments, staff assignments, applications, enrollments and existing staff controls. HR reviews applications and enrollment history. Team Leaders see their assigned departments and scoped enrollments. Verified interns manage their own applications and see their enrollment history. |
 | Browser runtime | [frontend/services](../frontend/services) contains Firebase Web Auth, the shared auth state service and same-origin API client. The login modal and dashboards consume server-provided workspace flags. |
 | HTTP runtime | [app.js](../backend/src/app.js) configures middleware, health probes, static and legacy URL aliases, and errors. [server.js](../backend/src/server.js) owns server startup and shutdown. `/health` checks liveness. `/ready` and `/api/v1/health` report database status. Swagger is served at `/api-docs` with JSON at `/api-docs.json`. |
-| Business services | [apiV1.js](../backend/src/routes/apiV1.js) mounts auth, users, staff, roles, permissions, audit logs, admin stats, departments, internship applications and enrollments. Routes and middleware validate input and enforce authorization. Services implement transactions and query Prisma. |
+| Business services | [apiV1.js](../backend/src/routes/apiV1.js) mounts auth, users, staff, roles, permissions, audit logs, admin stats, departments, internships, attendance, daily reports, leave and corrections. Routes validate and authorize requests. Services implement transactions and query Prisma. |
 | Integration boundaries | [backend/src/integrations](../backend/src/integrations) has Firebase Admin Auth, local file storage and email/calendar stubs. [templates](../templates) has email and certificate templates. The stubs and templates establish integration points. |
 | Operational tools | [docker-compose.yml](../docker-compose.yml), [Dockerfile](../backend/Dockerfile), [entrypoint](../backend/entrypoint.sh), [scripts](../scripts) and [SETUP.md](SETUP.md). The application and phpMyAdmin map to loopback ports 3000 and 8080. MySQL stays on the Compose network. The runtime runs as the non-root `node` user. |
 | Legacy reference | [legacy-firebase](../legacy-firebase) preserves Firebase rules, indexes, Functions, curriculum and historical onboarding, attendance, task and meeting logic. `/functions/curriculum.js` is a compatibility URL served from the current frontend asset. Reuse legitimate requirements and curriculum through the V2 architecture. |
@@ -36,7 +36,9 @@ IntelliCore combines a public site and Notes AI utility with an internal interns
 | Phase 03 operations | `StaffProfile`, `AuditLog` | One staff profile per user and unique `STF-XXXX` code. Employment states are `ACTIVE`, `SUSPENDED`, `INACTIVE`. Audit history preserves the record if the actor reference is cleared. |
 | Phase 04 | `Department`, `UserDepartment`, `InternshipApplication`, `Internship` | Unique department code and slug. Membership is unique by user, department and assigned role. The service keeps one active capacity per user and department. A unique application and code identify each enrollment. Application writes, role and staff changes and enrollment approval serialize on the applicant row. |
 
-Tables use Prisma mappings, UUID identifiers for entities, MySQL `utf8mb4` with `utf8mb4_unicode_ci`, and UTC timestamps. Phase 04 account, employment, application and enrollment states are separate. The seed defines eight roles, 34 permissions and nine starting departments. Department seed re-runs preserve administrative edits and inactive status. See [migration inventory and evidence](PROJECT_PROGRESS.md#migrations-and-seed).
+Phase 05 adds effective-dated policies, enrollment eligibility intervals, unique daily attendance and report rows, leave, and corrections. Check-in, checkout, lifecycle changes and review decisions use the same user row lock. Reporting derives absences, weekends and missing evidence from stored facts. [Attendance operating rules](ATTENDANCE.md).
+
+Tables use Prisma mappings, UUID identifiers, MySQL `utf8mb4` with `utf8mb4_unicode_ci`, and UTC event timestamps. The seed defines eight roles, 44 permissions and nine starting departments. Department seed re-runs preserve administrative edits and inactive status. [Migration inventory and evidence](PROJECT_PROGRESS.md#migrations-and-seed).
 
 ## Current HTTP surface
 
@@ -50,6 +52,7 @@ In addition to health and Swagger routes, the following groups are mounted under
 | Roles and permissions | `GET /roles`, `GET /roles/:id`, `PUT /roles/:id/permissions`, `GET /permissions`. Role mutation and Founder protections require continued acceptance checks. |
 | Audit and metrics | `GET /audit-logs` and `GET /admin/stats`. Stats include user and staff status, departments, applications and effective enrollment counts. |
 | Phase 04 | `/departments`, `/internship-applications` and `/internships`. See the [Phase 04 API](API.md#phase-04-departments-applications-and-internships) for methods, resources and authorization. |
+| Phase 05 | `/attendance`, `/daily-work-reports`, `/leave-requests` and `/attendance-corrections`. [Phase 05 API](API.md#phase-05-attendance-leave-and-work-reports). |
 
 ## Source records
 

@@ -1,6 +1,8 @@
 import { getPrismaClient } from '../../config/database.js';
 import { effectivePermissions } from '../../utils/founder.js';
 import logger from '../../config/logger.js';
+import { lockUser } from '../../utils/phase04.js';
+import { syncAttendanceEligibility } from '../attendance/eligibility.js';
 
 const prisma = getPrismaClient();
 
@@ -41,6 +43,7 @@ export class AuthService {
       });
 
       if (user) {
+        await lockUser(tx, user.id);
         // User already exists in MySQL: Update login time and verified status
         user = await tx.user.update({
           where: { id: user.id },
@@ -81,7 +84,8 @@ export class AuthService {
           }
         }
 
-        logger.info({ userId: user.id, email: normalizedEmail, status: user.status }, 'Existing account authenticated & synchronized');
+        await syncAttendanceEligibility(tx, user.id);
+        logger.info({ userId: user.id, status: user.status }, 'Existing account authenticated & synchronized');
         return this.formatUserContext(user);
       }
 
@@ -149,7 +153,7 @@ export class AuthService {
 
       logger.info({ userId: newUser.id, email: normalizedEmail }, 'New self-registered user initialized with PENDING status');
       return this.formatUserContext(newUser);
-    });
+    }, { isolationLevel: 'ReadCommitted' });
   }
 
   /**

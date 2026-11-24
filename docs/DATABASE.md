@@ -84,3 +84,18 @@ The Phase 04 migration adds departments, user-to-department memberships, interns
 
 Internship calendar dates are represented as UTC-midnight dates and compared to the Asia/Kolkata business day. Approval sets the first stored state, and list queries and statistics derive upcoming, ongoing and due-for-review state from the approved dates. Completion, termination and withdrawal persist explicit decisions and keep history. [Project progress](PROJECT_PROGRESS.md).
 
+## Phase 05 data model
+
+Migration `20261125000000_add_attendance_leave_and_reports` appends the following tables and one initial working policy. Existing Phase 01–04 migrations retain their original bytes.
+
+| Table | Integrity rule |
+| --- | --- |
+| `attendance_policies` | Immutable policy versions with unique effective date. The original timing and working days remain associated through policy foreign keys. |
+| `attendance_eligibility` | Enrollment, eligibility start/end UTC instants and applicable business-date bounds. Only open intervals close when applicable state changes. Migration begins verified enrollment evidence at cutover. |
+| `attendance` | One row per enrollment and IST business date, storing UTC check-in/checkout, policy, source and revision. |
+| `daily_work_reports` | One draft or immutable submission per enrollment and business date, with distinct review and late approval metadata. |
+| `leave_requests` | Period, type, working-day count, review result and reconciliation metadata. |
+| `attendance_corrections` | Append-preserved original values, proposal, reason and decision. Approval requires a current matching revision. |
+
+The service serializes business writes on the user row and uses the database unique constraints as a second limit against duplicates. Reports derive absent and weekly-off days and incomplete flags from stored eligibility and evidence. The populated upgrade rehearsal checked the migration ledger and verified zero schema drift. [Attendance operating rules](ATTENDANCE.md).
+

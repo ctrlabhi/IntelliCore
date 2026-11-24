@@ -22,6 +22,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js';
 import { firebaseConfig } from './firebase.js';
 import { api } from './api.js';
+import { signOutWithAttendance } from './attendance-logout.js';
 
 class AuthService {
   constructor() {
@@ -183,7 +184,21 @@ class AuthService {
 
   async logout() {
     if (!this.auth) return;
-    await signOut(this.auth);
+    const context = this.getContext();
+    const attendanceApplies = context.status === 'ACTIVE' && context.roles.length === 1 && context.roles[0] === 'INTERN';
+    await signOutWithAttendance({
+      checkOut: attendanceApplies && this.auth.currentUser
+        ? () => api.post('/attendance/check-out', {}, { timeoutMs: 3000 }) : undefined,
+      signOut: () => signOut(this.auth),
+      notify: (notice) => {
+        window.dispatchEvent(new CustomEvent('intelliCoreAttendanceNotice', { detail: notice }));
+        try {
+          sessionStorage.setItem('intelliCoreAttendanceNotice', notice);
+        } catch {
+          // The dashboard can still display the notice.
+        }
+      }
+    });
     this.currentUser = null;
     this.appUserContext = null;
     this._notify();

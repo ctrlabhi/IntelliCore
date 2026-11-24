@@ -8,6 +8,20 @@
 
 import { authService } from '/services/auth.js';
 
+try {
+  const notice = sessionStorage.getItem('intelliCoreAttendanceNotice');
+  if (notice) {
+    sessionStorage.removeItem('intelliCoreAttendanceNotice');
+    const banner = document.createElement('p');
+    banner.setAttribute('role', 'status');
+    banner.className = 'ic-auth-message is-info';
+    banner.textContent = notice;
+    document.querySelector('main')?.prepend(banner);
+  }
+} catch {
+  // Authentication works when session storage is unavailable.
+}
+
 (() => {
   const $ = (id) => document.getElementById(id);
 

@@ -6,6 +6,7 @@ import authRoutes from '../modules/auth/authRoutes.js';
 import departmentRoutes from '../modules/departments/departmentRoutes.js';
 import applicationRoutes from '../modules/internships/applicationRoutes.js';
 import internshipRoutes from '../modules/internships/internshipRoutes.js';
+import { attendanceRoutes, correctionRoutes, dailyWorkReportRoutes, leaveRoutes } from '../modules/attendance/phase05Routes.js';
 
 const router = Router();
 
@@ -101,6 +102,10 @@ router.use('/admin', adminRoutes);
 router.use('/departments', departmentRoutes);
 router.use('/internship-applications', applicationRoutes);
 router.use('/internships', internshipRoutes);
+router.use('/attendance', attendanceRoutes);
+router.use('/daily-work-reports', dailyWorkReportRoutes);
+router.use('/leave-requests', leaveRoutes);
+router.use('/attendance-corrections', correctionRoutes);
 
 export default router;
 

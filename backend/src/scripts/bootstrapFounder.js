@@ -2,6 +2,7 @@ import { getPrismaClient } from '../config/database.js';
 import firebaseService from '../integrations/firebase/firebaseService.js';
 import env from '../config/env.js';
 import logger from '../config/logger.js';
+import { syncAttendanceEligibility } from '../modules/attendance/eligibility.js';
 
 const prisma = getPrismaClient();
 
@@ -142,8 +143,9 @@ export async function bootstrapFounder() {
       });
     }
 
+    await syncAttendanceEligibility(tx, user.id);
     return user;
-  });
+  }, { isolationLevel: 'ReadCommitted' });
 
   console.log('✅ Founder account initialized with ACTIVE status.');
   return result;
