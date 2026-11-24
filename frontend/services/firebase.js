@@ -6,19 +6,33 @@
  * This module isolates client calls and prevents accidental production mutations.
  */
 
+/**
+ * IntelliCore Firebase Integration Abstraction
+ * Version: 2.0.0
+ * Environment: Local Development
+ * 
+ * Configured for isolated development Firebase project (intellicore-dev).
+ * Production Firebase (intellicore-229) is quarantined.
+ */
+
 export const firebaseConfig = {
-  isConfigured: false,
-  projectId: null,
-  authDomain: null,
-  note: 'Phase 1 Local Development: Production Firebase quarantined. Development Firebase credentials will be configured in Phase 2.'
+  isConfigured: true,
+  apiKey: 'AIzaSyDOQq-_c84R3W3QbMDeCD0PsRXZL5pq2oc',
+  authDomain: 'intellicore-dev.firebaseapp.com',
+  projectId: 'intellicore-dev',
+  storageBucket: 'intellicore-dev.firebasestorage.app',
+  messagingSenderId: '287532496050',
+  appId: '1:287532496050:web:015491f32a089ce1d585ab',
+  environment: 'development'
 };
 
 export function getDevFirebase() {
-  return null;
+  return firebaseConfig;
 }
 
 export default {
   firebaseConfig,
   getDevFirebase
 };
+
 

@@ -24,7 +24,13 @@ const envSchema = z.object({
   // Rate Limiting
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(15 * 60 * 1000),
   RATE_LIMIT_MAX_REQUESTS: z.coerce.number().default(100),
-  CORS_ORIGIN: z.string().default('http://localhost:3000')
+  CORS_ORIGIN: z.string().default('http://localhost:3000'),
+
+  // Firebase Integration (Phase 2 Development)
+  FIREBASE_PROJECT_ID: z.string().default('intellicore-dev'),
+  GOOGLE_APPLICATION_CREDENTIALS: z.string().optional(),
+  FOUNDER_EMAIL: z.string().email().optional(),
+  FOUNDER_FIREBASE_UID: z.string().optional()
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

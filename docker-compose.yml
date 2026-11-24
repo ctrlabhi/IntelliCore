@@ -29,11 +29,14 @@ services:
       RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-900000}
       RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-100}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-intellicore-dev}
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/firebase-admin-dev.json
     volumes:
       # Mount application code for hot reload, excluding node_modules to protect Linux binaries
       - ./backend/src:/app/backend/src:ro
       - ./frontend:/app/frontend:ro
       - ./prisma:/app/prisma
+      - ./secrets/firebase-admin-dev.json:/run/secrets/firebase-admin-dev.json:ro
       - uploads_data:/app/uploads
     depends_on:
       mysql:
@@ -62,7 +65,6 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       TZ: ${APP_TIMEZONE:-Asia/Kolkata}
     command:
-      - --default-authentication-plugin=caching_sha2_password
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
       - --default-time-zone=+05:30
@@ -71,10 +73,10 @@ services:
     networks:
       - intellicore_net
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u $$MYSQL_USER --password=$$MYSQL_PASSWORD"]
-      interval: 10s
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD || mysqladmin ping -h 127.0.0.1"]
+      interval: 5s
       timeout: 5s
-      retries: 6
+      retries: 10
       start_period: 30s
 
   # ----------------------------------------------------------------------------
