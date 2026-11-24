@@ -1,6 +1,6 @@
 # IntelliCore V2.0 project progress
 
-**Updated on 2026-11-25 (Asia/Kolkata).** Phase 05 builds on `75e329e`. Attendance, leave, Daily Work Reports and corrections are implemented and verified on disposable MySQL. Existing Docker Compose runtime and live Firebase sign-in remain unverified.
+**Updated on 2026-11-25 (Asia/Kolkata).** Phase 05 checkpoint `4d19095` builds on `75e329e`. Attendance, leave, Daily Work Reports and corrections are implemented and verified on disposable MySQL. Existing Docker Compose runtime and live Firebase sign-in remain unverified. [Phase 05 engineering report](PHASE_05_REPORT.md).
 
 ## Phase and checkpoint history
 
