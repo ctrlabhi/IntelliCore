@@ -76,7 +76,17 @@ const initialPermissions = [
   { code: 'workspace:team_leader', description: 'Access Team Leader dashboard workspace' },
   { code: 'workspace:intern', description: 'Access Intern dashboard and task workspace' },
   { code: 'users:read', description: 'View directory of application users' },
-  { code: 'roles:read', description: 'View application role and permission mappings' }
+  { code: 'users:update_status', description: 'Activate, suspend, or deactivate user accounts' },
+  { code: 'staff:read', description: 'View staff directory and employment information' },
+  { code: 'staff:create', description: 'Provision existing user accounts as staff members' },
+  { code: 'staff:update', description: 'Update staff member profile details and designations' },
+  { code: 'staff:update_status', description: 'Activate, suspend, or deactivate staff employment status' },
+  { code: 'roles:read', description: 'View application role and permission mappings' },
+  { code: 'roles:assign', description: 'Assign authorized staff roles to eligible users' },
+  { code: 'roles:manage_permissions', description: 'Configure permissions mapped to non-protected roles' },
+  { code: 'permissions:read', description: 'View system permissions catalog' },
+  { code: 'audit_logs:read', description: 'View system security and administrative audit logs' },
+  { code: 'analytics:read', description: 'View administrative overview and metrics statistics' }
 ];
 
 // Mapping roles to permission codes
@@ -84,28 +94,35 @@ const rolePermissionMatrix = {
   FOUNDER: [
     'auth:login', 'profile:read_own', 'profile:update_own',
     'workspace:founder', 'workspace:admin', 'workspace:hr', 'workspace:operations', 'workspace:team_leader', 'workspace:intern',
-    'users:read', 'roles:read'
+    'users:read', 'users:update_status',
+    'staff:read', 'staff:create', 'staff:update', 'staff:update_status',
+    'roles:read', 'roles:assign', 'roles:manage_permissions',
+    'permissions:read', 'audit_logs:read', 'analytics:read'
   ],
   CO_FOUNDER: [
     'auth:login', 'profile:read_own', 'profile:update_own',
     'workspace:founder', 'workspace:hr', 'workspace:operations', 'workspace:team_leader', 'workspace:intern',
-    'users:read', 'roles:read'
+    'users:read', 'users:update_status',
+    'staff:read', 'staff:create', 'staff:update', 'staff:update_status',
+    'roles:read', 'roles:assign',
+    'permissions:read', 'audit_logs:read', 'analytics:read'
   ],
   ADMIN: [
     'auth:login', 'profile:read_own', 'profile:update_own',
-    'workspace:admin', 'users:read', 'roles:read'
+    'workspace:admin', 'users:read', 'staff:read', 'roles:read',
+    'permissions:read', 'audit_logs:read', 'analytics:read'
   ],
   HR_MANAGER: [
     'auth:login', 'profile:read_own', 'profile:update_own',
-    'workspace:hr', 'users:read'
+    'workspace:hr', 'users:read', 'staff:read', 'analytics:read'
   ],
   HR_EXECUTIVE: [
     'auth:login', 'profile:read_own', 'profile:update_own',
-    'workspace:hr'
+    'workspace:hr', 'users:read', 'staff:read'
   ],
   OPERATIONS_EXECUTIVE: [
     'auth:login', 'profile:read_own', 'profile:update_own',
-    'workspace:operations'
+    'workspace:operations', 'staff:read'
   ],
   TEAM_LEADER: [
     'auth:login', 'profile:read_own', 'profile:update_own',

@@ -1,6 +1,7 @@
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 generator client {
@@ -28,6 +29,12 @@ enum AccountStatus {
   INACTIVE
 }
 
+enum StaffEmploymentStatus {
+  ACTIVE
+  SUSPENDED
+  INACTIVE
+}
+
 model User {
   id            String        @id @default(uuid()) @db.VarChar(36)
   firebaseUid   String        @unique @map("firebase_uid") @db.VarChar(128)
@@ -38,8 +45,10 @@ model User {
   createdAt     DateTime      @default(now()) @map("created_at")
   updatedAt     DateTime      @updatedAt @map("updated_at")
 
-  profile   Profile?
-  userRoles UserRole[]
+  profile      Profile?
+  staffProfile StaffProfile?
+  userRoles    UserRole[]
+  auditLogs    AuditLog[]     @relation("ActorAuditLogs")
 
   @@index([status])
   @@index([email])
@@ -111,4 +120,42 @@ model RolePermission {
   @@id([roleId, permissionId])
   @@index([permissionId])
   @@map("role_permissions")
+}
+
+model StaffProfile {
+  id               String                @id @default(uuid()) @db.VarChar(36)
+  userId           String                @unique @map("user_id") @db.VarChar(36)
+  staffCode        String                @unique @map("staff_code") @db.VarChar(50)
+  designation      String                @db.VarChar(100)
+  joiningDate      DateTime              @map("joining_date")
+  employmentStatus StaffEmploymentStatus @default(ACTIVE) @map("employment_status")
+  createdBy        String?               @map("created_by") @db.VarChar(36)
+  createdAt        DateTime              @default(now()) @map("created_at")
+  updatedAt        DateTime              @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([employmentStatus])
+  @@map("staff_profiles")
+}
+
+model AuditLog {
+  id              String   @id @default(uuid()) @db.VarChar(36)
+  actorUserId     String?  @map("actor_user_id") @db.VarChar(36)
+  action          String   @db.VarChar(100)
+  resourceType    String   @map("resource_type") @db.VarChar(50)
+  resourceId      String?  @map("resource_id") @db.VarChar(36)
+  sanitizedBefore String?  @map("sanitized_before") @db.Text
+  sanitizedAfter  String?  @map("sanitized_after") @db.Text
+  requestId       String?  @map("request_id") @db.VarChar(64)
+  result          String   @default("SUCCESS") @db.VarChar(20)
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  actorUser User? @relation("ActorAuditLogs", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([actorUserId])
+  @@index([action])
+  @@index([resourceType])
+  @@index([createdAt])
+  @@map("audit_logs")
 }

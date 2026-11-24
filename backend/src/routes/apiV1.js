@@ -73,5 +73,28 @@ router.get('/health', async (req, res) => {
 // Authentication and Identity Management Routes
 router.use('/', authRoutes);
 
+// User Directory & Profile Administration
+import userRoutes from '../modules/users/userRoutes.js';
+router.use('/users', userRoutes);
+
+// Staff Directory & Employment Provisioning
+import staffRoutes from '../modules/staff/staffRoutes.js';
+router.use('/staff', staffRoutes);
+
+// Role & Permission Management
+import roleRoutes from '../modules/roles/roleRoutes.js';
+router.use('/roles', roleRoutes);
+
+import permissionRoutes from '../modules/roles/permissionRoutes.js';
+router.use('/permissions', permissionRoutes);
+
+// Security & Audit Event Logs
+import auditRoutes from '../modules/audit/auditRoutes.js';
+router.use('/audit-logs', auditRoutes);
+
+// Operational Analytics & Metrics
+import adminRoutes from '../modules/admin/adminRoutes.js';
+router.use('/admin', adminRoutes);
+
 export default router;
 

@@ -43,3 +43,27 @@
 - **Automated Testing Baseline**:
   - Expanded test baseline from 40 to 45 passing automated tests across 9 test suites with 100% pass rate.
 
+## 2026-11-24: MASTER-PHASE-03 Execution — RBAC Enforcement, User Management & Staff Administration
+- **Privilege Separation & Versioned Database Migration**:
+  - Configured dedicated migration account `intellicore_migration` with pre-created shadow database `intellicore_shadow_db`.
+  - Extended Prisma schema with `StaffProfile` (`staff_profiles`), `AuditLog` (`audit_logs`), and `StaffEmploymentStatus` enum.
+  - Successfully generated and applied migration `20261124133504_add_staff_and_audit_models`.
+  - Updated seed catalog with 10 new permissions (`users:update_status`, `staff:read`, `staff:create`, `staff:update`, `staff:update_status`, `roles:assign`, `roles:manage_permissions`, `permissions:read`, `audit_logs:read`, `analytics:read`) and updated role mappings.
+- **Audit Logging Subsystem**:
+  - Built transactional `auditService.createAuditLog` with recursive credential sanitizer (`password`, `token`, `secret`, `credential`).
+  - Implemented `GET /api/v1/audit-logs` endpoint with pagination and search.
+- **User & Staff Management REST APIs**:
+  - Built user directory (`GET /api/v1/users`, `GET /api/v1/users/:id`), status management (`PATCH /api/v1/users/:id/status`) with Founder demotion protection and self-deactivation guardrails.
+  - Built staff management (`GET /api/v1/staff`, `GET /api/v1/staff/:id`, `PATCH /api/v1/staff/:id`, `PATCH /api/v1/staff/:id/status`).
+  - Built concurrency-safe staff provisioning (`POST /api/v1/staff`) generating sequential `STF-XXXX` codes, atomically updating user status, assigning staff roles, and creating audit logs.
+- **Roles & Permissions Management**:
+  - Built role listing (`GET /api/v1/roles`), permissions listing (`GET /api/v1/permissions`), role assignment (`PUT /api/v1/users/:id/roles`), and permission management (`PUT /api/v1/roles/:id/permissions`).
+  - Enforced security guardrail: HTTP API strictly prohibits assigning `FOUNDER` role; Founder role permissions are immutable.
+- **Operational Analytics**:
+  - Built `GET /api/v1/admin/stats` returning live MySQL aggregated counts for total users, active accounts, staff members, audit records, and uptime.
+- **Founder Command Center UI Integration**:
+  - Updated `frontend/assets/js/founder-dashboard.js` to connect directly to Express REST APIs.
+  - Wired live metrics cards, staff directory feed, recent audit activity feed, candidate role assignment form, and users table.
+- **Automated Testing Suite**:
+  - Expanded test coverage from 45 tests to 65 passing automated tests across 14 test suites with 100% pass rate.
+
