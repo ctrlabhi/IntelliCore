@@ -49,12 +49,15 @@ The IntelliCore platform enforces defense-in-depth across the client, networking
 
 1. **Restricted Application Credentials:**
    - The application does not connect to MySQL as `root`.
-   - Access is restricted to `intellicore_app` with privileges limited to `intellicore_db`.
+   - Access is restricted to `intellicore_app` with privileges limited to `intellicore_db` and development shadow database `intellicore_shadow_db`. All global administrative superuser privileges (`ON *.*`) have been revoked.
 2. **Zero Plaintext Secrets in Repository:**
    - `.env`, `secrets/`, and `backups/` are strictly ignored by `.gitignore` and `.dockerignore`.
    - Example blueprints are published in `.env.example`.
-3. **Firebase Production Quarantine:**
-   - The new local application is blocked from issuing read/write requests to the production Firebase project (`intellicore-229`).
+3. **Cross-Origin Opener Policy & Authentication Security:**
+   - Helmet configured with `crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' }` to allow secure Firebase/Google OAuth popups while preserving isolation.
+   - `requireRole` and `requirePermission` strictly gate access on `status === 'ACTIVE'`, rejecting non-active accounts.
+4. **Firebase Production Quarantine:**
+   - The new local application is blocked from issuing read/write requests to the production Firebase project (`intellicore-229`). All business data uses MySQL.
 
 ---
 

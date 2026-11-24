@@ -15,7 +15,9 @@ export const securityMiddleware = helmet({
         "'unsafe-inline'", // Needed for inline UI scripts and canvas initialization
         "'unsafe-eval'",
         'https://cdnjs.cloudflare.com', // html2pdf bundle
-        'https://www.gstatic.com'        // Google/Firebase static scripts
+        'https://www.gstatic.com',        // Google/Firebase static scripts
+        'https://apis.google.com',
+        'https://*.google.com'
       ],
       styleSrc: [
         "'self'",
@@ -38,14 +40,23 @@ export const securityMiddleware = helmet({
         'http://localhost:*',
         'http://127.0.0.1:*',
         'https://*.googleapis.com',
-        'https://*.firebaseio.com'
+        'https://*.firebaseio.com',
+        'https://*.google.com',
+        'https://identitytoolkit.googleapis.com',
+        'https://securetoken.googleapis.com'
       ],
-      frameSrc: ["'self'"],
+      frameSrc: [
+        "'self'",
+        'https://*.firebaseapp.com',
+        'https://accounts.google.com',
+        'https://*.google.com'
+      ],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null
     }
   },
   crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
   crossOriginResourcePolicy: { policy: 'cross-origin' },
   referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
   xFrameOptions: { action: 'sameorigin' }

@@ -126,6 +126,19 @@ export async function bootstrapFounder() {
       }
     });
 
+    // Remove inappropriate default INTERN role if assigned to Founder
+    const internRole = await tx.role.findUnique({
+      where: { code: 'INTERN' }
+    });
+    if (internRole) {
+      await tx.userRole.deleteMany({
+        where: {
+          userId: user.id,
+          roleId: internRole.id
+        }
+      });
+    }
+
     return user;
   });
 

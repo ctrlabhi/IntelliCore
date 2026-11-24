@@ -1,526 +1,201 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
-import {
-  collection, collectionGroup, doc, getDoc, getDocs, getFirestore, limit, orderBy, query, runTransaction,
-  serverTimestamp, setDoc, startAfter, where
-} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+/**
+ * IntelliCore Founder Command Center Dashboard Script
+ * Version: 2.0.0
+ * Architecture: Modular Monolith (Firebase Auth + MySQL RBAC via Express REST API)
+ * Phase: MASTER-PHASE-02C (Authentication Acceptance & Security Hardening)
+ */
 
-import { firebaseConfig } from '/services/firebase.js';
-const auth = getAuth(initializeApp(firebaseConfig));
-const db = getFirestore(auth.app);
-const tracks = [
-  "Business Analyst Intern", "Web Development Intern", "Data Analyst Intern",
-  "Digital Marketing Intern", "Graphic Designer Intern", "Social Media Intern",
-  "Content Writing Intern", "Human Resources Intern"
-];
-const $ = id => document.getElementById(id);
-const authState = $("authState");
-const shell = $("dashboardShell");
+import { authService } from '/services/auth.js';
+
+const $ = (id) => document.getElementById(id);
+const authState = $('authState');
+const shell = $('dashboardShell');
 let toastTimer;
-let roleAssignmentBusy = false;
-let founderInterns = [];
-let founderStaff = [];
-let founderAssignments = [];
-let founderAttendance = [];
-let founderDraftUids = new Set();
-let founderPendingCertificates = 0;
-let founderOverviewMonths = 6;
 
 function showToast(message) {
-  const toast = $("toast");
+  const toast = $('toast');
+  if (!toast) return;
   toast.textContent = message;
-  toast.classList.add("show");
+  toast.classList.add('show');
   window.clearTimeout(toastTimer);
-  toastTimer = window.setTimeout(() => toast.classList.remove("show"), 3600);
+  toastTimer = window.setTimeout(() => toast.classList.remove('show'), 3600);
 }
 
-function updateFounderNotificationBadge() {
-  const total = founderDraftUids.size + founderPendingCertificates;
-  const badge = $("notificationButton").querySelector(".notification-count");
-  const approvalCount = $("founderApprovalCount");
-  badge.textContent = total > 99 ? "99+" : String(total);
-  badge.hidden = total === 0;
-  approvalCount.textContent = total > 99 ? "99+" : String(total);
-  approvalCount.hidden = total === 0;
-  $("notificationButton").setAttribute("aria-label", total
-    ? `${total} pending approval${total === 1 ? "" : "s"}`
-    : "No pending approvals");
-}
-
-const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
-const indiaDate = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
-const stamp = value => value?.toMillis?.() || 0;
-function founderStatus(profile, today = indiaDate()) {
-  if (profile.accountStatus === "deactivated") return "Deactivated";
-  if (founderDraftUids.has(profile.uid) || !profile.track) return "Pending activation";
-  if (profile.internshipStatus === "completed" || profile.internshipEndDate < today) return "Completed";
-  if (profile.internshipStartDate > today) return "Scheduled";
-  return profile.internshipStatus === "active" ? "Active" : "Pending activation";
-}
-function workdaysBetween(startValue, endValue) {
-  if (!startValue || !endValue || startValue > endValue) return 0;
-  let count = 0;
-  for (let date = new Date(`${startValue}T00:00:00Z`), end = new Date(`${endValue}T00:00:00Z`); date <= end; date.setUTCDate(date.getUTCDate() + 1)) {
-    if (date.getUTCDay() !== 0) count += 1;
-  }
-  return count;
-}
-async function fetchAllDocs(buildQuery) {
-  const documents = [];
-  let cursor = null;
-  while (true) {
-    const pageSize = 500;
-    const page = await getDocs(buildQuery(cursor, pageSize));
-    documents.push(...page.docs);
-    if (page.size < pageSize) break;
-    cursor = page.docs.at(-1) || null;
-    if (!cursor) break;
-  }
-  return documents;
-}
-function renderFounderCharts(today) {
-  const domainColors = ["#09c9ed", "#1687f8", "#c9dd19", "#ff9024", "#8145ee", "#ff719e", "#169ddb", "#00d3a0"];
-  const counts = tracks.map(track => founderInterns.filter(profile => profile.track === track).length);
-  const total = counts.reduce((sum, count) => sum + count, 0);
-  let offset = 0;
-  const slices = counts.map((count, index) => {
-    const from = total ? offset / total * 100 : 0;
-    offset += count;
-    const to = total ? offset / total * 100 : 0;
-    return `${domainColors[index]} ${from}% ${to}%`;
-  });
-  $("founderDomainTotal").textContent = String(founderInterns.length);
-  $("founderDomainLegend").innerHTML = tracks.map((track, index) =>
-    `<li><i style="background:${domainColors[index]}"></i><span>${escapeHtml(track.replace(/ Intern$/, ""))}</span><b>${counts[index]}</b></li>`
-  ).join("");
-  $("founderDomainTotal").closest(".donut-chart").style.background = total
-    ? `conic-gradient(${slices.join(",")})`
-    : "conic-gradient(#29445c 0 100%)";
-
-  const monthCount = founderOverviewMonths;
-  const months = [];
-  const [year, month] = today.split("-").map(Number);
-  for (let ago = monthCount - 1; ago >= 0; ago -= 1) {
-    const date = new Date(Date.UTC(year, month - 1 - ago, 1));
-    const key = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
-    const monthEnd = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).toISOString().slice(0, 10);
-    const end = monthEnd > today ? today : monthEnd;
-    const totalAtEnd = founderInterns.filter(profile => profile.internshipStartDate && profile.internshipStartDate <= end).length;
-    const activeAtEnd = founderInterns.filter(profile => profile.accountStatus !== "deactivated"
-      && profile.internshipStatus === "active" && profile.internshipStartDate <= end
-      && profile.internshipEndDate >= end).length;
-    months.push({ key, label: new Intl.DateTimeFormat("en", { month: "short", timeZone: "UTC" }).format(date), total: totalAtEnd, active: activeAtEnd });
-  }
-  const maxValue = Math.max(1, ...months.map(item => item.total));
-  const y = value => 154 - value / maxValue * 138;
-  const x = index => months.length === 1 ? 260 : 8 + index * (504 / (months.length - 1));
-  const pointsFor = field => months.map((item, index) => `${x(index)},${y(item[field])}`).join(" ");
-  const areaFor = field => `M${months.map((item, index) => `${x(index)} ${y(item[field])}`).join(" L")} L512 160 L8 160 Z`;
-  const ticks = [maxValue, Math.round(maxValue * .75), Math.round(maxValue * .5), Math.round(maxValue * .25), 0];
-  $("founderLiveOverview").innerHTML = `<div class="chart-y-labels">${ticks.map(value => `<span>${value}</span>`).join("")}</div><svg viewBox="0 0 520 170" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="areaBlue" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#159cff" stop-opacity=".24"/><stop offset="1" stop-color="#159cff" stop-opacity="0"/></linearGradient><linearGradient id="areaGreen" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#00d6a0" stop-opacity=".16"/><stop offset="1" stop-color="#00d6a0" stop-opacity="0"/></linearGradient></defs><path class="grid-lines" d="M0 12H520 M0 48H520 M0 84H520 M0 120H520 M0 156H520"/><path fill="url(#areaBlue)" d="${areaFor("total")}"/><path fill="url(#areaGreen)" d="${areaFor("active")}"/><polyline class="line-blue" points="${pointsFor("total")}"/><polyline class="line-green" points="${pointsFor("active")}"/><g class="points-blue">${months.map((item, index) => `<circle cx="${x(index)}" cy="${y(item.total)}" r="3"/>`).join("")}</g><g class="points-green">${months.map((item, index) => `<circle cx="${x(index)}" cy="${y(item.active)}" r="3"/>`).join("")}</g></svg><div class="chart-x-labels">${months.map(item => `<span>${item.label}</span>`).join("")}</div>`;
-  $("founderLiveOverview").setAttribute("aria-label", `Monthly enrolled and active internship counts for the last ${monthCount} months`);
-}
-function renderFounderOverview() {
-  const today = indiaDate();
-  const month = today.slice(0, 7);
-  const monthStart = `${month}-01`;
-  const activeInterns = founderInterns.filter(profile => founderStatus(profile, today) === "Active");
-  const monthAttendance = founderAttendance.filter(item => item.attendanceDate?.startsWith(month));
-  const expected = activeInterns.reduce((total, profile) => total + workdaysBetween(
-    profile.internshipStartDate > monthStart ? profile.internshipStartDate : monthStart,
-    profile.internshipEndDate < today ? profile.internshipEndDate : today
-  ), 0);
-  const rate = expected ? Math.min(100, Math.round(monthAttendance.length / expected * 100)) : 0;
-  const pendingTasks = founderAssignments.filter(item => ["assigned", "submitted", "changes_requested"].includes(item.status)).length;
-  $("founderInternCount").textContent = String(founderInterns.length);
-  $("founderStaffCount").textContent = String(founderStaff.length);
-  $("founderPendingTaskCount").textContent = String(pendingTasks);
-  $("founderAttendanceRate").textContent = `${rate}%`;
-  renderFounderCharts(today);
-  $("founderStaffList").innerHTML = founderStaff.length
-    ? founderStaff.map((profile, index) => `<div class="staff-row"><span class="staff-avatar avatar-${index % 5 + 1}">${escapeHtml((profile.displayName || profile.email || "S").split(/\s+/).map(part => part[0]).slice(0, 2).join("").toUpperCase())}</span><span class="person"><strong>${escapeHtml(profile.displayName || profile.email || "Staff member")}</strong><small>${escapeHtml(profile.role.replaceAll("_", " "))}${profile.role === "mentor" && profile.mentorTracks?.length ? ` · ${escapeHtml(profile.mentorTracks.join(", "))}` : ""}</small></span></div>`).join("")
-    : "<p>No staff roles have been assigned yet.</p>";
-  const attendanceByUid = new Map();
-  monthAttendance.forEach(record => attendanceByUid.set(record.uid, (attendanceByUid.get(record.uid) || 0) + 1));
-  const search = $("internSearch").value.trim().toLowerCase();
-  const domain = $("domainFilter").value;
-  const visible = founderInterns.filter(profile => (!search || `${profile.displayName} ${profile.email}`.toLowerCase().includes(search))
-    && (!domain || profile.track === domain));
-  $("internRows").innerHTML = visible.map((profile, index) => {
-    const status = founderStatus(profile, today);
-    const expectedDays = workdaysBetween(profile.internshipStartDate > monthStart ? profile.internshipStartDate : monthStart,
-      profile.internshipEndDate < today ? profile.internshipEndDate : today);
-    const present = attendanceByUid.get(profile.uid) || 0;
-    const attendanceRate = expectedDays ? `${Math.min(100, Math.round(present / expectedDays * 100))}%` : "—";
-    const className = status === "Active" ? "active" : status === "Completed" ? "complete" : "pending";
-    return `<tr><td>${String(index + 1).padStart(2, "0")}</td><td><span class="table-avatar">${escapeHtml((profile.displayName || profile.email || "I").split(/\s+/).map(part => part[0]).slice(0, 2).join("").toUpperCase())}</span>${escapeHtml(profile.displayName || "Name not set")}</td><td>${escapeHtml((profile.track || "Not selected").replace(/ Intern$/, ""))}</td><td>Intern</td><td><span class="table-status ${className}">${escapeHtml(status)}</span></td><td>${attendanceRate}</td><td>${escapeHtml(profile.internshipStartDate || "—")}</td><td>${escapeHtml(profile.internshipEndDate || "—")}</td></tr>`;
-  }).join("");
-  $("emptySearch").hidden = visible.length > 0;
-  const activity = [
-    ...founderAssignments.map(item => ({ at: stamp(item.updatedAt || item.assignedAt), label: `Task ${item.status || "updated"}`, detail: item.taskTitle || item.taskId })),
-    ...founderAttendance.map(item => ({ at: stamp(item.checkedInAt), label: "Attendance check-in", detail: `${item.displayName || item.email || "Intern"} · ${item.attendanceDate}` }))
-  ].filter(item => item.at).sort((a, b) => b.at - a.at).slice(0, 8);
-  $("founderRecentActivity").innerHTML = activity.length ? activity.map((item, index) => `<li><span class="activity-icon ${["blue", "cyan", "green", "violet"][index % 4]}">${index % 2 ? "▣" : "✓"}</span><span><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.detail || "Workspace record")}</small></span><time>${escapeHtml(new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short" }).format(new Date(item.at)))}</time></li>`).join("") : "<li>No live attendance or task activity has been recorded yet.</li>";
-}
-async function loadFounderOverview() {
-  const [learners, staff, assignments, attendance, certificates] = await Promise.all([
-    fetchAllDocs((cursor, pageSize) => query(collection(db, "profiles"), where("role", "==", "learner"), ...(cursor ? [startAfter(cursor)] : []), limit(pageSize))),
-    fetchAllDocs((cursor, pageSize) => query(collection(db, "profiles"), where("role", "in", ["mentor", "hr_manager", "hr_executive", "operations_executive", "admin", "co_founder"]), ...(cursor ? [startAfter(cursor)] : []), limit(pageSize))),
-    fetchAllDocs((cursor, pageSize) => query(collection(db, "trainingAssignments"), ...(cursor ? [startAfter(cursor)] : []), limit(pageSize))),
-    fetchAllDocs((cursor, pageSize) => query(collectionGroup(db, "attendance"), orderBy("attendanceDate", "desc"), ...(cursor ? [startAfter(cursor)] : []), limit(pageSize))),
-    fetchAllDocs((cursor, pageSize) => query(collection(db, "certificateRequests"), where("status", "==", "requested"), ...(cursor ? [startAfter(cursor)] : []), limit(pageSize)))
-  ]);
-  founderInterns = learners.map(snapshot => ({ uid: snapshot.id, ...snapshot.data() }));
-  founderStaff = staff.map(snapshot => ({ uid: snapshot.id, ...snapshot.data() }));
-  founderAssignments = assignments.map(snapshot => ({ id: snapshot.id, ...snapshot.data(), taskTitle: window.IntelliCoreCurriculum?.taskById?.get(snapshot.get("taskId"))?.title || snapshot.get("taskId") }));
-  const internByUid = new Map(founderInterns.map(profile => [profile.uid, profile]));
-  founderAttendance = attendance.map(snapshot => ({
-    uid: snapshot.ref.parent.parent?.id || "", attendanceDate: snapshot.get("attendanceDate") || snapshot.id,
-    checkedInAt: snapshot.get("checkedInAt") || null,
-    displayName: internByUid.get(snapshot.ref.parent.parent?.id)?.displayName || "",
-    email: internByUid.get(snapshot.ref.parent.parent?.id)?.email || ""
-  }));
-  const pendingProfiles = founderInterns.filter(profile => profile.internshipStatus !== "active" && profile.accountStatus !== "deactivated");
-  const draftSnapshots = await Promise.all(pendingProfiles.map(async profile => {
-    const draft = await getDoc(doc(db, "users", profile.uid, "profileDrafts", "current"));
-    return draft.exists() ? profile.uid : "";
-  }));
-  founderDraftUids = new Set(draftSnapshots.filter(Boolean));
-  founderPendingCertificates = certificates.length;
-  updateFounderNotificationBadge();
-  const approvals = [
-    ...[...founderDraftUids].map(uid => {
-      const profile = founderInterns.find(item => item.uid === uid);
-      return `<div class="approval-row"><span class="approval-mark amber">↗</span><span><strong>Internship activation</strong><small>${escapeHtml(profile?.displayName || profile?.email || "Intern")}</small></span><a class="tag amber-tag" href="hr-dashboard.html?view=pending-activation">Review</a></div>`;
-    }),
-    ...certificates.map(snapshot => `<div class="approval-row"><span class="approval-mark violet">✧</span><span><strong>Certificate request</strong><small>${escapeHtml(snapshot.get("displayName") || snapshot.get("email") || "Intern")}</small></span><button class="tag violet-tag" type="button" data-founder-certificate="${escapeHtml(snapshot.id)}">Approve</button></div>`)
-  ];
-  $("founderApprovalList").innerHTML = approvals.length ? approvals.slice(0, 10).join("") : "<p>No profile activations or certificate requests are waiting.</p>";
-  const currentDomain = $("domainFilter").value;
-  $("domainFilter").innerHTML = `<option value="">All Domains</option>${tracks.map(track => `<option value="${escapeHtml(track)}">${escapeHtml(track.replace(/ Intern$/, ""))}</option>`).join("")}`;
-  if (tracks.includes(currentDomain)) $("domainFilter").value = currentDomain;
-  renderFounderOverview();
-}
-
-function setMobileNavOpen(open) {
-  $("sidebar").classList.toggle("open", open);
-  $("sidebarOverlay").hidden = !open;
-  $("mobileMenu").textContent = open ? "×" : "☰";
-  $("mobileMenu").setAttribute("aria-expanded", String(open));
-  $("mobileMenu").setAttribute("aria-label", open ? "Close dashboard navigation" : "Open dashboard navigation");
-  (open ? $("sidebarClose") : $("mobileMenu")).focus({ preventScroll: true });
-}
+const escapeHtml = (value) =>
+  String(value ?? '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[char]));
 
 function closeMobileNav() {
-  setMobileNavOpen(false);
+  const sidebar = $('sidebar');
+  const overlay = $('sidebarOverlay');
+  if (sidebar) sidebar.classList.remove('open');
+  if (overlay) overlay.hidden = true;
+  const mobileMenu = $('mobileMenu');
+  if (mobileMenu) mobileMenu.setAttribute('aria-expanded', 'false');
 }
 
-function setRoleAssignmentStatus(message, state = "") {
-  const status = $("roleAssignmentStatus");
-  status.textContent = message;
-  status.dataset.state = state;
+function setMobileNavOpen(isOpen) {
+  const sidebar = $('sidebar');
+  const overlay = $('sidebarOverlay');
+  if (sidebar) sidebar.classList.toggle('open', isOpen);
+  if (overlay) overlay.hidden = !isOpen;
+  const mobileMenu = $('mobileMenu');
+  if (mobileMenu) mobileMenu.setAttribute('aria-expanded', String(isOpen));
 }
 
-function updateRoleAssignmentButton() {
-  $("assignRoleButton").disabled = roleAssignmentBusy
-    || !$("roleCandidate").value
-    || !$("assignedRole").value;
-}
+// Attach navigation event handlers
+if ($('sidebarClose')) $('sidebarClose').addEventListener('click', closeMobileNav);
+if ($('mobileMenu')) $('mobileMenu').addEventListener('click', () => setMobileNavOpen(!$('sidebar')?.classList.contains('open')));
+if ($('sidebarOverlay')) $('sidebarOverlay').addEventListener('click', closeMobileNav);
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && $('sidebar')?.classList.contains('open')) closeMobileNav();
+});
 
-async function loadRoleAssignmentCandidates() {
-  const select = $("roleCandidate");
-  const refresh = $("refreshRoleCandidates");
-  select.disabled = true;
-  refresh.disabled = true;
-  setRoleAssignmentStatus("Loading unassigned intern accounts…");
-
-  try {
-    const candidateDocs = await fetchAllDocs((cursor, pageSize) => query(
-      collection(db, "profiles"), where("role", "==", "learner"),
-      ...(cursor ? [startAfter(cursor)] : []), limit(pageSize)
-    ));
-    const learners = candidateDocs
-      .map(document => ({ uid: document.id, ...document.data() }))
-      .filter(profile => profile.accountStatus !== "deactivated")
-      .sort((a, b) => (a.displayName || a.email || "").localeCompare(b.displayName || b.email || ""));
-    select.replaceChildren(new Option(
-      learners.length ? "Choose an intern account" : "No unassigned intern accounts",
-      ""
-    ));
-    learners.forEach(learner => {
-      const name = learner.displayName || learner.email || "Intern account";
-      const detail = [learner.email, learner.track].filter(Boolean).join(" · ");
-      const option = new Option(detail ? `${name} — ${detail}` : name, learner.uid);
-      select.add(option);
+const sidebar = $('sidebar');
+if (sidebar) {
+  sidebar.querySelectorAll('.nav-link').forEach((link) => {
+    link.addEventListener('click', () => {
+      sidebar.querySelectorAll('.nav-link').forEach((item) => item.classList.remove('active'));
+      link.classList.add('active');
+      closeMobileNav();
     });
-    select.disabled = learners.length === 0;
-    updateRoleAssignmentButton();
-    setRoleAssignmentStatus(learners.length
-      ? `${learners.length} unassigned verified intern account${learners.length === 1 ? "" : "s"} available.`
-      : "No unassigned intern profiles found. The user must sign in once before assignment.");
-    return tracks;
-  } catch (error) {
-    console.error("Unassigned intern accounts could not be loaded.", error);
-    select.replaceChildren(new Option("Could not load intern accounts", ""));
-    select.disabled = true;
-    setRoleAssignmentStatus(error.message || "Could not load intern accounts. Check Firestore access and retry.", "error");
-    return [];
-  } finally {
-    refresh.disabled = false;
-  }
-}
-
-function renderMentorTracks(tracks) {
-  const options = $("mentorTrackOptions");
-  options.replaceChildren();
-  tracks.forEach(track => {
-    const label = document.createElement("label");
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.name = "mentorTracks";
-    checkbox.value = track;
-    label.append(checkbox, document.createTextNode(track));
-    options.append(label);
   });
 }
 
-async function assignStaffRole(event) {
-  event.preventDefault();
-  const form = event.currentTarget;
-  const button = $("assignRoleButton");
-  const role = $("assignedRole").value;
-  const mentorTracks = role === "mentor"
-    ? [...form.querySelectorAll('input[name="mentorTracks"]:checked')].map(input => input.value)
-    : [];
-  if (!form.reportValidity()) return;
-  if (role === "mentor" && !mentorTracks.length) {
-    setRoleAssignmentStatus("Select at least one authorized track for the Team Leader.", "error");
-    $("mentorTrackOptions").querySelector("input")?.focus();
+// Quick action buttons
+document.querySelectorAll('[data-founder-action]').forEach((button) => {
+  button.addEventListener('click', () => {
+    const action = button.getAttribute('data-founder-action');
+    showToast(`${action} module scheduled for Phase 03 / Phase 04.`);
+  });
+});
+
+if ($('logoutButton')) {
+  $('logoutButton').addEventListener('click', async () => {
+    try {
+      await authService.logout();
+      window.location.replace('/');
+    } catch (err) {
+      console.error('[FounderDashboard] Sign out error:', err);
+      showToast('Sign out failed. Please try again.');
+    }
+  });
+}
+
+function renderFounderDashboard(context) {
+  const { appUser, firebaseUser } = context;
+  const displayName = appUser?.profile?.displayName || appUser?.profile?.fullName || firebaseUser?.displayName || 'Founder';
+  const roleLabel = appUser?.roles?.includes('FOUNDER') ? 'Founder · Super Admin' : 'Co-Founder · Super Admin';
+  const email = appUser?.email || firebaseUser?.email || 'Authorized Super Admin';
+  const initials = displayName
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase() || 'FC';
+
+  if ($('userName')) $('userName').textContent = displayName;
+  if ($('welcomeName')) $('welcomeName').textContent = displayName.split(/\s+/)[0];
+  if ($('userRole')) $('userRole').textContent = roleLabel;
+  if ($('userAvatar')) $('userAvatar').textContent = initials;
+  if ($('profileEmail')) $('profileEmail').textContent = `Signed in as ${email}`;
+
+  // Initial stats
+  if ($('founderInternCount')) $('founderInternCount').textContent = '0';
+  if ($('founderStaffCount')) $('founderStaffCount').textContent = '1';
+  if ($('founderPendingTaskCount')) $('founderPendingTaskCount').textContent = '0';
+  if ($('founderAttendanceRate')) $('founderAttendanceRate').textContent = '100%';
+
+  // Domain overview
+  if ($('founderDomainTotal')) $('founderDomainTotal').textContent = '0';
+  if ($('founderDomainLegend')) {
+    $('founderDomainLegend').innerHTML = '<li style="color: #8fa0b5;"><span>Domains provisioned in Phase 04</span><b>0</b></li>';
+  }
+
+  // Staff list
+  if ($('founderStaffList')) {
+    $('founderStaffList').innerHTML = `
+      <div class="staff-row">
+        <span class="staff-avatar avatar-1">${initials}</span>
+        <span class="person">
+          <strong>${escapeHtml(displayName)}</strong>
+          <small>${escapeHtml(roleLabel)} · Verified Primary Account</small>
+        </span>
+      </div>
+      <p style="margin-top: 0.75rem; font-size: 0.82rem; color: #8fa0b5;">
+        Staff directory &amp; delegation workflow scheduled for Phase 03.
+      </p>
+    `;
+  }
+
+  // Activity list
+  if ($('founderRecentActivity')) {
+    $('founderRecentActivity').innerHTML = `
+      <li>
+        <strong>Security Baseline Initialized</strong>
+        <p style="font-size:0.8rem; color:#8fa0b5; margin:0.25rem 0 0;">
+          Authentication accepted, least-privilege MySQL verified, Founder account active.
+        </p>
+      </li>
+    `;
+  }
+
+  // Approvals list
+  if ($('founderApprovalList')) {
+    $('founderApprovalList').innerHTML = '<p style="color: #8fa0b5;">No pending approvals. Intern approval workflow active in Phase 04.</p>';
+  }
+
+  // Role candidate dropdown
+  if ($('roleCandidate')) {
+    $('roleCandidate').innerHTML = '<option value="">No eligible candidates (Phase 03 Staff Management)</option>';
+  }
+  if ($('roleAssignmentStatus')) {
+    $('roleAssignmentStatus').textContent = 'Role assignment via MySQL RBAC will be enabled in Phase 03.';
+  }
+  if ($('assignRoleButton')) {
+    $('assignRoleButton').disabled = true;
+  }
+
+  // Intern table
+  if ($('internRows')) {
+    $('internRows').innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align: center; padding: 2rem; color: #8fa0b5;">
+          Intern management database integration scheduled for Phase 04.
+        </td>
+      </tr>
+    `;
+  }
+
+  if (authState) authState.hidden = true;
+  if (shell) shell.hidden = false;
+}
+
+// Initialize Auth Service listener
+authService.onAuthStateChanged((context) => {
+  if (context.isInitializing) return;
+
+  if (!context.isAuthenticated) {
+    window.location.replace('/?auth=login');
     return;
   }
 
-  roleAssignmentBusy = true;
-  updateRoleAssignmentButton();
-    setRoleAssignmentStatus("Saving role securely…");
-  try {
-    const profileRef = doc(db, "profiles", $("roleCandidate").value);
-    await runTransaction(db, async transaction => {
-      const profileSnapshot = await transaction.get(profileRef);
-      if (!profileSnapshot.exists() || profileSnapshot.get("role") !== "learner") {
-        throw new Error("Only an unassigned intern profile can receive a staff role.");
-      }
-      if (profileSnapshot.get("accountStatus") === "deactivated") {
-        throw new Error("Reactivate this account before assigning a staff role.");
-      }
-      if (role === "mentor" && (!mentorTracks.length || mentorTracks.some(track => !tracks.includes(track)))) {
-        throw new Error("Choose at least one valid track for the Team Leader.");
-      }
-      transaction.update(profileRef, {
-        role,
-        mentorTracks: role === "mentor" ? [...new Set(mentorTracks)] : [],
-        roleAssignedBy: auth.currentUser.uid,
-        roleAssignedAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-    });
-    setRoleAssignmentStatus("Role assigned. The user must sign out and sign in again for the new access to take effect.", "success");
-    showToast("Staff role assigned. The user needs to sign in again.");
-    form.reset();
-    $("mentorTrackField").hidden = true;
-    await loadRoleAssignmentCandidates();
-    await loadFounderOverview();
-  } catch (error) {
-    console.error("Staff role could not be assigned.", error);
-    setRoleAssignmentStatus(error.message || "The role could not be assigned. Check permissions and try again.", "error");
-  } finally {
-    roleAssignmentBusy = false;
-    updateRoleAssignmentButton();
-  }
-}
-
-onAuthStateChanged(auth, async user => {
-  if (!user) {
-    window.location.replace("index.html?auth=login");
+  if (context.status !== 'ACTIVE') {
+    window.location.replace('/#pending-approval');
     return;
   }
 
-  try {
-    await user.reload();
-    const latestUser = auth.currentUser;
-    if (!latestUser || latestUser.uid !== user.uid) return;
-    const token = await latestUser.getIdTokenResult(true);
-    const provider = token.claims.firebase?.sign_in_provider;
-    const verified = token.claims.email_verified === true
-      && (provider !== "password" || latestUser.emailVerified);
-    const profileSnapshot = await getDoc(doc(db, "profiles", latestUser.uid));
-    const storedRole = profileSnapshot.exists() ? profileSnapshot.get("role") : "";
-    const isAllowlistedFounder = verified
-      && latestUser.email?.trim().toLowerCase() === "ctrlabhishek@gmail.com";
-    if (!verified || !["google.com", "password"].includes(provider)) {
-      window.location.replace("index.html?auth=login&verification=required");
-      return;
-    }
-
-    const role = isAllowlistedFounder ? "founder"
-      : ["founder", "co_founder"].includes(storedRole) ? storedRole : token.claims.role;
-    if (!isAllowlistedFounder && !["founder", "co_founder"].includes(role)) {
-      window.location.replace("Intern-dashboard.html");
-      return;
-    }
-
-    const name = latestUser.displayName?.trim() || (role === "co_founder" ? "Co-Founder" : "Founder");
-    $("userName").textContent = name;
-    $("welcomeName").textContent = name.split(/\s+/)[0];
-    $("userRole").textContent = role === "co_founder" ? "Co-Founder · Super Admin" : "Founder · Super Admin";
-    $("userAvatar").textContent = name.split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase();
-    $("profileEmail").textContent = latestUser.email || "Authorized Super Admin account";
-    authState.hidden = true;
-    shell.hidden = false;
-    const tracks = await loadRoleAssignmentCandidates();
-    renderMentorTracks(tracks);
-    await loadFounderOverview();
-    window.setInterval(() => { void loadFounderOverview().catch(error => console.error("Founder live overview refresh failed.", error)); }, 60000);
-  } catch (error) {
-    console.error("Founder dashboard access could not be verified.", error);
-    authState.textContent = "Access could not be verified. Please return to sign in and try again.";
+  const isFounder = context.roles.includes('FOUNDER') || context.roles.includes('CO_FOUNDER') || context.workspaces.founder;
+  if (!isFounder) {
+    console.warn('[FounderDashboard] User does not hold FOUNDER role. Redirecting.');
+    window.location.replace('/');
+    return;
   }
-});
 
-$("logoutButton").addEventListener("click", async () => {
-  try {
-    await signOut(auth);
-    window.location.replace("index.html");
-  } catch (error) {
-    console.error("Founder dashboard sign-out failed.", error);
-    showToast("Sign out failed. Please try again.");
-  }
-});
-
-$("sidebarClose").addEventListener("click", closeMobileNav);
-$("mobileMenu").addEventListener("click", () => setMobileNavOpen(!$("sidebar").classList.contains("open")));
-$("sidebarOverlay").addEventListener("click", closeMobileNav);
-document.addEventListener("keydown", event => {
-  if (event.key === "Escape" && $("sidebar").classList.contains("open")) closeMobileNav();
-});
-$("sidebar").querySelectorAll(".nav-link").forEach(link => {
-  link.addEventListener("click", () => {
-    $("sidebar").querySelectorAll(".nav-link").forEach(item => item.classList.remove("active"));
-    link.classList.add("active");
-    closeMobileNav();
-  });
-});
-
-async function publishFounderAnnouncement() {
-  const audienceChoice = window.prompt(
-    `Choose an audience: enter all or a track number.\n${tracks.map((track, index) => `${index + 1}. ${track}`).join("\n")}`,
-    "all"
-  );
-  if (audienceChoice === null) return;
-  const choice = audienceChoice.trim();
-  const audienceTrack = choice.toLowerCase() === "all"
-    ? "all"
-    : tracks[Number(choice) - 1] || tracks.find(track => track.toLowerCase() === choice.toLowerCase());
-  if (!audienceTrack) return showToast("Choose all or one of the listed internship tracks.");
-  const title = window.prompt("Announcement title:")?.trim();
-  if (!title || title.length < 3 || title.length > 120) return showToast("Enter a title between 3 and 120 characters.");
-  const body = window.prompt("Announcement message:")?.trim();
-  if (!body || body.length > 5000) return showToast("Enter a message up to 5,000 characters.");
-  try {
-    await setDoc(doc(collection(db, "announcements")), {
-      title, body, audienceTrack,
-      createdByUid: auth.currentUser.uid,
-      createdAt: serverTimestamp()
-    });
-    showToast("Announcement published.");
-  } catch (error) {
-    console.error("Founder announcement could not be published.", error);
-    showToast(error.message || "Could not publish the announcement.");
-  }
-}
-
-async function reviewFounderCertificate(button) {
-  const uid = button.dataset.founderCertificate;
-  if (!uid) return;
-  button.disabled = true;
-  try {
-    await runTransaction(db, async transaction => {
-      const requestRef = doc(db, "certificateRequests", uid);
-      const request = await transaction.get(requestRef);
-      if (!request.exists() || request.get("status") !== "requested") {
-        throw new Error("This certificate request has already been reviewed.");
-      }
-      transaction.update(requestRef, {
-        status: "approved",
-        feedback: "Certificate review approved. Contact HR to receive the verified certificate document.",
-        reviewedByUid: auth.currentUser.uid,
-        reviewedAt: serverTimestamp()
-      });
-    });
-    showToast("Certificate request approved for HR follow-up.");
-    await loadFounderOverview();
-  } catch (error) {
-    console.error("Founder certificate review failed.", error);
-    showToast(error.message || "Could not approve the certificate request.");
-    button.disabled = false;
-  }
-}
-
-const quickActionRoutes = {
-  "Assign staff access": () => document.querySelector("#roleAssignments")?.scrollIntoView({ behavior: "smooth", block: "start" }),
-  "Manage roles": () => document.querySelector("#roleAssignments")?.scrollIntoView({ behavior: "smooth", block: "start" }),
-  "View domains": () => document.querySelector("#domains")?.scrollIntoView({ behavior: "smooth", block: "start" }),
-  "Assign task": () => { window.location.href = "Intern-dashboard.html?workspace=operations#icAssignTaskForm"; },
-  "Send announcement": () => { void publishFounderAnnouncement(); },
-  "Review approvals": () => { window.location.href = "hr-dashboard.html?view=pending-activation"; }
-};
-document.querySelectorAll("[data-founder-action]").forEach(button => {
-  button.addEventListener("click", () => quickActionRoutes[button.dataset.founderAction]?.());
-});
-$("founderApprovalList").addEventListener("click", event => {
-  const button = event.target.closest("[data-founder-certificate]");
-  if (button) void reviewFounderCertificate(button);
-});
-
-$("notificationButton").addEventListener("click", () => {
-  if (founderDraftUids.size) {
-    window.location.href = "hr-dashboard.html?view=pending-activation";
-  } else if (founderPendingCertificates) {
-    document.querySelector("#approvals")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  } else {
-    showToast("There are no pending approvals.");
-  }
-});
-$("refreshRoleCandidates").addEventListener("click", async () => {
-  const tracks = await loadRoleAssignmentCandidates();
-  if (tracks.length) renderMentorTracks(tracks);
-});
-$("assignedRole").addEventListener("change", event => {
-  const isTeamLeader = event.currentTarget.value === "mentor";
-  $("mentorTrackField").hidden = !isTeamLeader;
-  $("mentorTrackOptions").querySelectorAll('input[name="mentorTracks"]').forEach(input => {
-    input.required = isTeamLeader;
-    if (!isTeamLeader) input.checked = false;
-  });
-  updateRoleAssignmentButton();
-});
-$("roleCandidate").addEventListener("change", updateRoleAssignmentButton);
-$("roleAssignmentForm").addEventListener("submit", assignStaffRole);
-
-function filterFounderInterns() { renderFounderOverview(); }
-
-$("internSearch").addEventListener("input", filterFounderInterns);
-$("domainFilter").addEventListener("change", filterFounderInterns);
-$("founderOverviewPeriod").addEventListener("change", event => {
-  founderOverviewMonths = Number(event.currentTarget.value) === 12 ? 12 : 6;
-  renderFounderOverview();
-});
-
-$("globalSearch").addEventListener("keydown", event => {
-  if (event.key === "Enter" && event.currentTarget.value.trim()) {
-    const query = event.currentTarget.value.trim().toLowerCase();
-    const match = [...document.querySelectorAll(".module-card, .panel, .stat-card")]
-      .find(item => item.textContent.toLowerCase().includes(query));
-    if (match) match.scrollIntoView({ behavior: "smooth", block: "center" });
-    else showToast("No matching live dashboard content found.");
-  }
+  renderFounderDashboard(context);
 });

@@ -117,3 +117,4 @@ Each user in MySQL has a discrete `status` column governed by `enum AccountStatu
 2. **Credential Mount**: Mounted read-only at `/run/secrets/firebase-admin-dev.json:ro`. File permissions restricted.
 3. **Rate Limiting**: Configured globally with `express-rate-limit` (100 requests per 15-minute window per IP).
 4. **Token Revocation Check**: Tokens verified with Firebase Admin SDK handle revoked/disabled accounts properly.
+

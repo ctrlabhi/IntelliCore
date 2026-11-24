@@ -138,6 +138,16 @@ export function requireRole(...allowedRoles) {
       return sendError(res, 'Authentication required.', 401, 'UNAUTHENTICATED');
     }
 
+    if (req.user.status !== 'ACTIVE') {
+      return sendError(
+        res,
+        `Account access restricted. Current account status: ${req.user.status}.`,
+        403,
+        'ACCOUNT_STATUS_RESTRICTED',
+        { status: req.user.status }
+      );
+    }
+
     const hasRole = allowedRoles.some((role) => req.roles.includes(role));
     if (!hasRole) {
       return sendError(
@@ -160,6 +170,16 @@ export function requirePermission(...requiredPermissions) {
   return (req, res, next) => {
     if (!req.user) {
       return sendError(res, 'Authentication required.', 401, 'UNAUTHENTICATED');
+    }
+
+    if (req.user.status !== 'ACTIVE') {
+      return sendError(
+        res,
+        `Account access restricted. Current account status: ${req.user.status}.`,
+        403,
+        'ACCOUNT_STATUS_RESTRICTED',
+        { status: req.user.status }
+      );
     }
 
     const hasAll = requiredPermissions.every((perm) => req.permissions.includes(perm));

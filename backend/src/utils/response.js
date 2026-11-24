@@ -6,7 +6,7 @@ export function sendSuccess(res, data = {}, message = undefined, status = 200) {
   const payload = {
     success: true,
     data,
-    requestId: res.locals.requestId || res.getHeader('x-request-id') || null,
+    requestId: res.locals?.requestId || (typeof res.getHeader === 'function' ? res.getHeader('x-request-id') : null) || null,
     timestamp: new Date().toISOString()
   };
 
@@ -37,7 +37,7 @@ export function sendError(res, errorOrMessage, status = 500, code = 'INTERNAL_ER
       message,
       ...(errDetails ? { details: errDetails } : {})
     },
-    requestId: res.locals.requestId || res.getHeader('x-request-id') || null,
+    requestId: res.locals?.requestId || (typeof res.getHeader === 'function' ? res.getHeader('x-request-id') : null) || null,
     timestamp: new Date().toISOString()
   };
 

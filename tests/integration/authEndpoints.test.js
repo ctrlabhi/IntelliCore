@@ -46,7 +46,8 @@ describe('Integration: Authentication Endpoints & Identity Synchronization', () 
     expect(res.body.data.email).toBe(testEmail);
     expect(res.body.data.status).toBe('PENDING');
     expect(res.body.data.roles).toContain('INTERN');
-    expect(res.body.data.workspaces.intern).toBe(true);
+    // Security enforcement: PENDING accounts must not receive active workspace access before HR approval
+    expect(res.body.data.workspaces.intern).toBe(false);
     expect(res.body.data.workspaces.founder).toBe(false);
   });
 
@@ -163,3 +164,4 @@ describe('Integration: Authentication Endpoints & Identity Synchronization', () 
     expect(res.body.error.code).toBe('VALIDATION_ERROR');
   });
 });
+

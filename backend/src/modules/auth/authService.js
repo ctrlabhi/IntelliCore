@@ -221,14 +221,15 @@ export class AuthService {
     }
     const permissions = Array.from(permissionSet);
 
-    // Compute authorized workspaces
+    // Compute authorized workspaces (only active accounts can access workspaces)
+    const isActive = user.status === 'ACTIVE';
     const workspaces = {
-      founder: roleCodes.includes('FOUNDER') || roleCodes.includes('CO_FOUNDER') || permissions.includes('workspace:founder'),
-      admin: roleCodes.includes('ADMIN') || permissions.includes('workspace:admin'),
-      hr: roleCodes.includes('HR_MANAGER') || roleCodes.includes('HR_EXECUTIVE') || permissions.includes('workspace:hr'),
-      operations: roleCodes.includes('OPERATIONS_EXECUTIVE') || permissions.includes('workspace:operations'),
-      teamLeader: roleCodes.includes('TEAM_LEADER') || permissions.includes('workspace:team_leader'),
-      intern: roleCodes.includes('INTERN') || permissions.includes('workspace:intern')
+      founder: isActive && (roleCodes.includes('FOUNDER') || roleCodes.includes('CO_FOUNDER') || permissions.includes('workspace:founder')),
+      admin: isActive && (roleCodes.includes('ADMIN') || permissions.includes('workspace:admin')),
+      hr: isActive && (roleCodes.includes('HR_MANAGER') || roleCodes.includes('HR_EXECUTIVE') || permissions.includes('workspace:hr')),
+      operations: isActive && (roleCodes.includes('OPERATIONS_EXECUTIVE') || permissions.includes('workspace:operations')),
+      teamLeader: isActive && (roleCodes.includes('TEAM_LEADER') || permissions.includes('workspace:team_leader')),
+      intern: isActive && (roleCodes.includes('INTERN') || permissions.includes('workspace:intern'))
     };
 
     return {

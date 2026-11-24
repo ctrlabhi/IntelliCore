@@ -31,8 +31,11 @@ services:
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
       FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-intellicore-dev}
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/firebase-admin-dev.json
+      FOUNDER_EMAIL: ${FOUNDER_EMAIL:-ctrlabhishek@gmail.com}
+      FOUNDER_FIREBASE_UID: ${FOUNDER_FIREBASE_UID:-svNt0UTSz9N59EzlaTWR7jsCu5c2}
     volumes:
       # Mount application code for hot reload, excluding node_modules to protect Linux binaries
+      - ./package.json:/app/package.json:ro
       - ./backend/src:/app/backend/src:ro
       - ./frontend:/app/frontend:ro
       - ./prisma:/app/prisma

@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import request from 'supertest';
 import app from '../../backend/src/app.js';
 import firebaseService from '../../backend/src/integrations/firebase/firebaseService.js';
+import { requireRole, requirePermission } from '../../backend/src/middleware/auth.js';
 import { getPrismaClient } from '../../backend/src/config/database.js';
 
 const prisma = getPrismaClient();
@@ -65,4 +66,72 @@ describe('Integration: Authentication & Authorization Middleware', () => {
       .set('Authorization', 'Bearer valid.syntax.token');
     expect(res.status).toBe(401); // Verification error maps to 401 INVALID_TOKEN
   });
+
+  describe('Authorization: requireRole & requirePermission Guardrails', () => {
+    const mockRes = () => ({
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
+      locals: {}
+    });
+
+    it('requireRole rejects non-ACTIVE accounts with 403 ACCOUNT_STATUS_RESTRICTED', () => {
+      const middleware = requireRole('FOUNDER');
+      const req = { user: { status: 'PENDING' }, roles: ['FOUNDER'] };
+      const res = mockRes();
+      const next = vi.fn();
+
+      middleware(req, res, next);
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+        error: expect.objectContaining({ code: 'ACCOUNT_STATUS_RESTRICTED' })
+      }));
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('requireRole allows ACTIVE accounts with the required role', () => {
+      const middleware = requireRole('FOUNDER');
+      const req = { user: { status: 'ACTIVE' }, roles: ['FOUNDER'] };
+      const res = mockRes();
+      const next = vi.fn();
+
+      middleware(req, res, next);
+      expect(next).toHaveBeenCalled();
+    });
+
+    it('requireRole rejects ACTIVE accounts lacking the role with 403 FORBIDDEN_ROLE', () => {
+      const middleware = requireRole('FOUNDER');
+      const req = { user: { status: 'ACTIVE' }, roles: ['INTERN'] };
+      const res = mockRes();
+      const next = vi.fn();
+
+      middleware(req, res, next);
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+        error: expect.objectContaining({ code: 'FORBIDDEN_ROLE' })
+      }));
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('requirePermission rejects non-ACTIVE accounts with 403 ACCOUNT_STATUS_RESTRICTED', () => {
+      const middleware = requirePermission('workspace:founder');
+      const req = { user: { status: 'SUSPENDED' }, permissions: ['workspace:founder'] };
+      const res = mockRes();
+      const next = vi.fn();
+
+      middleware(req, res, next);
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('requirePermission allows ACTIVE accounts with all required permissions', () => {
+      const middleware = requirePermission('workspace:founder');
+      const req = { user: { status: 'ACTIVE' }, permissions: ['workspace:founder'] };
+      const res = mockRes();
+      const next = vi.fn();
+
+      middleware(req, res, next);
+      expect(next).toHaveBeenCalled();
+    });
+  });
 });
+

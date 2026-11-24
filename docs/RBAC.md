@@ -114,3 +114,6 @@ npm run founder:bootstrap
 3. Firebase Admin Auth retrieves and validates the genuine UID, verified email, and non-disabled state.
 4. Database transaction verifies no conflicting primary founder exists.
 5. User is created or updated with `status: ACTIVE` and assigned the `FOUNDER` role atomically.
+6. Inappropriate default `INTERN` role assignment is purged atomically.
+7. Verification status: **INITIALIZED & VERIFIED ACTIVE** for `ctrlabhishek@gmail.com` (UID `svNt0UTSz9N59EzlaTWR7jsCu5c2`).
+
