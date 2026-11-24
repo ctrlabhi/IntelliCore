@@ -6,15 +6,16 @@ import { getPrismaClient } from '../../backend/src/config/database.js';
 
 const prisma = getPrismaClient();
 
-const founderUid = 'svNt0UTSz9N59EzlaTWR7jsCu5c2';
-const founderEmail = 'ctrlabhishek@gmail.com';
+import { founderFixture, hasIsolatedDatabase } from './testDatabase.js';
+
+const { uid: founderUid, email: founderEmail } = founderFixture;
 
 const testRoleTargetUid = 'role_target_user_uid_103';
 const testRoleTargetEmail = 'role.target@intellicore.dev';
 
 let targetUser = null;
 
-describe('Integration: Role & Permission Management (/api/v1/roles, /api/v1/permissions)', () => {
+describe.skipIf(!hasIsolatedDatabase())('Integration: Role & Permission Management (/api/v1/roles, /api/v1/permissions)', () => {
   beforeAll(async () => {
     const internRole = await prisma.role.findUnique({ where: { code: 'INTERN' } });
     targetUser = await prisma.user.upsert({

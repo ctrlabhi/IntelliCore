@@ -76,3 +76,11 @@ Automated PowerShell utilities are located in `scripts/`:
 - **Backup:** `scripts/backup.ps1` produces a timestamped SQL dump in `backups/db-backup-YYYYMMDD-HHMMSS.sql`.
 - **Restore:** `scripts/restore.ps1` prompts for explicit user confirmation before applying a dump to prevent accidental data loss.
 
+## Phase 04 schema and migration tracking
+
+The original migration chain is tracked from `20261124000000_init` through `20261124141807_add_internship_and_department_models`, along with `migration_lock.toml`. Git ignores SQL dumps and only exempts `prisma/migrations/*/migration.sql`. The original migration bytes are preserved across checkouts.
+
+The Phase 04 migration adds departments, user-to-department memberships, internship applications and internship enrollments. Department codes and slugs are unique. Membership rows are unique by user, department and capacity. Changes of capacity deactivate the previous membership and retain its row. An internship has a unique code and a unique source application. The service takes an applicant row lock in a MySQL transaction before checking application state and overlap, then records approval, enrollment, account activation and audit together.
+
+Internship calendar dates are represented as UTC-midnight dates and compared to the Asia/Kolkata business day. Approval sets the first stored state, and list queries and statistics derive upcoming, ongoing and due-for-review state from the approved dates. Completion, termination and withdrawal persist explicit decisions and keep history. [Project progress](PROJECT_PROGRESS.md).
+

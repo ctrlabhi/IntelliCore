@@ -60,3 +60,11 @@ npm run test:coverage
    - `GET /Photos/favicon.png` resolves successfully.
    - Access to `.env` or `prisma/schema.prisma` is rejected with 404/403.
 
+## Phase 04 isolated integration tests
+
+The default test run uses an unreachable loopback database and excludes the MySQL suites. It covers unit checks, HTTP contracts, static routes, and RBAC and onboarding guards with mocked identity and persistence where needed.
+
+For the complete suite, provision a disposable MySQL 8.4 database and a dedicated user scoped to that database. Both names must begin with `intellicore_test_`. Use a loopback MySQL endpoint with an explicit port and set `INTELLICORE_TEST_DATABASE_URL` privately. The runner rejects the normal application schema, privileged usernames, non-loopback hosts and URL options. The MySQL suites also check that the configured application URL equals the validated test URL. Generate Prisma Client from the current schema before running `npm test` with the test URL.
+
+Fixture setup deploys the Prisma chain, seeds the catalog and creates a synthetic Founder in the isolated schema. The suite exercises real MySQL writes, foreign keys, concurrent transactions, audit rollback and ownership. Firebase verification is mocked. Browser tests with synthetic identities and actual development Firebase sign-in are separate checks.
+

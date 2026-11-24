@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import staffController from './staffController.js';
-import { authenticate, requireAuth, requirePermission } from '../../middleware/auth.js';
+import { authenticate, requireAuth, requirePermission, requirePrimaryFounder } from '../../middleware/auth.js';
 
 const router = Router();
 
@@ -115,6 +115,7 @@ router.post(
   '/',
   authenticate,
   requireAuth,
+  requirePrimaryFounder,
   requirePermission('staff:create'),
   staffController.provisionStaff
 );

@@ -1,0 +1,21 @@
+.phase04 { min-width: 0; }
+.phase04-section { margin-block: 1rem; padding: 1rem; border: 1px solid #49617a80; border-radius: 12px; }
+.phase04-record { margin-block: .75rem; padding: .75rem 1rem; background: #6b8fbb14; border-radius: 10px; overflow-wrap: anywhere; }
+.phase04 h3, .phase04 h4 { margin: 0 0 .6rem; }
+.phase04 p { margin-block: .45rem; }
+.phase04 details { margin-top: .75rem; }
+.phase04 summary { cursor: pointer; font-weight: 600; }
+.phase04-form, .phase04-filters { display: flex; flex-wrap: wrap; align-items: end; gap: .75rem; margin-block: .6rem; }
+.phase04 label { display: grid; gap: .3rem; flex: 1 1 11rem; min-width: 0; }
+.phase04 :is(input, select, textarea) {
+  width: 100%; min-height: 2.5rem; padding: .45rem .65rem; color: inherit; background: #101d2e;
+  border: 1px solid #5b738d; border-radius: 7px; font: inherit; color-scheme: dark;
+}
+.phase04 textarea { min-height: 4rem; resize: vertical; }
+.phase04 button { padding: .45rem .8rem; min-height: 2.5rem; margin-inline-end: .35rem; border-radius: 7px; border: 1px solid #5b738d; background: #173451; color: #eef6ff; cursor: pointer; font: inherit; }
+.phase04 button:disabled { opacity: .55; cursor: default; }
+.phase04 :is(button, input, select, textarea, summary):focus-visible { outline: 2px solid #69caff; outline-offset: 2px; }
+.phase04 dl { display: grid; grid-template-columns: minmax(6rem, 10rem) 1fr; gap: .4rem .65rem; }
+.phase04 dd { margin: 0; }
+.phase04 [role="status"] { font-size: .9rem; }
+.phase04 [hidden], .phase04-disabled[hidden] { display: none !important; }

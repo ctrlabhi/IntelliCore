@@ -6,6 +6,7 @@
  */
 
 import { authService } from '/services/auth.js';
+import { loadEnrollmentCounts, mountPhase04 } from './phase04-dashboard.js';
 
 const $ = (id) => document.getElementById(id);
 const authState = $('authState');
@@ -96,22 +97,9 @@ function renderTLDashboard(context) {
   if ($('userAvatar')) $('userAvatar').textContent = initials;
   if ($('profileEmail')) $('profileEmail').textContent = `Signed in as ${email}`;
 
-  if ($('tlInternCount')) $('tlInternCount').textContent = '0';
-  if ($('tlPendingTaskCount')) $('tlPendingTaskCount').textContent = '0';
-  if ($('tlAttendanceRate')) $('tlAttendanceRate').textContent = '—';
-
-  if ($('internRows')) {
-    $('internRows').innerHTML = `
-      <tr>
-        <td colspan="7" style="text-align: center; padding: 2rem; color: #8fa0b5;">
-          Team Leader intern roster scheduled for Phase 04 / Phase 06.
-        </td>
-      </tr>
-    `;
-  }
-
   if (authState) authState.hidden = true;
   if (shell) shell.hidden = false;
+  mountPhase04($('interns'), context, 'leader', () => loadEnrollmentCounts('tlInternCount', 'tlActiveCount'));
 }
 
 authService.onAuthStateChanged((context) => {
@@ -122,8 +110,8 @@ authService.onAuthStateChanged((context) => {
     return;
   }
 
-  if (context.status !== 'ACTIVE') {
-    window.location.replace('/#pending-approval');
+  if (context.status !== 'ACTIVE' || !context.appUser.emailVerified) {
+    window.location.replace(authService.determineDashboardRoute(context));
     return;
   }
 

@@ -20,14 +20,21 @@ export class FirebaseService {
   }
 
   init() {
+    if (env.NODE_ENV === 'test') return;
     try {
+      if (env.FIREBASE_PROJECT_ID !== 'intellicore-dev') {
+        throw new Error('Firebase Auth requires the IntelliCore development project.');
+      }
       const existingApps = getApps();
-      if (existingApps.length > 0) {
-        this.app = existingApps[0];
+      const existingDevApp = existingApps.find(({ options }) => options.projectId === 'intellicore-dev');
+      if (existingDevApp) {
+        this.app = existingDevApp;
         this.auth = getAuth(this.app);
         this.isInitialized = true;
         this.projectId = this.app.options.projectId || env.FIREBASE_PROJECT_ID;
         return;
+      } else if (existingApps.length) {
+        throw new Error('An unexpected Firebase app is initialized.');
       }
 
       // Check configured credential path or fallbacks
@@ -49,13 +56,13 @@ export class FirebaseService {
         const keyData = JSON.parse(fs.readFileSync(credPath, 'utf8'));
 
         // Strict security guardrail: never initialize against production
-        if (keyData.project_id === 'intellicore-229') {
-          throw new Error('FATAL SECURITY VIOLATION: Production Firebase credentials detected in development environment.');
+        if (keyData.project_id !== 'intellicore-dev') {
+          throw new Error('Firebase credentials do not belong to the development project.');
         }
 
         this.app = initializeApp({
           credential: cert(keyData),
-          projectId: keyData.project_id || env.FIREBASE_PROJECT_ID
+          projectId: keyData.project_id
         });
 
         this.auth = getAuth(this.app);

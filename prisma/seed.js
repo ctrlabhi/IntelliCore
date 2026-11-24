@@ -86,7 +86,32 @@ const initialPermissions = [
   { code: 'roles:manage_permissions', description: 'Configure permissions mapped to non-protected roles' },
   { code: 'permissions:read', description: 'View system permissions catalog' },
   { code: 'audit_logs:read', description: 'View system security and administrative audit logs' },
-  { code: 'analytics:read', description: 'View administrative overview and metrics statistics' }
+  { code: 'analytics:read', description: 'View administrative overview and metrics statistics' },
+  { code: 'departments:read', description: 'View company departments and tracks' },
+  { code: 'departments:create', description: 'Create company departments' },
+  { code: 'departments:update', description: 'Update department details and activation status' },
+  { code: 'departments:assign_staff', description: 'Assign staff and team leaders to departments' },
+  { code: 'applications:create_own', description: 'Create and draft own internship application' },
+  { code: 'applications:read_own', description: 'Read own internship application' },
+  { code: 'applications:read_all', description: 'Read all internship applications' },
+  { code: 'applications:review', description: 'Request changes, approve or reject applications' },
+  { code: 'internships:read_own', description: 'Read own internship details and history' },
+  { code: 'internships:read_all', description: 'Read all internship records organization-wide' },
+  { code: 'internships:read_department', description: 'Read interns within assigned departments' },
+  { code: 'internships:manage', description: 'Update internship details, assign team leaders, terminate' },
+  { code: 'internships:approve_completion', description: 'Approve completion of internship' }
+];
+
+const initialDepartments = [
+  { name: 'Human Resources', code: 'HR', slug: 'human-resources', description: 'Talent recruitment, onboarding, staff relations, and HR policies' },
+  { name: 'Web Development', code: 'WEB_DEV', slug: 'web-development', description: 'Full-stack web engineering, frontend UI, REST APIs, and modern web applications' },
+  { name: 'Data Analytics', code: 'DATA_ANALYTICS', slug: 'data-analytics', description: 'Data extraction, cleaning, exploratory data analysis, and predictive modeling' },
+  { name: 'Business Analytics', code: 'BIZ_ANALYTICS', slug: 'business-analytics', description: 'Market research, stakeholder briefs, business requirement documents, and metric dashboards' },
+  { name: 'Graphic Designing', code: 'GRAPHIC_DESIGN', slug: 'graphic-designing', description: 'Visual identity, UI brand assets, social collaterals, and multi-format design' },
+  { name: 'Content Writing', code: 'CONTENT_WRITING', slug: 'content-writing', description: 'Technical documentation, editorial briefs, evidence-led articles, and copy strategy' },
+  { name: 'Digital Marketing', code: 'DIGITAL_MARKETING', slug: 'digital-marketing', description: 'Performance marketing, search optimization, campaign planning, and growth analytics' },
+  { name: 'Social Media Management', code: 'SOCIAL_MEDIA', slug: 'social-media-management', description: 'Social content calendars, engagement reporting, brand messaging, and moderation' },
+  { name: 'WordPress Development', code: 'WORDPRESS_DEV', slug: 'wordpress-development', description: 'Custom WordPress theme architecture, CMS configuration, and plugin engineering' }
 ];
 
 // Mapping roles to permission codes
@@ -97,40 +122,56 @@ const rolePermissionMatrix = {
     'users:read', 'users:update_status',
     'staff:read', 'staff:create', 'staff:update', 'staff:update_status',
     'roles:read', 'roles:assign', 'roles:manage_permissions',
-    'permissions:read', 'audit_logs:read', 'analytics:read'
+    'permissions:read', 'audit_logs:read', 'analytics:read',
+    'departments:read', 'departments:create', 'departments:update', 'departments:assign_staff',
+    'applications:create_own', 'applications:read_own', 'applications:read_all', 'applications:review',
+    'internships:read_own', 'internships:read_all', 'internships:read_department', 'internships:manage', 'internships:approve_completion'
   ],
   CO_FOUNDER: [
     'auth:login', 'profile:read_own', 'profile:update_own',
     'workspace:founder', 'workspace:hr', 'workspace:operations', 'workspace:team_leader', 'workspace:intern',
     'users:read', 'users:update_status',
-    'staff:read', 'staff:create', 'staff:update', 'staff:update_status',
-    'roles:read', 'roles:assign',
-    'permissions:read', 'audit_logs:read', 'analytics:read'
+    'staff:read', 'staff:update', 'staff:update_status',
+    'roles:read',
+    'permissions:read', 'audit_logs:read', 'analytics:read',
+    'departments:read',
+    'applications:create_own', 'applications:read_own', 'applications:read_all', 'applications:review',
+    'internships:read_own', 'internships:read_all', 'internships:read_department', 'internships:manage', 'internships:approve_completion'
   ],
   ADMIN: [
     'auth:login', 'profile:read_own', 'profile:update_own',
     'workspace:admin', 'users:read', 'staff:read', 'roles:read',
-    'permissions:read', 'audit_logs:read', 'analytics:read'
+    'permissions:read', 'audit_logs:read', 'analytics:read',
+    'departments:read', 'applications:read_all', 'internships:read_all'
   ],
   HR_MANAGER: [
     'auth:login', 'profile:read_own', 'profile:update_own',
-    'workspace:hr', 'users:read', 'staff:read', 'analytics:read'
+    'workspace:hr', 'users:read', 'staff:read', 'analytics:read',
+    'departments:read',
+    'applications:read_all', 'applications:review',
+    'internships:read_all', 'internships:manage', 'internships:approve_completion'
   ],
   HR_EXECUTIVE: [
     'auth:login', 'profile:read_own', 'profile:update_own',
-    'workspace:hr', 'users:read', 'staff:read'
+    'workspace:hr', 'users:read', 'staff:read',
+    'departments:read', 'applications:read_all', 'internships:read_all'
   ],
   OPERATIONS_EXECUTIVE: [
     'auth:login', 'profile:read_own', 'profile:update_own',
-    'workspace:operations', 'staff:read'
+    'workspace:operations', 'staff:read',
+    'departments:read', 'internships:read_all'
   ],
   TEAM_LEADER: [
     'auth:login', 'profile:read_own', 'profile:update_own',
-    'workspace:team_leader', 'workspace:intern'
+    'workspace:team_leader', 'workspace:intern',
+    'departments:read', 'internships:read_department'
   ],
   INTERN: [
     'auth:login', 'profile:read_own', 'profile:update_own',
-    'workspace:intern'
+    'workspace:intern',
+    'departments:read',
+    'applications:create_own', 'applications:read_own',
+    'internships:read_own'
   ]
 };
 
@@ -204,6 +245,22 @@ async function seed() {
       });
     }
     console.log(`  ✓ Role permissions mapped: ${roleCode} (${permCodes.length} permissions)`);
+  }
+
+  // 5. Seed Legitimate Departments (Phase 04)
+  for (const dept of initialDepartments) {
+    const record = await prisma.department.upsert({
+      where: { code: dept.code },
+      update: {},
+      create: {
+        name: dept.name,
+        code: dept.code,
+        slug: dept.slug,
+        description: dept.description,
+        isActive: true
+      }
+    });
+    console.log(`  ✓ Department verified: ${record.name} (${record.code})`);
   }
 
   console.log('✅ Idempotent seed completed successfully.');

@@ -6,8 +6,9 @@ import { getPrismaClient } from '../../backend/src/config/database.js';
 
 const prisma = getPrismaClient();
 
-const founderUid = 'svNt0UTSz9N59EzlaTWR7jsCu5c2';
-const founderEmail = 'ctrlabhishek@gmail.com';
+import { founderFixture, hasIsolatedDatabase } from './testDatabase.js';
+
+const { uid: founderUid, email: founderEmail } = founderFixture;
 
 const testInternUid = 'test_user_mgmt_intern_uid_101';
 const testInternEmail = 'intern.user.mgmt@intellicore.dev';
@@ -15,7 +16,7 @@ const testInternEmail = 'intern.user.mgmt@intellicore.dev';
 let testInternUser = null;
 let founderUser = null;
 
-describe('Integration: User Management Endpoints (/api/v1/users)', () => {
+describe.skipIf(!hasIsolatedDatabase())('Integration: User Management Endpoints (/api/v1/users)', () => {
   beforeAll(async () => {
     // Ensure founder user exists in DB
     founderUser = await prisma.user.findUnique({
@@ -71,7 +72,7 @@ describe('Integration: User Management Endpoints (/api/v1/users)', () => {
     });
 
     const res = await request(app)
-      .get('/api/v1/users?page=1&limit=10')
+      .get('/api/v1/users?page=1&limit=10&role=FOUNDER')
       .set('Authorization', 'Bearer valid.founder.token');
 
     expect(res.status).toBe(200);
@@ -104,7 +105,7 @@ describe('Integration: User Management Endpoints (/api/v1/users)', () => {
     expect(res.body.data.status).toBe('PENDING');
   });
 
-  it('PATCH /api/v1/users/:id/status updates status of an intern account to ACTIVE', async () => {
+  it('PATCH /api/v1/users/:id/status cannot bypass the internship approval workflow', async () => {
     vi.spyOn(firebaseService, 'verifyIdToken').mockResolvedValue({
       uid: founderUid,
       email: founderEmail,
@@ -117,13 +118,10 @@ describe('Integration: User Management Endpoints (/api/v1/users)', () => {
       .set('Authorization', 'Bearer valid.founder.token')
       .send({ status: 'ACTIVE' });
 
-    expect(res.status).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.data.status).toBe('ACTIVE');
-
-    // Verify DB updated
+    expect(res.status).toBe(409);
+    expect(res.body.error.code).toBe('APPROVAL_REQUIRED');
     const updated = await prisma.user.findUnique({ where: { id: testInternUser.id } });
-    expect(updated.status).toBe('ACTIVE');
+    expect(updated.status).toBe('PENDING');
   });
 
   it('PATCH /api/v1/users/:id/status strictly prohibits suspending or deactivating Founder account', async () => {

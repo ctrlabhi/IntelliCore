@@ -127,8 +127,15 @@ import { authService } from '/services/auth.js';
         setMessage('Account created! A verification email has been sent. Please check your inbox.', 'success');
         if (verificationPanel) verificationPanel.hidden = false;
       } else {
-        await authService.loginWithEmail(email, password);
-        setMessage('Signed in successfully! Redirecting...', 'success');
+        const user = await authService.loginWithEmail(email, password);
+        if (user.emailVerified) {
+          const context = authService.getContext();
+          const route = authService.determineDashboardRoute(context);
+          if (route && route !== '/?auth=login') window.location.href = route;
+        } else {
+          setMessage('Verify your email to access your application.', 'info');
+          if (verificationPanel) verificationPanel.hidden = false;
+        }
       }
     } catch (err) {
       console.error('[Auth] Form error:', err);
@@ -200,6 +207,25 @@ import { authService } from '/services/auth.js';
   });
 
   // Global Auth State Observer & Router
+  if (verificationPanel) {
+    const checkVerification = document.createElement('button');
+    checkVerification.type = 'button';
+    checkVerification.className = resendVerificationBtn?.className || '';
+    checkVerification.textContent = 'I verified my email';
+    checkVerification.addEventListener('click', async () => {
+      checkVerification.disabled = true;
+      try {
+        const user = await authService.refreshIdentity();
+        if (user && !user.emailVerified) setMessage('Your email is still unverified. Open the verification link and try again.', 'info');
+      } catch (error) {
+        setMessage(error.message, 'error');
+      } finally {
+        checkVerification.disabled = false;
+      }
+    });
+    verificationPanel.append(checkVerification);
+  }
+
   authService.onAuthStateChanged((context) => {
     if (!context.isAuthenticated) {
       if (loginTrigger) {
@@ -209,7 +235,13 @@ import { authService } from '/services/auth.js';
     }
 
     // User is signed in and synchronized
-    const { appUser, workspaces, status } = context;
+    const { appUser, status } = context;
+
+    if (!appUser.emailVerified) {
+      setMessage('Verify your email to access your application.', 'info');
+      if (verificationPanel) verificationPanel.hidden = false;
+      return;
+    }
 
     if (loginTrigger) {
       loginTrigger.innerHTML = 'Workspace <span>→</span>';
@@ -222,13 +254,11 @@ import { authService } from '/services/auth.js';
       }, { once: true });
     }
 
-    if (status === 'ACTIVE') {
+    if (status === 'ACTIVE' || context.workspaces.onboarding) {
       const targetRoute = authService.determineDashboardRoute(context);
       if (targetRoute && modal?.classList.contains('is-open')) {
         window.location.href = targetRoute;
       }
-    } else if (status === 'PENDING') {
-      setMessage('Account registered! Status: PENDING review. You will receive access once approved by HR.', 'info');
     } else {
       setMessage(`Account restricted. Status: ${status}. Please contact support.`, 'error');
     }

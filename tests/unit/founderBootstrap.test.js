@@ -21,12 +21,14 @@ describe('Unit: Founder Bootstrap Administration CLI', () => {
   });
 
   it('verifies that conflicting primary founders cannot be created', async () => {
-    // If a different user already holds the primary FOUNDER role
-    const founderRole = await prisma.role.findUnique({ where: { code: 'FOUNDER' } });
-    expect(founderRole).toBeDefined();
-
-    // The script enforces: existing assignment UID must match the configured UID
-    // Tested through database constraints and transaction check
+    vi.spyOn(firebaseService, 'getAuth').mockReturnValue({
+      getUser: vi.fn().mockResolvedValue({ email: env.FOUNDER_EMAIL, emailVerified: true })
+    });
+    vi.spyOn(prisma, '$transaction').mockImplementation((callback) => callback({
+      role: { findUnique: vi.fn().mockResolvedValue({ id: 'founder-role' }) },
+      userRole: { findFirst: vi.fn().mockResolvedValue({ user: { firebaseUid: 'different-founder' } }) }
+    }));
+    await expect(bootstrapFounder()).rejects.toThrow('Conflicting primary founder');
   });
 });
 

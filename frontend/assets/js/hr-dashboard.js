@@ -6,6 +6,7 @@
  */
 
 import { authService } from '/services/auth.js';
+import { loadEnrollmentCounts, mountPhase04 } from './phase04-dashboard.js';
 
 const $ = (id) => document.getElementById(id);
 const authState = $('authState');
@@ -98,33 +99,10 @@ function renderHRDashboard(context) {
   if ($('userAvatar')) $('userAvatar').textContent = initials;
   if ($('profileEmail')) $('profileEmail').textContent = `Signed in as ${email}`;
 
-  // Initial stats
-  if ($('internCount')) $('internCount').textContent = '0';
-  if ($('activeCount')) $('activeCount').textContent = '0';
-  if ($('pendingCount')) $('pendingCount').textContent = '0';
-  if ($('attendanceRate')) $('attendanceRate').textContent = '—';
-
-  // Warnings / notices
-  if ($('sparkPlanNotice')) {
-    $('sparkPlanNotice').innerHTML = `
-      <span>ⓘ</span>
-      <p><strong>Modular Monolith Workspace.</strong> HR workflows will connect to MySQL via REST endpoints in Phase 03 &amp; 04.</p>
-    `;
-  }
-
-  // Intern table
-  if ($('internRows')) {
-    $('internRows').innerHTML = `
-      <tr>
-        <td colspan="7" style="text-align: center; padding: 2rem; color: #8fa0b5;">
-          Intern management database integration scheduled for Phase 04.
-        </td>
-      </tr>
-    `;
-  }
-
+  if ($('sparkPlanNotice')) $('sparkPlanNotice').hidden = true;
   if (authState) authState.hidden = true;
   if (shell) shell.hidden = false;
+  mountPhase04($('interns'), context, 'hr', () => loadEnrollmentCounts('liveInternCount', 'liveActiveCount'));
 }
 
 authService.onAuthStateChanged((context) => {
@@ -135,8 +113,8 @@ authService.onAuthStateChanged((context) => {
     return;
   }
 
-  if (context.status !== 'ACTIVE') {
-    window.location.replace('/#pending-approval');
+  if (context.status !== 'ACTIVE' || !context.appUser.emailVerified) {
+    window.location.replace(authService.determineDashboardRoute(context));
     return;
   }
 

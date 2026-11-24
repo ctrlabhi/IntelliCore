@@ -7,6 +7,7 @@
 
 import { authService } from '/services/auth.js';
 import { api } from '/services/api.js';
+import { mountPhase04 } from './phase04-dashboard.js';
 
 const $ = (id) => document.getElementById(id);
 const authState = $('authState');
@@ -75,6 +76,9 @@ document.querySelectorAll('[data-founder-action]').forEach((button) => {
     if (action === 'Assign staff access') {
       window.location.hash = '#roleAssignments';
       $('roleCandidate')?.focus();
+    } else if (action === 'Review approvals' || action === 'View domains') {
+      window.location.hash = action === 'Review approvals' ? '#phase04Applications'
+        : $('phase04Departments') ? '#phase04Departments' : '#domains';
     } else {
       showToast(`${action} workflow activated.`);
     }
@@ -96,22 +100,50 @@ if ($('logoutButton')) {
 /**
  * Loads real-time MySQL administrative metrics, staff, audit logs, and candidate accounts.
  */
-async function loadLiveDashboardData() {
+async function loadFounderStats() {
   try {
-    // 1. Fetch live administrative statistics
     const statsRes = await api.get('/admin/stats');
     if (statsRes && statsRes.data) {
       const stats = statsRes.data;
-      if ($('founderInternCount')) $('founderInternCount').textContent = String(stats.users?.total || 0);
-      if ($('founderStaffCount')) $('founderStaffCount').textContent = String(stats.staff?.total || 0);
-      if ($('founderPendingTaskCount')) $('founderPendingTaskCount').textContent = String(stats.users?.pending || 0);
-      if ($('founderAttendanceRate')) $('founderAttendanceRate').textContent = '100%';
-      if ($('founderDomainTotal')) $('founderDomainTotal').textContent = String(stats.users?.total || 0);
+      const pending = stats.applications.PENDING_APPROVAL ?? 0;
+      const metrics = {
+        founderInternCount: stats.internships.ONGOING,
+        founderStaffCount: stats.staff.active,
+        founderPendingTaskCount: pending,
+        founderAttendanceRate: stats.internships.COMPLETED,
+        founderDomainTotal: stats.departments.active,
+        founderApprovalCount: pending
+      };
+      for (const [id, value] of Object.entries(metrics)) if ($(id)) $(id).textContent = value;
+      if ($('founderApprovalCount')) $('founderApprovalCount').hidden = !pending;
+      if ($('founderApprovalList')) $('founderApprovalList').textContent = pending
+        ? `${pending} application${pending === 1 ? '' : 's'} await review.` : 'No pending applications.';
+      if ($('founderDomainLegend')) {
+        $('founderDomainLegend').replaceChildren(...stats.departments.counts.map(({ name, internships }) => {
+          const item = document.createElement('li');
+          item.textContent = `${name} · ${internships}`;
+          return item;
+        }));
+      }
+      if ($('founderLiveOverview')) {
+        $('founderLiveOverview').replaceChildren(...[
+          ['Approved to start', stats.internships.APPROVED],
+          ['Ongoing', stats.internships.ONGOING],
+          ['Awaiting completion review', stats.internships.COMPLETION_REVIEW],
+          ['Completed', stats.internships.COMPLETED]
+        ].map(([label, count]) => {
+          const metric = document.createElement('p');
+          metric.textContent = `${label} · ${count}`;
+          return metric;
+        }));
+      }
     }
   } catch (err) {
     console.warn('[FounderDashboard] Failed to fetch stats:', err);
   }
+}
 
+async function loadLiveDashboardData(canProvision = true) {
   try {
     // 2. Fetch live staff directory
     const staffRes = await api.get('/staff?limit=20');
@@ -177,14 +209,16 @@ async function loadLiveDashboardData() {
     console.warn('[FounderDashboard] Failed to fetch audit logs:', err);
   }
 
+  if (!canProvision) return;
   try {
-    // 4. Fetch registered users for role candidates and intern table
+    // Load verified accounts eligible for staff review.
     const usersRes = await api.get('/users?limit=50');
     if (usersRes && usersRes.data) {
       const users = usersRes.data.users || [];
 
       // Filter users who are not yet staff for the role assignment dropdown
-      const eligibleCandidates = users.filter((u) => !u.isStaff && !u.roles.some((r) => r.code === 'FOUNDER'));
+      const eligibleCandidates = users.filter((u) => u.emailVerified && ['ACTIVE', 'PENDING'].includes(u.status)
+        && !u.isStaff && !u.roles.some((r) => r.code === 'FOUNDER'));
       if ($('roleCandidate')) {
         if (eligibleCandidates.length === 0) {
           $('roleCandidate').innerHTML = '<option value="">No unassigned intern candidates</option>';
@@ -204,40 +238,6 @@ async function loadLiveDashboardData() {
         }
       }
 
-      // Populate intern table
-      if ($('internRows')) {
-        if (users.length === 0) {
-          $('internRows').innerHTML = `
-            <tr>
-              <td colspan="8" style="text-align: center; padding: 2rem; color: #8fa0b5;">
-                No registered learner accounts found.
-              </td>
-            </tr>
-          `;
-        } else {
-          $('internRows').innerHTML = users
-            .map((u, i) => {
-              const name = u.profile?.fullName || u.profile?.displayName || 'Registered User';
-              const roles = u.roles.map((r) => r.name || r.code).join(', ');
-              const date = new Date(u.createdAt).toLocaleDateString();
-              const statusColor = u.status === 'ACTIVE' ? '#00d6a0' : '#f59e0b';
-
-              return `
-                <tr>
-                  <td>${i + 1}</td>
-                  <td><strong>${escapeHtml(name)}</strong><br><small style="color:#8fa0b5;">${escapeHtml(u.email)}</small></td>
-                  <td>General</td>
-                  <td><span style="font-size:0.8rem; background:rgba(21,156,255,0.1); color:#159cff; padding:2px 6px; border-radius:4px;">${escapeHtml(roles)}</span></td>
-                  <td><span style="color:${statusColor}; font-weight:600;">${escapeHtml(u.status)}</span></td>
-                  <td>100%</td>
-                  <td>${date}</td>
-                  <td>Ongoing</td>
-                </tr>
-              `;
-            })
-            .join('');
-        }
-      }
     }
   } catch (err) {
     console.warn('[FounderDashboard] Failed to fetch users list:', err);
@@ -297,7 +297,7 @@ if (roleForm) {
       if (res && res.success) {
         showToast(`Staff member provisioned: ${res.data.staffCode} (${res.data.role?.name || roleCode})`);
         if ($('roleAssignmentStatus')) $('roleAssignmentStatus').textContent = `Successfully provisioned ${res.data.staffCode}!`;
-        await loadLiveDashboardData();
+        await Promise.all([loadLiveDashboardData(), loadFounderStats()]);
       }
     } catch (err) {
       console.error('[FounderDashboard] Staff provisioning error:', err);
@@ -339,7 +339,13 @@ function renderFounderDashboard(context) {
   if (shell) shell.hidden = false;
 
   // Load live data from MySQL via Express API
-  loadLiveDashboardData();
+  const canProvision = context.permissions.includes('staff:create');
+  if ($('roleAssignments')) $('roleAssignments').hidden = !canProvision;
+  document.querySelectorAll('[data-founder-action="Assign staff access"]').forEach((button) => {
+    button.hidden = !canProvision;
+  });
+  mountPhase04($('interns'), context, 'founder', loadFounderStats);
+  loadLiveDashboardData(canProvision);
 }
 
 // Initialize Auth Service listener
@@ -351,8 +357,8 @@ authService.onAuthStateChanged((context) => {
     return;
   }
 
-  if (context.status !== 'ACTIVE') {
-    window.location.replace('/#pending-approval');
+  if (context.status !== 'ACTIVE' || !context.appUser.emailVerified) {
+    window.location.replace(authService.determineDashboardRoute(context));
     return;
   }
 

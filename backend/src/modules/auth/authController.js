@@ -61,7 +61,7 @@ export class AuthController {
         emailVerified: context.emailVerified,
         roles: context.roles,
         workspaces: context.workspaces,
-        isAccessGranted: context.status === 'ACTIVE'
+        isAccessGranted: context.status === 'ACTIVE' && context.emailVerified
       };
       return sendSuccess(res, statusData, 'Account status retrieved.');
     } catch (err) {

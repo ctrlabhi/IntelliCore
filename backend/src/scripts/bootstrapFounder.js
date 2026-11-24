@@ -41,18 +41,21 @@ export async function bootstrapFounder() {
   try {
     firebaseUserRecord = await auth.getUser(founderUid);
   } catch (err) {
-    throw new Error(`Failed to retrieve Firebase user for UID "${founderUid}": ${err.message}`);
+    throw new Error('Failed to retrieve the configured Founder from development Firebase Auth.');
   }
 
   if (firebaseUserRecord.email?.toLowerCase() !== normalizedEmail) {
-    throw new Error(`Email mismatch: Firebase record email (${firebaseUserRecord.email}) does not match FOUNDER_EMAIL (${normalizedEmail}).`);
+    throw new Error('The verified Firebase email does not match the configured Founder.');
   }
 
   if (firebaseUserRecord.disabled) {
     throw new Error('Firebase user account is currently disabled.');
   }
+  if (!firebaseUserRecord.emailVerified) {
+    throw new Error('The configured Founder must verify their Firebase email.');
+  }
 
-  console.log(`  ✓ Firebase identity verified: UID=${founderUid}, Email=${normalizedEmail}, Verified=${firebaseUserRecord.emailVerified}`);
+  console.log('  ✓ Development Firebase Founder identity verified.');
 
   // 4. Atomic database transaction to initialize or upgrade Founder
   const result = await prisma.$transaction(async (tx) => {
@@ -72,7 +75,7 @@ export async function bootstrapFounder() {
     });
 
     if (existingFounderAssignment && existingFounderAssignment.user.firebaseUid !== founderUid) {
-      throw new Error(`Conflicting primary founder exists with UID: ${existingFounderAssignment.user.firebaseUid}. Conflicting assignment rejected.`);
+      throw new Error('Conflicting primary founder exists. Conflicting assignment rejected.');
     }
 
     // Resolve or create user
@@ -142,7 +145,7 @@ export async function bootstrapFounder() {
     return user;
   });
 
-  console.log(`✅ Founder account successfully initialized and assigned ACTIVE status! User ID: ${result.id}`);
+  console.log('✅ Founder account initialized with ACTIVE status.');
   return result;
 }
 

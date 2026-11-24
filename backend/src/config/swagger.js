@@ -1,4 +1,5 @@
 import swaggerJsdoc from 'swagger-jsdoc';
+import { phase04Paths } from './phase04OpenApi.js';
 
 const options = {
   definition: {
@@ -6,7 +7,7 @@ const options = {
     info: {
       title: 'IntelliCore REST API',
       version: '2.0.0',
-      description: 'API documentation for IntelliCore Modular Monolith Platform (Phase 1 Foundation)',
+      description: 'IntelliCore V2.0 operations, onboarding and internship lifecycle',
       contact: {
         name: 'IntelliCore Engineering Team',
         email: 'Info@IntelliCoreTechnologies.in',
@@ -25,7 +26,7 @@ const options = {
           type: 'http',
           scheme: 'bearer',
           bearerFormat: 'JWT',
-          description: 'Future development Firebase ID token or session JWT'
+          description: 'IntelliCore development Firebase ID token'
         }
       },
       schemas: {
@@ -57,9 +58,10 @@ const options = {
       }
     }
   },
-  apis: ['./backend/src/routes/*.js']
+  apis: ['./backend/src/routes/*.js', './backend/src/modules/**/*.js']
 };
 
 export const swaggerSpec = swaggerJsdoc(options);
+Object.assign(swaggerSpec.paths, phase04Paths);
 export default swaggerSpec;
 

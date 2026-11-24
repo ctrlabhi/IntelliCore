@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import authController from './authController.js';
-import { authenticate, requireAuth } from '../../middleware/auth.js';
+import { authenticate, requireAuth, requireStatus, requireVerifiedEmail } from '../../middleware/auth.js';
 import { sendError } from '../../utils/response.js';
 
 const router = Router();
@@ -88,7 +88,8 @@ router.get('/auth/status', authenticate, requireAuth, (req, res) => authControll
  *       400:
  *         description: Validation failed
  */
-router.patch('/users/me/profile', authenticate, requireAuth, validateUpdateProfile, (req, res) => authController.updateMyProfile(req, res));
+router.patch('/users/me/profile', authenticate, requireAuth, requireVerifiedEmail, requireStatus(['PENDING', 'ACTIVE']),
+  validateUpdateProfile, (req, res) => authController.updateMyProfile(req, res));
 
 export default router;
 

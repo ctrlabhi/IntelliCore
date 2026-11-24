@@ -6,9 +6,10 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#030914">
   <title>HR Dashboard | IntelliCore</title>
-  <link rel="icon" type="image/png" href="Photos/favicon.png">
-  <link rel="stylesheet" href="hr-dashboard.css">
-  <link rel="stylesheet" href="dashboard-background.css?v=20261028-hr-mobile-welcome">
+  <link rel="icon" type="image/png" href="/Photos/favicon.png">
+  <link rel="stylesheet" href="/assets/css/hr-dashboard.css">
+  <link rel="stylesheet" href="/assets/css/dashboard-background.css?v=20261028-hr-mobile-welcome">
+  <link rel="stylesheet" href="/assets/css/phase04-dashboard.css">
 </head>
 <body>
   <canvas id="icWorkspaceNeuralCanvas" class="dashboard-background-canvas" aria-hidden="true"></canvas>
@@ -17,7 +18,7 @@
     <aside class="sidebar" id="sidebar">
       <button class="sidebar-close" id="sidebarClose" type="button" aria-label="Close dashboard navigation">×</button>
       <a class="brand" href="#overview" aria-label="IntelliCore HR dashboard">
-        <img src="Photos/favicon.png" alt="">
+        <img src="/Photos/favicon.png" alt="">
         <span><strong>Intelli<span>Core</span></strong><small>Innovation at the Fore</small></span>
       </a>
       <nav class="side-nav" aria-label="HR dashboard">
@@ -58,7 +59,7 @@
           <button class="notification-button" id="notificationButton" type="button" aria-label="Notifications"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span class="notification-count" aria-hidden="true" hidden></span></button>
           <span class="topbar-divider"></span>
           <div class="user-chip"><span class="user-avatar" id="userAvatar">IC</span><span class="user-details"><strong id="userName">Staff</strong><small id="userRole">HR Dashboard</small></span></div>
-          <a class="operational-link" href="Intern-dashboard.html?workspace=operations">Open secure workspace <span aria-hidden="true">↗</span></a>
+          <a class="operational-link" href="/Intern-dashboard.html?workspace=operations">Open secure workspace <span aria-hidden="true">↗</span></a>
           <button class="topbar-logout" id="topbarLogout" type="button">Log out <span aria-hidden="true">↗</span></button>
         </div>
       </header>
@@ -70,7 +71,7 @@
             <p id="welcomeCopy">Handle interns, assign tasks, track progress and build a productive team.</p>
             <div class="welcome-meta"><span id="roleScope">HR Dashboard · Role-based access</span><span class="access-pill">Authorized scope</span></div>
           </div>
-          <div class="welcome-art" aria-hidden="true"><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><img class="welcome-logo" src="Photos/favicon.png" alt=""><div class="welcome-chip-track"><span class="welcome-chip chip-learn"><span>Learn</span></span><span class="welcome-chip chip-grow"><span>Grow</span></span><span class="welcome-chip chip-build"><span>Build</span></span></div></div>
+          <div class="welcome-art" aria-hidden="true"><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><img class="welcome-logo" src="/Photos/favicon.png" alt=""><div class="welcome-chip-track"><span class="welcome-chip chip-learn"><span>Learn</span></span><span class="welcome-chip chip-grow"><span>Grow</span></span><span class="welcome-chip chip-build"><span>Build</span></span></div></div>
           <div class="welcome-date"><span class="live-date-label"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 9h18M7 13h.01M12 13h.01M17 13h.01M7 17h.01M12 17h.01"/></svg><span data-live-date>Loading date…</span></span><strong data-live-time>--:--:--</strong><small data-live-greeting>Good Morning!</small></div>
         </section>
 
@@ -125,7 +126,7 @@
         <section class="module-grid" aria-label="HR workspace modules">
           <article class="module-card" id="recruitment"><span>▣</span><div><small>PEOPLE</small><h2>Recruitment &amp; Applications</h2><p>Recruitment applications are not yet stored in this workspace.</p></div><b>›</b></article>
           <article class="module-card" id="staff"><span>♜</span><div><small>TEAM COORDINATION</small><h2>Team Leaders</h2><p id="liveStaffList">Team Leader access is shown from assigned Firebase profiles.</p></div><b>›</b></article>
-          <article class="module-card live-task-module" id="tasks"><span>☑</span><div><small>WORK MANAGEMENT</small><h2>Tasks &amp; Projects</h2><p id="liveTaskSummary">Approved curriculum and live assignments load from Firebase.</p><div id="liveTaskCatalog"></div><div id="liveAssignedTasks"></div><a class="export-button" id="manageTasksLink" href="Intern-dashboard.html?workspace=operations#icAssignTaskForm">Assign tasks or review submissions ↗</a></div></article>
+          <article class="module-card live-task-module" id="tasks"><span>☑</span><div><small>WORK MANAGEMENT</small><h2>Tasks &amp; Projects</h2><p id="liveTaskSummary">Approved curriculum and live assignments load from Firebase.</p><div id="liveTaskCatalog"></div><div id="liveAssignedTasks"></div><a class="export-button" id="manageTasksLink" href="/Intern-dashboard.html?workspace=operations#icAssignTaskForm">Assign tasks or review submissions ↗</a></div></article>
           <article class="module-card" id="certificates"><span>✧</span><div><small>INTERN RECORDS</small><h2>Certificate Requests</h2><p>Review learner requests after their internship dates have ended.</p><div id="certificateRequestList">No certificate requests are waiting for review.</div></div><b>›</b></article>
           <article class="module-card" id="announcements"><span>➤</span><div><small>COMMUNICATION</small><h2>Announcements</h2><form id="announcementForm"><label>Title<input name="title" maxlength="120" required></label><label>Audience<select name="audienceTrack" id="announcementAudience"><option value="all">All interns</option></select></label><label>Message<textarea name="body" maxlength="5000" rows="3" required></textarea></label><button class="export-button" type="submit">Publish announcement</button></form><div id="liveAnnouncements">No announcements have been published.</div></div><b>›</b></article>
           <article class="module-card" id="resources"><span>▣</span><div><small>LEARNING</small><h2>Learning Resources</h2><form id="resourceForm"><label>Title<input name="title" maxlength="120" required></label><label>Audience<select name="track" id="resourceAudience"><option value="all">All interns</option></select></label><label>Type<select name="type"><option>Link</option><option>Article</option><option>Video</option><option>Course</option><option>Document</option></select></label><label>Description<textarea name="description" maxlength="2000" rows="2"></textarea></label><label>HTTPS link<input name="url" type="url" pattern="https://.*" required></label><button class="export-button" type="submit">Publish resource</button></form><div id="liveResources">No resources have been published.</div></div><b>›</b></article>
@@ -136,9 +137,9 @@
     </main>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="dashboard-visuals.js" defer></script>
-  <script src="live-clock.js" defer></script>
-  <script src="functions/curriculum.js"></script>
-  <script type="module" src="hr-dashboard.js?v=20261028-pending-activation"></script>
+  <script src="/assets/js/dashboard-visuals.js" defer></script>
+  <script src="/assets/js/live-clock.js" defer></script>
+  <script src="/functions/curriculum.js"></script>
+  <script type="module" src="/assets/js/hr-dashboard.js?v=20261028-pending-activation"></script>
 </body>
 </html>

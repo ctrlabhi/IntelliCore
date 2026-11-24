@@ -7,6 +7,7 @@ const prisma = getPrismaClient();
  * Strips sensitive fields (passwords, tokens, secrets) before audit serialization
  */
 function sanitizeAuditPayload(data) {
+  if (data instanceof Date) return data.toISOString();
   if (!data || typeof data !== 'object') {
     return data;
   }

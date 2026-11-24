@@ -9,7 +9,9 @@ const prisma = getPrismaClient();
 const testUid = 'test_firebase_uid_bootstrap_101';
 const testEmail = 'intern.test.unique@intellicore.dev';
 
-describe('Integration: Authentication Endpoints & Identity Synchronization', () => {
+import { hasIsolatedDatabase } from './testDatabase.js';
+
+describe.skipIf(!hasIsolatedDatabase())('Integration: Authentication Endpoints & Identity Synchronization', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });

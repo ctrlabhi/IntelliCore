@@ -50,4 +50,5 @@ desktop.ini
 *.tar.gz
 *.sql
 *.sql.gz
+!/prisma/migrations/*/migration.sql
 

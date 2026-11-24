@@ -15,6 +15,7 @@ import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
   sendPasswordResetEmail,
+  reload,
   signOut,
   onAuthStateChanged,
   updateProfile as updateFirebaseProfile
@@ -168,6 +169,18 @@ class AuthService {
     return await sendEmailVerification(this.auth.currentUser);
   }
 
+  async refreshIdentity() {
+    const user = this.auth?.currentUser;
+    if (!user) throw new Error('Sign in to refresh your verification status.');
+    await reload(user);
+    await user.getIdToken(true);
+    const { data } = await api.post('/auth/bootstrap', {});
+    if (this.auth.currentUser !== user) return;
+    this.appUserContext = data;
+    this._notify();
+    return data;
+  }
+
   async logout() {
     if (!this.auth) return;
     await signOut(this.auth);
@@ -180,9 +193,8 @@ class AuthService {
     if (!context.isAuthenticated) return null;
 
     const { workspaces, status } = context;
-    if (status !== 'ACTIVE') {
-      return '/#pending-approval';
-    }
+    if (workspaces.onboarding) return '/pages/dashboards/intern/index.html';
+    if (!context.appUser?.emailVerified || status !== 'ACTIVE') return '/?auth=login';
 
     if (workspaces.founder) {
       return '/pages/dashboards/founder/index.html';
@@ -190,6 +202,7 @@ class AuthService {
     if (workspaces.hr) {
       return '/pages/dashboards/hr/index.html';
     }
+    if (workspaces.admin) return '/pages/dashboards/hr/index.html';
     if (workspaces.teamLeader) {
       return '/pages/dashboards/team-leader/index.html';
     }

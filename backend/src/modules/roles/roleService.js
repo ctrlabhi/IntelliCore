@@ -1,7 +1,10 @@
 import { getPrismaClient } from '../../config/database.js';
 import auditService from '../audit/auditService.js';
 import logger from '../../config/logger.js';
-import env from '../../config/env.js';
+import { founderOnlyPermissions, isProtectedFounder } from '../../utils/founder.js';
+import { AppError } from '../../utils/errors.js';
+import { lockUser, transaction } from '../../utils/phase04.js';
+import { activeEnrollments, openApplications } from '../internships/internshipPolicy.js';
 
 const prisma = getPrismaClient();
 
@@ -63,7 +66,9 @@ export class RoleService {
       code: role.code,
       description: role.description,
       isSystemRole: role.isSystemRole,
-      permissions: role.rolePermissions.map((rp) => ({
+      permissions: role.rolePermissions.filter(({ permission }) =>
+        role.code === 'FOUNDER' || !founderOnlyPermissions.includes(permission.code)
+      ).map((rp) => ({
         id: rp.permission.id,
         code: rp.permission.code,
         description: rp.permission.description
@@ -91,9 +96,7 @@ export class RoleService {
       throw err;
     }
 
-    const actorRoles = actor.roles || [];
     const actorUserId = actor.user?.id || null;
-    const isActorFounder = actorRoles.includes('FOUNDER');
 
     // HTTP Security Rule: Prohibit assigning FOUNDER role via API
     if (roleCodes.includes('FOUNDER')) {
@@ -103,16 +106,8 @@ export class RoleService {
       throw err;
     }
 
-    // Privilege escalation guard: Only Founder can assign CO_FOUNDER or ADMIN
-    const requiresFounderAuthority = roleCodes.some((rc) => ['CO_FOUNDER', 'ADMIN'].includes(rc));
-    if (requiresFounderAuthority && !isActorFounder) {
-      const err = new Error('Security policy violation: Only the primary Founder can assign Executive or Administrator roles.');
-      err.code = 'FORBIDDEN_ELEVATED_ROLE_ASSIGNMENT';
-      err.status = 403;
-      throw err;
-    }
-
-    return await prisma.$transaction(async (tx) => {
+    return await transaction(async (tx) => {
+      await lockUser(tx, targetUserId);
       // 1. Fetch target user
       const targetUser = await tx.user.findUnique({
         where: { id: targetUserId },
@@ -130,21 +125,17 @@ export class RoleService {
         throw err;
       }
 
-      // Guardrail: Cannot revoke FOUNDER role from primary founder
-      const targetHasFounderRole = targetUser.userRoles.some((ur) => ur.role.code === 'FOUNDER');
-      const isConfiguredFounderEmail = env.FOUNDER_EMAIL && targetUser.email.toLowerCase() === env.FOUNDER_EMAIL.toLowerCase();
-
-      if (targetHasFounderRole || isConfiguredFounderEmail) {
-        // Ensure FOUNDER remains in assigned roles
-        if (!roleCodes.includes('FOUNDER')) {
-          roleCodes.push('FOUNDER');
-        }
+      if (isProtectedFounder(targetUser)) {
+        throw new AppError('The primary Founder role assignments are protected.', 403, 'FOUNDER_ACCOUNT_PROTECTED');
       }
 
       // 2. Fetch role records
       const rolesInDb = await tx.role.findMany({
         where: { code: { in: roleCodes } }
       });
+      if (rolesInDb.some(({ code }) => code === 'FOUNDER')) {
+        throw new AppError('Founder assignment requires the administrative bootstrap.', 403, 'CANNOT_ASSIGN_FOUNDER_ROLE');
+      }
 
       if (rolesInDb.length !== roleCodes.length) {
         const foundCodes = rolesInDb.map((r) => r.code);
@@ -153,6 +144,17 @@ export class RoleService {
         err.code = 'INVALID_ROLES';
         err.status = 400;
         throw err;
+      }
+      if (rolesInDb.some(({ code }) => code !== 'INTERN')) {
+        const application = await tx.internshipApplication.findFirst({
+          where: { applicantUserId: targetUserId, applicationStatus: { in: openApplications } }, select: { id: true }
+        });
+        const enrollment = await tx.internship.findFirst({
+          where: { userId: targetUserId, internshipStatus: { in: activeEnrollments } }, select: { id: true }
+        });
+        if (application || enrollment) {
+          throw new AppError('Resolve the active internship or application before assigning staff roles.', 409, 'INTERNSHIP_ACCOUNT_CONFLICT');
+        }
       }
 
       const beforeRoles = targetUser.userRoles.map((ur) => ur.role.code);
@@ -168,10 +170,6 @@ export class RoleService {
       });
 
       for (const role of rolesInDb) {
-        if (role.code === 'FOUNDER' && targetHasFounderRole) {
-          continue; // keep existing Founder role record untouched
-        }
-
         await tx.userRole.upsert({
           where: {
             userId_roleId: {
@@ -248,6 +246,9 @@ export class RoleService {
       const permissionsInDb = await tx.permission.findMany({
         where: { code: { in: permissionCodes } }
       });
+      if (permissionsInDb.some(({ code }) => founderOnlyPermissions.includes(code))) {
+        throw new AppError('Founder-only permissions cannot be delegated.', 403, 'FOUNDER_PERMISSION_PROTECTED');
+      }
 
       if (permissionsInDb.length !== permissionCodes.length) {
         const found = permissionsInDb.map((p) => p.code);

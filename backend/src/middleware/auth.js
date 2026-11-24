@@ -3,6 +3,7 @@ import firebaseService from '../integrations/firebase/firebaseService.js';
 import { sendError } from '../utils/response.js';
 import logger from '../config/logger.js';
 import env from '../config/env.js';
+import { effectivePermissions, matchesFounderIdentity } from '../utils/founder.js';
 
 const prisma = getPrismaClient();
 
@@ -34,7 +35,7 @@ export async function authenticate(req, res, next) {
     // Enforce configured development Firebase project allowlist
     const expectedProject = env.FIREBASE_PROJECT_ID || 'intellicore-dev';
     const tokenAud = decodedToken.aud;
-    if (tokenAud !== expectedProject && decodedToken.firebase?.source_project !== expectedProject) {
+    if (expectedProject !== 'intellicore-dev' || tokenAud !== expectedProject) {
       logger.error({ tokenAud, expectedProject }, 'Token issued for unauthorized Firebase project');
       return sendError(res, 'Security violation: Token issued for unauthorized project.', 403, 'WRONG_PROJECT');
     }
@@ -78,7 +79,7 @@ export async function authenticate(req, res, next) {
       }
 
       req.roles = roleCodes;
-      req.permissions = Array.from(permissionSet);
+      req.permissions = effectivePermissions(permissionSet, roleCodes, user);
     } else {
       req.user = null;
       req.profile = null;
@@ -129,6 +130,30 @@ export function requireStatus(allowedStatuses = ['ACTIVE']) {
   };
 }
 
+export function requireVerifiedEmail(req, res, next) {
+  if (req.firebaseUser?.email_verified !== true) {
+    return sendError(res, 'Verify your email to continue.', 403, 'EMAIL_VERIFICATION_REQUIRED');
+  }
+  return next();
+}
+
+export function requirePrimaryFounder(req, res, next) {
+  return requireRole('FOUNDER')(req, res, () => {
+    if (!matchesFounderIdentity(req.user)) {
+      return sendError(res, 'Only the primary Founder may perform this operation.', 403, 'FOUNDER_REQUIRED');
+    }
+    return next();
+  });
+}
+
+function hasVerifiedPasswordIdentity(req, res) {
+  if (req.firebaseUser?.firebase?.sign_in_provider === 'password' && req.firebaseUser.email_verified !== true) {
+    sendError(res, 'Verify your email to continue.', 403, 'EMAIL_VERIFICATION_REQUIRED');
+    return false;
+  }
+  return true;
+}
+
 /**
  * Enforce required roles (User must have at least one of the specified roles)
  */
@@ -149,6 +174,7 @@ export function requireRole(...allowedRoles) {
     }
 
     const hasRole = allowedRoles.some((role) => req.roles.includes(role));
+    if (!hasVerifiedPasswordIdentity(req, res)) return;
     if (!hasRole) {
       return sendError(
         res,
@@ -183,6 +209,7 @@ export function requirePermission(...requiredPermissions) {
     }
 
     const hasAll = requiredPermissions.every((perm) => req.permissions.includes(perm));
+    if (!hasVerifiedPasswordIdentity(req, res)) return;
     if (!hasAll) {
       return sendError(
         res,

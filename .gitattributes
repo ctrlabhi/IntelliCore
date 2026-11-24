@@ -1,0 +1,2 @@
+/prisma/migrations/*/migration.sql -text
+/prisma/migrations/20261124000000_init/migration.sql whitespace=-blank-at-eof

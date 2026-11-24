@@ -6,6 +6,8 @@
  */
 
 import { authService } from '/services/auth.js';
+import { api } from '/services/api.js';
+import { mountPhase04 } from './phase04-dashboard.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -31,7 +33,7 @@ if (hamburgerBtn && mobileDrawer) {
 }
 
 // Wire up logout buttons
-document.querySelectorAll('[data-action="logout"]').forEach((btn) => {
+document.querySelectorAll('[data-action="logout"], #icHeaderLogout').forEach((btn) => {
   btn.addEventListener('click', async () => {
     try {
       await authService.logout();
@@ -50,6 +52,10 @@ function renderInternWorkspace(context) {
   // Header user info
   const nameEl = $('icUserDisplayName');
   if (nameEl) nameEl.textContent = displayName;
+  if ($('icDashboardUserName')) $('icDashboardUserName').textContent = displayName;
+  if ($('icInternWelcomeName')) $('icInternWelcomeName').textContent = displayName.split(' ')[0];
+  if ($('icDashboardInitial')) $('icDashboardInitial').textContent = displayName[0];
+  $('workspaceTop').setAttribute('aria-busy', 'false');
 
   const emailEl = $('icUserEmail');
   if (emailEl) emailEl.textContent = email;
@@ -86,6 +92,30 @@ function renderInternWorkspace(context) {
   if (attendanceSummary) {
     attendanceSummary.textContent = 'Automated attendance logging will be activated in Phase 05.';
   }
+
+  const unfinished = document.querySelectorAll('#icTrainingSection, #icMeetingPanel, #icAttendancePanel, #icProgressPanel, .ic-workspace-stats, .ic-workspace-lower-grid, .ic-dashboard-search, a[href="#icTrainingSection"], a[href="#icAttendancePanel"], a[href="#icProgressPanel"], a[href="#icNotifications"]');
+  unfinished.forEach((element) => {
+    element.classList.add('phase04-disabled');
+    element.hidden = true;
+  });
+  $('icProfile').classList.add('phase04-disabled');
+  $('icProfile').hidden = true;
+  document.querySelectorAll('a[href="#icProfile"]').forEach((link) => link.setAttribute('href', '#phase04Profile'));
+  const panel = $('icApplications');
+  panel.removeAttribute('aria-labelledby');
+  panel.setAttribute('aria-label', 'Internship workspace');
+  mountPhase04(panel, context, 'intern', async () => {
+    if (status !== 'ACTIVE') return;
+    try {
+      const { data } = await api.get('/internships/me?status=ONGOING&limit=1');
+      if (data.items.length) {
+        const intro = document.querySelector('#workspaceHome .welcome-copy > p');
+        if (intro) intro.textContent = `Your ${data.items[0].department.name} internship is ongoing.`;
+      }
+    } catch {
+      // The enrollment list displays its own connection errors.
+    }
+  });
 }
 
 authService.onAuthStateChanged((context) => {
@@ -96,5 +126,9 @@ authService.onAuthStateChanged((context) => {
     return;
   }
 
+  if (!context.appUser.emailVerified || (!context.workspaces.onboarding && context.status !== 'ACTIVE')) {
+    window.location.replace('/?auth=login');
+    return;
+  }
   renderInternWorkspace(context);
 });

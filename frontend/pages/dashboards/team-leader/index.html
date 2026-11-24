@@ -6,10 +6,11 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#030914">
   <title>TL Dashboard | IntelliCore</title>
-  <link rel="icon" type="image/png" href="Photos/favicon.png">
-  <link rel="stylesheet" href="founder-dashboard.css">
-  <link rel="stylesheet" href="tl-dashboard.css">
-  <link rel="stylesheet" href="dashboard-background.css">
+  <link rel="icon" type="image/png" href="/Photos/favicon.png">
+  <link rel="stylesheet" href="/assets/css/founder-dashboard.css">
+  <link rel="stylesheet" href="/assets/css/tl-dashboard.css">
+  <link rel="stylesheet" href="/assets/css/dashboard-background.css">
+  <link rel="stylesheet" href="/assets/css/phase04-dashboard.css">
 </head>
 <body class="team-leader-page">
   <canvas id="icWorkspaceNeuralCanvas" class="dashboard-background-canvas" aria-hidden="true"></canvas>
@@ -18,7 +19,7 @@
     <aside class="sidebar" id="sidebar">
       <button class="sidebar-close" id="sidebarClose" type="button" aria-label="Close dashboard navigation">×</button>
       <a class="brand" href="#overview" aria-label="IntelliCore TL dashboard">
-        <img src="Photos/favicon.png" alt="">
+        <img src="/Photos/favicon.png" alt="">
         <span><strong>Intelli<span>Core</span></strong><small>Innovation at the Fore</small></span>
       </a>
       <div class="sidebar-caption">TL DASHBOARD</div>
@@ -26,7 +27,7 @@
         <a class="nav-link active" href="#overview"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg> Dashboard</a>
         <div class="nav-group-label">MY DOMAIN</div>
         <a class="nav-link" href="#interns"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.5A4.5 4.5 0 0 1 7 14h4a4.5 4.5 0 0 1 4.5 4.5V20M16 5a3.5 3.5 0 0 1 0 6.5M17 14a4.5 4.5 0 0 1 4.5 4.5V20"/></svg> My Interns</a>
-        <a class="nav-link" href="Intern-dashboard.html?workspace=operations#icAssignTaskForm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h12M9 12h12M9 18h12"/><path d="m3 6 1.5 1.5L7 5m-4 7 1.5 1.5L7 11m-4 7 1.5 1.5L7 17"/></svg> Tasks &amp; Projects</a>
+        <a class="nav-link" href="/Intern-dashboard.html?workspace=operations#icAssignTaskForm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h12M9 12h12M9 18h12"/><path d="m3 6 1.5 1.5L7 5m-4 7 1.5 1.5L7 11m-4 7 1.5 1.5L7 17"/></svg> Tasks &amp; Projects</a>
         <a class="nav-link" href="#attendance"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Attendance</a>
         <a class="nav-link" href="#completion"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="m8 14-1 8 5-3 5 3-1-8"/></svg> Certificates &amp; Completion</a>
         <a class="nav-link" href="#announcements"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11v2l13 5V6L3 11Z"/><path d="M6 14v4a2 2 0 0 0 2 2h2l-2-5m8-7 4-2v12l-4-2"/></svg> Announcements</a>
@@ -50,7 +51,7 @@
           <button class="notification-button" id="notificationButton" type="button" aria-label="Notifications"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span class="notification-count" aria-hidden="true" hidden></span></button>
           <span class="topbar-divider"></span>
           <div class="user-chip"><span class="user-avatar" id="userAvatar">TL</span><span class="user-details"><strong id="userName">Team Leader</strong><small id="userRole">Team Leader</small></span></div>
-          <a class="operational-link" href="Intern-dashboard.html?workspace=operations#icTrainingSection">Open secure workspace <span aria-hidden="true">↗</span></a>
+          <a class="operational-link" href="/Intern-dashboard.html?workspace=operations#icTrainingSection">Open secure workspace <span aria-hidden="true">↗</span></a>
           <button class="topbar-logout" id="topbarLogout" type="button">Log out <span aria-hidden="true">↗</span></button>
         </div>
       </header>
@@ -62,7 +63,7 @@
             <p>Manage your domain interns, track progress and help them succeed.</p>
             <div class="welcome-meta"><span>My Domain · <strong id="domainLabel">Authorized domain</strong></span><span class="access-pill">TL Access</span></div>
           </div>
-          <div class="welcome-art" aria-hidden="true"><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><img class="welcome-logo" src="Photos/favicon.png" alt=""><div class="welcome-chip-track"><span class="welcome-chip chip-learn"><span>Learn</span></span><span class="welcome-chip chip-grow"><span>Grow</span></span><span class="welcome-chip chip-build"><span>Build</span></span></div></div>
+          <div class="welcome-art" aria-hidden="true"><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><img class="welcome-logo" src="/Photos/favicon.png" alt=""><div class="welcome-chip-track"><span class="welcome-chip chip-learn"><span>Learn</span></span><span class="welcome-chip chip-grow"><span>Grow</span></span><span class="welcome-chip chip-build"><span>Build</span></span></div></div>
           <div class="welcome-date"><span class="live-date-label"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 9h18M7 13h.01M12 13h.01M17 13h.01M7 17h.01M12 17h.01"/></svg><span data-live-date>Loading date…</span></span><strong data-live-time>--:--:--</strong><small data-live-greeting>Good Morning!</small></div>
         </section>
 
@@ -96,9 +97,9 @@
           <article class="panel actions-panel">
             <div class="panel-heading"><div><h2>Quick Actions</h2></div></div>
             <div class="action-grid team-actions">
-              <a href="Intern-dashboard.html?workspace=operations#icAssignTaskForm"><span>▤</span>Assign Task <b>›</b></a>
-              <a href="Intern-dashboard.html?workspace=operations#icReviewQueue"><span>➤</span>Review Submissions <b>›</b></a>
-              <a href="Intern-dashboard.html?workspace=operations#icAttendanceReportWrap"><span>▥</span>View Reports <b>›</b></a>
+              <a href="/Intern-dashboard.html?workspace=operations#icAssignTaskForm"><span>▤</span>Assign Task <b>›</b></a>
+              <a href="/Intern-dashboard.html?workspace=operations#icReviewQueue"><span>➤</span>Review Submissions <b>›</b></a>
+              <a href="/Intern-dashboard.html?workspace=operations#icAttendanceReportWrap"><span>▥</span>View Reports <b>›</b></a>
               <button type="button" id="messageTeamButton"><span>▤</span>Message Interns <b>›</b></button>
             </div>
           </article>
@@ -135,9 +136,9 @@
     </main>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="dashboard-visuals.js" defer></script>
-  <script src="live-clock.js" defer></script>
-  <script src="functions/curriculum.js"></script>
-  <script type="module" src="tl-dashboard.js"></script>
+  <script src="/assets/js/dashboard-visuals.js" defer></script>
+  <script src="/assets/js/live-clock.js" defer></script>
+  <script src="/functions/curriculum.js"></script>
+  <script type="module" src="/assets/js/tl-dashboard.js"></script>
 </body>
 </html>

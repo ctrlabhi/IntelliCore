@@ -40,6 +40,7 @@ services:
       - ./frontend:/app/frontend:ro
       - ./prisma:/app/prisma
       - ./tests:/app/tests:ro
+      - ./vitest.config.js:/app/vitest.config.js:ro
       - ./secrets/firebase-admin-dev.json:/run/secrets/firebase-admin-dev.json:ro
       - uploads_data:/app/uploads
     depends_on:

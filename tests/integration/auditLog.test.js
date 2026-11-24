@@ -7,10 +7,11 @@ import { getPrismaClient } from '../../backend/src/config/database.js';
 
 const prisma = getPrismaClient();
 
-const founderUid = 'svNt0UTSz9N59EzlaTWR7jsCu5c2';
-const founderEmail = 'ctrlabhishek@gmail.com';
+import { founderFixture, hasIsolatedDatabase } from './testDatabase.js';
 
-describe('Integration: Audit Logs Module (/api/v1/audit-logs)', () => {
+const { uid: founderUid, email: founderEmail } = founderFixture;
+
+describe.skipIf(!hasIsolatedDatabase())('Integration: Audit Logs Module (/api/v1/audit-logs)', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });

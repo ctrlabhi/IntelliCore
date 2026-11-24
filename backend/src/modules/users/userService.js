@@ -1,7 +1,9 @@
 import { getPrismaClient } from '../../config/database.js';
 import auditService from '../audit/auditService.js';
 import logger from '../../config/logger.js';
-import env from '../../config/env.js';
+import { isProtectedFounder } from '../../utils/founder.js';
+import { AppError } from '../../utils/errors.js';
+import { lockUser, transaction } from '../../utils/phase04.js';
 
 const prisma = getPrismaClient();
 
@@ -173,10 +175,12 @@ export class UserService {
       throw err;
     }
 
-    return await prisma.$transaction(async (tx) => {
+    return await transaction(async (tx) => {
+      await lockUser(tx, targetUserId);
       const user = await tx.user.findUnique({
         where: { id: targetUserId },
         include: {
+          staffProfile: true,
           userRoles: {
             include: {
               role: true
@@ -193,10 +197,7 @@ export class UserService {
       }
 
       // Guardrail 1: Founder account status is permanently protected
-      const hasFounderRole = user.userRoles.some((ur) => ur.role.code === 'FOUNDER');
-      const isConfiguredFounder = env.FOUNDER_EMAIL && user.email.toLowerCase() === env.FOUNDER_EMAIL.toLowerCase();
-
-      if ((hasFounderRole || isConfiguredFounder) && newStatus !== 'ACTIVE') {
+      if (isProtectedFounder(user) && newStatus !== 'ACTIVE') {
         const err = new Error('Security policy violation: Founder account status cannot be deactivated, suspended, or demoted.');
         err.code = 'CANNOT_MODIFY_FOUNDER_STATUS';
         err.status = 403;
@@ -204,11 +205,21 @@ export class UserService {
       }
 
       // Guardrail 2: Self-deactivation prevention
-      if (actorUserId === targetUserId && ['SUSPENDED', 'INACTIVE', 'REJECTED'].includes(newStatus)) {
+      if (actorUserId === targetUserId && newStatus !== 'ACTIVE') {
         const err = new Error('Self-deactivation is prohibited. Another administrator must modify your account status.');
         err.code = 'CANNOT_SELF_DEACTIVATE';
         err.status = 400;
         throw err;
+      }
+
+      if (newStatus === 'ACTIVE' && user.status !== 'ACTIVE' && !isProtectedFounder(user)) {
+        const priorEnrollment = !user.staffProfile && await tx.internship.findFirst({
+          where: { userId: user.id, internshipStatus: { notIn: ['TERMINATED', 'WITHDRAWN'] } },
+          select: { id: true }
+        });
+        if (user.staffProfile?.employmentStatus !== 'ACTIVE' && !priorEnrollment) {
+          throw new AppError('Activate through the approved internship or staff workflow.', 409, 'APPROVAL_REQUIRED');
+        }
       }
 
       const beforeState = { status: user.status };

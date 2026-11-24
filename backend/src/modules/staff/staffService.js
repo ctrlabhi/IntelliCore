@@ -1,6 +1,10 @@
 import { getPrismaClient } from '../../config/database.js';
 import auditService from '../audit/auditService.js';
 import logger from '../../config/logger.js';
+import { AppError } from '../../utils/errors.js';
+import { isProtectedFounder } from '../../utils/founder.js';
+import { lockUser, transaction } from '../../utils/phase04.js';
+import { activeEnrollments, openApplications } from '../internships/internshipPolicy.js';
 
 const prisma = getPrismaClient();
 
@@ -18,22 +22,11 @@ export class StaffService {
    * Generates next sequential staff code (e.g. STF-0001)
    */
   async generateStaffCode(tx) {
-    const latestStaff = await tx.staffProfile.findFirst({
-      where: {
-        staffCode: { startsWith: 'STF-' }
-      },
-      orderBy: { staffCode: 'desc' }
-    });
-
-    let nextNum = 1;
-    if (latestStaff && latestStaff.staffCode) {
-      const match = latestStaff.staffCode.match(/^STF-(\d+)$/);
-      if (match) {
-        nextNum = parseInt(match[1], 10) + 1;
-      }
-    }
-
-    return `STF-${String(nextNum).padStart(4, '0')}`;
+    const [row] = await tx.$queryRaw`
+      SELECT MAX(CAST(SUBSTRING(staff_code, 5) AS UNSIGNED)) AS lastNumber
+      FROM staff_profiles WHERE staff_code REGEXP '^STF-[0-9]+$'
+    `;
+    return `STF-${String(BigInt(row.lastNumber ?? 0) + 1n).padStart(4, '0')}`;
   }
 
   /**
@@ -80,7 +73,8 @@ export class StaffService {
       throw err;
     }
 
-    return await prisma.$transaction(async (tx) => {
+    return await transaction(async (tx) => {
+      await lockUser(tx, userId);
       // 1. Check user exists
       const user = await tx.user.findUnique({
         where: { id: userId },
@@ -104,6 +98,18 @@ export class StaffService {
         err.code = 'STAFF_ALREADY_EXISTS';
         err.status = 409;
         throw err;
+      }
+      if (isProtectedFounder(user) || !['ACTIVE', 'PENDING'].includes(user.status) || !user.emailVerified) {
+        throw new AppError('Choose an eligible verified account for staff provisioning.', 409, 'STAFF_NOT_ELIGIBLE');
+      }
+      const application = await tx.internshipApplication.findFirst({
+        where: { applicantUserId: userId, applicationStatus: { in: openApplications } }, select: { id: true }
+      });
+      const enrollment = await tx.internship.findFirst({
+        where: { userId, internshipStatus: { in: activeEnrollments } }, select: { id: true }
+      });
+      if (application || enrollment) {
+        throw new AppError('Resolve the active internship or application before provisioning staff.', 409, 'INTERNSHIP_ACCOUNT_CONFLICT');
       }
 
       // 2. Fetch role to assign
@@ -202,7 +208,7 @@ export class StaffService {
           name: targetRole.name
         }
       };
-    });
+    }, { retryUnique: true });
   }
 
   /**
@@ -411,10 +417,12 @@ export class StaffService {
       throw err;
     }
 
-    return await prisma.$transaction(async (tx) => {
+    return await transaction(async (tx) => {
+      const target = await tx.staffProfile.findUnique({ where: { id }, select: { userId: true } });
+      if (target) await lockUser(tx, target.userId);
       const staff = await tx.staffProfile.findUnique({
         where: { id },
-        include: { user: true }
+        include: { user: { include: { userRoles: { include: { role: true } } } } }
       });
 
       if (!staff) {
@@ -422,6 +430,9 @@ export class StaffService {
         err.code = 'NOT_FOUND';
         err.status = 404;
         throw err;
+      }
+      if (isProtectedFounder(staff.user) && newStatus !== 'ACTIVE') {
+        throw new AppError('The primary Founder account status is protected.', 403, 'CANNOT_MODIFY_FOUNDER_STATUS');
       }
 
       // Self-suspension guardrail
@@ -440,13 +451,12 @@ export class StaffService {
         data: { employmentStatus: newStatus }
       });
 
-      // Synchronize user account status if suspended
-      if (newStatus === 'SUSPENDED' && staff.user.status === 'ACTIVE') {
+      if (newStatus !== 'ACTIVE' && (staff.user.status === 'ACTIVE' || staff.user.status === staff.employmentStatus)) {
         await tx.user.update({
           where: { id: staff.userId },
-          data: { status: 'SUSPENDED' }
+          data: { status: newStatus }
         });
-      } else if (newStatus === 'ACTIVE' && staff.user.status === 'SUSPENDED') {
+      } else if (newStatus === 'ACTIVE' && staff.employmentStatus !== 'ACTIVE' && staff.user.status === staff.employmentStatus) {
         await tx.user.update({
           where: { id: staff.userId },
           data: { status: 'ACTIVE' }

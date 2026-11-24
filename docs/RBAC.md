@@ -1,5 +1,7 @@
 # IntelliCore Role-Based Access Control (RBAC) Specification
 
+For current controls, see [Security rules](SECURITY_RULES.md) and the [Phase 04 API](API.md#phase-04-departments-applications-and-internships). The matrix below records the Phase 02B baseline.
+
 **Version:** 2.0.0  
 **Phase:** MASTER-PHASE-02B  
 **Environment:** Local Development  

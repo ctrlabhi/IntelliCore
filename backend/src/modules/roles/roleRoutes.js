@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import roleController from './roleController.js';
-import { authenticate, requireAuth, requirePermission } from '../../middleware/auth.js';
+import { authenticate, requireAuth, requirePermission, requirePrimaryFounder } from '../../middleware/auth.js';
 
 const router = Router();
 
@@ -82,6 +82,7 @@ router.put(
   '/:id/permissions',
   authenticate,
   requireAuth,
+  requirePrimaryFounder,
   requirePermission('roles:manage_permissions'),
   roleController.updateRolePermissions
 );

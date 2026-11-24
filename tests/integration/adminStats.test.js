@@ -3,10 +3,11 @@ import request from 'supertest';
 import app from '../../backend/src/app.js';
 import firebaseService from '../../backend/src/integrations/firebase/firebaseService.js';
 
-const founderUid = 'svNt0UTSz9N59EzlaTWR7jsCu5c2';
-const founderEmail = 'ctrlabhishek@gmail.com';
+import { founderFixture, hasIsolatedDatabase } from './testDatabase.js';
 
-describe('Integration: Administrative Statistics (/api/v1/admin/stats)', () => {
+const { uid: founderUid, email: founderEmail } = founderFixture;
+
+describe.skipIf(!hasIsolatedDatabase())('Integration: Administrative Statistics (/api/v1/admin/stats)', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
@@ -34,7 +35,12 @@ describe('Integration: Administrative Statistics (/api/v1/admin/stats)', () => {
     expect(typeof res.body.data.staff.total).toBe('number');
 
     expect(res.body.data.system).toBeDefined();
-    expect(res.body.data.system.environment).toBe('development');
+    expect(res.body.data.system.environment).toBe('test');
+    expect(res.body.data).toMatchObject({
+      departments: { active: expect.any(Number) },
+      applications: expect.any(Object),
+      internships: { ONGOING: expect.any(Number), COMPLETED: expect.any(Number) }
+    });
     expect(res.body.data.system.timezone).toBe('Asia/Kolkata');
   });
 

@@ -6,8 +6,9 @@ import { getPrismaClient } from '../../backend/src/config/database.js';
 
 const prisma = getPrismaClient();
 
-const founderUid = 'svNt0UTSz9N59EzlaTWR7jsCu5c2';
-const founderEmail = 'ctrlabhishek@gmail.com';
+import { founderFixture, hasIsolatedDatabase } from './testDatabase.js';
+
+const { uid: founderUid, email: founderEmail } = founderFixture;
 
 const staffCandidateUid = 'staff_candidate_uid_test_102';
 const staffCandidateEmail = 'staff.candidate@intellicore.dev';
@@ -15,17 +16,18 @@ const staffCandidateEmail = 'staff.candidate@intellicore.dev';
 let candidateUser = null;
 let provisionedStaffRecord = null;
 
-describe('Integration: Staff Management Endpoints (/api/v1/staff)', () => {
+describe.skipIf(!hasIsolatedDatabase())('Integration: Staff Management Endpoints (/api/v1/staff)', () => {
   beforeAll(async () => {
     // Create candidate user
     const internRole = await prisma.role.findUnique({ where: { code: 'INTERN' } });
     candidateUser = await prisma.user.upsert({
       where: { firebaseUid: staffCandidateUid },
-      update: { status: 'PENDING' },
+      update: { status: 'PENDING', emailVerified: true },
       create: {
         firebaseUid: staffCandidateUid,
         email: staffCandidateEmail,
         status: 'PENDING',
+        emailVerified: true,
         profile: {
           create: {
             fullName: 'Staff Candidate Test'

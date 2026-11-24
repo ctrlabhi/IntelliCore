@@ -3,6 +3,9 @@ import { sendSuccess } from '../utils/response.js';
 import { checkDatabaseConnection } from '../config/database.js';
 import env from '../config/env.js';
 import authRoutes from '../modules/auth/authRoutes.js';
+import departmentRoutes from '../modules/departments/departmentRoutes.js';
+import applicationRoutes from '../modules/internships/applicationRoutes.js';
+import internshipRoutes from '../modules/internships/internshipRoutes.js';
 
 const router = Router();
 
@@ -95,6 +98,9 @@ router.use('/audit-logs', auditRoutes);
 // Operational Analytics & Metrics
 import adminRoutes from '../modules/admin/adminRoutes.js';
 router.use('/admin', adminRoutes);
+router.use('/departments', departmentRoutes);
+router.use('/internship-applications', applicationRoutes);
+router.use('/internships', internshipRoutes);
 
 export default router;
 

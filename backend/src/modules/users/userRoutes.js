@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import userController from './userController.js';
 import roleController from '../roles/roleController.js';
-import { authenticate, requireAuth, requirePermission } from '../../middleware/auth.js';
+import { authenticate, requireAuth, requirePermission, requirePrimaryFounder } from '../../middleware/auth.js';
 
 const router = Router();
 
@@ -178,6 +178,7 @@ router.put(
   '/:id/roles',
   authenticate,
   requireAuth,
+  requirePrimaryFounder,
   requirePermission('roles:assign'),
   roleController.assignUserRoles
 );
