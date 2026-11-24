@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { sendSuccess } from '../utils/response.js';
 import { checkDatabaseConnection } from '../config/database.js';
 import env from '../config/env.js';
+import authRoutes from '../modules/auth/authRoutes.js';
 
 const router = Router();
 
@@ -68,6 +69,9 @@ router.get('/health', async (req, res) => {
 
   return sendSuccess(res, diagnostic, 'System operational');
 });
+
+// Authentication and Identity Management Routes
+router.use('/', authRoutes);
 
 export default router;
 

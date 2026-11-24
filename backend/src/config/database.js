@@ -50,5 +50,9 @@ export async function disconnectDatabase() {
   }
 }
 
+export function getPrismaClient() {
+  return prisma;
+}
+
 export default prisma;
 

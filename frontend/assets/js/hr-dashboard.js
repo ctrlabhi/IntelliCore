@@ -5,15 +5,7 @@ import {
   getFirestore, limit, orderBy, query, runTransaction, serverTimestamp, setDoc, startAfter, where
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCEhvxTrpDORuCByXDtlgNNHbpa5fnuud0",
-  authDomain: "intellicore-229.firebaseapp.com",
-  projectId: "intellicore-229",
-  storageBucket: "intellicore-229.firebasestorage.app",
-  messagingSenderId: "167120080877",
-  appId: "1:167120080877:web:a93abd68788b4d25caa1e4",
-  measurementId: "G-7597XQRVMB"
-};
+import { firebaseConfig } from '/services/firebase.js';
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);

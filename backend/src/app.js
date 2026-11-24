@@ -76,6 +76,7 @@ export function createApp() {
   // ---------------------------------------------------------------------------
   // 1. Primary modular assets mount
   app.use('/assets', express.static(path.join(frontendDir, 'assets')));
+  app.use('/services', express.static(path.join(frontendDir, 'services')));
 
   // 2. Backward-compatible image & photo aliases
   app.use('/Photos', express.static(path.join(frontendDir, 'assets/images')));

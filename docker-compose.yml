@@ -36,6 +36,7 @@ services:
       - ./backend/src:/app/backend/src:ro
       - ./frontend:/app/frontend:ro
       - ./prisma:/app/prisma
+      - ./tests:/app/tests:ro
       - ./secrets/firebase-admin-dev.json:/run/secrets/firebase-admin-dev.json:ro
       - uploads_data:/app/uploads
     depends_on:
@@ -63,17 +64,17 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-intellicore_db}
       MYSQL_USER: ${MYSQL_USER:-intellicore_app}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      TZ: ${APP_TIMEZONE:-Asia/Kolkata}
+      TZ: UTC
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
-      - --default-time-zone=+05:30
+      - --default-time-zone=+00:00
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
       - intellicore_net
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD || mysqladmin ping -h 127.0.0.1"]
+      test: ["CMD-SHELL", "mysql -h 127.0.0.1 -u $$MYSQL_USER -p\"$$MYSQL_PASSWORD\" -D $$MYSQL_DATABASE -e 'SELECT 1;' > /dev/null 2>&1"]
       interval: 5s
       timeout: 5s
       retries: 10
