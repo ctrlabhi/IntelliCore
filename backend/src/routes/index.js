@@ -1,0 +1,32 @@
+import { Router } from 'express';
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpec from '../config/swagger.js';
+import healthRoutes from './health.js';
+import apiV1Routes from './apiV1.js';
+import { apiRateLimiter } from '../middleware/rateLimiter.js';
+
+const router = Router();
+
+// Liveness and Readiness probes (unthrottled for Docker & orchestration)
+router.use('/', healthRoutes);
+
+// Swagger / OpenAPI documentation UI
+router.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customSiteTitle: 'IntelliCore API Documentation',
+  customCss: '.swagger-ui .topbar { display: none }',
+  swaggerOptions: {
+    persistAuthorization: true
+  }
+}));
+
+// Swagger JSON spec endpoint
+router.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
+// Versioned API v1 routes with rate limiting
+router.use('/api/v1', apiRateLimiter, apiV1Routes);
+
+export default router;
+

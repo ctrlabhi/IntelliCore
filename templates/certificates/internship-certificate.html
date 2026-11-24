@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Certificate of Internship Completion</title>
+  <style>
+    @page { size: A4 landscape; margin: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #030711; color: #f0f6fc; margin: 0; padding: 40px; display: flex; align-items: center; justify-content: center; height: 100vh; box-sizing: border-box; }
+    .cert-frame { width: 100%; height: 100%; border: 3px solid #00d2ff; border-radius: 16px; padding: 40px; box-sizing: border-box; position: relative; background: radial-gradient(ellipse at center, rgba(0, 116, 195, 0.12), transparent 70%), #061122; text-align: center; }
+    .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.08; font-size: 120px; font-weight: 900; color: #00d2ff; pointer-events: none; }
+    .title { font-size: 38px; font-weight: 800; color: #1ccfff; letter-spacing: 2px; margin-bottom: 8px; text-transform: uppercase; }
+    .subtitle { font-size: 16px; color: #8eb2d4; letter-spacing: 1px; margin-bottom: 30px; }
+    .recipient { font-size: 32px; font-weight: bold; color: #ffffff; border-bottom: 2px solid #00d2ff; display: inline-block; padding: 0 40px 8px; margin: 20px 0; }
+    .body-text { font-size: 16px; line-height: 1.8; color: #c5d8ea; max-width: 750px; margin: 0 auto; }
+    .meta-row { display: flex; justify-content: space-between; margin-top: 50px; padding: 0 40px; }
+    .sig-line { width: 200px; border-top: 1px solid #78a4c7; padding-top: 8px; font-size: 14px; color: #8eb2d4; }
+    .cert-id { font-size: 12px; color: #5882a8; margin-top: 30px; }
+  </style>
+</head>
+<body>
+  <div class="cert-frame">
+    <div class="watermark">INTELLICORE</div>
+    <div class="title">Certificate of Completion</div>
+    <div class="subtitle">THIS IS PROUDLY PRESENTED TO</div>
+    <div class="recipient">{{studentName}}</div>
+    <p class="body-text">
+      for successfully completing the <strong>{{trackName}}</strong> internship program at IntelliCore Technologies from <strong>{{startDate}}</strong> to <strong>{{endDate}}</strong>. During this tenure, the candidate demonstrated exemplary diligence, technical acumen, and collaborative excellence on live industry software deliverables.
+    </p>
+    <div class="meta-row">
+      <div class="sig-line">Founder &amp; Principal Architect<br><strong>IntelliCore Technologies</strong></div>
+      <div class="sig-line">Lead HR Manager<br><strong>Talent &amp; Operations</strong></div>
+    </div>
+    <div class="cert-id">Verification ID: {{certificateId}} &bull; Verify at intellicoretechnologies.in/verify</div>
+  </div>
+</body>
+</html>
+

@@ -1,0 +1,44 @@
+{
+  "name": "intellicore",
+  "version": "2.0.0",
+  "description": "IntelliCore Modular Monolith Platform - Phase 1 Foundation & Infrastructure",
+  "type": "module",
+  "main": "backend/src/server.js",
+  "scripts": {
+    "start": "node backend/src/server.js",
+    "dev": "nodemon --watch backend/src backend/src/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate deploy",
+    "prisma:seed": "node prisma/seed.js",
+    "lint": "eslint backend/src tests",
+    "format": "prettier --write \"backend/src/**/*.js\" \"tests/**/*.js\" \"frontend/services/**/*.js\""
+  },
+  "dependencies": {
+    "@prisma/client": "^6.4.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^5.0.1",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "pino": "^9.6.0",
+    "pino-http": "^10.4.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9",
+    "pino-pretty": "^13.0.0",
+    "prettier": "^3.5.1",
+    "prisma": "^6.4.0",
+    "supertest": "^7.0.0",
+    "vitest": "^3.0.5"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}
+

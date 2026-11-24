@@ -1,0 +1,116 @@
+# ==============================================================================
+# IntelliCore Modular Monolith - Multi-Container Infrastructure
+# Version: 2.0.0 | Environment: Local Development
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. Application Service: Node.js 24 LTS + Express.js 5 + Prisma ORM
+  # ----------------------------------------------------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: intellicore_app
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3000
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:3000}
+      APP_TIMEZONE: ${APP_TIMEZONE:-Asia/Kolkata}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-intellicore_db}
+      MYSQL_USER: ${MYSQL_USER:-intellicore_app}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      DATABASE_URL: mysql://${MYSQL_USER:-intellicore_app}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE:-intellicore_db}?connection_limit=10&connect_timeout=15
+      UPLOAD_DIR: /app/uploads
+      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-900000}
+      RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-100}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+    volumes:
+      # Mount application code for hot reload, excluding node_modules to protect Linux binaries
+      - ./backend/src:/app/backend/src:ro
+      - ./frontend:/app/frontend:ro
+      - ./prisma:/app/prisma
+      - uploads_data:/app/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - intellicore_net
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://localhost:3000/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ----------------------------------------------------------------------------
+  # 2. Database Service: MySQL 8.4 LTS
+  # ----------------------------------------------------------------------------
+  mysql:
+    image: mysql:8.4
+    container_name: intellicore_mysql
+    restart: unless-stopped
+    # Port 3306 is private to the internal Docker network (not published to host)
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-intellicore_db}
+      MYSQL_USER: ${MYSQL_USER:-intellicore_app}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: ${APP_TIMEZONE:-Asia/Kolkata}
+    command:
+      - --default-authentication-plugin=caching_sha2_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+05:30
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - intellicore_net
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u $$MYSQL_USER --password=$$MYSQL_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+
+  # ----------------------------------------------------------------------------
+  # 3. Database Administration: phpMyAdmin
+  # ----------------------------------------------------------------------------
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.2.2
+    container_name: intellicore_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_VERBOSE: "IntelliCore MySQL"
+      UPLOAD_LIMIT: 64M
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - intellicore_net
+
+# ------------------------------------------------------------------------------
+# Persistent Storage Volumes
+# ------------------------------------------------------------------------------
+volumes:
+  mysql_data:
+    name: intellicore_mysql_data
+  uploads_data:
+    name: intellicore_uploads_data
+
+# ------------------------------------------------------------------------------
+# Isolated Bridge Network
+# ------------------------------------------------------------------------------
+networks:
+  intellicore_net:
+    name: intellicore_network
+    driver: bridge
+

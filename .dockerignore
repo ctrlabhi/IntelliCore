@@ -1,0 +1,35 @@
+# Version control
+.git
+.gitignore
+
+# Dependencies
+node_modules
+npm-debug.log
+
+# Environment variables & secrets
+.env
+.env.*
+secrets
+*.pem
+*.key
+
+# Backups & local uploads
+backups
+backend/uploads
+
+# Tests & coverage
+tests
+coverage
+*.test.js
+
+# Documentation (not needed in container runtime)
+docs
+README.md
+
+# Legacy files
+legacy-firebase
+
+# Windows / OS files
+.DS_Store
+Thumbs.db
+
