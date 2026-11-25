@@ -32,8 +32,18 @@ export function createApp() {
   app.use(requestLogger);
 
   // CORS configuration
+  const allowedOrigins = [
+    env.CORS_ORIGIN || 'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:3000'
+  ];
   app.use(cors({
-    origin: env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(null, allowedOrigins[0]);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
   }));
@@ -62,6 +72,22 @@ export function createApp() {
       if (lowerUrl.startsWith(pattern) || lowerUrl.includes(pattern)) {
         return res.status(403).send('Access Denied');
       }
+    }
+    next();
+  });
+
+  // Standardize browser navigation to canonical localhost:3000 origin to align with Firebase Authorized Domains
+  app.use((req, res, next) => {
+    if (
+      env.NODE_ENV !== 'test' &&
+      req.hostname === '127.0.0.1' &&
+      req.method === 'GET' &&
+      !req.path.startsWith('/api') &&
+      !req.path.startsWith('/health') &&
+      !req.path.startsWith('/ready')
+    ) {
+      const targetPort = req.socket.localPort || env.PORT || 3000;
+      return res.redirect(307, `http://localhost:${targetPort}${req.originalUrl}`);
     }
     next();
   });

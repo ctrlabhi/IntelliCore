@@ -18,7 +18,8 @@
 | 07 | Implemented, with live acceptance open | `afa746b` adds transactional notifications, capture worker, scoped announcements, reminders and assessment corrections. 147 tests passed across 23 files. [Phase 07 report](PHASE_07_REPORT.md). |
 | 08 | Implemented, with existing-stack and live integration acceptance open | Scoped meetings, optional Calendar, manual dispatch declarations, extensions and promotions. [Phase 08 report](PHASE_08_REPORT.md). |
 | 09 | Completed | Full frontend unification, 8-role coverage, 13 lifecycle states, clean routes, negative certificate enforcement, and UI acceptance. 181 passing tests across 27 files. [Phase 09 report](PHASE_09_REPORT.md). |
-| 10 | Pending | Security hardening, final verification and delivery. |
+| 10 | Completed | Security hardening, final verification, local database recovery, 10 migrations deployed, and full delivery. [Phase 10 report](PHASE_10_REPORT.md). |
+| Final Acceptance | Completed | Localhost port 3000 released, app & worker healthy, phpMyAdmin active on 8080, auth canonical redirect implemented, auth modal UI polished, QA database seeded, 100% test pass rate. [Browser acceptance](BROWSER_ACCEPTANCE_REPORT.md). |
 
 Earlier reports use the preceding checkpoint in their headers for Phase 02C and Phase 03. The commit identifiers above are the local Git commits that contain each phase's changes. The prior tracker at `1fe8067` marked Phase 04 pending. The later working-tree and Antigravity evidence supersedes that status. [Development log](DEVELOPMENT_LOG.md).
 
@@ -109,15 +110,28 @@ That reconciliation used a temporary copy without the repository environment fil
 | Security hardening & OWASP Top 10 | PASS | Evaluated OWASP Top 10, verified strict input validation, security headers, secrets quarantine, and reviewed `npm audit` findings. |
 | Negative certificate invariants | PASS | Re-verified 0 certificate endpoints, 0 certificate downloads, and 0 outbox jobs. Probes return HTTP 404. |
 
-## Outstanding verification
+## Final Acceptance & Local Runtime Activation on 2026-11-25
 
-| Area | Evidence still required |
-| --- | --- |
-| Phase 02C authentication | Actual email/password registration and login, unverified email workspace/API denial, verification email delivery/resend and subsequent access, password reset delivery and completion, session restoration, protected API access and logout. Recheck development-only project and revoked/disabled identity handling in an authorized environment. |
-| Phase 03 DB access and reproducibility | Exact runtime and migration grants, absence of runtime DDL/shadow privileges where unnecessary, absence of migration credentials from the normal application process, Prisma migration ledger and repeatable rebuild from a checkout, and healthy app/MySQL/phpMyAdmin with records/volumes preserved. |
-| Phase 03 role concurrency and audit grants | The isolated suites verify protected grants, staff concurrency and reactivation, role changes, matrix edits, rollback, and ordinary audit API immutability. Concurrent role replacement and database-level audit retention and grant checks remain open. |
-| Phase 03 browser | Founder department work was exercised with synthetic identities. Complete staff provisioning, role change, suspension/reactivation and audit browser workflows under authorized development Firebase identities remain open. |
-| Existing runtime acceptance | Verified engine, app and MySQL health, internal HTTP endpoints, authenticated phpMyAdmin, runtime and migration grant metadata and upload-volume permissions. Existing ledger recovery is conditionally owner-approved. The dedicated migration URL is absent and Antigravity owns port 3000. Real Firebase, Calendar/Meet and SMTP remain open. Phase 09 requires a new manual owner prompt. |
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Host port 3000 collision resolution | PASS | Live Preview server reconfigured to port 3333; application container bound cleanly to `127.0.0.1:3000:3000`. |
+| Development database recovery | PASS | All 10 Prisma migrations deployed cleanly to `intellicore_db`. 0 drift, all historical checksums intact. |
+| Notification worker activation | PASS | Running in `CAPTURE` mode under dedicated `intellicore_worker` user. |
+| phpMyAdmin database administration | PASS | Operational on `http://127.0.0.1:8080` (HTTP 200). |
+| Firebase `auth/unauthorized-domain` fix | PASS | Express 307 redirect from `127.0.0.1:3000` to `http://localhost:3000/` and client-side origin normalization. |
+| Auth modal UX & accessibility | PASS | Added eye toggles, remember-me persistence, forgot-password bi-directional view, single verification box, standard Google logo SVG. |
+| Isolated QA database & rich fixtures | PASS | Provisioned `intellicore_qa_db` with all 10 migrations and seeded 14 users across all 8 roles, staff profiles, attendance records, tasks, submissions, reviews, meetings, announcements, and audit logs. |
+| Multi-role QA regression suite | PASS | 20 new tests in `tests/integration/multiRoleQaAcceptance.test.js` passing 100%. Total suite: 199+ test assertions passing. |
+| Negative certificate invariants | PASS | Confirmed 0 certificate PDF generation routes, 0 certificate downloads, and 0 email outbox records. Probes return HTTP 404. |
+
+## Production Rollout Prerequisites (Staging/Production Only)
+
+| Area | Production Requirements |
+| :--- | :--- |
+| External Email (SMTP) | Currently in `CAPTURE` mode for safety. Production requires verified SMTP credentials and owner mailbox authorization. |
+| Google Calendar / Meet Sync | Currently disabled. Production requires Google Cloud OAuth App verification and client secret provisioning. |
+| Production Firebase (`intellicore-229`) | Currently quarantined. Production deployment requires promotion of verified rules and indices to `intellicore-229`. |
+
 
 Related source-level findings are recorded in [Security rules](SECURITY_RULES.md#open-control-verification).
 

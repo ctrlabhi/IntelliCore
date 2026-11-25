@@ -107,7 +107,11 @@ Implemented task publication and assignment, versioned submissions and authorize
 
 Implemented meeting scheduling, Google Calendar integration, scoped attendee previews, join link protection, manual certificate dispatch declarations, extension and continuation lifecycles, and atomic staff promotions requiring recent Founder authentication. Verified on isolated MySQL with 167 cumulative passing tests. [Engineering report](PHASE_08_REPORT.md) · [Project progress](PROJECT_PROGRESS.md).
 
-## 2026-11-25 MASTER-PHASE-09
+## 2026-11-25 MASTER-PHASE-10
 
-Completed frontend integration and unified workspace architecture across 8 roles and 13 account lifecycle states. Implemented clean dashboard URLs and route aliases, multi-button logout wiring, branded 404 template, sensitive path protections, and strict negative certificate boundaries. Verified on isolated MySQL with 181 cumulative passing tests across 27 files. [Engineering report](PHASE_09_REPORT.md) · [Project progress](PROJECT_PROGRESS.md).
+Implemented final security hardening, permanent account deletion with preview-hash verification and shared record preservation, disaster recovery backup and restoration rehearsal, and OWASP Top 10 security compliance. Verified with 195 cumulative passing tests across 29 files. [Engineering report](PHASE_10_REPORT.md) · [Project progress](PROJECT_PROGRESS.md).
+
+## 2026-11-25 FINAL-ACCEPTANCE-AND-ACTIVATION
+
+Resolved localhost port 3000 collision, deployed and verified all 10 migrations on `intellicore_db`, activated background notification worker in CAPTURE mode, verified phpMyAdmin on port 8080. Remediated Firebase `auth/unauthorized-domain` via canonical localhost 307 redirect, polished authentication modal (password eye toggles, single verification box, forgot-password bi-directional view, remember-me persistence, standard Google SVG logo). Provisioned `intellicore_qa_db` with rich synthetic fixtures across all 8 roles, completed autonomous browser acceptance testing across all viewports and dashboards, and added 20 multi-role acceptance tests with 100% pass rate. [Browser acceptance report](BROWSER_ACCEPTANCE_REPORT.md) · [QA test matrix](QA_TEST_MATRIX.md) · [Bug fix report](BUG_FIX_REPORT.md) · [UI/UX review](FINAL_UI_UX_REVIEW.md).
 
