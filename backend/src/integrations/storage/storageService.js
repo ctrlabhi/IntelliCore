@@ -109,6 +109,9 @@ export class StorageService {
   }
 }
 
-export const storageService = process.env.VERCEL === '1' ? new VercelBlobStorage() : new StorageService();
+export const storageService =
+  env.STORAGE_PROVIDER === 'vercel-blob' || process.env.VERCEL === '1'
+    ? new VercelBlobStorage()
+    : new StorageService();
 export default storageService;
 

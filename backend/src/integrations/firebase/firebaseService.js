@@ -7,8 +7,8 @@ import env from '../../config/env.js';
 
 /**
  * Isolated Firebase Service Abstraction
- * Configured exclusively for local development with intellicore-dev.
- * Production Firebase (intellicore-229) is strictly isolated and forbidden.
+ * Configured for local development with intellicore-dev,
+ * and configurable for production deployments via secure Vercel environment variables.
  */
 export class FirebaseService {
   constructor() {
@@ -22,37 +22,72 @@ export class FirebaseService {
   init() {
     if (env.NODE_ENV === 'test') return;
     try {
-      if (env.FIREBASE_PROJECT_ID !== 'intellicore-dev') {
-        throw new Error('Firebase Auth requires the IntelliCore development project.');
+      const isProduction = env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+      const targetProjectId = env.FIREBASE_PROJECT_ID || 'intellicore-dev';
+
+      // Local development strict quarantine: never point local dev at production
+      if (!isProduction && targetProjectId !== 'intellicore-dev') {
+        throw new Error('Firebase Auth requires the IntelliCore development project (intellicore-dev) in local development.');
       }
+
       const existingApps = getApps();
-      const existingDevApp = existingApps.find(({ options }) => options.projectId === 'intellicore-dev');
-      if (existingDevApp) {
-        this.app = existingDevApp;
+      const existingApp = existingApps.find(({ options }) => options.projectId === targetProjectId);
+      if (existingApp) {
+        this.app = existingApp;
         this.auth = getAuth(this.app);
         this.isInitialized = true;
-        this.projectId = this.app.options.projectId || env.FIREBASE_PROJECT_ID;
+        this.projectId = this.app.options.projectId || targetProjectId;
         return;
       } else if (existingApps.length) {
         throw new Error('An unexpected Firebase app is initialized.');
       }
 
       const hosted = process.env.VERCEL === '1';
-      const candidatePaths = hosted ? [] : [
-        env.GOOGLE_APPLICATION_CREDENTIALS,
-        '/run/secrets/firebase-admin-dev.json',
-        path.resolve(process.cwd(), 'secrets/firebase-admin-dev.json')
-      ].filter(Boolean);
-      const credPath = candidatePaths.find((candidate) => fs.existsSync(candidate));
-      const serialized = hosted ? process.env.FIREBASE_SERVICE_ACCOUNT_JSON
-        : credPath && fs.readFileSync(credPath, 'utf8');
+      let keyData = null;
 
-      if (serialized) {
-        const keyData = JSON.parse(serialized);
+      // 1. Check for individual Vercel environment variables (recommended for Vercel)
+      if (process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+        const normalizedPrivateKey = process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n');
+        keyData = {
+          project_id: targetProjectId,
+          client_email: process.env.FIREBASE_CLIENT_EMAIL,
+          private_key: normalizedPrivateKey
+        };
+      }
+      // 2. Check for raw serialized JSON string (alternative for Vercel)
+      else if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+        try {
+          keyData = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+          if (keyData.private_key) {
+            keyData.private_key = keyData.private_key.replace(/\\n/g, '\n');
+          }
+        } catch {
+          throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON is not valid JSON.');
+        }
+      }
+      // 3. Fallback to local files for Docker / standalone local development
+      else if (!hosted) {
+        const candidatePaths = [
+          env.GOOGLE_APPLICATION_CREDENTIALS,
+          '/run/secrets/firebase-admin-dev.json',
+          path.resolve(process.cwd(), 'secrets/firebase-admin-dev.json')
+        ].filter(Boolean);
+        const credPath = candidatePaths.find((candidate) => fs.existsSync(candidate));
+        if (credPath) {
+          const raw = fs.readFileSync(credPath, 'utf8');
+          keyData = JSON.parse(raw);
+        }
+      }
 
-        // Strict security guardrail: never initialize against production
-        if (keyData.project_id !== 'intellicore-dev') {
-          throw new Error('Firebase credentials do not belong to the development project.');
+      if (keyData) {
+        // Enforce project alignment
+        if (!isProduction && keyData.project_id !== 'intellicore-dev') {
+          throw new Error('Firebase credentials do not belong to the development project (intellicore-dev).');
+        }
+        if (isProduction && targetProjectId && keyData.project_id !== targetProjectId) {
+          throw new Error(
+            `Firebase service account project (${keyData.project_id}) does not match configured FIREBASE_PROJECT_ID (${targetProjectId}).`
+          );
         }
 
         this.app = initializeApp({
@@ -63,12 +98,12 @@ export class FirebaseService {
         this.auth = getAuth(this.app);
         this.projectId = keyData.project_id;
         this.isInitialized = true;
-        logger.info(`Firebase Admin SDK successfully initialized for development project: ${this.projectId}`);
+        logger.info(`Firebase Admin SDK successfully initialized for project: ${this.projectId}`);
       } else {
         logger.warn('Firebase Admin SDK credentials are unavailable. Service running in uninitialized mode.');
       }
-    } catch {
-      logger.error({ code: 'FIREBASE_INITIALIZATION_FAILED' }, 'Failed to initialize the development Firebase Admin SDK.');
+    } catch (err) {
+      logger.error({ code: 'FIREBASE_INITIALIZATION_FAILED', err: err.message }, 'Failed to initialize Firebase Admin SDK.');
     }
   }
 
@@ -129,6 +164,3 @@ export class FirebaseService {
 
 export const firebaseService = new FirebaseService();
 export default firebaseService;
-
-
-

@@ -16,6 +16,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
     "prisma:seed": "node prisma/seed.js",
+    "db:verify": "node scripts/verify-hostinger-db.js",
     "founder:bootstrap": "node backend/src/scripts/bootstrapFounder.js",
     "lint": "eslint backend/src tests",
     "format": "prettier --write \"backend/src/**/*.js\" \"tests/**/*.js\" \"frontend/services/**/*.js\""

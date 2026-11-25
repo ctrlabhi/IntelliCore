@@ -6,7 +6,13 @@ node_modules/
 # Environment Variables & Secrets
 .env
 .env.local
+.env.development
+.env.production
+.env.test
 .env.*.local
+!.env.example
+!.env.local.example
+!.env.production.example
 secrets/*
 !secrets/.gitkeep
 *.pem

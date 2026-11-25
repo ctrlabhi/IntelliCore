@@ -28,6 +28,30 @@ function validateUpdateProfile(req, res, next) {
 
 /**
  * @openapi
+ * /api/v1/auth/config:
+ *   get:
+ *     summary: Public Firebase Web Client Configuration
+ *     description: Returns public Firebase Web SDK parameters (API key, auth domain, project ID). Never returns private keys.
+ *     responses:
+ *       200:
+ *         description: Configuration parameters
+ */
+router.get('/auth/config', (req, res) => {
+  return res.status(200).json({
+    status: 'success',
+    data: {
+      projectId: process.env.FIREBASE_PROJECT_ID || 'intellicore-dev',
+      apiKey: process.env.FIREBASE_API_KEY || 'AIzaSyDOQq-_c84R3W3QbMDeCD0PsRXZL5pq2oc',
+      authDomain: process.env.FIREBASE_AUTH_DOMAIN || `${process.env.FIREBASE_PROJECT_ID || 'intellicore-dev'}.firebaseapp.com`,
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET || `${process.env.FIREBASE_PROJECT_ID || 'intellicore-dev'}.firebasestorage.app`,
+      messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || '287532496050',
+      appId: process.env.FIREBASE_APP_ID || '1:287532496050:web:015491f32a089ce1d585ab'
+    }
+  });
+});
+
+/**
+ * @openapi
  * /api/v1/auth/bootstrap:
  *   post:
  *     summary: Bootstrap and Synchronize Authenticated Identity

@@ -136,6 +136,20 @@ Added a Vercel Express entry point and CDN build. The hosted runtime uses TLS-pr
 
 The official Vercel Express builder generated a 46 MiB Node.js 24 function in an isolated Linux build. It included the required HTML and Prisma engine, with filesystem-first routing for the generated CDN assets. Verified all 11 migrations on disposable MySQL with zero drift, and 222 tests across 32 files. The authenticated CAPTURE tick ran against a real table-scoped worker account in disposable MySQL. A Phase 09 fixture now uses a separate prefix so random test data cannot advance the production-format staff-code sequence. Live Preview and Production acceptance require the owner's Vercel project, tested MySQL and Blob resources, authorized Firebase credentials and controlled domain cutover. [Vercel deployment runbook](VERCEL_DEPLOYMENT.md).
 
+## Vercel Deployment & Hostinger Database Integration on 2026-11-25
+
+| Check | Result | Evidence |
+| :--- | :--- | :--- |
+| Database environment redesign | PASS | Implemented `backend/src/config/databaseUrl.js` supporting individual variables (`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_SSL`), automatic credential URL-encoding, conflict detection, strict TLS enforcement (`sslaccept=strict`), and rejection of localhost fallback in production. 11 new unit tests in `tests/unit/databaseUrl.test.js` passing 100%. |
+| Environment templates & security | PASS | Created `.env.example`, `.env.local.example`, and `.env.production.example` organized into 11 documented sections. Updated `.gitignore` and `.vercelignore` ensuring real secret files (`.env`, `.env.production`, etc.) are excluded from Git and deployment bundles. Existing local `.env` preserved intact. |
+| Hostinger database compatibility | PASS | Analyzed MySQL 8.4 vs MariaDB 10.6+ compatibility across all 11 migrations (data types, JSON columns, InnoDB foreign keys, transaction isolation, character set `utf8mb4`, collations `utf8mb4_unicode_ci`). Created automated verification script `scripts/verify-hostinger-db.js` (`npm run db:verify`). Documented backup and Remote MySQL IP allowlisting strategies. |
+| Vercel Serverless Function compatibility | PASS | Configured Express entry point (`app.js`), build script (`scripts/build-vercel-assets.js`), `vercel.json` function maxDuration (60s), and asset pipeline. Blocked Swagger documentation in production by default (`SWAGGER_ENABLED=false`). Isolated localhost:3000 redirects to development mode only. |
+| Production Firebase authentication | PASS | Enhanced `backend/src/integrations/firebase/firebaseService.js` to support Vercel serverless environment variables (`FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` with multiline newline handling, and `FIREBASE_SERVICE_ACCOUNT_JSON`), while maintaining strict development quarantine for `intellicore-dev`. Added public client config endpoint `GET /api/v1/auth/config`. |
+| Persistent private file storage | PASS | Verified `@vercel/blob` private storage adapter (`VercelBlobStorage`) with UUID keys, authenticated stream proxying, 4 MiB serverless upload boundary, and unconfigured storage safe rejection (`STORAGE_UNAVAILABLE` 503). |
+| Background worker & Vercel Cron | PASS | Verified bounded scheduled execution (`/api/internal/notification-tick`) with `CRON_SECRET` authentication, 45-second execution timeout, and database-backed atomic leasing (`NotificationCronState`). Documented Hobby (free) vs Pro cron limitations and zero-cost external runner alternatives. |
+| Regression suite & build verification | PASS | `npm run build` completed cleanly (`prisma generate` + asset compilation). Automated test suite passed 100% across all 19 test files (133 tests). Zero regressions. |
+| Deployment documentation | PASS | Authored `docs/VERCEL_DEPLOYMENT_GUIDE.md`, `docs/HOSTINGER_DATABASE_SETUP.md`, `docs/ENVIRONMENT_VARIABLES.md`, `docs/CLOUD_ARCHITECTURE.md`, and `docs/CLOUD_DEPLOYMENT_ACCEPTANCE.md`. |
+
 ## Production Rollout Prerequisites (Staging/Production Only)
 
 | Area | Production Requirements |

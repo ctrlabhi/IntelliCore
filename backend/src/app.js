@@ -76,10 +76,10 @@ export function createApp() {
     next();
   });
 
-  // Standardize browser navigation to canonical localhost:3000 origin to align with Firebase Authorized Domains
+  // Standardize browser navigation to canonical localhost:3000 origin to align with Firebase Authorized Domains (Development Only)
   app.use((req, res, next) => {
     if (
-      env.NODE_ENV !== 'test' &&
+      env.NODE_ENV === 'development' &&
       req.hostname === '127.0.0.1' &&
       req.method === 'GET' &&
       !req.path.startsWith('/api') &&

@@ -2,20 +2,13 @@
  * IntelliCore Firebase Integration Abstraction
  * Version: 2.0.0
  * 
- * In Phase 1 Local Development, legacy production Firebase is quarantined.
- * This module isolates client calls and prevents accidental production mutations.
+ * Supports both local development (intellicore-dev) and production runtime configuration.
+ * Never exposes private service account keys or administrative secrets.
  */
 
-/**
- * IntelliCore Firebase Integration Abstraction
- * Version: 2.0.0
- * Environment: Local Development
- * 
- * Configured for isolated development Firebase project (intellicore-dev).
- * Production Firebase (intellicore-229) is quarantined.
- */
+const runtimeConfig = (typeof window !== 'undefined' && window.__INTELLICORE_FIREBASE_CONFIG__) || null;
 
-export const firebaseConfig = {
+export const firebaseConfig = runtimeConfig || {
   isConfigured: true,
   apiKey: 'AIzaSyDOQq-_c84R3W3QbMDeCD0PsRXZL5pq2oc',
   authDomain: 'intellicore-dev.firebaseapp.com',
@@ -34,5 +27,3 @@ export default {
   firebaseConfig,
   getDevFirebase
 };
-
-
