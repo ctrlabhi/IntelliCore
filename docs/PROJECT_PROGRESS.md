@@ -1,6 +1,6 @@
 # IntelliCore V2.0 project progress
 
-**Updated on 2026-11-25 (Asia/Kolkata).** Phase 07 builds on `af38bcd` with notifications, scoped announcements, reminders and audited assessment amendments. The existing development database has an unresolved Phase 05 ledger entry. [Phase 07 engineering report](PHASE_07_REPORT.md).
+**Updated on 2026-11-25 (Asia/Kolkata).** Phase 08 implements the final owner-approved scope from `c9da6dd`. The existing development database has an unresolved Phase 05 ledger entry. A successful isolated recovery rehearsal and pending live prerequisites are recorded in the [Phase 08 engineering report](PHASE_08_REPORT.md).
 
 ## Phase and checkpoint history
 
@@ -16,7 +16,7 @@
 | 05 | Implemented, with existing-stack acceptance open | `4d19095` and `05c8830`. Automatic check-in, explicit checkout, deterministic attendance history, Daily Work Reports, leave and corrections. 112 tests passed across 19 files. [Phase 05 report](PHASE_05_REPORT.md). |
 | 06 | Implemented, with existing-stack acceptance open | `3085ef8` adds tasks, versioned submissions and reviews, private storage, immutable curriculum and scoped reports. 131 tests passed across 21 files. [Phase 06 report](PHASE_06_REPORT.md). |
 | 07 | Implemented, with live acceptance open | `afa746b` adds transactional notifications, capture worker, scoped announcements, reminders and assessment corrections. 147 tests passed across 23 files. [Phase 07 report](PHASE_07_REPORT.md). |
-| 08 | Pending | Google Meet and certificate generation. Calendar integration is a stub and a certificate template exists. |
+| 08 | Implemented, with existing-stack and live integration acceptance open | Scoped meetings, optional Calendar, manual dispatch declarations, extensions and promotions. [Phase 08 report](PHASE_08_REPORT.md). |
 | 09 | Pending | Full frontend unification and role dashboards. |
 | 10 | Pending | Security hardening, final verification and delivery. |
 
@@ -34,6 +34,7 @@ Earlier reports use the preceding checkpoint in their headers for Phase 02C and 
 | `20261125120000_add_tasks_learning_and_performance` | 11 task, attachment and learning tables | Fresh install and populated Phase 05 upgrade passed on MySQL 8.4.13. Six ledger checksums matched, ten source tables retained their fixture rows and Prisma found zero drift. |
 | `20261125143000_add_notifications_and_email_outbox` | Notifications, preferences, outbox, delivery attempts, announcements, receipts and worker heartbeat | Tested on fresh and populated isolated MySQL 8.4.13. |
 | `20261125143100_add_assessment_correction_history` | Task score and learning progress correction history | Both Phase 07 migrations retained 20 fixture table states and all eight ledger checksums. |
+| `20261125160000_add_meetings_and_internship_followups` | Meeting, participant, OAuth state/connection, extension, promotion and manual dispatch history | Fresh and isolated failed-ledger restore paths completed with zero drift. [Phase 08 report](PHASE_08_REPORT.md). |
 
 The Git exception is limited to `prisma/migrations/*/migration.sql`. All four original SQL files and `migration_lock.toml` are preserved. The five migrations deployed on disposable MySQL and matched the ledger. The existing development stack's ledger and privilege configuration require live confirmation.
 
@@ -71,6 +72,17 @@ That reconciliation used a temporary copy without the repository environment fil
 | Browser and API runtime | PASS | Headless Edge exercised the four dashboards using synthetic Firebase identities with real Express and disposable MySQL. Liveness, readiness and Swagger endpoints responded. |
 | Existing development environment | NOT VERIFIED | Docker Linux engine pipe was absent outside the sandbox as well. Existing service health, grants, ledger, phpMyAdmin and actual Firebase remain open. |
 
+## Phase 08 verification on 2026-11-25
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Complete automated suite | PASS | **167 tests passed across 25 test files** (84 offline tests, 83 isolated MySQL integration tests). |
+| Migration ledger & schema drift | PASS | All 9 migrations applied cleanly on fresh and restored isolated MySQL 8.4.13 schemas; zero drift reported. |
+| Negative certificate invariants | PASS | Confirmed zero certificate PDF generation, storage, download, QR verification, and zero email outbox records. Worker cancels unauthorized injected outbox records. |
+| Extension & promotion lifecycles | PASS | Verified ongoing extension expected date updates, completed continuation enrollments, gap protections, non-privileged intern titles, and atomic staff provisioning requiring recent Founder auth. |
+| Scoped meetings & calendar | PASS | Verified audience previews, Google Meet URL format validation, join link protection, deduplicated reminders, and OAuth state & token encryption. |
+| Existing development environment | NOT VERIFIED | Docker Linux engine running healthy containers, persistent volumes intact. Host port 3000 bound by IDE Live Preview; dedicated migration URL in `.env` pending live reconciliation. |
+
 ## Outstanding verification
 
 | Area | Evidence still required |
@@ -79,7 +91,7 @@ That reconciliation used a temporary copy without the repository environment fil
 | Phase 03 DB access and reproducibility | Exact runtime and migration grants, absence of runtime DDL/shadow privileges where unnecessary, absence of migration credentials from the normal application process, Prisma migration ledger and repeatable rebuild from a checkout, and healthy app/MySQL/phpMyAdmin with records/volumes preserved. |
 | Phase 03 role concurrency and audit grants | The isolated suites verify protected grants, staff concurrency and reactivation, role changes, matrix edits, rollback, and ordinary audit API immutability. Concurrent role replacement and database-level audit retention and grant checks remain open. |
 | Phase 03 browser | Founder department work was exercised with synthetic identities. Complete staff provisioning, role change, suspension/reactivation and audit browser workflows under authorized development Firebase identities remain open. |
-| Existing runtime acceptance | Verified engine, app and MySQL health, internal HTTP endpoints, authenticated phpMyAdmin, runtime and migration grant metadata and upload-volume permissions. Resolve the failed Phase 05 entry with the dedicated credential after backup, and recheck host routing and Phase 07 on the existing stack. Real Firebase and SMTP remain open. Phase 08 requires the next manual implementation prompt. |
+| Existing runtime acceptance | Verified engine, app and MySQL health, internal HTTP endpoints, authenticated phpMyAdmin, runtime and migration grant metadata and upload-volume permissions. Existing ledger recovery is conditionally owner-approved. The dedicated migration URL is absent and Antigravity owns port 3000. Real Firebase, Calendar/Meet and SMTP remain open. Phase 09 requires a new manual owner prompt. |
 
 Related source-level findings are recorded in [Security rules](SECURITY_RULES.md#open-control-verification).
 
