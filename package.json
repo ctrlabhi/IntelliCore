@@ -6,6 +6,8 @@
   "main": "backend/src/server.js",
   "scripts": {
     "start": "node backend/src/server.js",
+    "build": "npm run build:vercel",
+    "build:vercel": "prisma generate && node scripts/build-vercel-assets.js",
     "notifications:worker": "node backend/src/scripts/notificationWorker.js",
     "dev": "nodemon --watch backend/src backend/src/server.js",
     "test": "vitest run",
@@ -20,6 +22,7 @@
   },
   "dependencies": {
     "@prisma/client": "^6.4.0",
+    "@vercel/blob": "2.9.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^5.0.1",
@@ -44,6 +47,6 @@
     "vitest": "^3.0.5"
   },
   "engines": {
-    "node": ">=24.0.0"
+    "node": "24.x"
   }
 }

@@ -39,7 +39,7 @@ export async function runNotificationTick(client, workerId, {
   if (acceptJobs()) {
     try {
       reminded = await runReminders(client, clock(), cursors, await effectiveReminders(client));
-      await runMeetingReminders(client, clock());
+      await runMeetingReminders(client, clock(), undefined, { acceptJobs, cursors });
     } catch {
       errors ||= 'REMINDER_BATCH_FAILED';
     }

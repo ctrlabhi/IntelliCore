@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { checkDatabaseConnection } from '../config/database.js';
+import firebase from '../integrations/firebase/firebaseService.js';
 
 const router = Router();
 
@@ -62,7 +63,10 @@ router.get('/health', (req, res) => {
 router.get('/ready', async (req, res) => {
   const isDbConnected = await checkDatabaseConnection();
 
-  if (isDbConnected) {
+  const hostedConfigReady = process.env.VERCEL !== '1'
+    || (firebase.getStatus().isInitialized && Boolean(process.env.BLOB_READ_WRITE_TOKEN));
+
+  if (isDbConnected && hostedConfigReady) {
     return res.status(200).json({
       status: 'READY',
       database: 'CONNECTED',
@@ -72,7 +76,8 @@ router.get('/ready', async (req, res) => {
 
   return res.status(503).json({
     status: 'NOT_READY',
-    database: 'DISCONNECTED',
+    database: isDbConnected ? 'CONNECTED' : 'DISCONNECTED',
+    ...(!hostedConfigReady && { configuration: 'INCOMPLETE' }),
     timestamp: new Date().toISOString()
   });
 });

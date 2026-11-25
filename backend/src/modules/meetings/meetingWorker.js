@@ -20,18 +20,19 @@ export function meetingReminderMinutes(source = process.env) {
     ? [...new Set(chosen)].sort((a, b) => a - b) : [10, 60, 1440];
 }
 
-export async function runMeetingReminders(client, now, minutes = meetingReminderMinutes()) {
+export async function runMeetingReminders(client, now, minutes = meetingReminderMinutes(), { acceptJobs = () => true, cursors = {} } = {}) {
   if (!minutes.length) return 0;
   const windows = minutes.map((lead) => {
     const deadline = +now + lead * 60000;
     return { startAt: { gt: new Date(Math.max(+now, deadline - reminderWindow)), lte: new Date(deadline) } };
   });
   let total = 0;
-  let cursor;
+  let cursor = cursors.meetings;
   do {
     const rows = await client.meeting.findMany({ where: { status: 'SCHEDULED', providerSyncStatus: { in: ['NOT_REQUIRED', 'READY'] },
       OR: windows, ...(cursor ? { id: { gt: cursor } } : {}) }, select: { id: true }, orderBy: { id: 'asc' }, take: 25 });
     for (const { id } of rows) {
+      if (!acceptJobs()) return total;
       total += await client.$transaction(async (tx) => {
         await tx.$queryRaw`SELECT id FROM meetings WHERE id = ${id} FOR UPDATE`;
         const meeting = await tx.meeting.findFirst({ where: { id, status: 'SCHEDULED',
@@ -47,9 +48,11 @@ export async function runMeetingReminders(client, now, minutes = meetingReminder
           version: meetingVersion(meeting) + ':' + lead, recipientIds: people.map((row) => row.id) });
         return rows.length;
       }, { isolationLevel: 'ReadCommitted' });
+      cursors.meetings = id;
     }
     cursor = rows.length === 25 ? rows.at(-1).id : undefined;
   } while (cursor);
+  delete cursors.meetings;
   return total;
 }
 

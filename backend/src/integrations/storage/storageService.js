@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'node:url';
 import env from '../../config/env.js';
 import logger from '../../config/logger.js';
+import { VercelBlobStorage } from './vercelBlobStorage.js';
 import { AppError, NotFoundError } from '../../utils/errors.js';
 
 const frontendDirectory = fileURLToPath(new URL('../../../../frontend', import.meta.url));
@@ -108,6 +109,6 @@ export class StorageService {
   }
 }
 
-export const storageService = new StorageService();
+export const storageService = process.env.VERCEL === '1' ? new VercelBlobStorage() : new StorageService();
 export default storageService;
 

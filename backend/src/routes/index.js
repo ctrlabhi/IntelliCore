@@ -4,11 +4,13 @@ import swaggerSpec from '../config/swagger.js';
 import healthRoutes from './health.js';
 import apiV1Routes from './apiV1.js';
 import { apiRateLimiter } from '../middleware/rateLimiter.js';
+import { vercelNotificationCron } from '../modules/notifications/vercelCron.js';
 
 const router = Router();
 
 // Liveness and Readiness probes (unthrottled for Docker & orchestration)
 router.use('/', healthRoutes);
+router.get('/api/internal/notification-tick', vercelNotificationCron);
 
 // Swagger / OpenAPI documentation UI
 router.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {

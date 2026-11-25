@@ -239,7 +239,7 @@ describe.skipIf(!hasIsolatedDatabase())('Phase 09: Role Workspaces & Account Sta
 
     const leader = await createActor('TEAM_LEADER', 'ACTIVE', true);
     await prisma.staffProfile.create({
-      data: { userId: leader.id, staffCode: 'STF-' + randomUUID().slice(0, 8), designation: 'Tech Lead', joiningDate: new Date() }
+      data: { userId: leader.id, staffCode: 'P9-STAFF-' + randomUUID().slice(0, 8), designation: 'Tech Lead', joiningDate: new Date() }
     });
     await prisma.userDepartment.create({
       data: { userId: leader.id, departmentId: dept1.id, assignedRole: 'TEAM_LEADER', isActive: true }

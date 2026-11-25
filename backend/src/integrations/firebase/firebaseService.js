@@ -37,23 +37,18 @@ export class FirebaseService {
         throw new Error('An unexpected Firebase app is initialized.');
       }
 
-      // Check configured credential path or fallbacks
-      const candidatePaths = [
+      const hosted = process.env.VERCEL === '1';
+      const candidatePaths = hosted ? [] : [
         env.GOOGLE_APPLICATION_CREDENTIALS,
         '/run/secrets/firebase-admin-dev.json',
         path.resolve(process.cwd(), 'secrets/firebase-admin-dev.json')
       ].filter(Boolean);
+      const credPath = candidatePaths.find((candidate) => fs.existsSync(candidate));
+      const serialized = hosted ? process.env.FIREBASE_SERVICE_ACCOUNT_JSON
+        : credPath && fs.readFileSync(credPath, 'utf8');
 
-      let credPath = null;
-      for (const p of candidatePaths) {
-        if (fs.existsSync(p)) {
-          credPath = p;
-          break;
-        }
-      }
-
-      if (credPath) {
-        const keyData = JSON.parse(fs.readFileSync(credPath, 'utf8'));
+      if (serialized) {
+        const keyData = JSON.parse(serialized);
 
         // Strict security guardrail: never initialize against production
         if (keyData.project_id !== 'intellicore-dev') {
@@ -70,10 +65,10 @@ export class FirebaseService {
         this.isInitialized = true;
         logger.info(`Firebase Admin SDK successfully initialized for development project: ${this.projectId}`);
       } else {
-        logger.warn('Firebase Admin SDK credential file not found. Service running in uninitialized mode.');
+        logger.warn('Firebase Admin SDK credentials are unavailable. Service running in uninitialized mode.');
       }
-    } catch (err) {
-      logger.error(`Failed to initialize Firebase Admin SDK: ${err.message}`);
+    } catch {
+      logger.error({ code: 'FIREBASE_INITIALIZATION_FAILED' }, 'Failed to initialize the development Firebase Admin SDK.');
     }
   }
 

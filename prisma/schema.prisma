@@ -5,7 +5,8 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 model SystemSetting {
@@ -967,6 +968,15 @@ model AnnouncementRecipient {
   @@id([announcementId, userId])
   @@index([userId, receivedAt])
   @@map("announcement_recipients")
+}
+
+model NotificationCronState {
+  key        String    @id @db.VarChar(60)
+  cursors    Json
+  leaseToken String?   @map("lease_token") @db.VarChar(36)
+  leaseUntil DateTime? @map("lease_until")
+
+  @@map("notification_cron_state")
 }
 
 model NotificationWorkerState {

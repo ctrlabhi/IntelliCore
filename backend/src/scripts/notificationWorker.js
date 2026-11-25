@@ -6,19 +6,7 @@ import logger from '../config/logger.js';
 import { deliveryConfiguration } from '../integrations/email/emailConfig.js';
 import { heartbeat, runNotificationTick } from '../modules/notifications/notificationWorker.js';
 import { workerOptions } from '../modules/notifications/emailQueue.js';
-
-function workerDatabaseUrl(source = process.env) {
-  try {
-    const url = new URL(source.NOTIFICATION_DATABASE_URL);
-    const account = decodeURIComponent(url.username);
-    const runtimeAccount = source.DATABASE_URL ? decodeURIComponent(new URL(source.DATABASE_URL).username) : null;
-    if (url.protocol === 'mysql:' && url.password && url.host && /^intellicore_worker(?:_[a-z0-9]+)?$/i.test(account)
-        && account !== runtimeAccount && /^\/[a-z0-9_]+$/i.test(url.pathname)) return url.href;
-  } catch {
-    // Report configuration using a fixed error.
-  }
-  throw new Error('A dedicated intellicore_worker MySQL account is required.');
-}
+import { workerDatabaseUrl } from '../modules/notifications/workerDatabase.js';
 
 async function main() {
   const client = new PrismaClient({ datasourceUrl: workerDatabaseUrl(), log: [] });

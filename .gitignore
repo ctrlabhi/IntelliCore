@@ -34,6 +34,10 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Vercel local metadata and generated CDN assets
+.vercel/
+/public/
+
 # Prisma Generated Client Cache (if generated locally)
 # prisma/generated/
 

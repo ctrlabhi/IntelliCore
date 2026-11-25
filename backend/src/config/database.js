@@ -1,11 +1,14 @@
 import { PrismaClient } from '@prisma/client';
 import logger from './logger.js';
 import env from './env.js';
+import { vercelDatabaseUrl } from './vercelDatabase.js';
 
 // Global singleton instance for Prisma
 const globalForPrisma = globalThis;
 
+const hosted = process.env.VERCEL === '1';
 export const prisma = globalForPrisma.prisma || new PrismaClient({
+  ...(hosted && { datasourceUrl: vercelDatabaseUrl(process.env.DATABASE_URL, { local: process.env.VERCEL_ENV === 'development' }) }),
   log: env.NODE_ENV === 'development'
     ? [
         { emit: 'event', level: 'query' },
@@ -20,7 +23,7 @@ if (env.NODE_ENV === 'development') {
   prisma.$on('warn', (e) => logger.warn({ warning: e }, 'Prisma Database Warning'));
 }
 
-if (env.NODE_ENV !== 'production') {
+if (hosted || env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;
 }
 
@@ -33,7 +36,7 @@ export async function checkDatabaseConnection() {
     await prisma.$queryRaw`SELECT 1 as ping`;
     return true;
   } catch (err) {
-    logger.warn({ err: err.message }, 'Database healthcheck failed');
+    logger.warn({ code: err.code ?? err.errorCode }, 'Database healthcheck failed');
     return false;
   }
 }

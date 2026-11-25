@@ -1,5 +1,7 @@
 # Production deployment readiness checklist
 
+For the selected Vercel hosting path, follow [Vercel deployment](VERCEL_DEPLOYMENT.md). The container steps below apply to Docker-hosted environments.
+
 ## 1. Architecture & Security Review
 
 - [x] **Modular Monolith Integrity**: Single deployable Express 5 codebase with integrated static asset serving.

@@ -130,6 +130,12 @@ The live domain returned the repository README at `/` and the public homepage at
 
 Verified the public homepage, assets, Notes and Express login entry in local Edge with synthetic authentication. GitHub Pages root and project paths were simulated locally. The existing static-serving and security suites passed all 12 tests. The production static site will update on publication of these changes to the configured Pages source. The authenticated workspace requires the Express and MySQL runtime.
 
+## Vercel adaptation on 2026-11-25
+
+Added a Vercel Express entry point and CDN build. The hosted runtime uses TLS-protected MySQL, private Blob attachments and an authenticated minute-wise notification scheduler with durable leases and reminder cursors. Docker remains the local development workflow. The new migration is additive.
+
+The official Vercel Express builder generated a 46 MiB Node.js 24 function in an isolated Linux build. It included the required HTML and Prisma engine, with filesystem-first routing for the generated CDN assets. Verified all 11 migrations on disposable MySQL with zero drift, and 222 tests across 32 files. The authenticated CAPTURE tick ran against a real table-scoped worker account in disposable MySQL. A Phase 09 fixture now uses a separate prefix so random test data cannot advance the production-format staff-code sequence. Live Preview and Production acceptance require the owner's Vercel project, tested MySQL and Blob resources, authorized Firebase credentials and controlled domain cutover. [Vercel deployment runbook](VERCEL_DEPLOYMENT.md).
+
 ## Production Rollout Prerequisites (Staging/Production Only)
 
 | Area | Production Requirements |

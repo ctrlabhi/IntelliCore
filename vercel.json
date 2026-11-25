@@ -1,0 +1,32 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "express",
+  "buildCommand": "npm run build",
+  "functions": {
+    "app.js": {
+      "maxDuration": 60,
+      "includeFiles": "{frontend/**/*.html,backend/src/**/*.js,node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node}"
+    }
+  },
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/internal/notification-tick",
+      "schedule": "* * * * *"
+    }
+  ]
+}

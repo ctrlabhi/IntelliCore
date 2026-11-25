@@ -12,7 +12,8 @@ import { attachmentSummary, lockedTask, ownAssignmentWhere, privateAssignmentWhe
 import { lockOwnDraft } from './submissionService.js';
 import { audit, can, conflict, found, isIntern, own, scope } from './workAccess.js';
 
-export const attachmentLimitBytes = Math.min(env.TASK_MAX_FILE_SIZE_MB, env.MAX_UPLOAD_SIZE_MB) * 1024 * 1024;
+const platformLimitMb = process.env.VERCEL === '1' ? 4 : Infinity;
+export const attachmentLimitBytes = Math.min(env.TASK_MAX_FILE_SIZE_MB, env.MAX_UPLOAD_SIZE_MB, platformLimitMb) * 1024 * 1024;
 const unsupported = () => new AppError('Upload a valid plain-text document or non-interlaced PNG image.', 415, 'UNSAFE_FILE_TYPE');
 const pngHeader = Buffer.from('89504e470d0a1a0a', 'hex');
 
