@@ -1,5 +1,17 @@
 # IntelliCore V2.0 — Development Log
 
+## 2026-11-25 MASTER-PHASE-09
+
+Implemented complete frontend integration, unified workspace architecture, and UI/UX acceptance for IntelliCore V2.0:
+- Integrated all previously implemented modules into a cohesive modular monolith with HTML, CSS, and Vanilla JavaScript.
+- Standardized canonical clean dashboard URLs (`/dashboards/founder`, `/dashboards/co-founder`, `/dashboards/admin`, `/dashboards/hr`, `/dashboards/hr-executive`, `/dashboards/operations`, `/dashboards/team-leader`, `/dashboards/intern`) alongside clean aliases and legacy `.html` fallback routes.
+- Built a deterministic workspace routing engine (`backend/src/utils/workspaceRouting.js`, `frontend/services/auth.js`) supporting all 8 roles and 13 account lifecycle states.
+- Audited and wired multi-point logout buttons across all shells (`logoutButton`, `topbarLogout`, `sidebarLogout`) with token revocation and clean session clearing.
+- Enforced 100% MySQL-backed operational metrics on all dashboards; eliminated fake and hardcoded numbers.
+- Enforced strict negative certificate boundaries across client and server (zero PDF generation, zero storage, zero downloads, zero verification endpoints, zero outbox records).
+- Expanded automated test suite from 167 to 181 passing tests across 27 test files (100% pass rate).
+- Created [Phase 09 report](PHASE_09_REPORT.md), [Frontend integration guide](FRONTEND_INTEGRATION.md), [Workspace guide](WORKSPACE_GUIDE.md), [Role & workspace matrix](ROLE_WORKSPACE_MATRIX.md), and [UI acceptance matrix](UI_ACCEPTANCE_MATRIX.md).
+
 ## 2026-11-25 MASTER-PHASE-08
 
 Implemented the final owner-approved Phase 08 specification from `c9da6dd`. Added scoped meetings and optional Calendar, manual external certificate-email declarations, internship extensions and promotions. Rehearsed the supported Phase 05 ledger recovery against the isolated backup restore. See [the engineering report](PHASE_08_REPORT.md) for verification and the two remaining existing-stack prerequisites.
@@ -78,4 +90,12 @@ Implemented notifications, preference-controlled email outbox, durable worker cl
 ## 2026-11-25 MASTER-PHASE-06
 
 Implemented task publication and assignment, versioned submissions and authorized reviews, private files, curriculum authoring and immutable publication, persisted lesson progress and scoped performance reports. Preserved eight recovered curricula and Phase 05 behavior. [Engineering report](PHASE_06_REPORT.md) · [Project progress](PROJECT_PROGRESS.md).
+
+## 2026-11-25 MASTER-PHASE-08
+
+Implemented meeting scheduling, Google Calendar integration, scoped attendee previews, join link protection, manual certificate dispatch declarations, extension and continuation lifecycles, and atomic staff promotions requiring recent Founder authentication. Verified on isolated MySQL with 167 cumulative passing tests. [Engineering report](PHASE_08_REPORT.md) · [Project progress](PROJECT_PROGRESS.md).
+
+## 2026-11-25 MASTER-PHASE-09
+
+Completed frontend integration and unified workspace architecture across 8 roles and 13 account lifecycle states. Implemented clean dashboard URLs and route aliases, multi-button logout wiring, branded 404 template, sensitive path protections, and strict negative certificate boundaries. Verified on isolated MySQL with 181 cumulative passing tests across 27 files. [Engineering report](PHASE_09_REPORT.md) · [Project progress](PROJECT_PROGRESS.md).
 

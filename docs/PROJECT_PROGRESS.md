@@ -17,7 +17,7 @@
 | 06 | Implemented, with existing-stack acceptance open | `3085ef8` adds tasks, versioned submissions and reviews, private storage, immutable curriculum and scoped reports. 131 tests passed across 21 files. [Phase 06 report](PHASE_06_REPORT.md). |
 | 07 | Implemented, with live acceptance open | `afa746b` adds transactional notifications, capture worker, scoped announcements, reminders and assessment corrections. 147 tests passed across 23 files. [Phase 07 report](PHASE_07_REPORT.md). |
 | 08 | Implemented, with existing-stack and live integration acceptance open | Scoped meetings, optional Calendar, manual dispatch declarations, extensions and promotions. [Phase 08 report](PHASE_08_REPORT.md). |
-| 09 | Pending | Full frontend unification and role dashboards. |
+| 09 | Completed | Full frontend unification, 8-role coverage, 13 lifecycle states, clean routes, negative certificate enforcement, and UI acceptance. 181 passing tests across 27 files. [Phase 09 report](PHASE_09_REPORT.md). |
 | 10 | Pending | Security hardening, final verification and delivery. |
 
 Earlier reports use the preceding checkpoint in their headers for Phase 02C and Phase 03. The commit identifiers above are the local Git commits that contain each phase's changes. The prior tracker at `1fe8067` marked Phase 04 pending. The later working-tree and Antigravity evidence supersedes that status. [Development log](DEVELOPMENT_LOG.md).
@@ -82,6 +82,19 @@ That reconciliation used a temporary copy without the repository environment fil
 | Extension & promotion lifecycles | PASS | Verified ongoing extension expected date updates, completed continuation enrollments, gap protections, non-privileged intern titles, and atomic staff provisioning requiring recent Founder auth. |
 | Scoped meetings & calendar | PASS | Verified audience previews, Google Meet URL format validation, join link protection, deduplicated reminders, and OAuth state & token encryption. |
 | Existing development environment | NOT VERIFIED | Docker Linux engine running healthy containers, persistent volumes intact. Host port 3000 bound by IDE Live Preview; dedicated migration URL in `.env` pending live reconciliation. |
+
+## Phase 09 verification on 2026-11-25
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Complete automated suite | PASS | **181 tests passed across 27 test files** (90 offline tests, 91 isolated MySQL integration tests). |
+| Workspace clean routes & aliases | PASS | Served clean URLs (`/dashboards/*`) and role aliases (`/admin-dashboard`, `/hr-executive-dashboard`, `/operations-dashboard`) with legacy compatibility. |
+| Role & lifecycle routing engine | PASS | Verified 8 system roles and 13 account lifecycle states resolved deterministically. |
+| Strict negative certificate boundaries | PASS | Confirmed 0 certificate PDF generation, downloads, storage, QR codes, verification endpoints, and automated outbox jobs. Negative probes return 404. |
+| Session management & logout wiring | PASS | Verified topbar, sidebar, and modal logout termination flow, token revocation, and storage cleanup. |
+| Sensitive file & infrastructure guards | PASS | Confirmed `.env`, `.git`, `secrets`, and `prisma` protected paths return HTTP 403 Forbidden. |
+| Custom 404 error template | PASS | Nonexistent frontend paths return branded HTML 404 template. |
+| Existing development environment | NOT VERIFIED | Docker Linux engine running healthy containers, persistent volumes intact. Host port 3000 bound by IDE Live Preview (PID 4940). |
 
 ## Outstanding verification
 

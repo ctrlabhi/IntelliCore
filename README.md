@@ -57,10 +57,10 @@ Once started, the following services are live:
 | Service / Tool | URL | Description |
 | :--- | :--- | :--- |
 | **Public Website** | [http://localhost:3000](http://localhost:3000) | Main landing page, courses, track roadmap, team |
-| **Founder Command Center** | [http://localhost:3000/founder-dashboard.html](http://localhost:3000/founder-dashboard.html) | Founder management & administration |
-| **HR Operations Dashboard** | [http://localhost:3000/hr-dashboard.html](http://localhost:3000/hr-dashboard.html) | Intern roster & attendance oversight |
-| **Team Leader Dashboard** | [http://localhost:3000/tl-dashboard.html](http://localhost:3000/tl-dashboard.html) | Domain track mentoring & task review |
-| **Intern Workspace** | [http://localhost:3000/Intern-dashboard.html](http://localhost:3000/Intern-dashboard.html) | Intern tasks, attendance, and progress |
+| **Founder Command Center** | [http://localhost:3000/dashboards/founder](http://localhost:3000/dashboards/founder) | Founder management & administration (`/founder-dashboard.html`) |
+| **HR Operations Dashboard** | [http://localhost:3000/dashboards/hr](http://localhost:3000/dashboards/hr) | Intern roster & attendance oversight (`/hr-dashboard.html`) |
+| **Team Leader Dashboard** | [http://localhost:3000/dashboards/team-leader](http://localhost:3000/dashboards/team-leader) | Domain track mentoring & task review (`/tl-dashboard.html`) |
+| **Intern Workspace** | [http://localhost:3000/dashboards/intern](http://localhost:3000/dashboards/intern) | Intern tasks, attendance, and progress (`/Intern-dashboard.html`) |
 | **AI Notes Studio** | [http://localhost:3000/notes.html](http://localhost:3000/notes.html) | Video-to-notes generator with PDF export |
 | **REST API Gateway** | [http://localhost:3000/api/v1](http://localhost:3000/api/v1) | Versioned REST API entrypoint |
 | **Swagger API Docs** | [http://localhost:3000/api-docs](http://localhost:3000/api-docs) | Interactive OpenAPI 3.0 specification |
