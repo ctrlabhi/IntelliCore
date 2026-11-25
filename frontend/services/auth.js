@@ -207,24 +207,36 @@ class AuthService {
   determineDashboardRoute(context = this.getContext()) {
     if (!context.isAuthenticated) return null;
 
-    const { workspaces, status } = context;
-    if (workspaces.onboarding) return '/pages/dashboards/intern/index.html';
+    const { workspaces, status, roles = [] } = context;
+    if (workspaces?.onboarding) return '/dashboards/intern';
     if (!context.appUser?.emailVerified || status !== 'ACTIVE') return '/?auth=login';
 
-    if (workspaces.founder) {
-      return '/pages/dashboards/founder/index.html';
+    if (roles.includes('FOUNDER')) {
+      return '/dashboards/founder';
     }
-    if (workspaces.hr) {
-      return '/pages/dashboards/hr/index.html';
+    if (roles.includes('CO_FOUNDER')) {
+      return '/dashboards/co-founder';
     }
-    if (workspaces.admin) return '/pages/dashboards/hr/index.html';
-    if (workspaces.operations && context.roles.includes('OPERATIONS_EXECUTIVE')) return '/pages/dashboards/hr/index.html';
-    if (workspaces.teamLeader) {
-      return '/pages/dashboards/team-leader/index.html';
+    if (roles.includes('ADMIN')) {
+      return '/dashboards/admin';
     }
-    if (workspaces.intern) {
-      return '/pages/dashboards/intern/index.html';
+    if (roles.includes('HR_MANAGER')) {
+      return '/dashboards/hr';
     }
+    if (roles.includes('HR_EXECUTIVE')) {
+      return '/dashboards/hr-executive';
+    }
+    if (roles.includes('OPERATIONS_EXECUTIVE')) {
+      return '/dashboards/operations';
+    }
+    if (roles.includes('TEAM_LEADER') || workspaces.teamLeader) {
+      return '/dashboards/team-leader';
+    }
+    if (roles.includes('INTERN') || workspaces.intern) {
+      return '/dashboards/intern';
+    }
+    if (workspaces.founder) return '/dashboards/founder';
+    if (workspaces.hr) return '/dashboards/hr';
 
     return '/';
   }

@@ -95,11 +95,19 @@ export function createApp() {
   });
 
   // 5. Dashboard Page Routes (both clean URLs and legacy .html URLs)
-  app.get(['/founder-dashboard.html', '/founder-dashboard', '/dashboards/founder'], (req, res) => {
+  app.get([
+    '/founder-dashboard.html', '/founder-dashboard', '/dashboards/founder',
+    '/cofounder-dashboard.html', '/cofounder-dashboard', '/dashboards/co-founder',
+    '/admin-dashboard.html', '/admin-dashboard', '/dashboards/admin'
+  ], (req, res) => {
     res.sendFile(path.join(frontendDir, 'pages/dashboards/founder/index.html'));
   });
 
-  app.get(['/hr-dashboard.html', '/hr-dashboard', '/dashboards/hr'], (req, res) => {
+  app.get([
+    '/hr-dashboard.html', '/hr-dashboard', '/dashboards/hr',
+    '/hr-executive-dashboard.html', '/hr-executive-dashboard', '/dashboards/hr-executive',
+    '/operations-dashboard.html', '/operations-dashboard', '/dashboards/operations'
+  ], (req, res) => {
     res.sendFile(path.join(frontendDir, 'pages/dashboards/hr/index.html'));
   });
 

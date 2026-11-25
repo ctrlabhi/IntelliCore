@@ -93,8 +93,8 @@ document.querySelectorAll('[data-founder-action]').forEach((button) => {
   });
 });
 
-if ($('logoutButton')) {
-  $('logoutButton').addEventListener('click', async () => {
+document.querySelectorAll('#logoutButton, #topbarLogout, #sidebarLogout, [data-action="logout"]').forEach((btn) => {
+  btn.addEventListener('click', async () => {
     try {
       await authService.logout();
       window.location.replace('/');
@@ -103,7 +103,7 @@ if ($('logoutButton')) {
       showToast('Sign out failed. Please try again.');
     }
   });
-}
+});
 
 /**
  * Loads real-time MySQL administrative metrics, staff, audit logs, and candidate accounts.
@@ -328,8 +328,15 @@ if ($('refreshRoleCandidates')) {
 function renderFounderDashboard(context) {
   const { appUser, firebaseUser } = context;
   const displayName = appUser?.profile?.displayName || appUser?.profile?.fullName || firebaseUser?.displayName || 'Founder';
-  const roleLabel = appUser?.roles?.includes('FOUNDER') ? 'Founder · Super Admin' : 'Co-Founder · Super Admin';
-  const email = appUser?.email || firebaseUser?.email || 'Authorized Super Admin';
+  let roleLabel = 'Super Admin';
+  if (appUser?.roles?.includes('FOUNDER')) {
+    roleLabel = 'Founder · Super Admin';
+  } else if (appUser?.roles?.includes('CO_FOUNDER')) {
+    roleLabel = 'Co-Founder · Executive';
+  } else if (appUser?.roles?.includes('ADMIN')) {
+    roleLabel = 'System Administrator';
+  }
+  const email = appUser?.email || firebaseUser?.email || 'Authorized Administrator';
   const initials = displayName
     .split(/\s+/)
     .slice(0, 2)
@@ -374,9 +381,9 @@ authService.onAuthStateChanged((context) => {
     return;
   }
 
-  const isFounder = context.roles.includes('FOUNDER') || context.roles.includes('CO_FOUNDER') || context.workspaces.founder;
-  if (!isFounder) {
-    console.warn('[FounderDashboard] User does not hold FOUNDER role. Redirecting.');
+  const isAuthorizedAdmin = context.roles.includes('FOUNDER') || context.roles.includes('CO_FOUNDER') || context.roles.includes('ADMIN') || context.workspaces.founder || context.workspaces.admin;
+  if (!isAuthorizedAdmin) {
+    console.warn('[FounderDashboard] User does not hold administrative authorization. Redirecting.');
     window.location.replace('/');
     return;
   }

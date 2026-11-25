@@ -42,7 +42,7 @@ if (hamburgerBtn && mobileDrawer) {
 }
 
 // Wire up logout buttons
-document.querySelectorAll('[data-action="logout"], #icHeaderLogout').forEach((btn) => {
+document.querySelectorAll('[data-action="logout"], #icHeaderLogout, #logoutButton, #topbarLogout, #sidebarLogout').forEach((btn) => {
   btn.addEventListener('click', async () => {
     if (btn.disabled) return;
     btn.disabled = true;
@@ -79,15 +79,27 @@ function renderInternWorkspace(context) {
     statusBadge.className = `status-badge ${status.toLowerCase()}`;
   }
 
-  // If status is not ACTIVE, display notice
+  // If status is not ACTIVE, display appropriate notice
   if (status !== 'ACTIVE') {
     const noticeEl = $('icWorkspaceNotice');
     if (noticeEl) {
+      const isSuspended = status === 'SUSPENDED';
+      const isInactive = status === 'INACTIVE';
+      const bg = isSuspended ? 'rgba(239, 68, 68, 0.15)' : isInactive ? 'rgba(148, 163, 184, 0.15)' : 'rgba(255, 184, 0, 0.12)';
+      const border = isSuspended ? '#ef4444' : isInactive ? '#94a3b8' : '#ffb800';
+      const titleColor = isSuspended ? '#ef4444' : isInactive ? '#94a3b8' : '#ffb800';
+      const heading = isSuspended ? 'Account Suspended' : isInactive ? 'Account Inactive' : 'Account Under Review';
+      const desc = isSuspended
+        ? 'Your account has been suspended. Operational workspace access is disabled. Please contact the administrator.'
+        : isInactive
+        ? 'Your account is currently inactive. Please contact the administrator to restore access.'
+        : `Your account is currently in <strong>${escapeHtml(status)}</strong> status. Workspace modules will activate upon HR approval.`;
+
       noticeEl.innerHTML = `
-        <div style="background: rgba(255, 184, 0, 0.12); border: 1px solid #ffb800; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
-          <strong style="color: #ffb800;">Account Under Review</strong>
+        <div style="background: ${bg}; border: 1px solid ${border}; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+          <strong style="color: ${titleColor};">${heading}</strong>
           <p style="margin: 0.25rem 0 0; color: #e2e8f0; font-size: 0.88rem;">
-            Your account is currently in <strong>${escapeHtml(status)}</strong> status. Workspace modules will activate upon HR approval.
+            ${desc}
           </p>
         </div>
       `;

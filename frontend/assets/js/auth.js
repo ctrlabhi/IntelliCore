@@ -273,6 +273,10 @@ try {
       if (targetRoute && modal?.classList.contains('is-open')) {
         window.location.href = targetRoute;
       }
+    } else if (status === 'SUSPENDED') {
+      setMessage('Your account has been suspended. Operational access is disabled. Please contact support.', 'error');
+    } else if (status === 'INACTIVE') {
+      setMessage('Your account is currently inactive. Please contact support.', 'error');
     } else {
       setMessage(`Account restricted. Status: ${status}. Please contact support.`, 'error');
     }

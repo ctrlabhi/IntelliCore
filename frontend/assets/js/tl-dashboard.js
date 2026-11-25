@@ -72,8 +72,8 @@ if (sidebar) {
   });
 }
 
-if ($('logoutButton')) {
-  $('logoutButton').addEventListener('click', async () => {
+document.querySelectorAll('#logoutButton, #topbarLogout, #sidebarLogout, [data-action="logout"]').forEach((btn) => {
+  btn.addEventListener('click', async () => {
     try {
       await authService.logout();
       window.location.replace('/');
@@ -82,7 +82,7 @@ if ($('logoutButton')) {
       showToast('Sign out failed. Please try again.');
     }
   });
-}
+});
 
 function renderTLDashboard(context) {
   const { appUser, firebaseUser } = context;
