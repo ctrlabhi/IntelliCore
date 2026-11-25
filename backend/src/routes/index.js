@@ -32,13 +32,15 @@ if (swaggerEnabled) {
     res.send(swaggerSpec);
   });
 } else {
-  router.all(['/api-docs', '/api-docs/*', '/api-docs.json'], (req, res) => {
+  const disabledHandler = (req, res) => {
     res.status(404).json({
       status: 'error',
       code: 'NOT_FOUND',
       message: 'API documentation is disabled in production.'
     });
-  });
+  };
+  router.all('/api-docs.json', disabledHandler);
+  router.use('/api-docs', disabledHandler);
 }
 
 // Versioned API v1 routes with rate limiting

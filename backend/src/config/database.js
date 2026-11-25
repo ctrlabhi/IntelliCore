@@ -7,8 +7,17 @@ import { vercelDatabaseUrl } from './vercelDatabase.js';
 const globalForPrisma = globalThis;
 
 const hosted = process.env.VERCEL === '1';
+let hostedDatasourceUrl;
+if (hosted && process.env.DATABASE_URL) {
+  try {
+    hostedDatasourceUrl = vercelDatabaseUrl(process.env.DATABASE_URL, { local: process.env.VERCEL_ENV === 'development' });
+  } catch (err) {
+    logger.warn({ err: err.message }, 'Failed to format Vercel database URL');
+  }
+}
+
 export const prisma = globalForPrisma.prisma || new PrismaClient({
-  ...(hosted && { datasourceUrl: vercelDatabaseUrl(process.env.DATABASE_URL, { local: process.env.VERCEL_ENV === 'development' }) }),
+  ...(hostedDatasourceUrl && { datasourceUrl: hostedDatasourceUrl }),
   log: env.NODE_ENV === 'development'
     ? [
         { emit: 'event', level: 'query' },

@@ -15,12 +15,15 @@ try {
     process.env.DATABASE_URL = resolvedDb.databaseUrl;
   }
 } catch (err) {
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === 'production' && process.env.VERCEL !== '1') {
     throw err;
   }
-  // In development/test, keep fallback if error occurred
+  if (process.env.VERCEL === '1') {
+    console.error('⚠️ [Vercel Environment Warning]:', err.message);
+  }
+  // In development, test, or unconfigured Vercel cold-start fallback
   resolvedDb = {
-    databaseUrl: process.env.DATABASE_URL || 'mysql://intellicore_app:intellicore_dev_pass@localhost:3306/intellicore_db',
+    databaseUrl: process.env.DATABASE_URL || '',
     migrationDatabaseUrl: process.env.MIGRATION_DATABASE_URL || null,
     notificationDatabaseUrl: process.env.NOTIFICATION_DATABASE_URL || null
   };

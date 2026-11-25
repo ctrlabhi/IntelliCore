@@ -5,7 +5,7 @@
   "functions": {
     "app.js": {
       "maxDuration": 60,
-      "includeFiles": "{frontend/**/*.html,backend/src/**/*.js,node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node}"
+      "includeFiles": "{frontend/**,backend/src/**,node_modules/.prisma/client/**,prisma/schema.prisma}"
     }
   },
   "headers": [
