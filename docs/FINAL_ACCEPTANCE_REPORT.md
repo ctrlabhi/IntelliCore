@@ -2,14 +2,14 @@
 
 - **Project**: IntelliCore V2.0 — Enterprise Internship & Operations Management Platform
 - **Date**: 2026-11-25 (Asia/Kolkata)
-- **Implementation Status**: **All 10 Phases Implemented, Recovered & Verified**
+- **Implementation Status**: **All 10 Phases Implemented, Recovered & Locally Activated**
 - **Readiness Classification**:
   - **Implementation Completion**: **COMPLETE** (10/10 Phases)
   - **Development Database Recovery**: **COMPLETE** (All 10 Prisma migrations deployed cleanly to `intellicore_db`, zero schema drift, 48 tables/views intact, Founder preserved)
   - **Isolated Automated Test Suite**: **PASS** (195 passing tests across 29 test files on MySQL 8.4 LTS)
+  - **Localhost Application Runtime**: **PASS** (Application container `intellicore_app` healthy on `127.0.0.1:3000:3000`, `/health`, `/ready`, and `/api-docs` all verified HTTP 200)
   - **Background Worker**: **PASS** (Notification worker active in `CAPTURE` mode under dedicated `intellicore_worker` account)
   - **Database Administration (phpMyAdmin)**: **PASS** (Verified HTTP 200 on `http://127.0.0.1:8080`)
-  - **Localhost Application Runtime**: **COLLISION IDENTIFIED** (Host port 3000 currently occupied by Antigravity IDE's internal `ms-vscode.live-server` extension; `.vscode/settings.json` configured to port 3333; pending one-click IDE stop action)
   - **Production Readiness**: **NOT CONFIGURED / NOT VERIFIED** (Production Firebase quarantined, SMTP in CAPTURE mode, live Google Calendar disabled by security policy)
 
 ---
@@ -29,29 +29,34 @@
 | **Persistent Upload Volume** | **PASS** | Named volume `intellicore_uploads_data` verified. Mounted at `/app/uploads` with non-root ownership (`node:node`, UID 1000). |
 | **Background Notification Worker** | **PASS** | Worker active in `CAPTURE` mode (`intellicore-notification-worker-1`). Verified logging: `service: intellicore-api, version: 2.0.0, mode: CAPTURE`. Zero external SMTP dispatches permitted. |
 | **phpMyAdmin Web GUI** | **PASS** | Container `intellicore_phpmyadmin` verified operational on `http://127.0.0.1:8080` (HTTP 200). Direct visual MySQL inspection available. |
+| **Localhost Application Runtime** | **PASS** | Container `intellicore_app` verified healthy on `127.0.0.1:3000->3000/tcp`. `/health` (`status: UP`), `/ready` (`status: READY, database: CONNECTED`), and `/api-docs` verified HTTP 200. |
+| **Host Port 3000 Connectivity** | **RESOLVED** | Host port 3000 successfully released by owner stopping Live Preview server. Application bound to `127.0.0.1:3000:3000`. `.vscode/settings.json` reconfigured to port 3333 to prevent recurrence. |
 | **Permanent Account Deletion Safety** | **PASS** | Verified with 8 integration tests and 6 unit tests. Founder-only ceiling, preview-hash check, `PERMANENTLY DELETE` confirmation, shared record preservation, storage unlinking, and re-registration block (`ACCOUNT_DELETED`). |
 | **Negative Certificate Invariants** | **PASS** | Zero certificate PDF generation, downloads, QR codes, verification endpoints, or email outbox jobs. Probes return HTTP 404. Manual human dispatch declarations preserved. |
 | **Dependency Security Review** | **PASS** | All 12 findings itemized in [Final Security Audit](FINAL_SECURITY_AUDIT.md). Test/build tooling vulnerabilities isolated; runtime Zod finding guarded by Express `100kb` payload limits. |
-| **Host Port 3000 Ownership** | **COLLISION IDENTIFIED** | Port `127.0.0.1:3000` is bound by PID `4940` (Antigravity IDE internal utility process running `ms-vscode.live-server` Live Preview extension). Confirmed via HTTP response `<script src="/___vscode_livepreview_injected_script"></script>`. `.vscode/settings.json` reconfigured to port 3333. Awaiting user action to stop server. |
 | **External Email Delivery (SMTP)** | **NOT CONFIGURED** | Intentionally configured in `CAPTURE` mode to prevent accidental email dispatch during development. |
 | **Google Calendar Live Sync** | **NOT CONFIGURED** | Intentionally disabled. Manual Google Meet link input supported with zero third-party OAuth dependencies. |
 | **Production Firebase (`intellicore-229`)** | **NOT CONFIGURED** | Strictly quarantined from all local development and test operations by security policy. |
 
 ---
 
-## 2. Root Cause Analysis: Host Port 3000 Collision
+## 2. Verified Active Services
 
-- **Owning Process**: PID `4940` (`Antigravity IDE.exe`, Utility Process running `--utility-sub-type=node.mojom.NodeService`).
-- **Owning Extension**: `ms-vscode.live-server` (Live Preview extension version `0.4.16` installed in `.antigravity-ide/extensions`).
-- **Proof of Identification**: Probing `http://127.0.0.1:3000` returns the workspace root index with:
-  ```html
-  <script type="text/javascript" src="/___vscode_livepreview_injected_script"></script>
-  ```
-- **Configuration Remediation**: Created `.vscode/settings.json` with `"livePreview.portNumber": 3333` so that all subsequent Live Preview sessions avoid port 3000.
-- **Immediate Resolution Steps**:
-  1. Press `Ctrl + Shift + P` in Antigravity IDE.
-  2. Run command **`Live Preview: Stop Server`** (or **`Developer: Restart Extension Host`**).
-  3. Once executed, `127.0.0.1:3000` is immediately released and `docker compose up -d app` can bind port 3000 without error.
+```text
+NAME                                STATUS                   PORTS
+intellicore_app                     Up (healthy)             127.0.0.1:3000->3000/tcp
+intellicore-notification-worker-1   Up (CAPTURE mode)        3000/tcp (internal)
+intellicore_mysql                   Up (healthy)             3306/tcp, 33060/tcp (internal)
+intellicore_phpmyadmin              Up                       127.0.0.1:8080->80/tcp
+```
+
+### Verified Endpoints:
+- **Application Root**: [http://127.0.0.1:3000](http://127.0.0.1:3000) (HTTP 200)
+- **Liveness Probe**: [http://127.0.0.1:3000/health](http://127.0.0.1:3000/health) (HTTP 200, `{ status: "UP" }`)
+- **Readiness Probe**: [http://127.0.0.1:3000/ready](http://127.0.0.1:3000/ready) (HTTP 200, `{ status: "READY", database: "CONNECTED" }`)
+- **OpenAPI / Swagger Documentation**: [http://127.0.0.1:3000/api-docs](http://127.0.0.1:3000/api-docs) (HTTP 200)
+- **phpMyAdmin Database GUI**: [http://127.0.0.1:8080](http://127.0.0.1:8080) (HTTP 200)
+- **Founder Dashboard URL**: [http://127.0.0.1:3000/founder-dashboard.html](http://127.0.0.1:3000/founder-dashboard.html) (HTTP 200)
 
 ---
 
