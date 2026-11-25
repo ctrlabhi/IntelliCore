@@ -246,6 +246,14 @@ async function loadLiveDashboardData(canProvision = true) {
         }
       }
 
+      if ($('deletionTargetUser')) {
+        const deletableUsers = users.filter((u) => !u.roles.some((r) => r.code === 'FOUNDER'));
+        $('deletionTargetUser').innerHTML = '<option value="">Select an account to preview deletion…</option>' +
+          deletableUsers.map((u) => {
+            const label = u.profile?.fullName ? `${u.profile.fullName} (${u.email}) [${u.status}]` : `${u.email} [${u.status}]`;
+            return `<option value="${escapeHtml(u.id)}">${escapeHtml(label)}</option>`;
+          }).join('');
+      }
     }
   } catch (err) {
     console.warn('[FounderDashboard] Failed to fetch users list:', err);
@@ -325,6 +333,170 @@ if ($('refreshRoleCandidates')) {
   });
 }
 
+// Permanent Account Deletion Handlers
+let currentDeletionPreview = null;
+
+async function loadDeletionJobs() {
+  const tbody = $('deletionJobsTableBody');
+  if (!tbody) return;
+  try {
+    const res = await api.get('/admin/deletion-jobs?limit=10');
+    const jobs = res?.data?.jobs || [];
+    if (jobs.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #64748b;">No recent deletion jobs recorded.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = jobs.map((job) => {
+      const statusColor = job.status === 'COMPLETED' ? '#22c55e' : (job.status === 'FAILED' ? '#ef4444' : '#f59e0b');
+      const timeStr = new Date(job.createdAt).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const canRetry = job.status === 'RETRY_REQUIRED' || (job.status === 'FAILED' && job.failedStep === 'FIREBASE_AUTH_DELETION');
+      const actionBtn = canRetry
+        ? `<button type="button" class="assign-role-button retry-job-btn" data-job-id="${escapeHtml(job.id)}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: #ea580c; border: none; border-radius: 3px; color: #fff; cursor: pointer;">Retry</button>`
+        : '—';
+      return `
+        <tr>
+          <td><strong>${escapeHtml(job.targetName || job.targetEmail)}</strong><br><small style="color:#64748b;">${escapeHtml(job.targetEmail)}</small></td>
+          <td>${escapeHtml(job.reason || '—')}</td>
+          <td><span style="color: ${statusColor}; font-weight: 600;">${escapeHtml(job.status)}</span></td>
+          <td>${escapeHtml(job.failedStep || '—')}</td>
+          <td>${escapeHtml(timeStr)}</td>
+          <td>${actionBtn}</td>
+        </tr>
+      `;
+    }).join('');
+
+    tbody.querySelectorAll('.retry-job-btn').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const jobId = btn.dataset.jobId;
+        btn.disabled = true;
+        btn.textContent = 'Retrying…';
+        try {
+          await api.post(`/admin/deletion-jobs/${jobId}/retry`);
+          showToast('Deletion job retry completed.');
+          await loadDeletionJobs();
+        } catch (err) {
+          showToast(err.message || 'Retry failed.');
+          btn.disabled = false;
+          btn.textContent = 'Retry';
+        }
+      });
+    });
+  } catch (err) {
+    console.warn('[FounderDashboard] Could not load deletion jobs:', err);
+  }
+}
+
+if ($('refreshDeletionJobs')) {
+  $('refreshDeletionJobs').addEventListener('click', async () => {
+    await loadDeletionJobs();
+    showToast('Deletion job history refreshed.');
+  });
+}
+
+function updateDeletionExecuteBtnState() {
+  const btn = $('executePermanentDeletionBtn');
+  const confirmVal = $('deletionConfirmInput')?.value?.trim();
+  const reasonVal = $('deletionReasonInput')?.value?.trim();
+  if (btn) {
+    btn.disabled = !(confirmVal === 'PERMANENTLY DELETE' && reasonVal && reasonVal.length >= 5 && currentDeletionPreview);
+  }
+}
+
+if ($('deletionConfirmInput')) {
+  $('deletionConfirmInput').addEventListener('input', updateDeletionExecuteBtnState);
+}
+if ($('deletionReasonInput')) {
+  $('deletionReasonInput').addEventListener('input', updateDeletionExecuteBtnState);
+}
+
+if ($('previewDeletionBtn')) {
+  $('previewDeletionBtn').addEventListener('click', async () => {
+    const userId = $('deletionTargetUser')?.value;
+    if (!userId) {
+      showToast('Select an account to preview deletion.');
+      return;
+    }
+    const btn = $('previewDeletionBtn');
+    btn.disabled = true;
+    btn.textContent = 'Generating…';
+    try {
+      const res = await api.post(`/users/${userId}/deletion-preview`);
+      if (res && res.data) {
+        currentDeletionPreview = res.data;
+        const p = res.data;
+        const imp = p.impact;
+        const shared = p.sharedPreserved;
+
+        $('deletionImpactSummary').innerHTML = `
+          <div style="margin-bottom: 0.5rem; padding: 0.5rem; background: rgba(239, 68, 68, 0.1); border-left: 3px solid #ef4444; border-radius: 4px;">
+            <strong style="color: #f87171;">Target:</strong> ${escapeHtml(p.targetUser.fullName)} (${escapeHtml(p.targetUser.email)})<br>
+            <strong style="color: #f87171;">Status:</strong> ${escapeHtml(p.targetUser.status)} | <strong style="color: #f87171;">Roles:</strong> ${escapeHtml(p.targetUser.roles.join(', ') || 'None')}
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; margin-bottom: 0.5rem;">
+            <div>• Profile &amp; Staff: <strong>${imp.profile + imp.staffProfile} record(s)</strong></div>
+            <div>• Applications &amp; Enrollments: <strong>${imp.internshipApplications + imp.internships} record(s)</strong></div>
+            <div>• Attendance &amp; Reports: <strong>${imp.attendanceRecords + imp.dailyWorkReports} record(s)</strong></div>
+            <div>• Tasks &amp; Submissions: <strong>${imp.taskAssignments + imp.taskSubmissions} record(s)</strong></div>
+            <div>• Private Files: <strong>${imp.privateFileAttachments} file(s) to unlink</strong></div>
+            <div>• Firebase Identity: <strong>Will be permanently deleted</strong></div>
+          </div>
+          <div style="font-size: 0.8rem; color: #94a3b8; border-top: 1px solid #334155; padding-top: 0.5rem;">
+            <em>Organizational integrity:</em> ${shared.sharedTasksPreserved} shared task(s) and ${shared.sharedMeetingsPreserved} meeting(s) created by this user will remain intact with author attribution cleared.
+          </div>
+        `;
+        $('deletionPreviewWrap').hidden = false;
+        $('deletionConfirmInput').value = '';
+        $('deletionReasonInput').value = '';
+        updateDeletionExecuteBtnState();
+        showToast('Deletion impact preview generated.');
+      }
+    } catch (err) {
+      showToast(err.message || 'Failed to generate deletion preview.');
+      $('deletionPreviewWrap').hidden = true;
+      currentDeletionPreview = null;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Preview Impact';
+    }
+  });
+}
+
+if ($('executePermanentDeletionBtn')) {
+  $('executePermanentDeletionBtn').addEventListener('click', async () => {
+    if (!currentDeletionPreview) return;
+    const userId = currentDeletionPreview.targetUser.id;
+    const reason = $('deletionReasonInput')?.value?.trim();
+    const confirmationText = $('deletionConfirmInput')?.value?.trim();
+    const previewHash = currentDeletionPreview.previewHash;
+    const previewTimestamp = currentDeletionPreview.previewGeneratedAt;
+
+    const btn = $('executePermanentDeletionBtn');
+    const msg = $('deletionProgressMsg');
+    btn.disabled = true;
+    if (msg) msg.textContent = 'Permanently deleting account…';
+
+    try {
+      const res = await api.post(`/users/${userId}/permanent-deletion`, {
+        reason,
+        confirmationText,
+        previewHash,
+        previewTimestamp
+      });
+      if (res && res.success) {
+        showToast('Account permanently deleted.');
+        if (msg) msg.textContent = 'Completed successfully.';
+        $('deletionPreviewWrap').hidden = true;
+        currentDeletionPreview = null;
+        await Promise.all([loadLiveDashboardData(true), loadDeletionJobs()]);
+      }
+    } catch (err) {
+      showToast(err.message || 'Permanent deletion failed.');
+      if (msg) msg.textContent = `Error: ${err.message}`;
+      btn.disabled = false;
+    }
+  });
+}
+
 function renderFounderDashboard(context) {
   const { appUser, firebaseUser } = context;
   const displayName = appUser?.profile?.displayName || appUser?.profile?.fullName || firebaseUser?.displayName || 'Founder';
@@ -359,12 +531,19 @@ function renderFounderDashboard(context) {
   document.querySelectorAll('[data-founder-action="Assign staff access"]').forEach((button) => {
     button.hidden = !canProvision;
   });
+
+  const isPrimaryFounder = context.roles.includes('FOUNDER');
+  if ($('accountDeletion')) $('accountDeletion').hidden = !isPrimaryFounder;
+
   mountPhase04($('interns'), context, 'founder', loadFounderStats);
   mountStaffAttendance(context, $('interns'));
   void mountWork($('phase06Work'), context);
   mountNotifications($('phase07Workspace'), context);
   mountPhase08($('phase08Workspace'), context);
   loadLiveDashboardData(canProvision);
+  if (isPrimaryFounder) {
+    loadDeletionJobs();
+  }
 }
 
 // Initialize Auth Service listener

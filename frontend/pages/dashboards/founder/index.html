@@ -134,6 +134,73 @@
           <p class="role-assignment-status" id="roleAssignmentStatus" role="status" aria-live="polite">Loading unassigned intern accounts…</p>
         </section>
 
+        <section class="panel account-deletion-panel" id="accountDeletion" style="border-top: 3px solid #ef4444;">
+          <div class="panel-heading">
+            <div>
+              <span class="panel-kicker" style="color: #ef4444;">FOUNDER-ONLY · IRREVERSIBLE OPERATION</span>
+              <h2>Permanent Account Deletion</h2>
+            </div>
+            <button class="view-link" id="refreshDeletionJobs" type="button">Refresh history ↻</button>
+          </div>
+          <p class="role-assignment-intro" style="color: #cbd5e1;">
+            Permanently purges a user's account, profile, enrollments, attendance, and private files across MySQL, disk storage, and Firebase Auth. Shared organization records (tasks, departments, meetings) are preserved. Deactivation or suspension is recommended for routine personnel management.
+          </p>
+          <div class="deletion-controls" style="display: grid; gap: 1rem; margin-top: 1rem;">
+            <div style="display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap;">
+              <label style="flex: 1; min-width: 250px;">
+                <span style="display: block; margin-bottom: 0.25rem; font-size: 0.85rem; color: #94a3b8;">Select Target Account</span>
+                <select id="deletionTargetUser" style="width: 100%; padding: 0.5rem; background: #0f172a; color: #f8fafc; border: 1px solid #334155; border-radius: 4px;">
+                  <option value="">Loading accounts…</option>
+                </select>
+              </label>
+              <button type="button" id="previewDeletionBtn" class="assign-role-button" style="background: #334155; height: 38px;">Preview Impact</button>
+            </div>
+
+            <!-- Preview Card -->
+            <div id="deletionPreviewWrap" hidden style="background: rgba(15, 23, 42, 0.8); border: 1px solid #475569; border-radius: 6px; padding: 1rem;">
+              <h3 style="margin-top: 0; color: #f8fafc; font-size: 1rem;">Deletion Impact Preview</h3>
+              <div id="deletionImpactSummary" style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.6;"></div>
+              
+              <div style="margin-top: 1rem; border-top: 1px solid #334155; padding-top: 1rem;">
+                <div style="margin-bottom: 0.75rem;">
+                  <label style="display: block; margin-bottom: 0.25rem; font-size: 0.85rem; color: #94a3b8;">Deletion Reason (required):</label>
+                  <input type="text" id="deletionReasonInput" placeholder="Specify legitimate administrative or legal deletion reason..." style="width: 100%; padding: 0.5rem; background: #0f172a; color: #f8fafc; border: 1px solid #334155; border-radius: 4px;" />
+                </div>
+                <div style="margin-bottom: 0.75rem;">
+                  <label style="display: block; margin-bottom: 0.25rem; font-size: 0.85rem; color: #ef4444;">Confirmation (Type "PERMANENTLY DELETE"):</label>
+                  <input type="text" id="deletionConfirmInput" placeholder="PERMANENTLY DELETE" style="width: 100%; padding: 0.5rem; background: #0f172a; color: #f8fafc; border: 1px solid #ef4444; border-radius: 4px;" />
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                  <button type="button" id="executePermanentDeletionBtn" class="assign-role-button" style="background: #dc2626; border-color: #ef4444;" disabled>Execute Permanent Deletion</button>
+                  <span id="deletionProgressMsg" style="font-size: 0.85rem; color: #94a3b8;"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Deletion Jobs History -->
+            <div style="margin-top: 1rem;">
+              <h4 style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 0.5rem;">Recent Permanent Deletion Jobs</h4>
+              <div class="table-scroll">
+                <table style="width: 100%; font-size: 0.8rem;">
+                  <thead>
+                    <tr>
+                      <th>Target Identity</th>
+                      <th>Reason</th>
+                      <th>Status</th>
+                      <th>Failed Step</th>
+                      <th>Requested At</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="deletionJobsTableBody">
+                    <tr><td colspan="6" style="text-align: center; color: #64748b;">No recent deletion jobs recorded.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section class="panel intern-panel" id="interns">
           <div class="panel-heading intern-heading"><div><span class="panel-kicker">ALL DOMAINS · LIVE DATA</span><h2>Intern Management</h2></div><div class="table-tools"><input id="internSearch" type="search" placeholder="Search interns…" aria-label="Search live interns"><select id="domainFilter" aria-label="Filter live interns by domain"><option value="">All Domains</option></select><a href="/hr-dashboard.html#interns" class="view-link">Manage interns ↗</a></div></div>
           <div class="table-scroll"><table><thead><tr><th>#</th><th>Name</th><th>Domain</th><th>Role</th><th>Status</th><th>Attendance</th><th>Join Date</th><th>End Date</th></tr></thead><tbody id="internRows"></tbody></table><p class="empty-search" id="emptySearch" hidden>No live interns match your search.</p></div>

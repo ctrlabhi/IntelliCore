@@ -84,6 +84,41 @@ export class FirebaseService {
     return await this.auth.verifyIdToken(idToken);
   }
 
+  async deleteUser(uid) {
+    if (!this.isInitialized || !this.auth) {
+      logger.info({ uid }, 'Firebase Admin SDK not initialized; skipping deleteUser.');
+      return true;
+    }
+    try {
+      await this.auth.deleteUser(uid);
+      logger.info({ uid }, 'Firebase user deleted successfully.');
+      return true;
+    } catch (err) {
+      if (err.code === 'auth/user-not-found') {
+        logger.info({ uid }, 'Firebase user already deleted / not found.');
+        return true;
+      }
+      logger.error({ err: err.message, uid }, 'Failed to delete user in Firebase Auth.');
+      throw err;
+    }
+  }
+
+  async revokeRefreshTokens(uid) {
+    if (!this.isInitialized || !this.auth) {
+      logger.info({ uid }, 'Firebase Admin SDK not initialized; skipping revokeRefreshTokens.');
+      return true;
+    }
+    try {
+      await this.auth.revokeRefreshTokens(uid);
+      logger.info({ uid }, 'Firebase refresh tokens revoked successfully.');
+      return true;
+    } catch (err) {
+      if (err.code === 'auth/user-not-found') return true;
+      logger.warn({ err: err.message, uid }, 'Could not revoke refresh tokens in Firebase Auth.');
+      return false;
+    }
+  }
+
   getAuth() {
     return this.auth;
   }

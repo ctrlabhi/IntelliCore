@@ -27,6 +27,18 @@ export class ValidationError extends AppError {
   }
 }
 
+export class BadRequestError extends AppError {
+  constructor(message = 'Bad request', code = 'BAD_REQUEST', details = null) {
+    super(message, 400, code, details);
+  }
+}
+
+export class ConflictError extends AppError {
+  constructor(message = 'Conflict', code = 'CONFLICT', details = null) {
+    super(message, 409, code, details);
+  }
+}
+
 export class UnauthorizedError extends AppError {
   constructor(message = 'Authentication required', details = null) {
     super(message, 401, 'UNAUTHORIZED', details);

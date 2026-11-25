@@ -183,4 +183,86 @@ router.put(
   roleController.assignUserRoles
 );
 
+/**
+ * @openapi
+ * /api/v1/users/{id}/deletion-preview:
+ *   post:
+ *     summary: Generate Permanent Deletion Impact Preview
+ *     description: Restricted exclusively to primary Founder. Requires recent authentication.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Deletion impact preview
+ *       403:
+ *         description: Forbidden
+ */
+router.post(
+  '/:id/deletion-preview',
+  authenticate,
+  requireAuth,
+  requirePrimaryFounder,
+  userController.getDeletionPreview
+);
+
+router.get(
+  '/:id/deletion-preview',
+  authenticate,
+  requireAuth,
+  requirePrimaryFounder,
+  userController.getDeletionPreview
+);
+
+/**
+ * @openapi
+ * /api/v1/users/{id}/permanent-deletion:
+ *   post:
+ *     summary: Execute Permanent User Account Deletion
+ *     description: Irreversible permanent deletion across MySQL, private files, and Firebase. Restricted exclusively to primary Founder.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - reason
+ *               - confirmationText
+ *             properties:
+ *               reason:
+ *                 type: string
+ *               confirmationText:
+ *                 type: string
+ *               previewHash:
+ *                 type: string
+ *               previewTimestamp:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Deletion job started/completed
+ *       403:
+ *         description: Forbidden
+ */
+router.post(
+  '/:id/permanent-deletion',
+  authenticate,
+  requireAuth,
+  requirePrimaryFounder,
+  userController.executePermanentDeletion
+);
+
 export default router;

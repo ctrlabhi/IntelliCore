@@ -1,5 +1,22 @@
 export const founderFixture = { uid: 'intellicore-test-founder', email: 'founder@example.test' };
 
+export async function ensureCanonicalFounder(prisma) {
+  if (!prisma) return;
+  try {
+    const role = await prisma.role.findUnique({ where: { code: 'FOUNDER' } });
+    if (role) {
+      await prisma.userRole.deleteMany({
+        where: {
+          roleId: role.id,
+          user: { firebaseUid: { not: founderFixture.uid } }
+        }
+      });
+    }
+  } catch {
+    // Ignore if table does not exist yet or connection closed
+  }
+}
+
 export function isolatedDatabaseUrl(value) {
   if (!value) return null;
   try {

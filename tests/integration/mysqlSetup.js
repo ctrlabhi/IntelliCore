@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process';
 import { PrismaClient } from '@prisma/client';
-import { founderFixture, isolatedDatabaseUrl } from './testDatabase.js';
+import { founderFixture, isolatedDatabaseUrl, ensureCanonicalFounder } from './testDatabase.js';
 
 export default async function setup() {
   const databaseUrl = isolatedDatabaseUrl(process.env.INTELLICORE_TEST_DATABASE_URL);
@@ -17,6 +17,7 @@ export default async function setup() {
 
   const prisma = new PrismaClient({ datasourceUrl: databaseUrl });
   try {
+    await ensureCanonicalFounder(prisma);
     const role = await prisma.role.findUniqueOrThrow({ where: { code: 'FOUNDER' } });
     const { uid, email } = founderFixture;
     const founder = await prisma.user.upsert({

@@ -1,4 +1,6 @@
 import userService from './userService.js';
+import accountDeletionService from './accountDeletionService.js';
+import { assertRecentAuthentication } from '../../utils/recentAuth.js';
 import { sendSuccess, sendError } from '../../utils/response.js';
 
 export class UserController {
@@ -47,6 +49,36 @@ export class UserController {
       return sendSuccess(res, { roles: user.roles, permissions: user.permissions }, 'User roles retrieved successfully');
     } catch (err) {
       return sendError(res, err.message || 'Failed to retrieve user roles', err.status || 500, err.code || 'ROLES_FETCH_ERROR');
+    }
+  }
+
+  async getDeletionPreview(req, res) {
+    try {
+      assertRecentAuthentication(req);
+      const { id } = req.params;
+      const preview = await accountDeletionService.getDeletionPreview(id, req.user);
+      return sendSuccess(res, preview, 'Deletion impact preview generated successfully.');
+    } catch (err) {
+      return sendError(res, err.message || 'Failed to generate deletion preview.', err.status || 500, err.code || 'DELETION_PREVIEW_ERROR');
+    }
+  }
+
+  async executePermanentDeletion(req, res) {
+    try {
+      assertRecentAuthentication(req);
+      const { id } = req.params;
+      const { reason, confirmationText, previewHash, previewTimestamp } = req.body || {};
+      const job = await accountDeletionService.executePermanentDeletion({
+        targetUserId: id,
+        reason,
+        confirmationText,
+        previewHash,
+        previewTimestamp,
+        actor: req.user
+      });
+      return sendSuccess(res, job, 'Account permanent deletion operation executed successfully.', 200);
+    } catch (err) {
+      return sendError(res, err.message || 'Failed to execute permanent deletion.', err.status || 500, err.code || 'PERMANENT_DELETION_ERROR');
     }
   }
 }

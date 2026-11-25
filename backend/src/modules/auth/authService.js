@@ -3,6 +3,8 @@ import { effectivePermissions } from '../../utils/founder.js';
 import logger from '../../config/logger.js';
 import { lockUser } from '../../utils/phase04.js';
 import { syncAttendanceEligibility } from '../attendance/eligibility.js';
+import { accountDeletionService } from '../users/accountDeletionService.js';
+import { AppError } from '../../utils/errors.js';
 
 const prisma = getPrismaClient();
 
@@ -19,6 +21,12 @@ export class AuthService {
     }
 
     const normalizedEmail = email.trim().toLowerCase();
+
+    // Prevent recreation of permanently deleted identities
+    const isDeleted = await accountDeletionService.isAccountPermanentlyDeleted({ firebaseUid, email: normalizedEmail });
+    if (isDeleted) {
+      throw new AppError('This account has been permanently deleted and cannot be recreated.', 403, 'ACCOUNT_DELETED');
+    }
 
     return await prisma.$transaction(async (tx) => {
       // 1. Check if user with this firebaseUid already exists
