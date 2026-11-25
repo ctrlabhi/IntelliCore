@@ -149,14 +149,18 @@ docker compose logs -f mysql
 ## 📚 Complete Project Documentation
 
 Detailed technical documentation is maintained in the `docs/` directory:
-- [docs/PROJECT_AUDIT.md](docs/PROJECT_AUDIT.md) — Comprehensive pre-migration codebase audit
+- [docs/FINAL_ACCEPTANCE_REPORT.md](docs/FINAL_ACCEPTANCE_REPORT.md) — Final acceptance report across all 10 phases
+- [docs/OWNER_USER_GUIDE.md](docs/OWNER_USER_GUIDE.md) — Founder & Owner operational guide
+- [docs/LOCAL_SETUP_GUIDE.md](docs/LOCAL_SETUP_GUIDE.md) — Fresh machine setup and local development guide
+- [docs/FINAL_SECURITY_AUDIT.md](docs/FINAL_SECURITY_AUDIT.md) — Comprehensive OWASP Top 10 security audit
+- [docs/ACCOUNT_DELETION.md](docs/ACCOUNT_DELETION.md) — Permanent account deletion & data purging architecture
+- [docs/BACKUP_AND_RESTORE.md](docs/BACKUP_AND_RESTORE.md) — Automated disaster recovery and backup manual
+- [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) — Operational troubleshooting and known issue resolutions
+- [docs/EXTERNAL_INTEGRATIONS_SETUP.md](docs/EXTERNAL_INTEGRATIONS_SETUP.md) — Firebase, SMTP, and Google Meet integration setup
+- [docs/DEPLOYMENT_READINESS.md](docs/DEPLOYMENT_READINESS.md) — Production staging and deployment checklist
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — Modular Monolith architectural specification
-- [docs/SETUP.md](docs/SETUP.md) — Detailed Windows installation and troubleshooting guide
-- [docs/DATABASE.md](docs/DATABASE.md) — Database schema, Prisma migrations, and conventions
-- [docs/API.md](docs/API.md) — REST API endpoints, schemas, and Swagger usage
-- [docs/SECURITY.md](docs/SECURITY.md) — Hardening policies, CSP, rate limiting, and secret management
-- [docs/TESTING.md](docs/TESTING.md) — Automated testing guide and test scenarios
-- [docs/BUSINESS_RULES.md](docs/BUSINESS_RULES.md) — Approved business logic specification for future phases
+- [docs/BUSINESS_RULES.md](docs/BUSINESS_RULES.md) — Approved enterprise business rules
+- [docs/PROJECT_PROGRESS.md](docs/PROJECT_PROGRESS.md) — Comprehensive progress tracker and phase verification log
 
 ---
 

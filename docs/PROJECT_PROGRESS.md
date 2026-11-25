@@ -96,6 +96,19 @@ That reconciliation used a temporary copy without the repository environment fil
 | Custom 404 error template | PASS | Nonexistent frontend paths return branded HTML 404 template. |
 | Existing development environment | NOT VERIFIED | Docker Linux engine running healthy containers, persistent volumes intact. Host port 3000 bound by IDE Live Preview (PID 4940). |
 
+## Phase 10 verification on 2026-11-25
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Complete automated suite | PASS | **195 tests passed across 29 test files** (100% pass rate, 0 failures, sequential isolated MySQL execution). |
+| Permanent account deletion | PASS | Verified Founder-only authorization, preview-hash check, confirmation text `PERMANENTLY DELETE`, reason validation, and stale preview timeout. |
+| Transactional record purge & shared preservation | PASS | Verified personal record purge while reassigning shared tasks, meetings, and reviews to Founder, and anonymizing reviewer foreign keys. |
+| Storage unlinking & Firebase deletion | PASS | Verified physical storage unlinking via `removePrivate`, token revocation, Firebase deletion, and job tracking with retry support. |
+| Re-registration blocking | PASS | Confirmed bootstrap rejection (`ACCOUNT_DELETED`) for deleted identities attempting sign-in. |
+| Disaster recovery rehearsal | PASS | Generated SHA-256 verified backup (`db-backup-20261125-122305-4387.sql`, 54,398 bytes) and completed full restoration rehearsal on isolated schema `rehearsal_db`. |
+| Security hardening & OWASP Top 10 | PASS | Evaluated OWASP Top 10, verified strict input validation, security headers, secrets quarantine, and reviewed `npm audit` findings. |
+| Negative certificate invariants | PASS | Re-verified 0 certificate endpoints, 0 certificate downloads, and 0 outbox jobs. Probes return HTTP 404. |
+
 ## Outstanding verification
 
 | Area | Evidence still required |

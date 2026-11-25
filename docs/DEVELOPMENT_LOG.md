@@ -1,5 +1,17 @@
 # IntelliCore V2.0 — Development Log
 
+## 2026-11-25 MASTER-PHASE-10
+
+Implemented final security hardening, permanent account deletion, runtime recovery, quality assurance, and project delivery for IntelliCore V2.0:
+- **Permanent Account Deletion Architecture**: Implemented Founder-only permanent account deletion with preview-hash verification, mandatory confirmation text (`PERMANENTLY DELETE`), minimum 5-character reason, and 15-minute preview freshness.
+- **Transactional Purge with Shared Asset Preservation**: Designed and executed transactional MySQL purge deleting personal records while preserving shared organizational artifacts (meetings, tasks, attendance reviews, score amendments) by reassigning to Founder or anonymizing reviewer keys.
+- **Security & Re-entry Blocking**: Implemented immediate Firebase refresh token revocation, physical private file unlinking from disk storage, Firebase user deletion with retry capability, and blocked deleted identities from re-registering (`ACCOUNT_DELETED`).
+- **UI Integration**: Added interactive Account Deletion management and historical jobs table to Founder Command Center (`founder/index.html`, `founder-dashboard.js`).
+- **Disaster Recovery Rehearsal**: Executed `scripts/backup.ps1` producing verified backup `backups/db-backup-20261125-122305-4387.sql` (54,398 bytes, SHA-256 verified) and completed full restoration rehearsal on isolated schema `rehearsal_db`.
+- **Security & Dependency Audit**: Evaluated OWASP Top 10 across all endpoints, verified strict Zod schemas, HTTP security headers, secrets exclusion, and reviewed `npm audit` findings.
+- **Comprehensive Quality Assurance**: Expanded test suite to 195 passing tests across 29 test files (100% pass rate) on isolated MySQL 8.4 LTS database, permanently fixing fixture isolation.
+- **Project Handover Documentation**: Authored 10 delivery guides including [Phase 10 report](PHASE_10_REPORT.md), [Final acceptance report](FINAL_ACCEPTANCE_REPORT.md), [Account deletion guide](ACCOUNT_DELETION.md), [Owner user guide](OWNER_USER_GUIDE.md), [Local setup guide](LOCAL_SETUP_GUIDE.md), [Final security audit](FINAL_SECURITY_AUDIT.md), [Backup and restore guide](BACKUP_AND_RESTORE.md), [Troubleshooting guide](TROUBLESHOOTING.md), [External integrations setup](EXTERNAL_INTEGRATIONS_SETUP.md), and [Deployment readiness](DEPLOYMENT_READINESS.md).
+
 ## 2026-11-25 MASTER-PHASE-09
 
 Implemented complete frontend integration, unified workspace architecture, and UI/UX acceptance for IntelliCore V2.0:
