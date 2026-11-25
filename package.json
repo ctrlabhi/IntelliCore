@@ -48,6 +48,11 @@
     "supertest": "^7.0.0",
     "vitest": "^3.0.5"
   },
+  "overrides": {
+    "jwks-rsa": {
+      "jose": "4.15.9"
+    }
+  },
   "engines": {
     "node": "24.x"
   }
