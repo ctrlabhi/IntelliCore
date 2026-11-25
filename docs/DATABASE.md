@@ -99,3 +99,21 @@ Migration `20261125000000_add_attendance_leave_and_reports` appends the followin
 
 The service serializes business writes on the user row and uses the database unique constraints as a second limit against duplicates. Reports derive absent and weekly-off days and incomplete flags from stored eligibility and evidence. The populated upgrade rehearsal checked the migration ledger and verified zero schema drift. [Attendance operating rules](ATTENDANCE.md).
 
+## Phase 06 data model
+
+The sixth migration adds 11 tables and foreign keys while retaining all five prior migration files.
+
+| Table | Relationship and constraints |
+| --- | --- |
+| `tasks` | Department and creator, unique task code, lifecycle and content revision. |
+| `task_assignments` | Task, internship, recipient and assigner. Unique task and internship. |
+| `task_submissions` | Assignment and submitter. Unique assignment and version. Immutable snapshot after submission. |
+| `task_reviews` | One review per submitted version, with reviewer, decision, feedback and bounded score. |
+| `file_attachments` | Owner and exactly one task or submission parent under the service contract. Unique private storage key. |
+| `learning_tracks` | Department and versioned track key, unique within department and version. |
+| `learning_modules`, `lessons`, `learning_resources` | Ordered content belonging to a track version. Resources link to either module or lesson. |
+| `learning_enrollments` | Internship and published track version, unique as a pair. |
+| `learning_progress` | Enrollment and lesson, unique as a pair. Both belong to the same track version under the service contract. |
+
+New activity tables start empty. The seed installs the recovered catalog and the first phase permission grants separately from the schema migration. [Migration evidence](PHASE_06_REPORT.md#database-and-migrations).
+

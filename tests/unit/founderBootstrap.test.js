@@ -25,8 +25,9 @@ describe('Unit: Founder Bootstrap Administration CLI', () => {
       getUser: vi.fn().mockResolvedValue({ email: env.FOUNDER_EMAIL, emailVerified: true })
     });
     vi.spyOn(prisma, '$transaction').mockImplementation((callback) => callback({
+      $queryRaw: vi.fn(),
       role: { findUnique: vi.fn().mockResolvedValue({ id: 'founder-role' }) },
-      userRole: { findFirst: vi.fn().mockResolvedValue({ user: { firebaseUid: 'different-founder' } }) }
+      userRole: { findFirst: vi.fn().mockResolvedValue({ userId: 'different-founder' }) }
     }));
     await expect(bootstrapFounder()).rejects.toThrow('Conflicting primary founder');
   });

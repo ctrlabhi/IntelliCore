@@ -150,3 +150,19 @@ Calls require verified development Firebase identity and active MySQL account st
 
 Lists accept validated `from`, `to`, `internshipId`, `departmentId`, `search`, `status`, `page` and `limit` as applicable. Attendance also accepts `sort` as `asc` or `desc`. Leave adds `leaveType`. Attendance ranges support 31 days, summary and export support at most 250 enrollments, and a leave request may cover up to 90 calendar days. REST errors use the standard envelope. [Phase 05 OpenAPI](../backend/src/config/phase05OpenApi.js).
 
+## Phase 06 tasks, learning and performance
+
+Routes below are under `/api/v1`. Requests require an active account, verified Firebase identity and MySQL authorization. JSON responses use the standard envelope. Binary downloads send file bytes.
+
+| Resource | Contracts |
+| --- | --- |
+| `/tasks` | GET directory, POST draft. GET templates and eligible recipients by department. GET/PATCH by ID. POST preview, publish, close, cancel and archive. GET/POST assignments by task ID and POST attachments on drafts. |
+| `/task-assignments` | GET staff list, own `/me` or scoped detail. POST start, extend or cancel with the applicable ownership, confirmation and scope. GET submission history and POST an own draft under the assignment. |
+| `/task-submissions` | GET a scoped version, PATCH the current draft, POST submit, POST attachment, GET reviews, POST review on current submitted work. |
+| `/attachments/:id/download` | GET one authorized attachment as private, no-store bytes. |
+| `/learning/tracks` | GET list or detail, POST draft, PATCH draft, POST versions, publish, archive and enrollments. POST/PATCH nested modules, lessons and link resources. DELETE draft links. |
+| `/learning` | GET eligible recipients or staff progress. POST `/me/sync` for own eligible enrollment. GET `/me` and `/me/progress`. POST lesson start or complete with the permitted enrollment ID. |
+| `/performance` | GET own metrics, scoped internship history, department details or summary. Accepts inclusive IST dates and paginated lists. |
+
+Publish and add-recipient requests use the `revision` and `previewToken` from the latest recipient preview. Submitted versions retain their original deadline and rubric. Stale or invalid state transitions return 409. Upload one binary file per request with `Content-Type: application/octet-stream`, `X-Attachment-Name` as the percent-encoded filename and `X-Expected-Revision` as the draft revision. Oversize and unsupported content return 413 and 415. See [OpenAPI definitions](../backend/src/config/phase06OpenApi.js) and [file storage](FILE_STORAGE.md).
+

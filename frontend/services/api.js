@@ -46,6 +46,7 @@ class ApiClient {
       body,
       timeoutMs = this.defaultTimeoutMs,
       signal: customSignal,
+      responseType,
       ...customOptions
     } = options;
 
@@ -62,7 +63,8 @@ class ApiClient {
       ...headers
     };
 
-    if (body !== undefined && !(body instanceof FormData)) {
+    const rawBody = body instanceof FormData || body instanceof Blob;
+    if (body !== undefined && !rawBody) {
       requestHeaders['Content-Type'] = 'application/json';
     }
 
@@ -86,7 +88,7 @@ class ApiClient {
       const response = await fetch(url, {
         method,
         headers: requestHeaders,
-        body: body !== undefined && !(body instanceof FormData) ? JSON.stringify(body) : body,
+        body: body !== undefined && !rawBody ? JSON.stringify(body) : body,
         signal: controller.signal,
         ...customOptions
       });
@@ -98,6 +100,8 @@ class ApiClient {
 
       if (contentType.includes('application/json')) {
         data = await response.json();
+      } else if (response.ok && responseType === 'blob') {
+        return await response.blob();
       } else {
         data = await response.text();
       }

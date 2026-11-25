@@ -58,6 +58,13 @@ model User {
   reviewedAttendanceCorrections  AttendanceCorrection[] @relation("AttendanceCorrectionReviewer")
   reviewedDailyWorkReports       DailyWorkReport[]
   reviewedLeaveRequests          LeaveRequest[]
+  createdTasks                   Task[] @relation("TaskCreator")
+  taskAssignments                TaskAssignment[] @relation("TaskRecipient")
+  issuedTaskAssignments          TaskAssignment[] @relation("TaskAssigner")
+  taskSubmissions                TaskSubmission[]
+  taskReviews                    TaskReview[]
+  privateAttachments             FileAttachment[]
+  createdLearningTracks          LearningTrack[]
 
   @@index([status])
   @@index([email])
@@ -201,6 +208,8 @@ model Department {
   userDepartments        UserDepartment[]
   internshipApplications InternshipApplication[]
   internships            Internship[]
+  tasks                  Task[]
+  learningTracks         LearningTrack[]
 
   @@index([isActive])
   @@map("departments")
@@ -286,6 +295,8 @@ model Internship {
   attendanceEligibility AttendanceEligibility[]
   dailyWorkReports   DailyWorkReport[]
   leaveRequests      LeaveRequest[]
+  taskAssignments    TaskAssignment[]
+  learningEnrollments LearningEnrollment[]
 
   @@index([userId])
   @@index([departmentId])
@@ -451,4 +462,313 @@ model AttendanceCorrection {
   @@index([attendanceId, status])
   @@index([status, createdAt])
   @@map("attendance_corrections")
+}
+
+enum TaskType {
+  INDIVIDUAL
+  DEPARTMENT
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TaskStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  ARCHIVED
+  CANCELLED
+}
+
+enum TaskAssignmentStatus {
+  ASSIGNED
+  IN_PROGRESS
+  SUBMITTED
+  REVISION_REQUESTED
+  COMPLETED
+  CANCELLED
+}
+
+enum TaskSubmissionStatus {
+  DRAFT
+  SUBMITTED
+}
+
+enum TaskReviewDecision {
+  APPROVED
+  REVISION_REQUESTED
+}
+
+enum AttachmentPurpose {
+  TASK_RESOURCE
+  SUBMISSION
+}
+
+enum CurriculumStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum LearningEnrollmentStatus {
+  ACTIVE
+  COMPLETED
+}
+
+enum LearningProgressStatus {
+  IN_PROGRESS
+  COMPLETED
+}
+
+model Task {
+  id String @id @default(uuid()) @db.VarChar(36)
+  taskCode String @unique @map("task_code") @db.VarChar(50)
+  departmentId String @map("department_id") @db.VarChar(36)
+  createdBy String @map("created_by") @db.VarChar(36)
+  title String @db.VarChar(180)
+  description String @db.Text
+  instructions String @db.Text
+  deliverables String @db.Text
+  resources Json
+  rubric Json
+  templateKey String? @map("template_key") @db.VarChar(100)
+  taskType TaskType @map("task_type")
+  priority TaskPriority @default(MEDIUM)
+  status TaskStatus @default(DRAFT)
+  availableFrom DateTime @map("available_from")
+  dueAt DateTime @map("due_at")
+  maximumScore Int? @map("maximum_score")
+  revision Int @default(1)
+  publishedAt DateTime? @map("published_at")
+  archivedAt DateTime? @map("archived_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  creator User @relation("TaskCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  assignments TaskAssignment[]
+  attachments FileAttachment[]
+
+  @@index([departmentId, status, dueAt])
+  @@index([publishedAt])
+  @@map("tasks")
+}
+
+model TaskAssignment {
+  id String @id @default(uuid()) @db.VarChar(36)
+  taskId String @map("task_id") @db.VarChar(36)
+  internshipId String @map("internship_id") @db.VarChar(36)
+  assignedTo String @map("assigned_to") @db.VarChar(36)
+  assignedBy String @map("assigned_by") @db.VarChar(36)
+  assignedAt DateTime @default(now()) @map("assigned_at")
+  dueAt DateTime? @map("due_at")
+  status TaskAssignmentStatus @default(ASSIGNED)
+  startedAt DateTime? @map("started_at")
+  submittedAt DateTime? @map("submitted_at")
+  completedAt DateTime? @map("completed_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  internship Internship @relation(fields: [internshipId], references: [id], onDelete: Restrict)
+  recipient User @relation("TaskRecipient", fields: [assignedTo], references: [id], onDelete: Restrict)
+  assigner User @relation("TaskAssigner", fields: [assignedBy], references: [id], onDelete: Restrict)
+  submissions TaskSubmission[]
+
+  @@unique([taskId, internshipId])
+  @@index([assignedTo, status])
+  @@index([internshipId, assignedAt])
+  @@index([status, assignedAt])
+  @@map("task_assignments")
+}
+
+model TaskSubmission {
+  id String @id @default(uuid()) @db.VarChar(36)
+  assignmentId String @map("assignment_id") @db.VarChar(36)
+  submittedBy String @map("submitted_by") @db.VarChar(36)
+  submissionVersion Int @map("submission_version")
+  revision Int @default(1)
+  writtenResponse String? @map("written_response") @db.Text
+  projectUrl String? @map("project_url") @db.VarChar(1500)
+  repositoryUrl String? @map("repository_url") @db.VarChar(1500)
+  additionalLinks Json @map("additional_links")
+  status TaskSubmissionStatus @default(DRAFT)
+  deadlineAt DateTime? @map("deadline_at")
+  late Boolean @default(false)
+  taskSnapshot Json? @map("task_snapshot")
+  submittedAt DateTime? @map("submitted_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  assignment TaskAssignment @relation(fields: [assignmentId], references: [id], onDelete: Restrict)
+  submitter User @relation(fields: [submittedBy], references: [id], onDelete: Restrict)
+  attachments FileAttachment[]
+  review TaskReview?
+
+  @@unique([assignmentId, submissionVersion])
+  @@map("task_submissions")
+}
+
+model TaskReview {
+  id String @id @default(uuid()) @db.VarChar(36)
+  submissionId String @unique @map("submission_id") @db.VarChar(36)
+  reviewedBy String @map("reviewed_by") @db.VarChar(36)
+  decision TaskReviewDecision
+  score Int?
+  maximumScore Int? @map("maximum_score")
+  criterionScores Json @map("criterion_scores")
+  feedback String @db.Text
+  reviewedAt DateTime @default(now()) @map("reviewed_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  submission TaskSubmission @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+  reviewer User @relation(fields: [reviewedBy], references: [id], onDelete: Restrict)
+
+  @@index([reviewedAt])
+  @@map("task_reviews")
+}
+
+model FileAttachment {
+  id String @id @default(uuid()) @db.VarChar(36)
+  ownerUserId String @map("owner_user_id") @db.VarChar(36)
+  taskId String? @map("task_id") @db.VarChar(36)
+  submissionId String? @map("submission_id") @db.VarChar(36)
+  storageKey String @unique @map("storage_key") @db.VarChar(36)
+  originalFilename String @map("original_filename") @db.VarChar(160)
+  mimeType String @map("mime_type") @db.VarChar(80)
+  fileSize Int @map("file_size")
+  checksum String @db.Char(64)
+  attachmentPurpose AttachmentPurpose @map("attachment_purpose")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  task Task? @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  submission TaskSubmission? @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+  owner User @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+
+  @@index([taskId])
+  @@index([submissionId])
+  @@map("file_attachments")
+}
+
+model LearningTrack {
+  id String @id @default(uuid()) @db.VarChar(36)
+  departmentId String @map("department_id") @db.VarChar(36)
+  trackKey String @map("track_key") @db.VarChar(100)
+  title String @db.VarChar(180)
+  description String @db.Text
+  status CurriculumStatus @default(DRAFT)
+  version Int @default(1)
+  createdBy String? @map("created_by") @db.VarChar(36)
+  publishedAt DateTime? @map("published_at")
+  archivedAt DateTime? @map("archived_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  creator User? @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  modules LearningModule[]
+  enrollments LearningEnrollment[]
+
+  @@unique([departmentId, trackKey, version])
+  @@index([departmentId, status])
+  @@map("learning_tracks")
+}
+
+model LearningModule {
+  id String @id @default(uuid()) @db.VarChar(36)
+  learningTrackId String @map("learning_track_id") @db.VarChar(36)
+  title String @db.VarChar(180)
+  description String @db.Text
+  sequence Int
+  estimatedMinutes Int? @map("estimated_minutes")
+  isRequired Boolean @default(true) @map("is_required")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  track LearningTrack @relation(fields: [learningTrackId], references: [id], onDelete: Restrict)
+  lessons Lesson[]
+  resources LearningResource[]
+
+  @@index([learningTrackId, sequence])
+  @@map("learning_modules")
+}
+
+model Lesson {
+  id String @id @default(uuid()) @db.VarChar(36)
+  learningModuleId String @map("learning_module_id") @db.VarChar(36)
+  title String @db.VarChar(180)
+  content String @db.Text
+  sequence Int
+  estimatedMinutes Int? @map("estimated_minutes")
+  isRequired Boolean @default(true) @map("is_required")
+  sourceKey String? @map("source_key") @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  module LearningModule @relation(fields: [learningModuleId], references: [id], onDelete: Restrict)
+  resources LearningResource[]
+  progress LearningProgress[]
+
+  @@index([learningModuleId, sequence])
+  @@map("lessons")
+}
+
+model LearningResource {
+  id String @id @default(uuid()) @db.VarChar(36)
+  lessonId String? @map("lesson_id") @db.VarChar(36)
+  learningModuleId String? @map("learning_module_id") @db.VarChar(36)
+  title String @db.VarChar(180)
+  resourceUrl String @map("resource_url") @db.VarChar(1500)
+  description String @db.Text
+  sequence Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  lesson Lesson? @relation(fields: [lessonId], references: [id], onDelete: Restrict)
+  module LearningModule? @relation(fields: [learningModuleId], references: [id], onDelete: Restrict)
+
+  @@index([lessonId, sequence])
+  @@index([learningModuleId, sequence])
+  @@map("learning_resources")
+}
+
+model LearningEnrollment {
+  id String @id @default(uuid()) @db.VarChar(36)
+  internshipId String @map("internship_id") @db.VarChar(36)
+  learningTrackId String @map("learning_track_id") @db.VarChar(36)
+  curriculumVersion Int @map("curriculum_version")
+  status LearningEnrollmentStatus @default(ACTIVE)
+  enrolledAt DateTime @default(now()) @map("enrolled_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  internship Internship @relation(fields: [internshipId], references: [id], onDelete: Restrict)
+  track LearningTrack @relation(fields: [learningTrackId], references: [id], onDelete: Restrict)
+  progress LearningProgress[]
+
+  @@unique([internshipId, learningTrackId])
+  @@index([learningTrackId, status])
+  @@map("learning_enrollments")
+}
+
+model LearningProgress {
+  id String @id @default(uuid()) @db.VarChar(36)
+  learningEnrollmentId String @map("learning_enrollment_id") @db.VarChar(36)
+  lessonId String @map("lesson_id") @db.VarChar(36)
+  status LearningProgressStatus @default(IN_PROGRESS)
+  startedAt DateTime @map("started_at")
+  completedAt DateTime? @map("completed_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  enrollment LearningEnrollment @relation(fields: [learningEnrollmentId], references: [id], onDelete: Restrict)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Restrict)
+
+  @@unique([learningEnrollmentId, lessonId])
+  @@index([lessonId])
+  @@map("learning_progress")
 }

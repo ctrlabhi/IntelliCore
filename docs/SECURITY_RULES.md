@@ -51,3 +51,10 @@ Track verification results and follow-up under [Project progress](PROJECT_PROGRE
 - User row locks serialize check-in, checkout, leave and corrections. Successful administrative decisions and audits share a transaction. Eligibility intervals and effective-dated policies preserve evidence for historical absence, and leave reconciliation retains recorded activity.
 - Team Leaders have read-only department scope for attendance and submitted reports. HR Managers and Founders can review leave and corrections. Policy administration requires the primary Founder. CSV export checks role and permission and neutralizes formula-like cells.
 - Drafts, proposal text and leave reasons stay within authorized endpoints. Summaries and export omit that content. Logout uses a bounded checkout attempt and proceeds with Firebase sign-out after a checkout failure or missing report. [Attendance operating rules](ATTENDANCE.md).
+
+## Phase 06 controls
+
+- Every work endpoint resolves verified Firebase identity, active MySQL state and explicit permissions. Apply role ceilings, internship eligibility, ownership and active department membership in resource queries. Denied object lookups return a scoped 404. Recheck department and recipient eligibility during locked writes.
+- Use strict schemas and isolated file upload limits. Render author text as text and permit HTTP(S) links without embedded credentials. Keep files outside served directories. Stream authorized downloads as private attachments. [File storage](FILE_STORAGE.md).
+- Publish rosters, write submitted versions and review with transactional audits. Store version metadata, decisions and bounded scores in logs, and keep private content and attachments in their domain records.
+- Serialize Founder bootstrap on the seeded role row before checking for a conflicting assignment. Preserve primary identity requirements for privileged operations.

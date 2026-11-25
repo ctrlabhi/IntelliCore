@@ -124,13 +124,14 @@ describe.skipIf(!hasIsolatedDatabase())('Integration: Staff Management Endpoints
     });
 
     const res = await request(app)
-      .get('/api/v1/staff?page=1&limit=10')
+      .get('/api/v1/staff?page=1&limit=10&search=' + encodeURIComponent(provisionedStaffRecord.staffCode))
       .set('Authorization', 'Bearer valid.founder.token');
 
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.data.staff).toBeInstanceOf(Array);
     expect(res.body.data.staff.some((s) => s.id === provisionedStaffRecord.id)).toBe(true);
+    expect(res.body.data.pagination).toMatchObject({ page: 1, limit: 10 });
   });
 
   it('GET /api/v1/staff/:id returns specific staff member record', async () => {

@@ -9,6 +9,7 @@ import { authService } from '/services/auth.js';
 import { api } from '/services/api.js';
 import { mountPhase04 } from './phase04-dashboard.js';
 import { mountStaffAttendance } from './phase05-dashboard.js';
+import { mountWork } from './phase06-dashboard.js';
 
 const $ = (id) => document.getElementById(id);
 const authState = $('authState');
@@ -80,6 +81,10 @@ document.querySelectorAll('[data-founder-action]').forEach((button) => {
     } else if (action === 'Review approvals' || action === 'View domains') {
       window.location.hash = action === 'Review approvals' ? '#phase04Applications'
         : $('phase04Departments') ? '#phase04Departments' : '#domains';
+    } else if (action === 'Assign task') {
+      window.location.hash = '#phase06Tasks';
+      const create = document.querySelector('#phase06Tasks > details');
+      if (create) create.open = true;
     } else {
       showToast(`${action} workflow activated.`);
     }
@@ -347,6 +352,7 @@ function renderFounderDashboard(context) {
   });
   mountPhase04($('interns'), context, 'founder', loadFounderStats);
   mountStaffAttendance(context, $('interns'));
+  void mountWork($('phase06Work'), context);
   loadLiveDashboardData(canProvision);
 }
 

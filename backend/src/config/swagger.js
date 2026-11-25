@@ -1,6 +1,7 @@
 import swaggerJsdoc from 'swagger-jsdoc';
 import { phase04Paths } from './phase04OpenApi.js';
 import { phase05Paths } from './phase05OpenApi.js';
+import { phase06Paths } from './phase06OpenApi.js';
 
 const options = {
   definition: {
@@ -8,7 +9,7 @@ const options = {
     info: {
       title: 'IntelliCore REST API',
       version: '2.0.0',
-      description: 'IntelliCore V2.0 onboarding, internships, attendance, leave and daily work reports',
+      description: 'IntelliCore V2.0 onboarding, internships, attendance, reports, tasks, learning and performance',
       contact: {
         name: 'IntelliCore Engineering Team',
         email: 'Info@IntelliCoreTechnologies.in',
@@ -63,6 +64,6 @@ const options = {
 };
 
 export const swaggerSpec = swaggerJsdoc(options);
-Object.assign(swaggerSpec.paths, phase04Paths, phase05Paths);
+Object.assign(swaggerSpec.paths, phase04Paths, phase05Paths, phase06Paths);
 export default swaggerSpec;
 

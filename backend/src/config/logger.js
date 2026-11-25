@@ -9,7 +9,7 @@ export const logger = pino({
     env: env.NODE_ENV
   },
   redact: {
-    paths: ['req.headers.authorization', 'req.headers.cookie', 'password', 'token', 'secret'],
+    paths: ['req.headers.authorization', 'req.headers.cookie', 'req.headers["x-attachment-name"]', 'password', 'token', 'secret'],
     censor: '[REDACTED]'
   },
   transport: env.NODE_ENV === 'development'

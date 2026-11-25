@@ -46,7 +46,7 @@
 - Preserve the original 1, 2, 3 and 6 month options. Support validated day-based durations where an approved domain rule requires them. Apply calendar-month arithmetic and confirm the final dates during HR approval. Default work mode to `REMOTE` and use additional modes only when approved. Payroll is outside scope.
 - Use `APPROVED`, `ONGOING`, `COMPLETION_REVIEW`, `COMPLETED`, `TERMINATED` and `WITHDRAWN`. Termination and withdrawal are authorized lifecycle operations. Gate ongoing operations by commencement date. At the calculated end, send the internship to completion review, corresponding to the original `completion_pending` rule. HR confirms successful completion manually. Completed interns retain authorized historical access. Termination and withdrawal end active internship access and preserve the Firebase identity and records.
 - Founder needs department/assignment controls, applications, active and completed enrollment views, Team Leader assignments, completion reviews and real MySQL-derived metrics. HR needs a review queue, applicant details, authorized decisions and completion management. Interns need accessible application and status screens, revision/rejection feedback, enrollment details and history. Team Leaders need authorized assigned departments and interns. Use real APIs with loading, error, empty, search and filter states where applicable.
-- Preserve the existing curriculum content and rubrics in the [backend](../backend/src/modules/learning/curriculum.js) and [frontend](../frontend/assets/js/curriculum.js). Map tracks to departments in Phase 04. Learning delivery, progress and assessment belong to Phase 06.
+- Preserve the existing curriculum content and rubrics in the [backend](../backend/src/modules/learning/curriculum.js) and [frontend](../frontend/assets/js/curriculum.js). Phase 04 mapped tracks to departments. Phase 06 uses those mappings for learning delivery, progress and assessment.
 
 ## Attendance, leave and learning
 
@@ -56,6 +56,13 @@
 - Interns request leave with type, reason and dates. Authorized HR Manager or Founder review is required. Approved working days are `ON_LEAVE`, and approval over recorded activity requires an audited reconciliation that preserves timestamps.
 - Submitted reports, checkout evidence and historical policy and eligibility are preserved. Authorized corrections retain original values, proposals and reviewer decisions. Team Leader access follows active department scope. [Attendance operating rules](ATTENDANCE.md).
 - Provide task pacing, assigned work, submissions, reviews, curriculum resources and learning progress. Team Leaders oversee their assigned scope and interns access their own records. Preserve legitimate tracks, milestones, deliverables and rubrics from the legacy curriculum.
+
+## Phase 06 tasks, learning and evaluations
+
+- Publish scoped tasks to eligible internships atomically. Keep individual status, deadlines and assignment history independent from the task definition and other recipients. Department publication records an explicit recipient set.
+- Keep draft work and files private, accept versioned late submissions while tasks remain open, and preserve the deadline and rubric used at submission. Require authorized review to approve work or record scores.
+- Preserve recovered curriculum, bind learning progress to immutable published versions, and keep authorized historical enrollments. Report task completion and required learning progress with their denominators.
+- Keep attendance, daily reports, task review, learning and internship completion independent. See the [task](TASK_MANAGEMENT.md), [learning](LEARNING_MANAGEMENT.md), [evaluation](PERFORMANCE_EVALUATION.md) and [file storage](FILE_STORAGE.md) specifications.
 
 ## Communications, meetings and completion artifacts
 

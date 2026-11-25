@@ -1,7 +1,7 @@
 import { getPrismaClient } from '../config/database.js';
 import firebaseService from '../integrations/firebase/firebaseService.js';
 import env from '../config/env.js';
-import logger from '../config/logger.js';
+import { transaction } from '../utils/phase04.js';
 import { syncAttendanceEligibility } from '../modules/attendance/eligibility.js';
 
 const prisma = getPrismaClient();
@@ -59,8 +59,9 @@ export async function bootstrapFounder() {
   console.log('  ✓ Development Firebase Founder identity verified.');
 
   // 4. Atomic database transaction to initialize or upgrade Founder
-  const result = await prisma.$transaction(async (tx) => {
-    // Check if role FOUNDER exists
+  const result = await transaction(async (tx) => {
+    // Serialize first-time provisioning even when no Founder user exists yet.
+    await tx.$queryRaw`SELECT id FROM roles WHERE code = 'FOUNDER' FOR UPDATE`;
     const founderRole = await tx.role.findUnique({
       where: { code: 'FOUNDER' }
     });
@@ -71,11 +72,11 @@ export async function bootstrapFounder() {
 
     // Check for conflicting primary founder
     const existingFounderAssignment = await tx.userRole.findFirst({
-      where: { roleId: founderRole.id },
-      include: { user: true }
+      where: { roleId: founderRole.id, user: { firebaseUid: { not: founderUid } } },
+      select: { userId: true }
     });
 
-    if (existingFounderAssignment && existingFounderAssignment.user.firebaseUid !== founderUid) {
+    if (existingFounderAssignment) {
       throw new Error('Conflicting primary founder exists. Conflicting assignment rejected.');
     }
 
@@ -145,7 +146,7 @@ export async function bootstrapFounder() {
 
     await syncAttendanceEligibility(tx, user.id);
     return user;
-  }, { isolationLevel: 'ReadCommitted' });
+  }, { retryUnique: true });
 
   console.log('✅ Founder account initialized with ACTIVE status.');
   return result;

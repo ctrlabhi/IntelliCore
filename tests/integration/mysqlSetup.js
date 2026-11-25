@@ -8,7 +8,7 @@ export default async function setup() {
   const env = { ...process.env, NODE_ENV: 'test', DATABASE_URL: databaseUrl };
 
   for (const [label, args] of [
-    ['migration deployment', ['node_modules/prisma/build/index.js', 'migrate', 'deploy']],
+    ['migration status', ['node_modules/prisma/build/index.js', 'migrate', 'status']],
     ['seed', ['prisma/seed.js']]
   ]) {
     const result = spawnSync(process.execPath, args, { env, encoding: 'utf8', timeout: 60000 });

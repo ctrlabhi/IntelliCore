@@ -1,6 +1,23 @@
 # IntelliCore Role-Based Access Control (RBAC) Specification
 
-For current controls, see [Security rules](SECURITY_RULES.md) and the [Phase 04 API](API.md#phase-04-departments-applications-and-internships). The matrix below records the Phase 02B baseline.
+For current controls, see [Security rules](SECURITY_RULES.md) and the [API specifications](API.md). Earlier tables preserve the Phase 02B baseline.
+
+## Phase 06 work and learning permissions
+
+Each staff capability uses explicit `_all` or `_department` grants. The scope suffix authorizes the matching operational role and, for Team Leaders, current active department membership. For example, `tasks:review_department` permits technical review within assigned departments only. Owning an internship is required for own operations. The permission seed installs the defaults once and preserves later removal of new grants.
+
+| Role | Default task access | Default learning access | Default performance access |
+| --- | --- | --- | --- |
+| FOUNDER | Organization read, manage and review | Organization read and manage | Organization metrics, scores and feedback |
+| CO_FOUNDER | Organization read, manage and review | Organization read and manage | Organization metrics, scores and feedback |
+| ADMIN | Organization status | Organization progress | Organization metrics |
+| HR_MANAGER | Organization status | Organization progress | Organization metrics, scores and feedback |
+| HR_EXECUTIVE | Organization status | Organization progress | Organization metrics |
+| OPERATIONS_EXECUTIVE | Organization read and manage | Organization progress | Organization metrics |
+| TEAM_LEADER | Assigned department read, manage and review | Assigned department read and manage | Assigned department metrics, scores and feedback |
+| INTERN | `tasks:own` | `learning:own` | `performance:own` |
+
+The six scoped capabilities are `tasks:read`, `tasks:manage`, `tasks:review`, `learning:read`, `learning:manage` and `performance:read`. Technical review governs access to private submitted work. `performance:feedback` adds evaluation history within report scope. Existing protected Founder administration remains guarded by the configured primary identity. [Security rules](SECURITY_RULES.md#phase-06-controls).
 
 **Version:** 2.0.0  
 **Phase:** MASTER-PHASE-02B  

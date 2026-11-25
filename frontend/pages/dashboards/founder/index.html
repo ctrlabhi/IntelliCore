@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="/assets/css/founder-dashboard.css">
   <link rel="stylesheet" href="/assets/css/dashboard-background.css">
   <link rel="stylesheet" href="/assets/css/phase04-dashboard.css">
+  <link rel="stylesheet" href="/assets/css/phase06-dashboard.css">
 </head>
 <body>
   <canvas id="icWorkspaceNeuralCanvas" class="dashboard-background-canvas" aria-hidden="true"></canvas>
@@ -71,7 +72,6 @@
           <div class="welcome-date"><span class="live-date-label"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 9h18M7 13h.01M12 13h.01M17 13h.01M7 17h.01M12 17h.01"/></svg><span data-live-date>Loading date…</span></span><strong data-live-time>--:--:--</strong><small data-live-greeting>Good Morning!</small></div>
         </section>
 
-        <div class="sample-notice"><span>ⓘ</span><p><strong>Live Founder workspace.</strong> Workforce, attendance, training and role data load from Firebase. Staff access changes are enforced by Firestore rules.</p></div>
 
         <section class="stats-grid" aria-label="Organization summary">
           <article class="stat-card"><span class="stat-icon blue"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.3A4.7 4.7 0 0 1 7.2 14h3.6a4.7 4.7 0 0 1 4.7 4.7V20M16 4.8a3.5 3.5 0 0 1 0 6.7M17 14.2a4.6 4.6 0 0 1 4.5 4.5V20"/></svg></span><div><small>Ongoing Internships</small><strong id="founderInternCount">—</strong><span class="trend">Within approved dates</span></div></article>
@@ -137,25 +137,25 @@
           <div class="table-scroll"><table><thead><tr><th>#</th><th>Name</th><th>Domain</th><th>Role</th><th>Status</th><th>Attendance</th><th>Join Date</th><th>End Date</th></tr></thead><tbody id="internRows"></tbody></table><p class="empty-search" id="emptySearch" hidden>No live interns match your search.</p></div>
         </section>
 
+        <section id="phase06Work" class="phase04-disabled" aria-label="Tasks, learning and performance" hidden></section>
         <section class="module-grid" aria-label="Command center modules">
           <a class="module-card module-card-link" id="recruitment" href="#interns"><span>▣</span><div><small>PEOPLE</small><h2>Intern Onboarding</h2><p>Review registered learner accounts, selected domains and activation status.</p></div><b>›</b></a>
           <a class="module-card module-card-link" id="leaders" href="#roleAssignments"><span>♜</span><div><small>TEAM OVERSIGHT</small><h2>Team Leaders</h2><p>Assign HR or Team Leader access to a registered account.</p></div><b>›</b></a>
-          <a class="module-card module-card-link" id="tasks" href="/Intern-dashboard.html?workspace=operations#icAssignTaskForm"><span>☑</span><div><small>DELIVERY</small><h2>Tasks &amp; Projects</h2><p>Assign curriculum tasks and review submitted work.</p></div><b>›</b></a>
+          <a class="module-card module-card-link" id="tasks" href="#phase06Tasks" data-phase06-link hidden><span>☑</span><div><small>DELIVERY</small><h2>Tasks &amp; Projects</h2><p>Assign curriculum tasks and review submitted work.</p></div><b>›</b></a>
           <a class="module-card module-card-link" id="attendance" href="/Intern-dashboard.html?workspace=operations#icAttendanceReportWrap"><span>◷</span><div><small>WORKFORCE</small><h2>Attendance Reports</h2><p>Review check-ins recorded during approved internship dates.</p></div><b>›</b></a>
           <a class="module-card module-card-link" id="certificates" href="#approvals"><span>✧</span><div><small>RECORDS</small><h2>Certificate Requests</h2><p>Approve requests after the internship end date; HR handles document delivery.</p></div><b>›</b></a>
           <button class="module-card module-card-button" id="announcements" type="button" data-founder-action="Send announcement"><span>➤</span><div><small>COMMUNICATION</small><h2>Announcements</h2><p>Publish a company-wide or track-specific message.</p></div><b>›</b></button>
-          <a class="module-card module-card-link" id="integrations" href="#overview"><span>⌘</span><div><small>PLATFORM</small><h2>Firebase Workspace</h2><p>Check the live data connection and account access status.</p></div><b>›</b></a>
+          <a class="module-card module-card-link" id="integrations" href="#overview"><span>⌘</span><div><small>PLATFORM</small><h2>System Overview</h2><p>View account and workspace status.</p></div><b>›</b></a>
           <a class="module-card module-card-link" id="settings" href="#roleAssignments"><span>⚙</span><div><small>ADMINISTRATION</small><h2>Staff Access</h2><p>Manage staff roles and assigned Team Leader tracks.</p></div><b>›</b></a>
           <div class="module-card" id="profile"><span>◎</span><div><small>YOUR ACCOUNT</small><h2>My Profile</h2><p id="profileEmail">Signed in as authorized Founder or Co-Founder.</p></div></div>
         </section>
-        <footer class="page-footer">IntelliCore Founder Command Center <span>Live workforce data · Firebase role controls</span></footer>
+        <footer class="page-footer">IntelliCore Founder Command Center <span>Live workforce data · Role-based access</span></footer>
       </div>
     </main>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="/assets/js/dashboard-visuals.js" defer></script>
   <script src="/assets/js/live-clock.js" defer></script>
-  <script src="/functions/curriculum.js"></script>
   <script type="module" src="/assets/js/founder-dashboard.js"></script>
 </body>
 </html>

@@ -104,3 +104,9 @@ This specification enshrines the approved business rules and functional logic go
    - No legacy Firestore documents will be imported into MySQL.
    - IntelliCore 2.0.0 starts with a clean relational database.
 
+## Phase 06 tasks, learning and performance
+
+A task definition has a separate assignment per eligible internship. Authorize individual and department recipients, preserve prior submissions and evaluations, and audit changes to deadlines, recipients and lifecycle. Assess the latest submitted version using its original deadline and rubric. Approved work alone reaches completed status. Late work can be submitted while a task remains published and active. Scores and lesson completion never advance attendance, leave, a Daily Work Report or internship completion.
+
+Preserve original practice exercises and rubric points. Published curriculum versions remain accessible to their historical eligible enrollments. Lessons are self-reported progress. Review outcomes and scoring use authorized reviewer decisions. Performance reports expose the recorded denominators and feedback only within approved scope. [Tasks](TASK_MANAGEMENT.md) · [Learning](LEARNING_MANAGEMENT.md) · [Performance](PERFORMANCE_EVALUATION.md).
+

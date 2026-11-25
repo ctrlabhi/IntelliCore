@@ -1,4 +1,6 @@
 import { PrismaClient } from '@prisma/client';
+import { recoveredTracks } from '../backend/src/modules/learning/curriculumCatalog.js';
+import { workGrants, workPermissions } from '../backend/src/modules/work/workAccess.js';
 
 const prisma = new PrismaClient();
 
@@ -218,7 +220,7 @@ async function seed() {
 
   // 2. Seed Permissions
   const permissionMap = new Map();
-  for (const perm of initialPermissions) {
+  for (const perm of [...initialPermissions, ...workPermissions]) {
     const record = await prisma.permission.upsert({
       where: { code: perm.code },
       update: { description: perm.description },
@@ -287,7 +289,48 @@ async function seed() {
     console.log(`  ✓ Department verified: ${record.name} (${record.code})`);
   }
 
+  await seedWorkGrants(roleMap, permissionMap);
+  await seedRecoveredTracks();
   console.log('✅ Idempotent seed completed successfully.');
+}
+
+async function seedWorkGrants(roleMap, permissionMap) {
+  const marker = 'rbac.phase06.defaults';
+  await prisma.$transaction(async (tx) => {
+    await tx.systemSetting.createMany({ skipDuplicates: true, data: [{
+      key: marker, value: 'pending', category: 'rbac', description: 'Phase 06 default permissions installation'
+    }] });
+    await tx.$queryRaw`SELECT id FROM system_settings WHERE \`key\` = ${marker} FOR UPDATE`;
+    const record = await tx.systemSetting.findUnique({ where: { key: marker } });
+    if (record.value === 'installed') return;
+    await tx.rolePermission.createMany({
+      skipDuplicates: true,
+      data: Object.entries(workGrants).flatMap(([role, permissions]) =>
+        permissions.map((code) => ({ roleId: roleMap.get(role), permissionId: permissionMap.get(code) })))
+    });
+    await tx.systemSetting.update({ where: { key: marker }, data: { value: 'installed' } });
+  });
+}
+
+async function seedRecoveredTracks() {
+  for (const { departmentCode, trackKey, title, exercises } of recoveredTracks) {
+    await prisma.$transaction(async (tx) => {
+      const department = await tx.department.findUniqueOrThrow({ where: { code: departmentCode } });
+      await tx.$queryRaw`SELECT id FROM departments WHERE id = ${department.id} FOR UPDATE`;
+      const version = { departmentId: department.id, trackKey, version: 1 };
+      if (await tx.learningTrack.findUnique({ where: { departmentId_trackKey_version: version } })) return;
+      const track = await tx.learningTrack.create({ data: {
+        ...version, title, description: 'Original IntelliCore practice exercises', status: 'PUBLISHED', publishedAt: new Date(),
+        modules: { create: exercises.map((exercise, index) => ({
+          title: exercise.title, description: '', sequence: index + 1,
+          lessons: { create: { title: exercise.title, content: exercise.instructions + '\n\nDeliverable\n' + exercise.deliverable,
+            sequence: 1, sourceKey: exercise.id } }
+        })) }
+      } });
+      await tx.auditLog.create({ data: { action: 'LEARNING_TRACK_PUBLISHED', resourceType: 'LEARNING_TRACK',
+        resourceId: track.id, sanitizedAfter: JSON.stringify({ version: 1, source: 'recovered-curriculum' }) } });
+    });
+  }
 }
 
 seed()

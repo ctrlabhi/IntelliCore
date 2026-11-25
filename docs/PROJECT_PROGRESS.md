@@ -1,6 +1,6 @@
 # IntelliCore V2.0 project progress
 
-**Updated on 2026-11-25 (Asia/Kolkata).** Phase 05 checkpoint `4d19095` builds on `75e329e`. Attendance, leave, Daily Work Reports and corrections are implemented and verified on disposable MySQL. Existing Docker Compose runtime and live Firebase sign-in remain unverified. [Phase 05 engineering report](PHASE_05_REPORT.md).
+**Updated on 2026-11-25 (Asia/Kolkata).** Phase 06 builds on `05c8830` and adds tasks, submission review, private attachments, learning and performance. Isolated database and synthetic browser acceptance passed. The existing Docker Compose runtime and real Firebase flows remain open. [Phase 06 engineering report](PHASE_06_REPORT.md).
 
 ## Phase and checkpoint history
 
@@ -13,8 +13,8 @@
 | 02C | Accepted with outstanding verification | `6dd4d6a` added MySQL privilege hardening, ACTIVE role/permission gates, OAuth CSP/COOP compatibility and zero-Firestore dashboard architecture. Phase report verified development Founder bootstrap, real Google sign-in, Founder dashboard, logout and zero legacy Firebase business-data requests. 45 historical tests passed. Email/password and session acceptance remain open. [Phase 02C validation](PHASE_02C_VALIDATION.md). |
 | 03 | Implemented and conditionally accepted | `1fe8067` added staff profiles, audit logs, user and staff administration, role/permission controls, 21 total permissions, administrative stats and Founder dashboard bindings. 65 historical tests passed across 14 files. The recovered Principal Engineer review required follow-up evidence. [Phase 03 report](PHASE_03_REPORT.md). |
 | 04 | Conditionally accepted | Department assignments, onboarding, review, enrollment, manual completion, MySQL metrics, auditing and four dashboards. 91 tests passed, plus four synthetic browser role workflows. [Phase 04 engineering report](PHASE_04_REPORT.md). |
-| 05 | Implemented, with existing-stack acceptance open | Automatic check-in, explicit checkout, deterministic attendance history, Daily Work Reports, leave, corrections and four dashboards. 112 tests passed across 19 files. |
-| 06 | Pending | Task pacing and learning management. Curriculum content exists. |
+| 05 | Implemented, with existing-stack acceptance open | `4d19095` and `05c8830`. Automatic check-in, explicit checkout, deterministic attendance history, Daily Work Reports, leave and corrections. 112 tests passed across 19 files. [Phase 05 report](PHASE_05_REPORT.md). |
+| 06 | Implemented, with existing-stack acceptance open | Tasks, versioned submissions and reviews, private storage, immutable curriculum and scoped reports. 131 tests passed across 21 files. [Phase 06 report](PHASE_06_REPORT.md). |
 | 07 | Pending | SMTP email notifications and dispatcher. Email integration is a stub. |
 | 08 | Pending | Google Meet and certificate generation. Calendar integration is a stub and a certificate template exists. |
 | 09 | Pending | Full frontend unification and role dashboards. |
@@ -31,6 +31,7 @@ Earlier reports use the preceding checkpoint in their headers for Phase 02C and 
 | `20261124133504_add_staff_and_audit_models` | `staff_profiles`, `audit_logs` | Phase 03 report records successful application. |
 | `20261124141807_add_internship_and_department_models` | `departments`, `user_departments`, `internship_applications`, `internships` | Antigravity Prisma output records successful application and client generation at 19:48 IST on 2026-11-24. A follow-up MySQL command listed all four tables. |
 | `20261125000000_add_attendance_leave_and_reports` | `attendance_policies`, `attendance_eligibility`, `attendance`, `daily_work_reports`, `leave_requests`, `attendance_corrections` | Additive migration passed on both an empty schema and a populated Phase 04 fixture. Existing users and enrollments were preserved, and only eligible enrollments received cutover periods. |
+| `20261125120000_add_tasks_learning_and_performance` | 11 task, attachment and learning tables | Fresh install and populated Phase 05 upgrade passed on MySQL 8.4.13. Six ledger checksums matched, ten source tables retained their fixture rows and Prisma found zero drift. |
 
 The Git exception is limited to `prisma/migrations/*/migration.sql`. All four original SQL files and `migration_lock.toml` are preserved. The five migrations deployed on disposable MySQL and matched the ledger. The existing development stack's ledger and privilege configuration require live confirmation.
 
@@ -76,7 +77,7 @@ That reconciliation used a temporary copy without the repository environment fil
 | Phase 03 DB access and reproducibility | Exact runtime and migration grants, absence of runtime DDL/shadow privileges where unnecessary, absence of migration credentials from the normal application process, Prisma migration ledger and repeatable rebuild from a checkout, and healthy app/MySQL/phpMyAdmin with records/volumes preserved. |
 | Phase 03 role concurrency and audit grants | The isolated suites verify protected grants, staff concurrency and reactivation, role changes, matrix edits, rollback, and ordinary audit API immutability. Concurrent role replacement and database-level audit retention and grant checks remain open. |
 | Phase 03 browser | Founder department work was exercised with synthetic identities. Complete staff provisioning, role change, suspension/reactivation and audit browser workflows under authorized development Firebase identities remain open. |
-| Existing runtime acceptance | Verify migration and seed metadata, effective runtime and migration database privileges, authenticated phpMyAdmin, and real browser authentication on the existing development stack when available. Phase 06 requires the next manual implementation prompt. |
+| Existing runtime acceptance | Verify migration and seed metadata, effective runtime and migration database privileges, authenticated phpMyAdmin, private upload volume access and real browser authentication on the existing development stack. Phase 07 requires the next manual implementation prompt. |
 
 Related source-level findings are recorded in [Security rules](SECURITY_RULES.md#open-control-verification).
 

@@ -24,3 +24,7 @@
 - **Decision:** Purge all Firestore/Storage/Functions imports from frontend dashboards. Connect all dashboards strictly through the Express REST API (`/api/v1/*`) backed by MySQL. Use Firebase exclusively for identity token issuance via Google OAuth and email/password.
 - **Consequences:** Strict architectural decoupling: MySQL is the sole source of truth for business data and RBAC. Zero Firestore requests or rules dependencies in development or production.
 
+## ADR-005 Task and curriculum history
+
+Task definitions, assignments, submission versions and reviews have separate states and identities. The submission stores the deadline and rubric used for review. A curriculum version is immutable after publication and an enrollment retains its exact version. Scope checks and writes use existing MySQL relations. Private binary content uses the persistent local upload volume with MySQL metadata and authenticated access. Transactional audit events identify publication, assignment, deadline, submission, revision, approval and curriculum enrollment for Phase 07 integration. [Task rules](TASK_MANAGEMENT.md) · [Learning rules](LEARNING_MANAGEMENT.md).
+

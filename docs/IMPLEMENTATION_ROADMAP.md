@@ -50,10 +50,10 @@ The directive defines the following paths under `/api/v1`. See [Phase 04 API](AP
 | Phase | Planned work | Evidence for acceptance |
 | --- | --- | --- |
 | 05 | Attendance, verified dashboard check-in, explicit logout checkout, Daily Work Reports, leave and corrections. | IST boundaries, deterministic historical evaluation, concurrent check-in and leave, immutable submissions, and audited corrections. [Attendance operating rules](ATTENDANCE.md). |
-| 06 | Task pacing, curriculum and learning resources, assignments, submissions, review, progress and evaluations. | Legacy curriculum mapping and preservation, scoped Team Leader and intern operations, valid assignment/review states and persisted progress. |
+| 06 | Tasks, private submission versions and reviews, curriculum, progress and evaluations. | Scoped operations, recovered exercises and rubrics, immutable history and private storage. Existing-stack acceptance remains open. [Phase 06 report](PHASE_06_REPORT.md). |
 | 07 | SMTP delivery, notification records and in-app alerts for status changes, reviews, leave and announcements. | Validate dispatcher outcomes, failure handling and retry behavior with authorized test delivery and sanitized logs. |
 | 08 | Server-mediated Google Calendar/Meet and certificate generation after HR sign-off. | Authorized scoped meetings with real links in development, verifiable certificate PDF with ID, QR code and watermark, and audit and history checks. |
 | 09 | Finish same-origin frontend integration across public pages and all authorized role workflows. | End-to-end role routing, multi-role behavior, live metrics, existing branding and URL compatibility, responsive and accessible forms, and error/loading/empty states. |
 | 10 | Final security hardening, release verification and delivery. | Verify auth and RBAC, production isolation, secrets and logging, database grants, migration reproducibility, backups and restore on isolated infrastructure, deployment runbook and regression/browser baselines. Production actions require explicit scope. |
 
-Use [Master requirements](MASTER_REQUIREMENTS.md) for approved business behavior and [Project progress](PROJECT_PROGRESS.md) for verification and checkpoints. Phase 06 begins after the user's next manual implementation prompt.
+Use [Master requirements](MASTER_REQUIREMENTS.md) for approved business behavior and [Project progress](PROJECT_PROGRESS.md) for verification and checkpoints. Phase 07 begins after the user's next manual implementation prompt.

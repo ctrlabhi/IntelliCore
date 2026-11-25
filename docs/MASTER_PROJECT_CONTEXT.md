@@ -1,6 +1,6 @@
 # IntelliCore V2.0 master project context
 
-**Updated on 2026-11-25 (Asia/Kolkata).** Phase 05 extends checkpoint `75e329e` with attendance, leave, reports and corrections for eligible internships. [Project progress](PROJECT_PROGRESS.md).
+**Updated on 2026-11-25 (Asia/Kolkata).** Phase 06 extends checkpoint `05c8830` with tasks, private submissions, immutable curricula, learning progress and performance reporting. [Project progress](PROJECT_PROGRESS.md).
 
 ## Product and repository
 
@@ -38,7 +38,9 @@ IntelliCore combines a public site and Notes AI utility with an internal interns
 
 Phase 05 adds effective-dated policies, enrollment eligibility intervals, unique daily attendance and report rows, leave, and corrections. Check-in, checkout, lifecycle changes and review decisions use the same user row lock. Reporting derives absences, weekends and missing evidence from stored facts. [Attendance operating rules](ATTENDANCE.md).
 
-Tables use Prisma mappings, UUID identifiers, MySQL `utf8mb4` with `utf8mb4_unicode_ci`, and UTC event timestamps. The seed defines eight roles, 44 permissions and nine starting departments. Department seed re-runs preserve administrative edits and inactive status. [Migration inventory and evidence](PROJECT_PROGRESS.md#migrations-and-seed).
+Phase 06 adds tasks, assignments, submission versions, reviews and private file metadata. Curriculum joins versioned content to internship enrollments and lesson progress. [Data model](DATABASE.md#phase-06-data-model).
+
+Tables use Prisma mappings, UUID identifiers, MySQL `utf8mb4` with `utf8mb4_unicode_ci`, and UTC event timestamps. Phase 06 adds 16 permission codes to the eight-role model and seeds eight recovered curricula across the nine existing departments. Seed re-runs preserve existing department edits and Phase 06 permission revocations. [Migration inventory and evidence](PROJECT_PROGRESS.md#migrations-and-seed).
 
 ## Current HTTP surface
 
@@ -53,6 +55,7 @@ In addition to health and Swagger routes, the following groups are mounted under
 | Audit and metrics | `GET /audit-logs` and `GET /admin/stats`. Stats include user and staff status, departments, applications and effective enrollment counts. |
 | Phase 04 | `/departments`, `/internship-applications` and `/internships`. See the [Phase 04 API](API.md#phase-04-departments-applications-and-internships) for methods, resources and authorization. |
 | Phase 05 | `/attendance`, `/daily-work-reports`, `/leave-requests` and `/attendance-corrections`. [Phase 05 API](API.md#phase-05-attendance-leave-and-work-reports). |
+| Phase 06 | `/tasks`, `/task-assignments`, `/task-submissions`, `/attachments`, `/learning` and `/performance`. [Phase 06 API](API.md#phase-06-tasks-learning-and-performance). |
 
 ## Source records
 
@@ -60,7 +63,7 @@ In addition to health and Swagger routes, the following groups are mounted under
 - [PROJECT_AUDIT.md](PROJECT_AUDIT.md), [DEVELOPMENT_LOG.md](DEVELOPMENT_LOG.md), [PHASE_02A_REPORT.md](PHASE_02A_REPORT.md), [PHASE_02B_REPORT.md](PHASE_02B_REPORT.md), [PHASE_02C_VALIDATION.md](PHASE_02C_VALIDATION.md) and [PHASE_03_REPORT.md](PHASE_03_REPORT.md) preserve the historical decisions, reported verification and implementation details. Some technical guides still describe their original phase.
 - [FIREBASE_SETUP.md](FIREBASE_SETUP.md), [SECURITY.md](SECURITY.md), [TESTING.md](TESTING.md) and [SETUP.md](SETUP.md) document setup and original controls. Consult [Security rules](SECURITY_RULES.md) and [Project progress](PROJECT_PROGRESS.md) for current boundaries and verified coverage before following operational examples.
 
-## Curriculum mapping for later learning work
+## Curriculum mapping
 
 The legacy track content and rubrics remain in the [backend curriculum](../backend/src/modules/learning/curriculum.js) and [frontend curriculum](../frontend/assets/js/curriculum.js). The department codes below give Phase 06 a stable reference for the existing track names.
 
@@ -75,4 +78,4 @@ The legacy track content and rubrics remain in the [backend curriculum](../backe
 | Content Writing Intern | `CONTENT_WRITING` |
 | Human Resources Intern | `HR` |
 
-The approved WordPress Development department is `WORDPRESS_DEV`. Its curriculum can be specified during learning work.
+Phase 06 imports eight recovered practice tracks and their 16 exercises. The approved WordPress Development department, `WORDPRESS_DEV`, has an empty recovered catalog and supports authorized authoring. [Curriculum inventory](LEARNING_MANAGEMENT.md).

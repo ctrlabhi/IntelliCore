@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="/assets/css/Intern-dashboard.css?v=20261103-clean-sync-v9" />
 <link rel="stylesheet" href="/assets/css/dashboard-background.css" />
   <link rel="stylesheet" href="/assets/css/phase04-dashboard.css">
+  <link rel="stylesheet" href="/assets/css/phase06-dashboard.css">
 </head>
 <body class="ic-workspace-page">
   <div class="scroll-progress-wrap" aria-hidden="true">
@@ -34,12 +35,12 @@
       <nav class="desktop-nav ic-workspace-nav" aria-label="Workspace navigation">
         <a href="#workspaceHome" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Intern Dashboard</a>
         <a href="#icProfile" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My Profile</a>
-        <a href="#icTrainingSection" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="m3 6 1 1 2-2m-3 7 1 1 2-2m-3 7 1 1 2-2"/></svg>My Tasks</a>
+        <a href="#phase06Tasks" class="nav-link phase04-disabled" data-phase06-link hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="m3 6 1 1 2-2m-3 7 1 1 2-2m-3 7 1 1 2-2"/></svg>My Tasks</a>
         <a href="#icApplications" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>My Applications</a>
         <a href="#icAttendancePanel" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Attendance</a>
         <div class="ic-sidebar-group-label">LEARNING</div>
-        <a href="#icProjects" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 7 9-4 9 4-9 4-9-4Z"/><path d="m5 11 7 3 7-3M5 15l7 3 7-3"/></svg>My Projects</a>
-        <a href="#icLearningResources" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v15H4zM8 3v4m8-4v4M7 10h10M7 14h6"/></svg>Learning Resources</a>
+        <a href="#phase06Learning" class="nav-link phase04-disabled" data-phase06-link hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v15H4zM8 3v4m8-4v4M7 10h10M7 14h6"/></svg>Learning Center</a>
+        <a href="#phase06Performance" class="nav-link phase04-disabled" data-phase06-link hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18v-5m7 5V6m7 12V9"/></svg>My Performance</a>
         <a href="#icCertificateEligibility" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.4 5 5.5.8-4 3.9.9 5.5-4.8-2.6-4.8 2.6.9-5.5-4-3.9 5.5-.8L12 3Z"/></svg>Certificates</a>
         <div class="ic-sidebar-group-label">UPDATES &amp; HELP</div>
         <a href="#icNotifications" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12h4"/></svg>Announcements</a>
@@ -73,14 +74,14 @@
       <ul class="mobile-nav-list">
         <li><a href="#workspaceHome" class="mobile-nav-link">Intern dashboard <span>→</span></a></li>
         <li><a href="#icProfile" class="mobile-nav-link">My profile <span>→</span></a></li>
-        <li><a href="#icTrainingSection" class="mobile-nav-link">My tasks <span>→</span></a></li>
+        <li><a href="#phase06Tasks" class="mobile-nav-link phase04-disabled" data-phase06-link hidden>My tasks <span>→</span></a></li>
         <li><a href="#icApplications" class="mobile-nav-link">My applications <span>→</span></a></li>
         <li><a href="#icAttendancePanel" class="mobile-nav-link">Attendance <span>→</span></a></li>
       </ul>
       <p class="mobile-nav-group">LEARNING</p>
       <ul class="mobile-nav-list">
-        <li><a href="#icProjects" class="mobile-nav-link">My projects <span>→</span></a></li>
-        <li><a href="#icLearningResources" class="mobile-nav-link">Learning resources <span>→</span></a></li>
+        <li><a href="#phase06Learning" class="mobile-nav-link phase04-disabled" data-phase06-link hidden>Learning center <span>→</span></a></li>
+        <li><a href="#phase06Performance" class="mobile-nav-link phase04-disabled" data-phase06-link hidden>My performance <span>→</span></a></li>
         <li><a href="#icCertificateEligibility" class="mobile-nav-link">Certificates <span>→</span></a></li>
       </ul>
       <p class="mobile-nav-group">UPDATES &amp; HELP</p>
@@ -213,7 +214,8 @@
       <div id="icAttendanceHistory" class="ic-attendance-history"></div>
     </section>
 
-    <section class="ic-training-section ic-workspace-panel" id="icTrainingSection" aria-labelledby="icTrainingTitle" aria-live="polite">
+    <section id="phase06Work" class="phase04-disabled" aria-label="My tasks, learning and performance" hidden></section>
+    <section class="ic-training-section ic-workspace-panel phase04-disabled" id="icTrainingSection" aria-labelledby="icTrainingTitle" aria-live="polite" hidden>
       <div class="ic-panel-heading">
         <div><span class="ic-muted-label">YOUR INTERNSHIP</span><h2 id="icTrainingTitle">Task Overview</h2><p id="icTrainingIntro">Loading your internship profile…</p></div>
         <div class="ic-training-heading-actions"><span class="ic-training-track-pill" id="icTrainingTrack">Loading track</span><button type="button" class="ic-outline-button" id="icRefreshTraining">Refresh</button></div>
@@ -366,7 +368,6 @@
   </div>
   <script src="/assets/js/dashboard-visuals.js" defer></script>
   <script src="/assets/js/live-clock.js" defer></script>
-  <script src="/functions/curriculum.js" defer></script>
   <script type="module" src="/assets/js/dashboard-auth.js?v=20261028-spark-staff-login"></script>
 </body>
 </html>

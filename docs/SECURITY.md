@@ -68,3 +68,7 @@ The IntelliCore platform enforces defense-in-depth across the client, networking
 2. **Minimal Docker Build Context:**
    - Host `node_modules`, `.git`, temporary files, and local logs are excluded from Docker builds via `.dockerignore`.
 
+## Phase 06 application security
+
+Technical work, attachments and published learning content use verified identity, active account checks, explicit MySQL permissions and ownership or department scope. The module validates transition inputs and rejects stale writes. Private work stays out of diagnostic logs and staff reports without technical permission. Files live under the existing upload volume and are provided by authenticated download with conservative content validation. [Security rules](SECURITY_RULES.md#phase-06-controls) · [Private file storage](FILE_STORAGE.md).
+

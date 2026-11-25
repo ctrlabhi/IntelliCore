@@ -9,6 +9,7 @@ import { authService } from '/services/auth.js';
 import { api } from '/services/api.js';
 import { mountPhase04 } from './phase04-dashboard.js';
 import { mountAttendance, stopAttendance } from './phase05-dashboard.js';
+import { mountWork } from './phase06-dashboard.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -92,12 +93,6 @@ function renderInternWorkspace(context) {
     }
   }
 
-  // Development-pending module states
-  const tasksEl = $('icTrainingIntro');
-  if (tasksEl) {
-    tasksEl.textContent = 'Learning modules and assigned projects scheduled for Phase 06 integration.';
-  }
-
   const unfinished = document.querySelectorAll('#icTrainingSection, #icMeetingPanel, #icProgressPanel, .ic-workspace-stats, .ic-workspace-lower-grid, .ic-dashboard-search, a[href="#icTrainingSection"], a[href="#icProgressPanel"], a[href="#icNotifications"]');
   unfinished.forEach((element) => {
     element.classList.add('phase04-disabled');
@@ -133,6 +128,7 @@ function renderInternWorkspace(context) {
   attendance.setAttribute('aria-label', 'Attendance, reports and leave');
   if (showAttendance) mountAttendance(attendance, context, true);
   else stopAttendance(attendance);
+  void mountWork($('phase06Work'), context, true);
 }
 
 authService.onAuthStateChanged((context) => {
