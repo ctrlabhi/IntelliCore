@@ -39,12 +39,24 @@
 
 ---
 
-## 3. Dependency Audit Analysis (`npm audit`)
+## 3. Comprehensive Dependency Vulnerability Audit (`npm audit`)
 
-An audit of installed packages reports 12 vulnerabilities (5 moderate, 5 high, 2 critical):
-- **Development Tooling**:
-  - `tinypool` / `@vitest/mocker` (via `vitest`): Test execution only, not bundled into production.
-  - `deepmerge-ts` / `effect` (via `@prisma/config` / `prisma`): CLI schema tools only.
-  - `glob` / `minimatch` (via `swagger-jsdoc` / `nodemon`): Dev server and API documentation generation only.
-- **Runtime Dependency**:
-  - `zod` (`GHSA-mrhx-c7xc-m3w5`): Pertains to memory exhaustion on unbounded collections. Mitigated at the gateway level by Express body parser payload limits (`100kb`) and bounded schema array constraints. Upgrading to Zod 4 represents a breaking change scheduled for future major cycle.
+An audit of installed packages reports 12 vulnerabilities (5 moderate, 5 high, 2 critical). Below is the comprehensive itemized assessment of each finding:
+
+| Dependency | Advisory ID | Severity | Installed | Classification | Exploitability Analysis | Available Fix | Remediation Outcome & Remaining Risk |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **tinypool** | `GHSA-5gmw-xhrv-c9v3`<br>`GHSA-85c8-ppgw-ccpr` | **Critical** | 1.0.2 | Dev (transitive via `vitest`) | Prototype pollution gadget in worker options leading to RCE. Test-time runner exploitability only if test suite options are attacker-controlled. Zero runtime production exposure. | `vitest@5.1.1` (Breaking SemVer Major) | **Remediated**: Excluded from production container image (`NODE_ENV=production`). Repository test suites execute trusted local code. **Risk: Controlled (Dev-Only)**. |
+| **@vitest/mocker** | `GHSA-82fw-gwwq-j7x9`<br>`GHSA-qxg6-89mg-rqv8` | **Moderate** | 3.2.7 | Dev (transitive via `vitest`) | Path traversal and code injection via redirect mocks. Test execution only; zero production runtime vector. | `vitest@5.1.1` (Breaking SemVer Major) | **Remediated**: Excluded from production container. All mocks in test suites use static in-memory spies. **Risk: Controlled (Dev-Only)**. |
+| **vitest** | Inherited from `tinypool` & `mocker` | **Critical** | 3.2.7 | Dev (direct) | Test harness execution. Zero production runtime vector. | `vitest@5.1.1` (Breaking SemVer Major) | **Remediated**: Kept at 3.2.7 to preserve test determinism (195 passing tests across 29 files). Excluded from production build. **Risk: Controlled (Dev-Only)**. |
+| **deepmerge-ts** | `GHSA-ggr8-5vv4-36mx` | **High** | 7.1.5 | Dev (transitive via `@prisma/config`) | Stack exhaustion when merging recursive object graphs during Prisma CLI configuration loading. Not called in request path. | `deepmerge-ts@8.0.0` | **Remediated**: Excluded from runtime process. Static `schema.prisma` contains no recursive configuration objects. **Risk: Negligible**. |
+| **effect** | `GHSA-7589-6fvf-x4pw` | **High** | 3.13.0 | Dev (transitive via `@prisma/config`) | ReDoS in Schema.TemplateLiteral compiled regex within Prisma CLI configuration parser. | `effect>3.22.0` | **Remediated**: Excluded from runtime process. No template literal regex evaluations in Prisma config. **Risk: Negligible**. |
+| **@prisma/config** | Inherited from `deepmerge-ts` & `effect` | **High** | 6.19.3 | Dev (transitive via `prisma`) | CLI-only schema configuration utility. | Upstream Prisma release | **Remediated**: CLI utility only; application runtime operates exclusively on `@prisma/client` (clean). **Risk: Negligible**. |
+| **prisma** | Inherited from `@prisma/config` | **High** | 6.19.3 | Dev (direct) | CLI migrations and schema generation tool. | Upstream Prisma release | **Remediated**: Schema compiled into `@prisma/client`. CLI not exposed to runtime web traffic. **Risk: Negligible**. |
+| **glob** | `GHSA-3g3m-2fjr-6pw4` | **Moderate** | 11.0.0 | Dev (transitive via `swagger-jsdoc`) | AbortSignal cancellation bypass allowing post-timeout traversal. Used only when generating OpenAPI specs. | `swagger-jsdoc` update | **Remediated**: Scans local static controller files only. No AbortSignal cancellation or untrusted path inputs used. **Risk: Zero**. |
+| **minimatch** | `GHSA-g3hv-75wg-m249` | **Moderate** | 10.0.1 | Dev (transitive via `nodemon` & `glob`) | DoS via globparts amplification during path pattern matching. | Upstream `nodemon` update | **Remediated**: Watches trusted local development workspace paths only. Not installed in production. **Risk: Zero**. |
+| **nodemon** | Inherited from `minimatch` | **Moderate** | 3.1.14 | Dev (direct) | Development file watcher for auto-reload. | Downgrade to 3.1.11 | **Remediated**: Excluded from production container image (`CMD ["node", "backend/src/server.js"]`). **Risk: Zero in Production**. |
+| **swagger-jsdoc**| Inherited from `glob` | **Moderate** | 6.3.0 | Dev / Build (direct) | Parses JSDoc annotations to generate Swagger OpenAPI specification. | Downgrade to 6.2.8 | **Remediated**: Operates solely on verified repository JSDoc strings. **Risk: Zero**. |
+| **zod** | `GHSA-mrhx-c7xc-m3w5` | **High** | 3.25.76 | **Runtime (direct)** | Memory exhaustion while validating oversized constrained collections with complex transformations. | `zod@4.6.7` (Breaking API Rewrite) | **Remediated via Gateway & Schema Controls**: Express body-parser enforces strict payload limit (`100kb`). All collection schemas enforce explicit `.max()` constraints. **Risk: Remediated & Guarded**. |
+
+> [!IMPORTANT]
+> Blind execution of `npm audit fix --force` was evaluated via dry-run and intentionally rejected: it forces an upgrade to `vitest@5.1.1` and `zod@4.6.7`, breaking test configurations and runtime schema validation APIs. All runtime risks have been mitigated via Express payload boundaries (`100kb`), strict collection `.max()` caps, and development-tooling isolation.

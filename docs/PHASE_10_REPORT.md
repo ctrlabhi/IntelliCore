@@ -65,7 +65,7 @@ Key accomplishments:
 The full sequential test suite was executed against the isolated MySQL 8.4 LTS database:
 
 ```bash
-set INTELLICORE_TEST_DATABASE_URL=mysql://intellicore_test_fresh:P8_Test_Secret_2026@127.0.0.1:33359/intellicore_test_fresh
+set INTELLICORE_TEST_DATABASE_URL=mysql://intellicore_test_fresh:<TEST_DB_PASSWORD>@127.0.0.1:33359/intellicore_test_fresh
 npx vitest run --fileParallelism=false
 ```
 
