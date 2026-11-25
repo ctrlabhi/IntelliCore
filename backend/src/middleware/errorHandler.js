@@ -23,7 +23,7 @@ export function errorHandler(err, req, res, next) {
     },
     requestId,
     method: req.method,
-    url: req.originalUrl,
+    url: req.originalUrl?.split('?')[0],
     ip: req.ip
   }, 'Request error encountered');
 

@@ -71,8 +71,8 @@ export async function listStaffAssignments(departmentId, query, teamLeadersOnly)
   }, query);
 }
 
-export function saveStaffAssignment(departmentId, { userId, assignedRole, isActive }, actor, requestId) {
-  return transaction(async (tx) => {
+export function saveStaffAssignment(departmentId, { userId, assignedRole, isActive }, actor, requestId, client) {
+  const assign = async (tx) => {
     await lockUser(tx, userId);
     await lockDepartment(tx, departmentId);
     if (isActive) await requireActiveDepartment(tx, departmentId);
@@ -104,5 +104,6 @@ export function saveStaffAssignment(departmentId, { userId, assignedRole, isActi
       afterState: { ...key, isActive }
     });
     return assignment;
-  });
+  };
+  return client ? assign(client) : transaction(assign);
 }

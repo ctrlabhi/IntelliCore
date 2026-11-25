@@ -18,3 +18,7 @@ The versioned application registry is implemented in the [notification policy](.
 | company-announcement | Versioned template reserved, with current announcement delivery in-app |
 
 Queue data stores template identity, event and fixed-shape application path. The renderer builds the URL from a validated configured application origin. Local messages explain where the workspace link can be opened. Content uses fixed event copy, HTML escaping and a single safe sender envelope. No passwords, Firebase tokens, feedback, personal details or attachments are rendered. Capture previews use the recorded template version under the local admin scope.
+
+## Phase 08 templates
+
+`meeting-update` renders approved meeting invitations, schedule changes, cancellations and reminders with a dashboard link. Certificate dispatch declarations and corrections have no email templates.

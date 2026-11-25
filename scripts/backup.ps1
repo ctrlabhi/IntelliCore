@@ -1,57 +1,44 @@
-<#
-.SYNOPSIS
-    IntelliCore Database & Storage Backup Utility
-.DESCRIPTION
-    Creates a timestamped MySQL dump in the backups/ directory.
-#>
-
+<# Creates a consistent SQL backup of the existing, explicitly identified local development database. #>
 [CmdletBinding()]
 param()
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = 'Stop'
+$project = Split-Path -Parent $PSScriptRoot
+$context = docker context show
+if ($LASTEXITCODE -or $context -ne 'desktop-linux') { throw 'Expected the local Docker Desktop engine.' }
 
-$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$ProjectRoot = Split-Path -Parent $ScriptDir
-Set-Location $ProjectRoot
+$target = docker inspect --format '{{.State.Running}} {{range .Mounts}}{{.Name}} {{end}}' intellicore_mysql
+if ($LASTEXITCODE -or $target -notmatch '^true\s+intellicore_mysql_data\s*$') { throw 'Unexpected database container or volume.' }
 
-$Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
-$BackupDir = Join-Path $ProjectRoot "backups"
-$SqlBackupFile = Join-Path $BackupDir "db-backup-$Timestamp.sql"
-
-if (-not (Test-Path $BackupDir)) {
-    New-Item -ItemType Directory -Path $BackupDir -Force | Out-Null
-}
-
-Write-Host "💾 Initiating IntelliCore database backup..." -ForegroundColor Cyan
-
-# Source credentials from .env
-$EnvFile = Join-Path $ProjectRoot ".env"
-$DbUser = "intellicore_app"
-$DbName = "intellicore_db"
-$DbPass = ""
-
-if (Test-Path $EnvFile) {
-    Get-Content $EnvFile | ForEach-Object {
-        if ($_ -match '^\s*MYSQL_USER\s*=\s*(.*)$') { $DbUser = $matches[1].Trim() }
-        if ($_ -match '^\s*MYSQL_DATABASE\s*=\s*(.*)$') { $DbName = $matches[1].Trim() }
-        if ($_ -match '^\s*MYSQL_PASSWORD\s*=\s*(.*)$') { $DbPass = $matches[1].Trim() }
-    }
-}
-
+$folder = Join-Path $project 'backups'
+$stamp = Get-Date -Format 'yyyyMMdd-HHmmss-ffff'
+$partial = Join-Path $folder "db-backup-$stamp.sql.partial"
+$complete = Join-Path $folder "db-backup-$stamp.sql"
+$docker = (Get-Command docker.exe -ErrorAction Stop).Source
+$start = [Diagnostics.ProcessStartInfo]::new()
+$start.FileName = $docker
+$start.Arguments = 'exec intellicore_mysql sh -c "test \"$MYSQL_DATABASE\" = intellicore_db || exit 67; export MYSQL_PWD=$MYSQL_ROOT_PASSWORD; exec mysqldump -u root --single-transaction --quick --no-tablespaces --set-gtid-purged=OFF --skip-lock-tables --skip-add-drop-table --routines --events --triggers intellicore_db"'
+$start.UseShellExecute = $false
+$start.RedirectStandardOutput = $true
+$start.RedirectStandardError = $true
+$process = [Diagnostics.Process]::new()
+$process.StartInfo = $start
 try {
-    Write-Host "  Dumping database '$DbName' via MySQL container..." -ForegroundColor Yellow
-    docker compose exec -T mysql mysqldump -u "$DbUser" "-p$DbPass" "$DbName" > "$SqlBackupFile"
-
-    if (Test-Path $SqlBackupFile) {
-        $Size = (Get-Item $SqlBackupFile).Length
-        Write-Host "✅ Database backup created successfully!" -ForegroundColor Green
-        Write-Host "   File: $SqlBackupFile" -ForegroundColor White
-        Write-Host "   Size: $Size bytes" -ForegroundColor White
-    } else {
-        Write-Host "❌ Backup file was not generated." -ForegroundColor Red
+    if (-not $process.Start()) { throw 'Could not start the database backup.' }
+    $stderr = $process.StandardError.ReadToEndAsync()
+    $file = [IO.File]::Open($partial, [IO.FileMode]::CreateNew)
+    try { $process.StandardOutput.BaseStream.CopyTo($file) } finally { $file.Dispose() }
+    $process.WaitForExit()
+    $null = $stderr.GetAwaiter().GetResult()
+    if ($process.ExitCode -ne 0 -or (Get-Item -LiteralPath $partial).Length -eq 0) {
+        throw 'The database dump did not complete successfully.'
     }
-} catch {
-    Write-Host "❌ Backup execution failed: $_" -ForegroundColor Red
-    Write-Host "   Ensure the MySQL container is running: .\scripts\start.ps1" -ForegroundColor Yellow
+    if (@((Get-Content -LiteralPath $partial -Tail 4) -match '^-- Dump completed on ').Count -eq 0) {
+        throw 'The database dump completion marker is absent.'
+    }
+    Move-Item -LiteralPath $partial -Destination $complete
+    [pscustomobject]@{ Path = $complete; Bytes = (Get-Item -LiteralPath $complete).Length; SHA256 = (Get-FileHash -LiteralPath $complete).Hash }
+} finally {
+    $process.Dispose()
+    if (Test-Path -LiteralPath $partial) { Remove-Item -LiteralPath $partial }
 }
-

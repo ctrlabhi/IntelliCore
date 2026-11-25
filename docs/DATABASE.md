@@ -129,3 +129,8 @@ The sixth migration adds 11 tables and foreign keys while retaining all five pri
 
 New activity tables start empty. The seed installs the recovered catalog and the first phase permission grants separately from the schema migration. [Migration evidence](PHASE_06_REPORT.md#database-and-migrations).
 
+## Phase 08 schema
+
+Migration `20261125160000_add_meetings_and_internship_followups` adds `meetings`, `meeting_participants`, `calendar_connections`, `calendar_authorizations`, `internship_extensions`, `internship_promotions` and `certificate_dispatch_history`. Enrollment application linkage remains unique when present. It becomes nullable for continuations, which refer to their approved source through the extension decision. The migration preserves prior application links and certificate history is created only through human declarations. The historical migrations are byte-for-byte unchanged.
+
+An intern-row lock serializes enrollments, extensions, declarations and promotions. Meeting edits and reminders serialize by meeting row. Durable Calendar writes use the desired revision and worker lease. Dispatch history uses per-enrollment request and sequence uniqueness. [Runtime recovery](RUNTIME_RECOVERY.md).

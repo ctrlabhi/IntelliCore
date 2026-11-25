@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isMeetingEmailAuthorized } from '../meetings/meetingWorker.js';
 import { deliverEmail } from '../../integrations/email/emailService.js';
 import { eligibleWhere, historicalWhere } from '../work/workAccess.js';
 import { policyFor, recipientWhere } from './notificationPolicy.js';
@@ -92,6 +93,7 @@ export async function finishJob(client, job, outcome, now, options, random) {
 
 async function stillAuthorized(client, job, now) {
   const policy = policyFor(job.templateData.event);
+  if (!policy.templateKey || policy.templateKey !== job.templateKey) return false;
   const { type, resourceId, rule, departmentId, version } = job.authorization;
   const id = job.recipientUserId;
   if (!await client.user.count({ where: {
@@ -101,6 +103,7 @@ async function stillAuthorized(client, job, now) {
       ...(policy.preference ? { [policy.preference]: true } : {}) } }],
     ...(rule ? { AND: [recipientWhere(rule, departmentId)] } : {})
   } })) return false;
+  if (type === 'MEETING') return isMeetingEmailAuthorized(client, resourceId, id, job.templateData.event, version, now);
   if (type === 'INTERNSHIP_APPLICATION') {
     const event = job.templateData.event;
     return Boolean(await client.internshipApplication.count({ where: { id: resourceId, applicantUserId: id,

@@ -34,3 +34,9 @@ In-app operational notices are enabled. Email for configured operational events 
 ## Navigation and privacy
 
 The generated action path opens one dashboard-owned notice. On navigation the browser rechecks notification ownership and then fetches the linked resource through the existing protected endpoint. A role change, departmental revocation or an inactive record can make the linked resource unavailable. Subjects and feed previews use fixed summaries and exclude private reports and feedback. Actual announcement content remains in the authorized announcement endpoint. [API contracts](API.md#phase-07-notifications-announcements-and-delivery).
+
+## Phase 08 events
+
+Meeting invitations, reschedules, cancellations and reminders have in-app and policy-controlled email channels. The worker checks scope, lifecycle, revision and reminder eligibility. Scheduled meeting notices for organizers are in-app.
+
+Certificate dispatch declarations and corrections, internship extensions and promotion decisions are in-app. Dispatch events have no email template or outbox producer. The worker refuses dispatch events even if an outbox record is injected. Earlier internship-completion event behavior stays in place. [Manual certificate email status](MANUAL_CERTIFICATE_EMAIL_STATUS.md).

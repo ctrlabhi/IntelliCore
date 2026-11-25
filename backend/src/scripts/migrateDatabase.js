@@ -18,9 +18,11 @@ function validateTarget() {
 
 try {
   validateTarget();
-  const action = process.argv.slice(2);
-  if (action.length && !(action.length === 1 && action[0] === 'status')) throw new Error('Unsupported maintenance action.');
-  const result = spawnSync(process.execPath, ['node_modules/prisma/build/index.js', 'migrate', action[0] ?? 'deploy'],
+  const [action = 'deploy', ...extra] = process.argv.slice(2);
+  const commands = { deploy: ['deploy'], status: ['status'], 'resolve-phase05': ['resolve', '--rolled-back',
+    '20261125000000_add_attendance_leave_and_reports'] };
+  if (extra.length || !Object.hasOwn(commands, action)) throw new Error('Unsupported maintenance action.');
+  const result = spawnSync(process.execPath, ['node_modules/prisma/build/index.js', 'migrate', ...commands[action]],
     { stdio: 'inherit' });
   process.exitCode = result.status ?? 1;
 } catch {

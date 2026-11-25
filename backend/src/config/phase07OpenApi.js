@@ -8,7 +8,7 @@ const object = (properties, required = []) => ({ type: 'object', additionalPrope
   ...(required.length ? { required } : {}) });
 const confirm = object({ confirm: { type: 'boolean', enum: [true] } }, ['confirm']);
 const list = { page: number, limit: { ...number, maximum: 100 }, search: text(120), sort: select(['asc', 'desc']) };
-const categories = ['ACCOUNT', 'INTERNSHIP', 'ATTENDANCE', 'LEAVE', 'TASK', 'LEARNING', 'ANNOUNCEMENT'];
+const categories = ['ACCOUNT', 'INTERNSHIP', 'ATTENDANCE', 'LEAVE', 'TASK', 'LEARNING', 'ANNOUNCEMENT', 'MEETING'];
 const states = ['DRAFT', 'SCHEDULED', 'PUBLISHED', 'CANCELLED', 'ARCHIVED'];
 const emailStates = ['PENDING', 'PROCESSING', 'RETRY_SCHEDULED', 'SENT', 'FAILED', 'CANCELLED', 'CAPTURED'];
 const audience = { title: text(160), message: text(5000),

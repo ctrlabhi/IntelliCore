@@ -40,7 +40,7 @@ export class StaffService {
     roleCode,
     createdBy = null,
     requestId = null
-  }) {
+  }, client) {
     if (!userId) {
       const err = new Error('Target User ID is required.');
       err.code = 'VALIDATION_ERROR';
@@ -74,7 +74,7 @@ export class StaffService {
       throw err;
     }
 
-    return await transaction(async (tx) => {
+    const provision = async (tx) => {
       await lockUser(tx, userId);
       // 1. Check user exists
       const user = await tx.user.findUnique({
@@ -211,7 +211,8 @@ export class StaffService {
           name: targetRole.name
         }
       };
-    }, { retryUnique: true });
+    };
+    return client ? provision(client) : transaction(provision, { retryUnique: true });
   }
 
   /**
@@ -356,8 +357,8 @@ export class StaffService {
   /**
    * Updates staff designation or joining date.
    */
-  async updateStaff(id, { designation, joiningDate }, actorUserId, requestId = null) {
-    return await prisma.$transaction(async (tx) => {
+  async updateStaff(id, { designation, joiningDate }, actorUserId, requestId = null, client) {
+    const update = async (tx) => {
       const existing = await tx.staffProfile.findUnique({
         where: { id }
       });
@@ -406,7 +407,8 @@ export class StaffService {
       });
 
       return updated;
-    });
+    };
+    return client ? update(client) : prisma.$transaction(update);
   }
 
   /**

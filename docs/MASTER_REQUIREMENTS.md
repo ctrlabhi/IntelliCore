@@ -17,7 +17,7 @@
 | `FOUNDER` | Full executive oversight, protected role and personnel administration, department management and privileged assignments, internship oversight and approval. |
 | `CO_FOUNDER` | Executive and organization-wide oversight with the approved permissions, subject to protected Founder-only operations. |
 | `ADMIN` | Authorized operational and technical administration, with organization-wide internship access within the approved scope. |
-| `HR_MANAGER` | Internship application and completion decisions, roster management, leave approval, attendance compliance and certificate issuance through the approved workflow. |
+| `HR_MANAGER` | Internship application and completion decisions, roster management, leave approval, attendance compliance and audited declarations of externally emailed certificates, extensions and non-privileged designations or staff recommendations. |
 | `HR_EXECUTIVE` | Applicant communication, authorized applications and intern profile review, and attendance monitoring. Independent approval or rejection requires the authorized reviewer role. |
 | `OPERATIONS_EXECUTIVE` | Authorized cross-track operations, task allocation and progress monitoring. Independent internship approval remains with authorized reviewers. |
 | `TEAM_LEADER` | Mentoring and operational access for assigned domains and interns. Require an active account, active `TEAM_LEADER` role and active assignment for the relevant department. |
@@ -35,7 +35,7 @@
 
 ## Phase 04 onboarding and applications
 
-- A verified pending applicant may access their own profile, own application and status, the approved public fields of active departments, and logout. Active workspace operations, other users' records, administrative data, attendance, tasks and certificates require the applicable active account and resource authorization. Use a narrow onboarding guard.
+- A verified pending applicant may access their own profile, own application and status, the approved public fields of active departments, and logout. Active workspace operations, other users' records, administrative data, attendance, tasks and completion follow-ups require the applicable active account and resource authorization. Use a narrow onboarding guard.
 - Capture the selected department, requested start and duration, relevant qualifications, institution, skills, motivation and necessary contact details. Reuse existing profile data and form design where applicable. Validate fields and limits, and prevent applicants from setting review, status and approval metadata.
 - Support own draft save/edit, submission and withdrawal where eligible. Lock submitted content during review. Allow review with reasoned changes requests or rejection. Model `DRAFT → PENDING_APPROVAL → APPROVED`, `PENDING_APPROVAL → CHANGES_REQUESTED → PENDING_APPROVAL`, `PENDING_APPROVAL → REJECTED` and authorized `WITHDRAWN` transitions. Detect duplicate submissions, conflicting actions and self-approval.
 - Approval confirms the applicant, department, position, dates and eligible Team Leader where available. In one transaction, recheck application state and department activity, validate dates and leader scope, prevent duplicate or overlapping enrollment, create the internship and update the application, activate an eligible pending account, preserve appropriate roles, and write an audit entry. Suspended and inactive accounts and privileged staff conflicts require explicit handling. Approval email belongs to Phase 07.
@@ -64,14 +64,15 @@
 - Preserve recovered curriculum, bind learning progress to immutable published versions, and keep authorized historical enrollments. Report task completion and required learning progress with their denominators.
 - Keep attendance, daily reports, task review, learning and internship completion independent. See the [task](TASK_MANAGEMENT.md), [learning](LEARNING_MANAGEMENT.md), [evaluation](PERFORMANCE_EVALUATION.md) and [file storage](FILE_STORAGE.md) specifications.
 
-## Communications, meetings and completion artifacts
+## Communications, meetings and internship follow-up
 
 - Provide in-app and server-dispatched email notifications for application status, task reviews, leave decisions and company announcements. Persist delivery/notification records and use the SMTP dispatcher in Phase 07.
 - Commit business changes, applicable notices and email jobs together. Separate transport from the HTTP transaction, keep capture as the development default and publish company announcements in-app.
 - Author, preview, publish and schedule announcements within role and department scope. Revalidate audience, eligibility and preferences for delayed work. Protect read, archive, diagnostics and retry operations.
 - Preserve original lesson and review evidence when authorized staff record a learning correction or score amendment. Validate current scope, the recorded rubric and the required reason. [Notification and event rules](NOTIFICATION_MANAGEMENT.md).
-- Implement real Google Meet links through server-to-server Google Calendar integration for authorized HR and Team Leaders. Use appropriate domain and meeting scope.
-- On HR completion sign-off, generate an official verifiable certificate PDF with unique verification ID, QR code, domain track, completion date and an official digital watermark. Preserve enrollment and certificate history.
+- Support scoped meetings through canonical manual Google Meet links and explicitly authorized optional Calendar event creation. Keep actual provider verification and external invitations approval-gated. [Meeting management](MEETING_MANAGEMENT.md).
+- The owner creates and emails certificates outside the application. The primary Founder and authorized HR Managers can record or correct a completed internship’s external dispatch declaration and notify the intern in-app. Keep dispatch history. [Manual certificate email status](MANUAL_CERTIFICATE_EMAIL_STATUS.md).
+- Extend ongoing internships with an audited date revision and preserve completed internships through linked continuation periods. Record effective-dated non-privileged titles and staff recommendations. Only the primary Founder can provision staff or assign privileged roles. [Extensions and promotions](INTERNSHIP_EXTENSIONS_AND_PROMOTIONS.md).
 
 ## Data protection and release acceptance
 

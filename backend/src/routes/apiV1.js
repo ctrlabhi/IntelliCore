@@ -6,9 +6,12 @@ import authRoutes from '../modules/auth/authRoutes.js';
 import departmentRoutes from '../modules/departments/departmentRoutes.js';
 import applicationRoutes from '../modules/internships/applicationRoutes.js';
 import internshipRoutes from '../modules/internships/internshipRoutes.js';
+import { promotionRoutes } from '../modules/internships/followupRoutes.js';
 import { attendanceRoutes, correctionRoutes, dailyWorkReportRoutes, leaveRoutes } from '../modules/attendance/phase05Routes.js';
 import { workRoutes } from '../modules/work/workRoutes.js';
 import { notificationRoutes } from '../modules/notifications/notificationRoutes.js';
+import { meetingRoutes } from '../modules/meetings/meetingRoutes.js';
+import { calendarRoutes } from '../modules/meetings/calendarRoutes.js';
 
 const router = Router();
 
@@ -104,6 +107,9 @@ router.use('/admin', adminRoutes);
 router.use('/departments', departmentRoutes);
 router.use('/internship-applications', applicationRoutes);
 router.use('/internships', internshipRoutes);
+router.use('/promotions', promotionRoutes);
+router.use('/meetings', meetingRoutes);
+router.use('/calendar', calendarRoutes);
 router.use('/attendance', attendanceRoutes);
 router.use('/daily-work-reports', dailyWorkReportRoutes);
 router.use('/leave-requests', leaveRoutes);

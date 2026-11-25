@@ -2,6 +2,7 @@ import { deliveryConfiguration } from '../../integrations/email/emailConfig.js';
 import { claimEmails, processEmailJob, workerOptions } from './emailQueue.js';
 import { publishScheduled } from './announcementService.js';
 import { reminderOptions, runReminders } from './reminderService.js';
+import { processCalendarMeeting, runMeetingReminders } from '../meetings/meetingWorker.js';
 
 export const remindersKey = 'notifications.reminders';
 
@@ -38,9 +39,14 @@ export async function runNotificationTick(client, workerId, {
   if (acceptJobs()) {
     try {
       reminded = await runReminders(client, clock(), cursors, await effectiveReminders(client));
+      await runMeetingReminders(client, clock());
     } catch {
       errors ||= 'REMINDER_BATCH_FAILED';
     }
+  }
+  if (acceptJobs()) {
+    try { await processCalendarMeeting(client, { clock }); }
+    catch { errors ||= 'MEETING_SYNC_BATCH_FAILED'; }
   }
   if (!config.errorCode && acceptJobs()) {
     try {

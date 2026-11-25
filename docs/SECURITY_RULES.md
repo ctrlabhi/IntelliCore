@@ -1,5 +1,11 @@
 # IntelliCore V2.0 security rules
 
+## Phase 08 controls
+
+- Keep database recovery on the verified local development target and require owner approval for ledger changes. Validate current source and backup on disposable MySQL, preserve the two named volumes and keep live SMTP and Calendar writes disabled during recovery. [Runtime recovery](RUNTIME_RECOVERY.md).
+- Require active accounts, resource scope and a recent primary-Founder sign-in for Phase 08 staff activation. Calendar consent, encrypted tokens and approved calendar event writes are separate from Firebase identity. Keep provider credentials out of responses, request logs and Git.
+- Keep certificate events in-app only, with no certificate files, document endpoints or automated email. Preserve declaration and correction history. [Manual certificate email status](MANUAL_CERTIFICATE_EMAIL_STATUS.md).
+
 ## Phase 07 controls
 
 Notification feed and mutating actions derive ownership from the authenticated account. Pending verified applicants receive only their own onboarding records. Related records are read through existing authorization after opening a notice. Announcement publication requires a validated audience, revision and current scope. Worker and email diagnostics omit recipient addresses and raw provider errors. Require an approved exact allowlist, verified TLS and explicit mode before real SMTP. Keep migration and worker credentials separate from the web process. [Background processing](BACKGROUND_PROCESSING.md) · [Email configuration](EMAIL_INTEGRATION.md).

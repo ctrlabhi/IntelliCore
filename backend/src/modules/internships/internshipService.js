@@ -4,6 +4,7 @@ import { businessToday, lockDepartment, lockUser, readPage, transaction } from '
 import { departmentSummary } from '../departments/departmentService.js';
 import auditService from '../audit/auditService.js';
 import { syncAttendanceEligibility } from '../attendance/eligibility.js';
+import { policyFor } from '../notifications/notificationPolicy.js';
 import { emitNotification } from '../notifications/notificationService.js';
 import { activeEnrollments, assertNoOverlap, assertTeamLeader, effectiveStatus, ensureFound, statusFilter } from './internshipPolicy.js';
 
@@ -13,15 +14,23 @@ const internshipSelect = {
   id: true, internshipCode: true, userId: true, user: person, department: { select: departmentSummary },
   assignedTeamLeaderId: true, assignedTeamLeader: person, positionTitle: true, commencementDate: true,
   expectedCompletionDate: true, actualCompletionDate: true, duration: true,
-  workMode: true, internshipStatus: true, approvedAt: true, completionApprovedAt: true
+  workMode: true, internshipStatus: true, approvedAt: true, completionApprovedAt: true,
+  continuationOf: { select: { internshipId: true } },
+  promotions: { where: { status: 'APPROVED', targetRole: null, continuationId: null }, orderBy: [{ effectiveOn: 'desc' }, { id: 'asc' }],
+    select: { designation: true, effectiveOn: true } },
+  continuationPromotions: { where: { status: 'APPROVED', targetRole: null }, orderBy: [{ effectiveOn: 'desc' }, { id: 'asc' }],
+    select: { designation: true, effectiveOn: true } }
 };
 
 function presentInternship(internship, today) {
-  return { ...internship, completionRequested: internship.internshipStatus === 'COMPLETION_REVIEW',
+  const { continuationPromotions = [], promotions = [], ...row } = internship;
+  const effectiveDesignation = continuationPromotions.find(({ effectiveOn }) => effectiveOn <= today)?.designation ?? row.positionTitle;
+  const recordedDesignation = promotions.find(({ effectiveOn }) => effectiveOn <= today) ?? null;
+  return { ...row, effectiveDesignation, recordedDesignation, completionRequested: internship.internshipStatus === 'COMPLETION_REVIEW',
     internshipStatus: effectiveStatus(internship, today) };
 }
 
-export async function listInternships(query, scope) {
+export async function listInternships(query, scope, own = false) {
   const today = businessToday();
   const where = { AND: [scope, statusFilter(query.status, today), {
     departmentId: query.departmentId,
@@ -34,9 +43,21 @@ export async function listInternships(query, scope) {
     ] } : {})
   }] };
   const page = await readPage(prisma.internship, {
-    where, select: internshipSelect, orderBy: [{ commencementDate: 'desc' }, { id: 'asc' }]
+    where, select: own ? { ...internshipSelect, certificateDispatches: {
+      orderBy: { sequence: 'desc' }, take: 1, select: { status: true, recordedAt: true } }
+    } : internshipSelect, orderBy: [{ commencementDate: 'desc' }, { id: 'asc' }]
   }, query);
-  return { ...page, items: page.items.map((internship) => presentInternship(internship, today)) };
+  return { ...page, items: page.items.map((internship) => {
+    const { certificateDispatches, ...row } = internship;
+    const certificateDispatch = certificateDispatches?.[0];
+    const result = presentInternship(row, today);
+    if (!own || row.internshipStatus !== 'COMPLETED') return result;
+    return { ...result, certificateEmailStatus: {
+      status: certificateDispatch?.status ?? 'NOT_SENT', recordedAt: certificateDispatch?.recordedAt ?? null,
+      message: certificateDispatch?.status === 'SENT' ? policyFor('CERTIFICATE_DISPATCH_RECORDED').message
+        : 'Certificate email has not yet been marked as sent.'
+    } };
+  }) };
 }
 
 export async function getInternship(id, scope) {
@@ -86,6 +107,10 @@ export function updateInternship(id, input, actor, requestId) {
     if (status === 'ONGOING' && input.commencementDate && +input.commencementDate !== +before.commencementDate) {
       throw new AppError('Commencement cannot change once the internship is ongoing.', 409, 'COMMENCEMENT_LOCKED');
     }
+    if ((input.expectedCompletionDate && input.expectedCompletionDate > before.expectedCompletionDate && status === 'ONGOING')
+      || ((input.commencementDate || input.expectedCompletionDate) && await tx.internshipExtension.count({ where: {
+        cancelledAt: null, OR: [{ internshipId: id }, { continuationId: id }]
+      } }))) throw new AppError('Use the audited extension workflow for date changes.', 409, 'INTERNSHIP_EXTENSION_REQUIRED');
     await assertNoOverlap(tx, {
       userId: before.userId, commencementDate: input.commencementDate ?? before.commencementDate,
       expectedCompletionDate: input.expectedCompletionDate ?? before.expectedCompletionDate

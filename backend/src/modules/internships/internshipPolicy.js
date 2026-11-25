@@ -46,7 +46,7 @@ export async function assertTeamLeader(tx, userId, departmentId) {
   if (!membership) throw new AppError('Choose an active Team Leader assigned to this department.', 409, 'TEAM_LEADER_NOT_ELIGIBLE');
 }
 
-export async function assertNoOverlap(tx, { userId, commencementDate, expectedCompletionDate }, excludedId) {
+export async function assertNoOverlap(tx, { userId, commencementDate, expectedCompletionDate }, excludedId, { includeCompleted = false } = {}) {
   if (expectedCompletionDate < commencementDate) {
     throw new AppError('Completion date must be on or after commencement.', 400, 'INVALID_INTERNSHIP_DATES');
   }
@@ -54,9 +54,11 @@ export async function assertNoOverlap(tx, { userId, commencementDate, expectedCo
     where: {
       userId,
       ...(excludedId ? { id: { not: excludedId } } : {}),
-      internshipStatus: { in: activeEnrollments },
       commencementDate: { lte: expectedCompletionDate },
-      expectedCompletionDate: { gte: commencementDate }
+      ...(includeCompleted ? { OR: [
+        { internshipStatus: { in: activeEnrollments }, expectedCompletionDate: { gte: commencementDate } },
+        { internshipStatus: 'COMPLETED', actualCompletionDate: { gte: commencementDate } }
+      ] } : { internshipStatus: { in: activeEnrollments }, expectedCompletionDate: { gte: commencementDate } })
     },
     select: { id: true }
   });

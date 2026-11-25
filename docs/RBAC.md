@@ -142,3 +142,16 @@ npm run founder:bootstrap
 6. Inappropriate default `INTERN` role assignment is purged atomically.
 7. Verification status: **INITIALIZED & VERIFIED ACTIVE** for `ctrlabhishek@gmail.com` (UID `svNt0UTSz9N59EzlaTWR7jsCu5c2`).
 
+## Phase 08 meetings and follow-up
+
+| Role | Meetings | Internship follow-up |
+| --- | --- | --- |
+| Primary Founder | Organization scope | Declarations, extensions, designation decisions, staff recommendation decisions and protected provisioning |
+| Co-Founder and Admin | Organization scope with `meetings:manage_all` | Existing internship rights and own records |
+| HR Manager | Own internship or HR department meetings with `meetings:manage_hr` | Declarations, extensions, intern designations and staff recommendations |
+| HR Executive | Own invitations | Scoped read only |
+| Operations Executive | Own staff and department meetings with `meetings:manage_operations` | Existing internship rights and own records |
+| Team Leader | Assigned active departments with `meetings:manage_department` | Scoped extension and promotion history |
+| Intern | Own invitations, response and authorized link | Own periods, promotion history and dispatch status |
+
+Calendar additionally requires the configured organizer identity. Staff activation relies on the existing primary-Founder permissions and a recent sign-in. [Security rules](SECURITY_RULES.md).

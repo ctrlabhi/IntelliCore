@@ -18,7 +18,7 @@ IntelliCore 2.0.0 is architected as a **Single Repository Modular Monolith**. It
    - Both the static frontend application and the REST API are served from the same HTTP origin (`http://localhost:3000`).
    - This eliminates complex CORS issues in local development and standardizes reverse proxy deployment in production.
 2. **Modular Encapsulation:**
-   - The backend code (`backend/src/modules/`) is split into independent feature domains (auth, users, roles, departments, internships, attendance, leaves, tasks, reports, learning, meetings, certificates, announcements, notifications, dashboard, files, audit, settings).
+   - The backend code (`backend/src/modules/`) is split into independent feature domains (auth, users, roles, departments, internships, attendance, leaves, tasks, reports, learning, meetings, internship follow-ups, announcements, notifications, dashboard, files, audit, settings).
    - In Phase 1, the infrastructure foundation is established with minimal coupling. Domain business logic is prepared for incremental implementation in subsequent phases.
 3. **Layered Separation of Concerns:**
    - **Routes Layer:** HTTP request parsing, route guards, input validation (Zod).
@@ -162,6 +162,6 @@ IntelliCore/
 ## 4. Operational Boundaries for Phase 1
 
 - **Scope Delimitation:** Phase 1 delivers strictly the foundation, container infrastructure, database integration, API harness, static asset reorganization, and operational documentation.
-- **Business Modules:** Business logic (full RBAC enforcement, dynamic attendance tracking, automatic leave approval workflows, certificate compilation) is intentionally stubbed or documented for Phase 2 implementation.
+- **Historical Phase 01 boundary.** Business workflows were initially stubbed. The final Phase 08 owner decision establishes external-only certificate documents and in-app dispatch declarations. [Phase 08 engineering report](PHASE_08_REPORT.md).
 - **Firebase Isolation:** The legacy production Firebase configuration is strictly isolated from the local runtime environment.
 

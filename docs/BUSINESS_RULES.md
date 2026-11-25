@@ -39,7 +39,7 @@ This specification enshrines the approved business rules and functional logic go
 1. **Hierarchical Roles:**
    - `founder` / `co_founder`: Super Administrator with complete system authority.
    - `admin`: Operational administrator with access to organization, recruitment, and management tools.
-   - `hr_manager`: Human Resources lead managing intern rosters, leave approvals, attendance compliance, and certificate issuance.
+   - `hr_manager`: Human Resources lead managing intern rosters, leave approvals, attendance compliance, and audited declarations of externally emailed certificates.
    - `hr_executive`: Operational HR personnel handling applicant communications and attendance monitoring.
    - `operations_executive`: Operational personnel monitoring domain tasks and progress.
    - `team_leader`: Domain mentor authorized exclusively to oversee interns assigned to their specified tracks.
@@ -84,9 +84,8 @@ This specification enshrines the approved business rules and functional logic go
    - Internship duration options: 1 month, 2 months, 3 months, or 6 months.
    - Upon reaching the calculated end date, the account transitions to `completion_pending`.
    - Manual review and formal sign-off by HR are required to mark the internship as `completed`.
-3. **Automated Certificate Generation:**
-   - Upon HR completion sign-off, an official verifiable certificate PDF is compiled automatically.
-   - Certificates feature a unique verification ID, QR code, domain track, completion date, and official digital watermark.
+3. **Completion follow-up.** The owner handles certificate documents and email externally. The primary Founder and authorized HR Managers record or correct external send declarations after manual completion approval. Each new declaration creates one in-app notice. Certificate documents, verification and automated email are outside the workflow.
+4. **Extensions and promotions.** Keep completed periods immutable, link continuations to their source, prevent overlapping periods and maintain audit history. Intern designations do not alter RBAC. Staff recommendations require separate primary-Founder approval and provisioning. [Extensions and promotions](INTERNSHIP_EXTENSIONS_AND_PROMOTIONS.md).
 
 ---
 

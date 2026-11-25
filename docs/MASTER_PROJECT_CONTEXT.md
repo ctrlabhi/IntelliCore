@@ -4,7 +4,7 @@
 
 ## Product and repository
 
-IntelliCore combines a public site and Notes AI utility with an internal internship operations platform. The operating sequence is applicant onboarding, HR review and enrollment, department and Team Leader assignment, attendance and tasks, learning, completion and certificate issuance. Founder, HR, Team Leader and Intern workspaces share a branded, responsive frontend. Admin and Operations roles already exist in RBAC. Their complete workspace routing and workflows remain a later integration concern.
+IntelliCore combines a public site and Notes AI utility with an internal internship operations platform. The operating sequence is applicant onboarding, HR review and enrollment, department and Team Leader assignment, attendance and tasks, learning, completion and authorized follow-up. Founder, HR, Team Leader and Intern workspaces share a branded, responsive frontend. Admin and Operations roles already exist in RBAC. Their complete workspace routing and workflows remain a later integration concern.
 
 | Area | Current entry points and role |
 | --- | --- |
@@ -13,7 +13,7 @@ IntelliCore combines a public site and Notes AI utility with an internal interns
 | Browser runtime | [frontend/services](../frontend/services) contains Firebase Web Auth, the shared auth state service and same-origin API client. The login modal and dashboards consume server-provided workspace flags. |
 | HTTP runtime | [app.js](../backend/src/app.js) configures middleware, health probes, static and legacy URL aliases, and errors. [server.js](../backend/src/server.js) owns server startup and shutdown. `/health` checks liveness. `/ready` and `/api/v1/health` report database status. Swagger is served at `/api-docs` with JSON at `/api-docs.json`. |
 | Business services | [apiV1.js](../backend/src/routes/apiV1.js) mounts auth, users, staff, roles, permissions, audit logs, admin stats, departments, internships, attendance, daily reports, leave and corrections. Routes validate and authorize requests. Services implement transactions and query Prisma. |
-| Integration boundaries | [backend/src/integrations](../backend/src/integrations) has Firebase Admin Auth, local file storage and email/calendar stubs. [templates](../templates) has email and certificate templates. The stubs and templates establish integration points. |
+| Integration boundaries | [backend/src/integrations](../backend/src/integrations) has Firebase Admin Auth, private file storage, optional Calendar OAuth and worker-controlled email. The archived certificate template in [templates](../templates) is inactive. Certificate creation and sending take place outside the application. |
 | Operational tools | [docker-compose.yml](../docker-compose.yml), [Dockerfile](../backend/Dockerfile), [entrypoint](../backend/entrypoint.sh), [scripts](../scripts) and [SETUP.md](SETUP.md). The application and phpMyAdmin map to loopback ports 3000 and 8080. MySQL stays on the Compose network. The runtime runs as the non-root `node` user. |
 | Legacy reference | [legacy-firebase](../legacy-firebase) preserves Firebase rules, indexes, Functions, curriculum and historical onboarding, attendance, task and meeting logic. `/functions/curriculum.js` is a compatibility URL served from the current frontend asset. Reuse legitimate requirements and curriculum through the V2 architecture. |
 
@@ -57,6 +57,10 @@ In addition to health and Swagger routes, the following groups are mounted under
 | Phase 05 | `/attendance`, `/daily-work-reports`, `/leave-requests` and `/attendance-corrections`. [Phase 05 API](API.md#phase-05-attendance-leave-and-work-reports). |
 | Phase 06 | `/tasks`, `/task-assignments`, `/task-submissions`, `/attachments`, `/learning` and `/performance`. [Phase 06 API](API.md#phase-06-tasks-learning-and-performance). |
 | Phase 07 | `/notifications`, `/notification-preferences`, `/announcements`, authorized admin email and worker endpoints, and assessment corrections. [Phase 07 API](API.md#phase-07-notifications-announcements-and-delivery). |
+
+## Phase 08 boundaries
+
+Meeting management supports manually supplied Meet links and disabled-by-default Calendar OAuth. Completed internships have independent dispatch declarations, extensions and promotion histories. The primary Founder alone controls staff activation and privileged role assignment. [Phase 08 engineering report](PHASE_08_REPORT.md).
 
 ## Source records
 

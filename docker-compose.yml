@@ -3,6 +3,16 @@
 # Version: 2.0.0 | Environment: Local Development
 # ==============================================================================
 
+x-calendar-env: &calendar-env
+  GOOGLE_CALENDAR_ENABLED: ${GOOGLE_CALENDAR_ENABLED:-false}
+  GOOGLE_CALENDAR_EVENT_WRITES_AUTHORIZED: ${GOOGLE_CALENDAR_EVENT_WRITES_AUTHORIZED:-false}
+  GOOGLE_CALENDAR_CLIENT_ID: ${GOOGLE_CALENDAR_CLIENT_ID:-}
+  GOOGLE_CALENDAR_CLIENT_SECRET: ${GOOGLE_CALENDAR_CLIENT_SECRET:-}
+  GOOGLE_CALENDAR_REDIRECT_URI: ${GOOGLE_CALENDAR_REDIRECT_URI:-http://localhost:3000/api/v1/calendar/callback}
+  GOOGLE_CALENDAR_ID: ${GOOGLE_CALENDAR_ID:-}
+  GOOGLE_CALENDAR_ORGANIZER_UID: ${GOOGLE_CALENDAR_ORGANIZER_UID:-}
+  GOOGLE_CALENDAR_TOKEN_KEY: ${GOOGLE_CALENDAR_TOKEN_KEY:-}
+
 services:
   # ----------------------------------------------------------------------------
   # 1. Application Service: Node.js 24 LTS + Express.js 5 + Prisma ORM
@@ -17,6 +27,7 @@ services:
     ports:
       - "127.0.0.1:3000:3000"
     environment:
+      <<: *calendar-env
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 3000
       APP_BASE_URL: ${APP_BASE_URL:-http://localhost:3000}
@@ -64,6 +75,7 @@ services:
     stop_grace_period: 45s
     command: ["node", "backend/src/scripts/notificationWorker.js"]
     environment:
+      <<: *calendar-env
       NODE_ENV: ${NODE_ENV:-development}
       APP_BASE_URL: ${APP_BASE_URL:-http://localhost:3000}
       NOTIFICATION_DATABASE_URL: ${NOTIFICATION_DATABASE_URL:-}
@@ -79,6 +91,7 @@ services:
       EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-IntelliCore}
       EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:-}
       EMAIL_REPLY_TO: ${EMAIL_REPLY_TO:-}
+      MEETING_REMINDER_MINUTES: ${MEETING_REMINDER_MINUTES-1440,60,10}
       NOTIFICATION_BATCH_SIZE: ${NOTIFICATION_BATCH_SIZE:-5}
       NOTIFICATION_POLL_MS: ${NOTIFICATION_POLL_MS:-5000}
       EMAIL_RETRY_BASE_SECONDS: ${EMAIL_RETRY_BASE_SECONDS:-60}

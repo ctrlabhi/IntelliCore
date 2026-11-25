@@ -4,7 +4,7 @@ import { founderFixture, isolatedDatabaseUrl } from './tests/integration/testDat
 
 const testDatabase = isolatedDatabaseUrl(process.env.INTELLICORE_TEST_DATABASE_URL);
 const databaseSuites = [
-  'adminStats', 'auditLog', 'authEndpoints', 'roleEndpoints', 'staffEndpoints', 'userEndpoints', 'phase04MySql', 'phase05MySql', 'phase06MySql', 'phase07MySql'
+  'adminStats', 'auditLog', 'authEndpoints', 'roleEndpoints', 'staffEndpoints', 'userEndpoints', 'phase04MySql', 'phase05MySql', 'phase06MySql', 'phase07MySql', 'phase08MySql'
 ].map((name) => `tests/integration/${name}.test.js`);
 
 export default defineConfig({

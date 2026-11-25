@@ -11,6 +11,7 @@ import { mountPhase04 } from './phase04-dashboard.js';
 import { mountStaffAttendance } from './phase05-dashboard.js';
 import { mountWork } from './phase06-dashboard.js';
 import { mountNotifications } from './phase07-dashboard.js';
+import { mountPhase08 } from './phase08-dashboard.js';
 
 const $ = (id) => document.getElementById(id);
 const authState = $('authState');
@@ -355,6 +356,7 @@ function renderFounderDashboard(context) {
   mountStaffAttendance(context, $('interns'));
   void mountWork($('phase06Work'), context);
   mountNotifications($('phase07Workspace'), context);
+  mountPhase08($('phase08Workspace'), context);
   loadLiveDashboardData(canProvision);
 }
 

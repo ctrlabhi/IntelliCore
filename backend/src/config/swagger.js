@@ -3,6 +3,7 @@ import { phase04Paths } from './phase04OpenApi.js';
 import { phase05Paths } from './phase05OpenApi.js';
 import { phase06Paths } from './phase06OpenApi.js';
 import { phase07Paths } from './phase07OpenApi.js';
+import { phase08Paths } from './phase08OpenApi.js';
 
 const options = {
   definition: {
@@ -65,6 +66,6 @@ const options = {
 };
 
 export const swaggerSpec = swaggerJsdoc(options);
-Object.assign(swaggerSpec.paths, phase04Paths, phase05Paths, phase06Paths, phase07Paths);
+Object.assign(swaggerSpec.paths, phase04Paths, phase05Paths, phase06Paths, phase07Paths, phase08Paths);
 export default swaggerSpec;
 

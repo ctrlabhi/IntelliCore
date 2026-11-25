@@ -101,6 +101,12 @@ const initialPermissions = [
   { code: 'internships:read_own', description: 'Read own internship details and history' },
   { code: 'internships:read_all', description: 'Read all internship records organization-wide' },
   { code: 'internships:read_department', description: 'Read interns within assigned departments' },
+  { code: 'internships:read_followups', description: 'View authorized internship completion follow-ups' },
+  { code: 'internships:manage_followups', description: 'Manage authorized internship extensions, promotions and email declarations' },
+  { code: 'meetings:manage_all', description: 'Manage organization-wide meetings' },
+  { code: 'meetings:manage_hr', description: 'Manage HR and internship meetings' },
+  { code: 'meetings:manage_operations', description: 'Manage operational meetings' },
+  { code: 'meetings:manage_department', description: 'Manage meetings in assigned departments' },
   { code: 'internships:manage', description: 'Update internship details, assign team leaders, terminate' },
   { code: 'internships:approve_completion', description: 'Approve completion of internship' },
   { code: 'attendance:read_all', description: 'View organization attendance' },
@@ -188,6 +194,16 @@ const rolePermissionMatrix = {
   ]
 };
 
+const phase08Grants = {
+  FOUNDER: ['meetings:manage_all', 'internships:read_followups', 'internships:manage_followups'],
+  CO_FOUNDER: ['meetings:manage_all'],
+  ADMIN: ['meetings:manage_all'],
+  HR_MANAGER: ['meetings:manage_hr', 'internships:read_followups', 'internships:manage_followups'],
+  HR_EXECUTIVE: ['internships:read_followups'],
+  OPERATIONS_EXECUTIVE: ['meetings:manage_operations'],
+  TEAM_LEADER: ['meetings:manage_department']
+};
+
 const attendanceView = ['attendance:read_all', 'reports:read_all'];
 const attendanceReview = [...attendanceView, 'attendance:export', 'attendance:review_corrections',
   'reports:review', 'leaves:read_all', 'leaves:review'];
@@ -249,7 +265,7 @@ async function seed() {
 
   // 4. Seed Role Permissions
   for (const [roleCode, basePermissions] of Object.entries(rolePermissionMatrix)) {
-    const permCodes = [...basePermissions, ...(attendanceGrants[roleCode] ?? [])];
+    const permCodes = [...basePermissions, ...(attendanceGrants[roleCode] ?? []), ...(phase08Grants[roleCode] ?? [])];
     const roleId = roleMap.get(roleCode);
     if (!roleId) continue;
 

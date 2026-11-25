@@ -7,7 +7,7 @@ const date = (value) => value?.slice(0, 10) ?? '';
 
 export function node(tag, ...children) {
   const element = document.createElement(tag);
-  element.append(...children.filter((child) => child !== null && child !== undefined));
+  element.append(...children.filter((child) => child !== null && child !== undefined && typeof child !== 'boolean'));
   return element;
 }
 

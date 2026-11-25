@@ -10,6 +10,16 @@ const events = {
   INTERNSHIP_COMMENCING: ['INTERNSHIP', 'Internship starting soon', 'Your internship commencement date is approaching.'],
   INTERNSHIP_COMMENCED: ['INTERNSHIP', 'Internship started', 'Your internship has reached its commencement date.'],
   INTERNSHIP_COMPLETION_DUE: ['INTERNSHIP', 'Internship completion review approaching', 'An internship is approaching the end of its planned period.'],
+  CERTIFICATE_DISPATCH_RECORDED: ['INTERNSHIP', 'Certificate email status', 'Your internship certificate has been sent to your registered email address. Please check your inbox and spam folder.'],
+  CERTIFICATE_DISPATCH_CORRECTED: ['INTERNSHIP', 'Certificate email status corrected', 'The previous certificate email declaration was corrected. Check your internship timeline for the current status.'],
+  INTERNSHIP_EXTENDED: ['INTERNSHIP', 'Internship extended', 'An authorized extension is available in your internship timeline.'],
+  INTERNSHIP_EXTENSION_CANCELLED: ['INTERNSHIP', 'Internship extension cancelled', 'An authorized extension was cancelled. Review your internship timeline.'],
+  INTERNSHIP_PROMOTION_UPDATED: ['INTERNSHIP', 'Internship promotion updated', 'A designation or promotion decision is available in your internship timeline.'],
+  MEETING_SCHEDULED: ['MEETING', 'Meeting scheduled', 'A meeting is available in your workspace.'],
+  MEETING_INVITED: ['MEETING', 'Meeting invitation', 'You have been invited to a meeting. Open your workspace for details.', 'meeting-update'],
+  MEETING_RESCHEDULED: ['MEETING', 'Meeting rescheduled', 'A meeting invitation was updated. Open your workspace for the current details.', 'meeting-update'],
+  MEETING_CANCELLED: ['MEETING', 'Meeting cancelled', 'An upcoming meeting was cancelled. Open your workspace for details.', 'meeting-update'],
+  MEETING_REMINDER: ['MEETING', 'Meeting reminder', 'An upcoming meeting is on your schedule.', 'meeting-update'],
   INTERNSHIP_COMPLETED: ['INTERNSHIP', 'Internship completion approved', 'Your internship completion was approved.', 'internship-completed'],
   INTERNSHIP_TERMINATED: ['INTERNSHIP', 'Internship status updated', 'Your internship was terminated. Review your enrollment information.'],
   TEAM_LEADER_CHANGED: ['INTERNSHIP', 'Team Leader assignment updated', 'An internship’s Team Leader assignment changed. Review the enrollment for details.'],
@@ -48,7 +58,7 @@ const roleOrder = [
   ['HR_MANAGER', '/dashboards/hr'], ['HR_EXECUTIVE', '/dashboards/hr'], ['OPERATIONS_EXECUTIVE', '/dashboards/hr'],
   ['TEAM_LEADER', '/dashboards/team-leader']
 ];
-export const categories = ['ACCOUNT', 'INTERNSHIP', 'ATTENDANCE', 'LEAVE', 'TASK', 'LEARNING', 'ANNOUNCEMENT'];
+export const categories = ['ACCOUNT', 'INTERNSHIP', 'ATTENDANCE', 'LEAVE', 'TASK', 'LEARNING', 'ANNOUNCEMENT', 'MEETING'];
 const pathPattern = /^\/dashboards\/(?:intern|founder|hr|team-leader)\?notice=[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}#phase07Notice$/u;
 export const isActionPath = (path) => typeof path === 'string' && pathPattern.test(path);
 

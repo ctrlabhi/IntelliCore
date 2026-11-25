@@ -8,7 +8,7 @@ const escape = (value) => String(value).replace(/[&<>"']/g, (character) =>
 export function renderEmail({ templateKey, version, event, path, baseUrl, development = true }) {
   const policy = policyFor(event);
   const origin = applicationOrigin(baseUrl);
-  if (templateKey !== policy.templateKey || version !== templateVersion || !origin || !isActionPath(path)) {
+  if (!policy.templateKey || templateKey !== policy.templateKey || version !== templateVersion || !origin || !isActionPath(path)) {
     throw new Error('INVALID_EMAIL_TEMPLATE');
   }
   const url = new URL(path, origin).href;

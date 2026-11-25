@@ -3,6 +3,7 @@ import logger from '../config/logger.js';
 
 export const requestLogger = pinoHttp({
   logger,
+  serializers: { req: (request) => ({ ...request, url: request.url?.split('?')[0], query: undefined }) },
   genReqId: (req, res) => res.locals.requestId || req.headers['x-request-id'] || 'no-id',
   customLogLevel: (req, res, err) => {
     if (res.statusCode >= 500 || err) return 'error';

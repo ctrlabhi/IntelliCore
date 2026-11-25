@@ -1,5 +1,9 @@
 # IntelliCore V2.0 — Development Log
 
+## 2026-11-25 MASTER-PHASE-08
+
+Implemented the final owner-approved Phase 08 specification from `c9da6dd`. Added scoped meetings and optional Calendar, manual external certificate-email declarations, internship extensions and promotions. Rehearsed the supported Phase 05 ledger recovery against the isolated backup restore. See [the engineering report](PHASE_08_REPORT.md) for verification and the two remaining existing-stack prerequisites.
+
 ## 2026-11-25 MASTER-PHASE-07
 
 Implemented notifications, preference-controlled email outbox, durable worker claim/recovery, reminders, and in-app announcements in the existing modular monolith. Added immutable score and progress correction histories. Checked healthy Docker services and found the existing Phase 05 ledger blocked by a historical permission failure. [Phase 07 report](PHASE_07_REPORT.md).

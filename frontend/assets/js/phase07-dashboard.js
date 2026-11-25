@@ -3,7 +3,7 @@ import { mountAnnouncements } from './announcement-dashboard.js';
 import { mountNotificationAdmin } from './notification-admin-dashboard.js';
 import { check, disclosure, field, form, inIndia, label, listing, node, record, section } from './work-controls.js';
 
-const categories = ['ACCOUNT', 'INTERNSHIP', 'ATTENDANCE', 'LEAVE', 'TASK', 'LEARNING', 'ANNOUNCEMENT'];
+const categories = ['ACCOUNT', 'INTERNSHIP', 'ATTENDANCE', 'LEAVE', 'TASK', 'LEARNING', 'ANNOUNCEMENT', 'MEETING'];
 const idPattern = /^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/i;
 const safeAction = /^\/dashboards\/(?:intern|founder|hr|team-leader)\?notice=[\da-f-]{36}#phase07Notice$/i;
 const mounts = new WeakMap();

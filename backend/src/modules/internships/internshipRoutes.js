@@ -5,6 +5,8 @@ import { businessDate, endpoint, pageFields, uuid } from '../../utils/phase04.js
 import { internshipScope, internshipStatuses, reviewRoles } from './internshipPolicy.js';
 import { approveCompletion, assignTeamLeader, endInternship, getInternship, listInternships, requestCompletion, updateInternship } from './internshipService.js';
 
+import { followupRoutes } from './followupRoutes.js';
+
 const router = Router();
 const query = z.object({ ...pageFields, departmentId: uuid.optional(), status: z.enum(internshipStatuses).optional(),
   commencementFrom: businessDate.optional(), completionThrough: businessDate.optional(), teamLeaderId: uuid.optional()
@@ -22,8 +24,9 @@ const managers = [requireRole(...reviewRoles), requirePermission('internships:ma
 const canManage = (req) => req.permissions.includes('internships:manage') && req.roles.some((role) => reviewRoles.includes(role));
 
 router.use(authenticate, requireAuth, requireVerifiedEmail);
-router.get('/me', requireStatus(['PENDING', 'ACTIVE']), endpoint((req) => listInternships(query.parse(req.query), { userId: req.user.id })));
+router.get('/me', requireStatus(['PENDING', 'ACTIVE']), endpoint((req) => listInternships(query.parse(req.query), { userId: req.user.id }, true)));
 router.use(requireStatus());
+router.use(followupRoutes);
 router.get('/', endpoint((req) => listInternships(query.parse(req.query), internshipScope(req))));
 router.get('/:id', endpoint((req) => getInternship(id(req), internshipScope(req))));
 router.patch('/:id', ...managers, endpoint((req, requestId) => updateInternship(id(req), fields.parse(req.body), req.user, requestId)));

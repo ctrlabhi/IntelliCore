@@ -89,7 +89,7 @@ export class RoleService {
   /**
    * Assigns roles to a user with strict privilege escalation guardrails.
    */
-  async assignUserRoles(targetUserId, roleCodes, actor, requestId = null) {
+  async assignUserRoles(targetUserId, roleCodes, actor, requestId = null, client) {
     if (!Array.isArray(roleCodes) || roleCodes.length === 0) {
       const err = new Error('At least one role code must be provided.');
       err.code = 'VALIDATION_ERROR';
@@ -107,7 +107,7 @@ export class RoleService {
       throw err;
     }
 
-    return await transaction(async (tx) => {
+    const assign = async (tx) => {
       await lockUser(tx, targetUserId);
       // 1. Fetch target user
       const targetUser = await tx.user.findUnique({
@@ -207,7 +207,8 @@ export class RoleService {
       logger.info({ targetUserId, actorUserId, roles: roleCodes }, 'User roles updated');
 
       return rolesInDb.map((r) => ({ code: r.code, name: r.name }));
-    });
+    };
+    return client ? assign(client) : transaction(assign);
   }
 
   /**

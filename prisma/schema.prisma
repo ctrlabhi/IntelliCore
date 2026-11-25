@@ -73,6 +73,15 @@ model User {
   scoreAmendments                TaskScoreAmendment[]
   learningProgressCorrections    LearningProgressCorrection[]
 
+  certificateDispatches CertificateDispatch[]
+  internshipExtensions InternshipExtension[]
+  requestedPromotions InternshipPromotion[] @relation("PromotionRequester")
+  decidedPromotions InternshipPromotion[] @relation("PromotionDecider")
+  meetings Meeting[]
+  meetingParticipations MeetingParticipant[]
+  calendarConnections CalendarConnection[]
+  calendarAuthorizations CalendarAuthorization[]
+
   @@index([status])
   @@index([email])
   @@map("users")
@@ -159,6 +168,8 @@ model StaffProfile {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([employmentStatus])
+  promotions InternshipPromotion[]
+
   @@map("staff_profiles")
 }
 
@@ -220,6 +231,9 @@ model Department {
   announcements          Announcement[]
 
   @@index([isActive])
+  meetings Meeting[]
+  promotions InternshipPromotion[]
+
   @@map("departments")
 }
 
@@ -277,7 +291,7 @@ model Internship {
   id                     String           @id @default(uuid()) @db.VarChar(36)
   internshipCode         String           @unique @map("internship_code") @db.VarChar(50)
   userId                 String           @map("user_id") @db.VarChar(36)
-  applicationId          String           @unique @map("application_id") @db.VarChar(36)
+  applicationId          String?          @unique @map("application_id") @db.VarChar(36)
   departmentId           String           @map("department_id") @db.VarChar(36)
   assignedTeamLeaderId   String?          @map("assigned_team_leader_id") @db.VarChar(36)
   positionTitle          String           @map("position_title") @db.VarChar(100)
@@ -296,7 +310,7 @@ model Internship {
   updatedAt              DateTime         @updatedAt @map("updated_at")
 
   user               User                  @relation("InternEnrollments", fields: [userId], references: [id], onDelete: Cascade)
-  application        InternshipApplication @relation(fields: [applicationId], references: [id], onDelete: Restrict)
+  application        InternshipApplication? @relation(fields: [applicationId], references: [id], onDelete: Restrict)
   department         Department            @relation(fields: [departmentId], references: [id], onDelete: Restrict)
   assignedTeamLeader User?                 @relation("TeamLeaderInternships", fields: [assignedTeamLeaderId], references: [id], onDelete: SetNull)
   attendanceRecords  Attendance[]
@@ -305,6 +319,11 @@ model Internship {
   leaveRequests      LeaveRequest[]
   taskAssignments    TaskAssignment[]
   learningEnrollments LearningEnrollment[]
+  certificateDispatches CertificateDispatch[]
+  extensions InternshipExtension[] @relation("ExtensionSource")
+  continuationOf InternshipExtension? @relation("ExtensionContinuation")
+  promotions InternshipPromotion[] @relation("PromotionSource")
+  continuationPromotions InternshipPromotion[] @relation("PromotionContinuation")
 
   @@index([userId])
   @@index([departmentId])
@@ -794,6 +813,7 @@ enum EmailStatus {
 }
 
 enum NotificationCategory {
+  MEETING
   ACCOUNT
   INTERNSHIP
   ATTENDANCE
@@ -992,4 +1012,201 @@ model LearningProgressCorrection {
 
   @@unique([progressId, revision])
   @@map("learning_progress_corrections")
+}
+
+enum CertificateDispatchStatus {
+  SENT
+  NOT_SENT
+}
+
+model CertificateDispatch {
+  id             String                    @id @default(uuid()) @db.VarChar(36)
+  internshipId   String                    @map("internship_id") @db.VarChar(36)
+  actorId        String                    @map("actor_id") @db.VarChar(36)
+  requestKey     String                    @map("request_key") @db.VarChar(36)
+  sequence       Int
+  status         CertificateDispatchStatus
+  declaredSentAt DateTime?                 @map("declared_sent_at")
+  recordedAt     DateTime                  @default(now()) @map("recorded_at")
+  note           String?                   @db.VarChar(500)
+
+  internship Internship @relation(fields: [internshipId], references: [id], onDelete: Restrict)
+  actor      User       @relation(fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@unique([internshipId, requestKey])
+  @@unique([internshipId, sequence])
+  @@map("certificate_dispatch_history")
+}
+
+model InternshipExtension {
+  id               String    @id @default(uuid()) @db.VarChar(36)
+  internshipId     String    @map("internship_id") @db.VarChar(36)
+  continuationId   String?   @unique @map("continuation_id") @db.VarChar(36)
+  actorId          String    @map("actor_id") @db.VarChar(36)
+  previousEnd      DateTime  @map("previous_end") @db.Date
+  startsOn         DateTime  @map("starts_on") @db.Date
+  endsOn           DateTime  @map("ends_on") @db.Date
+  reason           String    @db.VarChar(500)
+  remarks          String?   @db.VarChar(500)
+  createdAt        DateTime  @default(now()) @map("created_at")
+  cancelledAt      DateTime? @map("cancelled_at")
+  cancellationNote String?   @map("cancellation_note") @db.VarChar(500)
+
+  internship   Internship  @relation("ExtensionSource", fields: [internshipId], references: [id], onDelete: Restrict)
+  continuation Internship? @relation("ExtensionContinuation", fields: [continuationId], references: [id], onDelete: Restrict)
+  actor        User        @relation(fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([internshipId, createdAt])
+  @@map("internship_extensions")
+}
+
+enum PromotionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+  PROVISIONED
+}
+
+model InternshipPromotion {
+  id                   String          @id @default(uuid()) @db.VarChar(36)
+  internshipId         String          @map("internship_id") @db.VarChar(36)
+  continuationId       String?         @map("continuation_id") @db.VarChar(36)
+  departmentId         String?         @map("department_id") @db.VarChar(36)
+  requestedBy          String          @map("requested_by") @db.VarChar(36)
+  decidedBy            String?         @map("decided_by") @db.VarChar(36)
+  designation          String          @db.VarChar(100)
+  targetRole           String?         @map("target_role") @db.VarChar(40)
+  effectiveOn          DateTime        @map("effective_on") @db.Date
+  reason               String          @db.VarChar(500)
+  status               PromotionStatus
+  decisionReason       String?         @map("decision_reason") @db.VarChar(500)
+  createdAt            DateTime        @default(now()) @map("created_at")
+  decidedAt            DateTime?       @map("decided_at")
+  provisionedAt        DateTime?       @map("provisioned_at")
+  provisionedStaffId   String?         @map("provisioned_staff_id") @db.VarChar(36)
+
+  internship        Internship   @relation("PromotionSource", fields: [internshipId], references: [id], onDelete: Restrict)
+  continuation      Internship?  @relation("PromotionContinuation", fields: [continuationId], references: [id], onDelete: Restrict)
+  department        Department?  @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  requester         User         @relation("PromotionRequester", fields: [requestedBy], references: [id], onDelete: Restrict)
+  decider           User?        @relation("PromotionDecider", fields: [decidedBy], references: [id], onDelete: Restrict)
+  provisionedStaff  StaffProfile? @relation(fields: [provisionedStaffId], references: [id], onDelete: Restrict)
+
+  @@index([internshipId, createdAt])
+  @@index([continuationId, effectiveOn])
+  @@index([status, createdAt])
+  @@map("internship_promotions")
+}
+
+enum MeetingMode {
+  MANUAL
+  GOOGLE_CALENDAR
+}
+
+enum MeetingStatus {
+  DRAFT
+  SCHEDULED
+  CANCELLED
+  COMPLETED
+}
+
+enum MeetingSyncStatus {
+  NOT_REQUIRED
+  PENDING
+  PROCESSING
+  READY
+  FAILED
+  SYNC_REQUIRED
+}
+
+enum MeetingResponse {
+  INVITED
+  ACCEPTED
+  DECLINED
+}
+
+model Meeting {
+  id                  String            @id @default(uuid()) @db.VarChar(36)
+  meetingCode         String            @unique @map("meeting_code") @db.VarChar(50)
+  organizerId         String            @map("organizer_id") @db.VarChar(36)
+  departmentId        String?           @map("department_id") @db.VarChar(36)
+  title               String            @db.VarChar(160)
+  description         String            @db.Text
+  audienceType        AnnouncementAudience @map("audience_type")
+  selectedUserIds     Json              @map("selected_user_ids")
+  creationMode        MeetingMode       @map("creation_mode")
+  startAt             DateTime          @map("start_at")
+  endAt               DateTime          @map("end_at")
+  timezone            String            @default("Asia/Kolkata") @db.VarChar(40)
+  meetingUrl          String?           @map("meeting_url") @db.VarChar(255)
+  status              MeetingStatus     @default(DRAFT)
+  version             Int               @default(0)
+  providerSyncStatus  MeetingSyncStatus @default(NOT_REQUIRED) @map("provider_sync_status")
+  providerEventId     String?           @unique @map("provider_event_id") @db.VarChar(64)
+  conferenceRequestId String?           @unique @map("conference_request_id") @db.VarChar(64)
+  calendarConnectionId String?          @map("calendar_connection_id") @db.VarChar(36)
+  syncAttempts        Int               @default(0) @map("sync_attempts")
+  syncAfter           DateTime?         @map("sync_after")
+  syncLease           String?           @map("sync_lease") @db.VarChar(36)
+  syncError           String?           @map("sync_error") @db.VarChar(80)
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+  cancelledAt         DateTime?         @map("cancelled_at")
+  cancellationReason  String?           @map("cancellation_reason") @db.VarChar(500)
+
+  organizer          User                @relation(fields: [organizerId], references: [id], onDelete: Restrict)
+  department         Department?         @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  participants       MeetingParticipant[]
+  calendarConnection CalendarConnection? @relation(fields: [calendarConnectionId], references: [id], onDelete: Restrict)
+
+  @@index([status, startAt])
+  @@index([departmentId, status])
+  @@index([providerSyncStatus, syncAfter])
+  @@map("meetings")
+}
+
+model MeetingParticipant {
+  meetingId      String          @map("meeting_id") @db.VarChar(36)
+  userId         String          @map("user_id") @db.VarChar(36)
+  response       MeetingResponse @default(INVITED)
+  invitedAt      DateTime        @default(now()) @map("invited_at")
+  responseAt     DateTime?       @map("response_at")
+  revokedAt      DateTime?       @map("revoked_at")
+  joinRequestedAt DateTime?      @map("join_requested_at")
+
+  meeting Meeting @relation(fields: [meetingId], references: [id], onDelete: Restrict)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@id([meetingId, userId])
+  @@index([userId, revokedAt])
+  @@map("meeting_participants")
+}
+
+model CalendarConnection {
+  id               String    @id @default(uuid()) @db.VarChar(36)
+  organizerId      String    @map("organizer_id") @db.VarChar(36)
+  calendarId       String    @map("calendar_id") @db.VarChar(255)
+  encryptedToken   String?   @map("encrypted_token") @db.Text
+  scope            String    @db.VarChar(255)
+  connectedAt      DateTime  @default(now()) @map("connected_at")
+  disconnectedAt   DateTime? @map("disconnected_at")
+
+  organizer User      @relation(fields: [organizerId], references: [id], onDelete: Restrict)
+  meetings  Meeting[]
+
+  @@unique([organizerId, calendarId])
+  @@map("calendar_connections")
+}
+
+model CalendarAuthorization {
+  id          String   @id @default(uuid()) @db.VarChar(64)
+  organizerId String   @map("organizer_id") @db.VarChar(36)
+  expiresAt   DateTime @map("expires_at")
+
+  organizer User @relation(fields: [organizerId], references: [id], onDelete: Restrict)
+
+  @@index([expiresAt])
+  @@index([organizerId])
+  @@map("calendar_authorizations")
 }

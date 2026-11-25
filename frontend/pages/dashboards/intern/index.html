@@ -42,8 +42,9 @@
         <div class="ic-sidebar-group-label">LEARNING</div>
         <a href="#phase06Learning" class="nav-link phase04-disabled" data-phase06-link hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v15H4zM8 3v4m8-4v4M7 10h10M7 14h6"/></svg>Learning Center</a>
         <a href="#phase06Performance" class="nav-link phase04-disabled" data-phase06-link hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18v-5m7 5V6m7 12V9"/></svg>My Performance</a>
-        <a href="#icCertificateEligibility" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.4 5 5.5.8-4 3.9.9 5.5-4.8-2.6-4.8 2.6.9-5.5-4-3.9 5.5-.8L12 3Z"/></svg>Certificates</a>
+        <a href="#phase08Internships" data-phase08-link hidden class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.4 5 5.5.8-4 3.9.9 5.5-4.8-2.6-4.8 2.6.9-5.5-4-3.9 5.5-.8L12 3Z"/></svg>Internship timeline</a>
         <div class="ic-sidebar-group-label">UPDATES &amp; HELP</div>
+        <a href="#phase08Meetings" class="nav-link" data-phase08-link hidden>Meetings</a>
         <a href="#phase07Center" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12h4"/></svg>Notifications</a>
         <a href="mailto:Info@IntelliCoreTechnologies.in" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 4.4 1.6c-1.1 1.2-1.9 1.2-1.9 3.4m0 3h.01"/></svg>Support</a>
       </nav>
@@ -83,10 +84,11 @@
       <ul class="mobile-nav-list">
         <li><a href="#phase06Learning" class="mobile-nav-link phase04-disabled" data-phase06-link hidden>Learning center <span>→</span></a></li>
         <li><a href="#phase06Performance" class="mobile-nav-link phase04-disabled" data-phase06-link hidden>My performance <span>→</span></a></li>
-        <li><a href="#icCertificateEligibility" class="mobile-nav-link">Certificates <span>→</span></a></li>
+        <li><a href="#phase08Internships" data-phase08-link hidden class="mobile-nav-link">Internship timeline <span>→</span></a></li>
       </ul>
       <p class="mobile-nav-group">UPDATES &amp; HELP</p>
       <ul class="mobile-nav-list">
+        <li><a href="#phase08Meetings" class="mobile-nav-link" data-phase08-link hidden>Meetings</a></li>
         <li><a href="#phase07Center" class="mobile-nav-link">Notifications <span>→</span></a></li>
         <li><a href="mailto:Info@IntelliCoreTechnologies.in" class="mobile-nav-link">Support <span>↗</span></a></li>
       </ul>
@@ -200,15 +202,6 @@
       </div>
     </section>
 
-    <section class="ic-meeting-panel" id="icMeetingPanel" aria-label="Team meeting">
-      <div><span class="ic-meeting-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></span><div><strong id="icMeetingTitle">Team meeting</strong><p id="icMeetingDescription">There is no active organisation-wide meeting right now.</p></div></div>
-      <div class="ic-meeting-actions">
-        <span class="ic-meeting-status" id="icMeetingStatus">No active meeting</span>
-        <a class="ic-meet-button" id="icJoinMeetButton" href="#" target="_blank" rel="noopener noreferrer" hidden>Join Google Meet &rarr;</a>
-        <button type="button" class="ic-meet-button ic-meet-admin-button" id="icStartMeetButton" hidden>Start meeting</button>
-        <button type="button" class="ic-outline-button" id="icEndMeetButton" hidden>End meeting</button>
-      </div>
-    </section>
 
     <section class="ic-attendance-panel ic-workspace-panel" id="icAttendancePanel" aria-labelledby="icAttendanceTitle" hidden>
       <div class="ic-attendance-heading"><div><h2 id="icAttendanceTitle">My Attendance</h2><p id="icAttendanceSummary">Monthly attendance overview.</p></div><label class="ic-attendance-month-label" for="icAttendanceMonthFilter"><select id="icAttendanceMonthFilter" aria-label="Attendance month"></select></label></div>
@@ -218,6 +211,7 @@
 
     <section id="phase06Work" class="phase04-disabled" aria-label="My tasks, learning and performance" hidden></section>
     <section id="phase07Workspace" class="phase04-disabled" aria-label="Notifications and announcements" hidden></section>
+    <section id="phase08Workspace" class="phase04-disabled" aria-label="Meetings and internship follow-up" hidden></section>
     <section class="ic-training-section ic-workspace-panel phase04-disabled" id="icTrainingSection" aria-labelledby="icTrainingTitle" aria-live="polite" hidden>
       <div class="ic-panel-heading">
         <div><span class="ic-muted-label">YOUR INTERNSHIP</span><h2 id="icTrainingTitle">Task Overview</h2><p id="icTrainingIntro">Loading your internship profile…</p></div>
@@ -293,7 +287,6 @@
       <div class="ic-stat-card"><span class="ic-stat-icon icon-teal"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span><span><span>Completed Tasks</span><strong class="ic-stat-word" id="icApprovedTrainingCount">—</strong><small>Approved by your mentor</small></span></div>
       <button type="button" class="ic-stat-card" data-workspace-view="attendance" aria-label="Open attendance"><span class="ic-stat-icon icon-amber"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 9h18M8 14l2.5 2.5L16 11"/></svg></span><span><span>Attendance</span><strong class="ic-stat-word" id="icAttendanceStatStatus">—</strong><small id="icAttendanceStatDetail">Recorded check-ins</small></span></button>
       <button type="button" class="ic-stat-card" data-workspace-view="training" aria-label="Open internship progress"><span class="ic-stat-icon icon-blue"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span><span><span>Internship Progress</span><strong class="ic-stat-word" id="icInternshipProgress">—</strong><small>Based on approved training tasks</small></span></button>
-      <button type="button" class="ic-stat-card" id="icCertificateEligibility" aria-label="Request certificate review"><span class="ic-stat-icon icon-violet"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></span><span><span>Certificate Status</span><strong class="ic-stat-word" id="icCertificateStatus">Not requested</strong><small id="icCertificateDetail">Request HR review after your internship ends</small></span></button>
     </section>
 
     <section class="ic-workspace-lower-grid ic-insights-grid" aria-label="Workspace details">

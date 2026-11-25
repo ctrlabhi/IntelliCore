@@ -182,3 +182,11 @@ Routes below are under `/api/v1`. Requests require an active account, verified F
 
 Publish and add-recipient requests use the `revision` and `previewToken` from the latest recipient preview. Submitted versions retain their original deadline and rubric. Stale or invalid state transitions return 409. Upload one binary file per request with `Content-Type: application/octet-stream`, `X-Attachment-Name` as the percent-encoded filename and `X-Expected-Revision` as the draft revision. Oversize and unsupported content return 413 and 415. See [OpenAPI definitions](../backend/src/config/phase06OpenApi.js) and [file storage](FILE_STORAGE.md).
 
+## Phase 08 meetings and internship follow-up
+
+See the concrete Phase 08 request and response contracts in local Swagger at `/api-docs/`. All paths use `/api/v1`.
+
+- `/meetings` lists managed meetings and creates drafts. `/meetings/me` lists own invitations. Managed detail and participant endpoints use current resource scope. Meeting actions preview an audience, schedule, reschedule, cancel, complete, respond, join and retry provider synchronization.
+- `/calendar/connection`, `/calendar/connect` and `/calendar/disconnect` expose the configured organizer's connection controls. The browser callback requires one-time state and the same user-agent cookie.
+- `/internships/followups/completed` supports the current dispatch status filter. On `/internships/:id`, use `certificate-email-status`, `extensions` and `promotions` histories and explicit state-transition routes.
+- `/promotions` provides a scoped recommendation list. Decisions use approve, reject, cancel and provision actions. Provisioning requires an approved recommendation, effective date and recent authentication of the primary Founder.

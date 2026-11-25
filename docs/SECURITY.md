@@ -76,3 +76,6 @@ The IntelliCore platform enforces defense-in-depth across the client, networking
 
 Technical work, attachments and published learning content use verified identity, active account checks, explicit MySQL permissions and ownership or department scope. The module validates transition inputs and rejects stale writes. Private work stays out of diagnostic logs and staff reports without technical permission. Files live under the existing upload volume and are provided by authenticated download with conservative content validation. [Security rules](SECURITY_RULES.md#phase-06-controls) · [Private file storage](FILE_STORAGE.md).
 
+## Phase 08 application protections
+
+Calendar consent binds a single-use state hash and PKCE challenge to an HttpOnly cookie. OAuth query strings are omitted from request logs. AES-GCM associates refresh credentials with organizer and calendar. Provider writes use an explicit development authorization flag and never supply attendees. Meet links use a strict canonical HTTPS format. Certificate status is an authenticated, audited app-only record. The external certificate document and email workflow remains outside IntelliCore. [Security rules](SECURITY_RULES.md).

@@ -57,7 +57,7 @@ async function verifyAudience(tx, actor, data, lockDepartment = true) {
   throw new ForbiddenError('Announcement audience exceeds current scope.');
 }
 
-async function audience(tx, data, now) {
+export function eligibleAudienceWhere(data, now) {
   const type = data.audienceType;
   let where = active;
   if (type === 'SELECTED_USERS') where = { ...where, id: { in: data.selectedUsers } };
@@ -70,6 +70,11 @@ async function audience(tx, data, now) {
         userDepartments: { some: { departmentId: data.departmentId, isActive: true, department: { isActive: true } } } }] };
     }
   }
+  return where;
+}
+
+async function audience(tx, data, now) {
+  const where = eligibleAudienceWhere(data, now);
   const users = await tx.user.findMany({ where, select: { id: true }, orderBy: { id: 'asc' }, take: audienceLimit + 1 });
   if (users.length > audienceLimit) throw conflict('Narrow this audience to at most 1000 people.', 'AUDIENCE_LIMIT');
   return users.map(({ id }) => id);

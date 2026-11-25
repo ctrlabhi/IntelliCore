@@ -1,5 +1,11 @@
 # Architecture Decision Records (ADRs)
 
+## ADR-007 Calendar consent and auditable internship follow-up
+
+The final Phase 08 owner specification supersedes the earlier certificate document design. The application tracks an external-dispatch declaration and corrections, with in-app notification. Completed enrollment periods remain separate from continuation periods. Non-privileged titles are independent of RBAC. Protected staff and role changes share the existing service transaction with promotion evidence.
+
+Calendar is an optional separate OAuth integration with browser-bound one-time state, protected refresh tokens, and a durable meeting revision and synchronization lease. The worker sends provider requests only for the configured organizer and designated calendar. [Calendar integration](GOOGLE_CALENDAR_INTEGRATION.md).
+
 ## ADR-006 Transactional notifications and isolated transport
 
 Business changes and their notices and outbox entries commit together in MySQL. Keep transport and scheduled work in a separately authorized process sharing the application image. Persist job claims, attempt history and auditable audience snapshots. Use capture by default and record SMTP ambiguity separately from successful acceptance. Keep app, worker and migration credentials apart. [Background processing](BACKGROUND_PROCESSING.md) · [Notification routes](API.md#phase-07-notifications-announcements-and-delivery).

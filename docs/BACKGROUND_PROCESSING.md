@@ -30,3 +30,9 @@ The initial defaults are five jobs per poll, a five-second poll, five automatic 
 Task reminders use the effective due instant for available unfinished assignments. The provisional default sends one reminder per deadline within 24 hours. Daily work reports use the effective attendance policy and business date, defaulting to the last 30 minutes before cutoff. They exclude approved leave, weekly off, ineligible internships, and submitted reports. Internship commencement uses two days of lead time plus the commencement date. Completion-review reminders use a three-day lead time. Launcher defaults can be changed with bounded configuration or the audited Founder settings form. Processing uses UTC timestamps and IST calendar dates.
 
 The worker scans limited batches with cursors and generates notices only inside current windows. It does not replay expired reminder windows after downtime. Scheduled announcements apply their confirmed snapshot, expiry and current authorization separately. [Announcement rules](ANNOUNCEMENT_MANAGEMENT.md).
+
+## Phase 08 worker grants and processing
+
+Add scoped SELECT on `meetings` and `meeting_participants` for reminders, recipient eligibility and meeting email. The Calendar profile of the same worker additionally requires SELECT on the configured schema's `calendar_connections` and narrowly scoped UPDATE on the meeting synchronization columns `sync_lease`, `sync_after`, `sync_attempts`, `sync_error`, `provider_sync_status`, `meeting_url` and `updated_at`. Grant the Calendar token-read capability only to the worker processing approved provider events. Keep CAPTURE as the normal local email mode.
+
+Meeting reminders use the scheduled revision and recipient and share the notification transaction. Calendar processing durably claims one due record at a time, with a 90-second lease and up to eight attempts. Ambiguous provider results are reconciled against the stable event ID. [Meeting management](MEETING_MANAGEMENT.md).

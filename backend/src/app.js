@@ -57,7 +57,7 @@ export function createApp() {
       '/Dockerfile',
       '/docker-compose.yml'
     ];
-    const lowerUrl = req.url.toLowerCase();
+    const lowerUrl = req.path.toLowerCase();
     for (const pattern of sensitive) {
       if (lowerUrl.startsWith(pattern) || lowerUrl.includes(pattern)) {
         return res.status(403).send('Access Denied');

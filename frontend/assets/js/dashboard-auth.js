@@ -11,6 +11,7 @@ import { mountPhase04 } from './phase04-dashboard.js';
 import { mountAttendance, stopAttendance } from './phase05-dashboard.js';
 import { mountWork } from './phase06-dashboard.js';
 import { mountNotifications } from './phase07-dashboard.js';
+import { mountPhase08 } from './phase08-dashboard.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -131,6 +132,7 @@ function renderInternWorkspace(context) {
   else stopAttendance(attendance);
   void mountWork($('phase06Work'), context, true);
   mountNotifications($('phase07Workspace'), context);
+  mountPhase08($('phase08Workspace'), context, true);
 }
 
 authService.onAuthStateChanged((context) => {
