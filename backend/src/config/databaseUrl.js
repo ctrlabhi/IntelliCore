@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+
 /**
  * Database URL Construction & Validation Module
  * Supports individual environment variables (DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD, DB_SSL)
@@ -221,10 +223,24 @@ export function resolveDatabaseConfiguration(envSource = process.env) {
     }
   }
 
+  const normalizeLocalHost = (urlStr) => {
+    if (!urlStr || isProduction) return urlStr;
+    try {
+      const u = new URL(urlStr);
+      if (u.hostname.toLowerCase() === 'mysql' && !fs.existsSync('/.dockerenv')) {
+        u.hostname = '127.0.0.1';
+        return u.href;
+      }
+    } catch {}
+    return urlStr;
+  };
+
+  const effectiveFinalUrl = normalizeLocalHost(finalUrl);
+
   return {
-    databaseUrl: finalUrl,
-    migrationDatabaseUrl: envSource.MIGRATION_DATABASE_URL?.trim() || null,
-    notificationDatabaseUrl: envSource.NOTIFICATION_DATABASE_URL?.trim() || null
+    databaseUrl: effectiveFinalUrl,
+    migrationDatabaseUrl: normalizeLocalHost(envSource.MIGRATION_DATABASE_URL?.trim()) || null,
+    notificationDatabaseUrl: normalizeLocalHost(envSource.NOTIFICATION_DATABASE_URL?.trim()) || null
   };
 }
 

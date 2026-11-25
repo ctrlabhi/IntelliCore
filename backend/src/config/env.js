@@ -11,9 +11,7 @@ if (process.env.NODE_ENV !== 'test' && process.env.VERCEL !== '1') {
 let resolvedDb;
 try {
   resolvedDb = resolveDatabaseConfiguration(process.env);
-  if (!process.env.DATABASE_URL) {
-    process.env.DATABASE_URL = resolvedDb.databaseUrl;
-  }
+  process.env.DATABASE_URL = resolvedDb.databaseUrl;
 } catch (err) {
   if (process.env.NODE_ENV === 'production' && process.env.VERCEL !== '1') {
     throw err;

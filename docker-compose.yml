@@ -129,7 +129,8 @@ services:
     image: mysql:8.4
     container_name: intellicore_mysql
     restart: unless-stopped
-    # Port 3306 is private to the internal Docker network (not published to host)
+    ports:
+      - "127.0.0.1:3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-intellicore_db}
