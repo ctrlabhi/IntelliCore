@@ -15,7 +15,7 @@
 | 04 | Conditionally accepted | Department assignments, onboarding, review, enrollment, manual completion, MySQL metrics, auditing and four dashboards. 91 tests passed, plus four synthetic browser role workflows. [Phase 04 engineering report](PHASE_04_REPORT.md). |
 | 05 | Implemented, with existing-stack acceptance open | `4d19095` and `05c8830`. Automatic check-in, explicit checkout, deterministic attendance history, Daily Work Reports, leave and corrections. 112 tests passed across 19 files. [Phase 05 report](PHASE_05_REPORT.md). |
 | 06 | Implemented, with existing-stack acceptance open | `3085ef8` adds tasks, versioned submissions and reviews, private storage, immutable curriculum and scoped reports. 131 tests passed across 21 files. [Phase 06 report](PHASE_06_REPORT.md). |
-| 07 | Implemented, with live acceptance open | Transactional notifications, capture worker, scoped announcements, reminders and assessment corrections. [Phase 07 report](PHASE_07_REPORT.md). |
+| 07 | Implemented, with live acceptance open | `afa746b` adds transactional notifications, capture worker, scoped announcements, reminders and assessment corrections. 147 tests passed across 23 files. [Phase 07 report](PHASE_07_REPORT.md). |
 | 08 | Pending | Google Meet and certificate generation. Calendar integration is a stub and a certificate template exists. |
 | 09 | Pending | Full frontend unification and role dashboards. |
 | 10 | Pending | Security hardening, final verification and delivery. |
