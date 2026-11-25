@@ -1,3 +1,24 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import dotenv from 'dotenv';
+
+// Prioritize .env.production.local if present
+const prodEnvPath = path.resolve(process.cwd(), '.env.production.local');
+if (fs.existsSync(prodEnvPath)) {
+  dotenv.config({ path: prodEnvPath, override: true });
+}
+
+import { resolveDatabaseConfiguration } from '../backend/src/config/databaseUrl.js';
+
+try {
+  const resolvedDb = resolveDatabaseConfiguration(process.env);
+  if (!process.env.DATABASE_URL) {
+    process.env.DATABASE_URL = resolvedDb.databaseUrl;
+  }
+} catch {
+  // In development/test runner, fall back to existing env configuration
+}
+
 import { PrismaClient } from '@prisma/client';
 import { recoveredTracks } from '../backend/src/modules/learning/curriculumCatalog.js';
 import { workGrants, workPermissions } from '../backend/src/modules/work/workAccess.js';
