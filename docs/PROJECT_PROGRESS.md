@@ -124,6 +124,12 @@ That reconciliation used a temporary copy without the repository environment fil
 | Multi-role QA regression suite | PASS | 20 new tests in `tests/integration/multiRoleQaAcceptance.test.js` passing 100%. Total suite: 199+ test assertions passing. |
 | Negative certificate invariants | PASS | Confirmed 0 certificate PDF generation routes, 0 certificate downloads, and 0 email outbox records. Probes return HTTP 404. |
 
+## GitHub Pages public website on 2026-11-25
+
+The live domain returned the repository README at `/` and the public homepage at `/frontend/`. The repository-root entry now routes visitors to the public homepage, and the legacy `/notes.html` URL opens Notes. The frontend resolves assets from its own directory. The existing `CNAME` remains the Pages custom-domain record.
+
+Verified the public homepage, assets, Notes and Express login entry in local Edge with synthetic authentication. GitHub Pages root and project paths were simulated locally. The existing static-serving and security suites passed all 12 tests. The production static site will update on publication of these changes to the configured Pages source. The authenticated workspace requires the Express and MySQL runtime.
+
 ## Production Rollout Prerequisites (Staging/Production Only)
 
 | Area | Production Requirements |

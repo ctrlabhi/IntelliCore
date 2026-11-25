@@ -4,6 +4,15 @@
   const modal = $('loginModal');
   if (!modal) return;
 
+  const script = document.currentScript.src;
+  // The repository-root Pages site serves the public homepage from the frontend directory.
+  const home = new URL('../../', script);
+  if (home.pathname.endsWith('/frontend/')) {
+    $('loginTrigger')?.remove();
+    modal.remove();
+    return;
+  }
+
   function openModal() {
     modal.classList.add('is-open');
     modal.setAttribute('aria-hidden', 'false');
@@ -29,4 +38,7 @@
     if (event.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
   });
   if (new URLSearchParams(window.location.search).get('auth') === 'login') openModal();
+  import(new URL('./auth.js?v=20261028-google-mobile-redirect', script).href).catch((error) => {
+    console.error('IntelliCore workspace sign-in could not load.', error);
+  });
 })();
