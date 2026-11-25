@@ -11,6 +11,7 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
+    image: intellicore-app
     container_name: intellicore_app
     restart: unless-stopped
     ports:
@@ -26,6 +27,7 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       DATABASE_URL: mysql://${MYSQL_USER:-intellicore_app}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE:-intellicore_db}?connection_limit=10&connect_timeout=15
       UPLOAD_DIR: /app/uploads
+      EMAIL_MAX_ATTEMPTS: ${EMAIL_MAX_ATTEMPTS:-5}
       RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-900000}
       RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-100}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
@@ -55,6 +57,54 @@ services:
       retries: 5
       start_period: 20s
 
+  notification-worker:
+    profiles: ["notifications"]
+    image: intellicore-app
+    restart: unless-stopped
+    stop_grace_period: 45s
+    command: ["node", "backend/src/scripts/notificationWorker.js"]
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:3000}
+      NOTIFICATION_DATABASE_URL: ${NOTIFICATION_DATABASE_URL:-}
+      EMAIL_DELIVERY_MODE: ${EMAIL_DELIVERY_MODE:-CAPTURE}
+      EMAIL_SMTP_AUTHORIZED: ${EMAIL_SMTP_AUTHORIZED:-false}
+      EMAIL_ALLOWED_RECIPIENTS: ${EMAIL_ALLOWED_RECIPIENTS:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_REQUIRE_TLS: ${SMTP_REQUIRE_TLS:-true}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-IntelliCore}
+      EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:-}
+      EMAIL_REPLY_TO: ${EMAIL_REPLY_TO:-}
+      NOTIFICATION_BATCH_SIZE: ${NOTIFICATION_BATCH_SIZE:-5}
+      NOTIFICATION_POLL_MS: ${NOTIFICATION_POLL_MS:-5000}
+      EMAIL_RETRY_BASE_SECONDS: ${EMAIL_RETRY_BASE_SECONDS:-60}
+      EMAIL_RETRY_CAP_SECONDS: ${EMAIL_RETRY_CAP_SECONDS:-3600}
+      NOTIFICATION_TASK_REMINDER_HOURS: ${NOTIFICATION_TASK_REMINDER_HOURS:-24}
+      NOTIFICATION_REPORT_REMINDER_MINUTES: ${NOTIFICATION_REPORT_REMINDER_MINUTES:-30}
+      NOTIFICATION_COMMENCEMENT_DAYS: ${NOTIFICATION_COMMENCEMENT_DAYS:-2}
+      NOTIFICATION_COMPLETION_DAYS: ${NOTIFICATION_COMPLETION_DAYS:-3}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - intellicore_net
+  migrate:
+    profiles: ["maintenance"]
+    image: intellicore-app
+    command: ["node", "backend/src/scripts/migrateDatabase.js"]
+    environment:
+      DATABASE_URL: ${MIGRATION_DATABASE_URL:-}
+      SHADOW_DATABASE_URL: ${MIGRATION_SHADOW_DATABASE_URL:-}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-intellicore_db}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - intellicore_net
   # ----------------------------------------------------------------------------
   # 2. Database Service: MySQL 8.4 LTS
   # ----------------------------------------------------------------------------

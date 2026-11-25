@@ -3,6 +3,8 @@ import { randomUUID } from 'node:crypto';
 import prisma from '../../config/database.js';
 import { lockUser, readPage, transaction } from '../../utils/phase04.js';
 import { activeDepartment, audit, conflict, eligibleWhere, found, historicalWhere, own, person, scope, can } from '../work/workAccess.js';
+import { emitForReviewers, emitNotification } from '../notifications/notificationService.js';
+import { ForbiddenError } from '../../utils/errors.js';
 
 const orderBy = [{ sequence: 'asc' }, { id: 'asc' }];
 const outline = { orderBy, include: { resources: { orderBy }, lessons: { orderBy, include: { resources: { orderBy } } } } };
@@ -107,6 +109,10 @@ export function transitionTrack(req, id, status, requestId) {
       status, ...(status === 'PUBLISHED' ? { publishedAt: now } : { archivedAt: now })
     } });
     await audit(tx, req, requestId, 'LEARNING_TRACK_' + status, 'LEARNING_TRACK', id, { version: track.version });
+    if (status === 'PUBLISHED') {
+      await emitForReviewers(tx, { event: 'LEARNING_VERSION_AVAILABLE', type: 'LEARNING_TRACK', resourceId: id,
+        rule: 'DEPARTMENT_LEARNING', departmentId: track.departmentId, actorId: req.user.id, now });
+    }
     return result;
   });
 }
@@ -172,7 +178,9 @@ function lessonCounts(modules, progressRows) {
     totalModules: progressModules.length, modules: progressModules };
 }
 
-const enrollmentTree = { track: { include: { department, modules: outline } }, progress: true,
+const enrollmentTree = { track: { include: { department, modules: outline } },
+  progress: { include: { corrections: { orderBy: { revision: 'desc' }, take: 1,
+    select: { id: true, revision: true, createdAt: true } } } },
   internship: { select: person } };
 
 function formatEnrollment(enrollment) {
@@ -202,6 +210,8 @@ async function enroll(tx, req, internship, track, requestId) {
   await audit(tx, req, requestId, 'LEARNING_ENROLLED', 'LEARNING_ENROLLMENT', created.id, {
     internshipId: internship.id, trackId: track.id, version: track.version
   });
+  await emitNotification(tx, { event: 'LEARNING_ASSIGNED', type: 'LEARNING_ENROLLMENT', resourceId: created.id,
+    recipientIds: [internship.userId] });
   return created;
 }
 
@@ -272,6 +282,13 @@ export async function listLearningProgress(req, query) {
   return { ...result, items: result.items.map(summarizeLearning) };
 }
 
+export async function learningEnrollmentDetail(req, id, ownOnly = false) {
+  const access = ownOnly ? historicalWhere(own(req, 'learning')) : scope(req, 'learning:read');
+  return formatEnrollment(found(await prisma.learningEnrollment.findFirst({
+    where: { id, internship: access, track: { publishedAt: { not: null } } }, include: enrollmentTree
+  }), 'Learning enrollment'));
+}
+
 export function progressLesson(req, lessonId, { enrollmentId }, complete) {
   const userId = own(req, 'learning');
   return transaction(async (tx) => {
@@ -292,7 +309,46 @@ export function progressLesson(req, lessonId, { enrollmentId }, complete) {
     const summary = lessonCounts(enrollment.track.modules, [...enrollment.progress.filter((p) => p.id !== current.id), result]);
     if (summary.required > 0 && summary.completedRequired === summary.required && enrollment.status !== 'COMPLETED') {
       await tx.learningEnrollment.update({ where: { id: enrollmentId }, data: { status: 'COMPLETED' } });
+      await emitNotification(tx, { event: 'LEARNING_COMPLETED', type: 'LEARNING_ENROLLMENT', resourceId: enrollmentId,
+        recipientIds: [userId], now });
+      await emitForReviewers(tx, { event: 'LEARNING_COMPLETED', type: 'LEARNING_ENROLLMENT', resourceId: enrollmentId,
+        rule: 'DEPARTMENT_LEARNING', departmentId: enrollment.track.departmentId, now });
     }
     return result;
+  });
+}
+
+export function correctLearningProgress(req, enrollmentId, lessonId, input, requestId) {
+  const access = scope(req, 'learning:manage');
+  if (!req.permissions.includes('learning:correct_progress')) throw new ForbiddenError();
+  return transaction(async (tx) => {
+    const where = { id: enrollmentId, internship: access, track: {
+      publishedAt: { not: null }, modules: { some: { lessons: { some: { id: lessonId } } } }
+    } };
+    const target = found(await tx.learningEnrollment.findFirst({ where, include: enrollmentTree }), 'Learning enrollment');
+    if (target.internship.userId === req.user.id) throw new ForbiddenError('Self-correction is unavailable.');
+    await lockedTrack(tx, req, target.learningTrackId);
+    await lockUser(tx, target.internship.userId);
+    const current = found(await tx.learningEnrollment.findFirst({ where, include: enrollmentTree }), 'Learning enrollment');
+    const progress = found(current.progress.find((item) => item.lessonId === lessonId), 'Observed lesson progress');
+    if (progress.status !== input.expectedStatus || (progress.corrections[0]?.id ?? null) !== input.expectedCorrectionId
+      || progress.status === input.status) throw conflict('Reload the lesson and choose a different valid progress state.');
+    const now = new Date();
+    const after = await tx.learningProgress.update({ where: { id: progress.id }, data: {
+      status: input.status, completedAt: input.status === 'COMPLETED' ? now : null
+    } });
+    const snapshot = (row) => ({ status: row.status, startedAt: row.startedAt.toISOString(), completedAt: row.completedAt?.toISOString() ?? null });
+    const correction = await tx.learningProgressCorrection.create({ data: {
+      progressId: progress.id, correctedBy: req.user.id, reason: input.reason, revision: (progress.corrections[0]?.revision ?? 0) + 1,
+      beforeState: snapshot(progress), afterState: snapshot(after), createdAt: now
+    } });
+    const counts = lessonCounts(current.track.modules, current.progress.map((row) => row.id === after.id ? after : row));
+    const status = counts.required > 0 && counts.completedRequired === counts.required ? 'COMPLETED' : 'ACTIVE';
+    if (status !== current.status) await tx.learningEnrollment.update({ where: { id: enrollmentId }, data: { status } });
+    await audit(tx, req, requestId, 'LEARNING_PROGRESS_CORRECTED', 'LEARNING_PROGRESS', progress.id,
+      { status: after.status, correctionId: correction.id }, { status: progress.status });
+    await emitNotification(tx, { event: 'LEARNING_PROGRESS_CORRECTED', type: 'LEARNING_ENROLLMENT', resourceId: enrollmentId,
+      recipientIds: [target.internship.userId], version: correction.id, now });
+    return { ...after, correctionId: correction.id, enrollmentStatus: status };
   });
 }

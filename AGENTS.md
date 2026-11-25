@@ -14,11 +14,12 @@ Read the linked architecture decisions, business rules, phase reports and releva
 
 ## Implementation boundaries
 
-- Follow the phase scope in the roadmap and the current user request. Phase 07 requires the user's next manual implementation prompt.
+- Follow the phase scope in the roadmap and the current user request. Phase 08 requires the user's next manual implementation prompt.
 - Preserve the same-origin modular monolith, HTML/CSS/vanilla JavaScript, Node.js 24 LTS, Express 5, MySQL 8.4 LTS, Prisma, Docker Compose and phpMyAdmin. Preserve branding, responsive layouts and compatible public URLs. Use UTC for stored timestamps and Asia/Kolkata for business dates.
 - Keep Firebase authentication-only and use `intellicore-dev` for development identity. Keep production Firebase `intellicore-229` quarantined from local and test activity. Leave `legacy-firebase/` as historical reference. MySQL is authoritative for account state, RBAC and all business records.
 - Apply server-side account, role, permission and resource guards. Use strict input validation, Express response helpers and the existing routes/controllers/services layout. Keep related business changes and successful audit entries in the same transaction.
 - Never expose credentials, private identifiers or personal records in documentation, logs, messages or tool output. Keep existing database records, migration history and persistent volumes intact. Use isolated databases and synthetic fixtures for mutating tests. Read [Security rules](docs/SECURITY_RULES.md) before any operation that could affect data or infrastructure.
+- Keep email in capture mode unless the owner specifically approves the provider, mailbox and test recipients. Keep SMTP and migration credentials out of the web process. [Notification operations](docs/BACKGROUND_PROCESSING.md).
 
 ## Verification and history
 

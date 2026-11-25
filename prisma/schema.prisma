@@ -65,6 +65,13 @@ model User {
   taskReviews                    TaskReview[]
   privateAttachments             FileAttachment[]
   createdLearningTracks          LearningTrack[]
+  notifications                 Notification[]
+  notificationPreference        NotificationPreference?
+  emailOutbox                    EmailOutbox[]
+  announcements                  Announcement[]
+  announcementReceipts           AnnouncementRecipient[]
+  scoreAmendments                TaskScoreAmendment[]
+  learningProgressCorrections    LearningProgressCorrection[]
 
   @@index([status])
   @@index([email])
@@ -210,6 +217,7 @@ model Department {
   internships            Internship[]
   tasks                  Task[]
   learningTracks         LearningTrack[]
+  announcements          Announcement[]
 
   @@index([isActive])
   @@map("departments")
@@ -628,6 +636,7 @@ model TaskReview {
 
   submission TaskSubmission @relation(fields: [submissionId], references: [id], onDelete: Restrict)
   reviewer User @relation(fields: [reviewedBy], references: [id], onDelete: Restrict)
+  amendments TaskScoreAmendment[]
 
   @@index([reviewedAt])
   @@map("task_reviews")
@@ -767,8 +776,220 @@ model LearningProgress {
 
   enrollment LearningEnrollment @relation(fields: [learningEnrollmentId], references: [id], onDelete: Restrict)
   lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Restrict)
+  corrections LearningProgressCorrection[]
 
   @@unique([learningEnrollmentId, lessonId])
   @@index([lessonId])
   @@map("learning_progress")
+}
+
+enum EmailStatus {
+  PENDING
+  PROCESSING
+  RETRY_SCHEDULED
+  SENT
+  FAILED
+  CANCELLED
+  CAPTURED
+}
+
+enum NotificationCategory {
+  ACCOUNT
+  INTERNSHIP
+  ATTENDANCE
+  LEAVE
+  TASK
+  LEARNING
+  ANNOUNCEMENT
+}
+
+enum AnnouncementStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  CANCELLED
+  ARCHIVED
+}
+
+enum AnnouncementAudience {
+  ALL_ACTIVE_USERS
+  STAFF
+  INTERNS
+  DEPARTMENT
+  SELECTED_USERS
+}
+
+model Notification {
+  id                  String               @id @default(uuid()) @db.VarChar(36)
+  recipientUserId     String               @map("recipient_user_id") @db.VarChar(36)
+  eventType           String               @map("event_type") @db.VarChar(60)
+  category            NotificationCategory
+  title               String               @db.VarChar(160)
+  message             String               @db.VarChar(600)
+  relatedResourceType String               @map("related_resource_type") @db.VarChar(40)
+  relatedResourceId   String               @map("related_resource_id") @db.VarChar(36)
+  actionPath          String               @map("action_path") @db.VarChar(255)
+  deduplicationKey    String               @unique @map("deduplication_key") @db.Char(64)
+  onboarding          Boolean              @default(false)
+  readAt              DateTime?            @map("read_at")
+  archivedAt          DateTime?            @map("archived_at")
+  createdAt           DateTime             @default(now()) @map("created_at")
+
+  recipient    User          @relation(fields: [recipientUserId], references: [id], onDelete: Restrict)
+  email        EmailOutbox?
+  announcement AnnouncementRecipient?
+
+  @@index([recipientUserId, archivedAt, readAt, createdAt])
+  @@index([recipientUserId, category, createdAt])
+  @@index([eventType, relatedResourceId])
+  @@map("notifications")
+}
+
+model NotificationPreference {
+  userId          String  @id @map("user_id") @db.VarChar(36)
+  emailEnabled    Boolean @default(true) @map("email_enabled")
+  taskReminders   Boolean @default(true) @map("task_reminders")
+  learningUpdates Boolean @default(true) @map("learning_updates")
+  announcements   Boolean @default(true)
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@map("notification_preferences")
+}
+
+model EmailOutbox {
+  id                 String      @id @default(uuid()) @db.VarChar(36)
+  recipientUserId    String      @map("recipient_user_id") @db.VarChar(36)
+  recipientEmail     String      @map("recipient_email") @db.VarChar(191)
+  notificationId     String      @unique @map("notification_id") @db.VarChar(36)
+  templateKey        String      @map("template_key") @db.VarChar(60)
+  templateVersion    Int         @default(1) @map("template_version")
+  templateData       Json        @map("template_data")
+  authorization      Json
+  deduplicationKey   String      @unique @map("deduplication_key") @db.Char(64)
+  status             EmailStatus @default(PENDING)
+  attemptCount       Int         @default(0) @map("attempt_count")
+  maximumAttempts    Int         @default(5) @map("maximum_attempts")
+  availableAt        DateTime    @default(now()) @map("available_at")
+  nextAttemptAt      DateTime    @map("next_attempt_at")
+  processingStartedAt DateTime?  @map("processing_started_at")
+  leaseExpiresAt     DateTime?   @map("lease_expires_at")
+  workerId           String?     @map("worker_id") @db.VarChar(36)
+  sentAt             DateTime?   @map("sent_at")
+  providerMessageId  String?     @map("provider_message_id") @db.VarChar(191)
+  lastErrorCode      String?     @map("last_error_code") @db.VarChar(60)
+  createdAt          DateTime    @default(now()) @map("created_at")
+  updatedAt          DateTime    @updatedAt @map("updated_at")
+
+  recipient    User                   @relation(fields: [recipientUserId], references: [id], onDelete: Restrict)
+  notification Notification           @relation(fields: [notificationId], references: [id], onDelete: Restrict)
+  attempts     EmailDeliveryAttempt[]
+
+  @@index([status, nextAttemptAt, id])
+  @@index([status, leaseExpiresAt])
+  @@index([recipientUserId, createdAt])
+  @@map("email_outbox")
+}
+
+model EmailDeliveryAttempt {
+  id                String    @id @default(uuid()) @db.VarChar(36)
+  emailOutboxId     String    @map("email_outbox_id") @db.VarChar(36)
+  sequence           Int
+  startedAt          DateTime  @map("started_at")
+  finishedAt         DateTime? @map("finished_at")
+  outcome            String    @db.VarChar(32)
+  errorCode          String?   @map("error_code") @db.VarChar(60)
+  providerMessageId String?   @map("provider_message_id") @db.VarChar(191)
+
+  email EmailOutbox @relation(fields: [emailOutboxId], references: [id], onDelete: Restrict)
+
+  @@unique([emailOutboxId, sequence])
+  @@map("email_delivery_attempts")
+}
+
+model Announcement {
+  id           String               @id @default(uuid()) @db.VarChar(36)
+  createdBy    String               @map("created_by") @db.VarChar(36)
+  departmentId String?              @map("department_id") @db.VarChar(36)
+  title        String               @db.VarChar(160)
+  message      String               @db.Text
+  audienceType AnnouncementAudience @map("audience_type")
+  selectedUsers Json                @map("selected_users")
+  scheduledAudience Json?           @map("scheduled_audience")
+  status       AnnouncementStatus   @default(DRAFT)
+  revision     Int                  @default(1)
+  scheduledAt  DateTime?            @map("scheduled_at")
+  publishedAt  DateTime?            @map("published_at")
+  expiresAt    DateTime?            @map("expires_at")
+  createdAt    DateTime             @default(now()) @map("created_at")
+  updatedAt    DateTime             @updatedAt @map("updated_at")
+
+  creator    User                    @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  department Department?             @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  recipients AnnouncementRecipient[]
+
+  @@index([status, scheduledAt])
+  @@index([departmentId, createdAt])
+  @@map("announcements")
+}
+
+model AnnouncementRecipient {
+  announcementId String @map("announcement_id") @db.VarChar(36)
+  userId         String @map("user_id") @db.VarChar(36)
+  notificationId String @unique @map("notification_id") @db.VarChar(36)
+  receivedAt     DateTime @map("received_at")
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Restrict)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Restrict)
+
+  @@id([announcementId, userId])
+  @@index([userId, receivedAt])
+  @@map("announcement_recipients")
+}
+
+model NotificationWorkerState {
+  id           String    @id @db.VarChar(60)
+  mode         String    @db.VarChar(20)
+  status       String    @db.VarChar(20)
+  heartbeatAt  DateTime  @map("heartbeat_at")
+  lastErrorCode String?  @map("last_error_code") @db.VarChar(60)
+
+  @@index([heartbeatAt])
+  @@map("notification_worker_state")
+}
+
+model TaskScoreAmendment {
+  id           String   @id @default(uuid()) @db.VarChar(36)
+  reviewId     String   @map("review_id") @db.VarChar(36)
+  amendedBy    String   @map("amended_by") @db.VarChar(36)
+  revision     Int
+  score        Int
+  criterionScores Json @map("criterion_scores")
+  reason       String   @db.VarChar(1000)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  review TaskReview @relation(fields: [reviewId], references: [id], onDelete: Restrict)
+  actor  User       @relation(fields: [amendedBy], references: [id], onDelete: Restrict)
+
+  @@unique([reviewId, revision])
+  @@map("task_score_amendments")
+}
+
+model LearningProgressCorrection {
+  id          String   @id @default(uuid()) @db.VarChar(36)
+  progressId  String   @map("progress_id") @db.VarChar(36)
+  correctedBy String   @map("corrected_by") @db.VarChar(36)
+  revision    Int
+  beforeState Json     @map("before_state")
+  afterState  Json     @map("after_state")
+  reason      String   @db.VarChar(1000)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  progress LearningProgress @relation(fields: [progressId], references: [id], onDelete: Restrict)
+  actor    User             @relation(fields: [correctedBy], references: [id], onDelete: Restrict)
+
+  @@unique([progressId, revision])
+  @@map("learning_progress_corrections")
 }

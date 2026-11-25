@@ -12,7 +12,7 @@
 | 04 | Internship lifecycle, onboarding and department management | Implemented. Isolated MySQL and synthetic-browser workflows verified. Existing Compose stack and live Firebase sign-in remain open. |
 | 05 | Automatic attendance, leave and Daily Work Reports | Implemented and verified on disposable MySQL and synthetic-auth browser workflows. Existing Compose and live Firebase acceptance remain open. |
 | 06 | Task pacing and learning management | Pending. |
-| 07 | SMTP email notifications and dispatcher | Pending. |
+| 07 | Transactional in-app notifications, announcements, reminders and email outbox | Implemented. Real SMTP and the existing database upgrade remain open. |
 | 08 | Google Meet integration and certificate generation | Pending. |
 | 09 | Full frontend unification and dashboards | Pending. |
 | 10 | Security hardening, testing and final delivery | Pending. |
@@ -51,9 +51,9 @@ The directive defines the following paths under `/api/v1`. See [Phase 04 API](AP
 | --- | --- | --- |
 | 05 | Attendance, verified dashboard check-in, explicit logout checkout, Daily Work Reports, leave and corrections. | IST boundaries, deterministic historical evaluation, concurrent check-in and leave, immutable submissions, and audited corrections. [Attendance operating rules](ATTENDANCE.md). |
 | 06 | Tasks, private submission versions and reviews, curriculum, progress and evaluations. | Scoped operations, recovered exercises and rubrics, immutable history and private storage. Existing-stack acceptance remains open. [Phase 06 report](PHASE_06_REPORT.md). |
-| 07 | SMTP delivery, notification records and in-app alerts for status changes, reviews, leave and announcements. | Validate dispatcher outcomes, failure handling and retry behavior with authorized test delivery and sanitized logs. |
+| 07 | Notification feed, audience snapshots, SMTP modes and MySQL-backed processing. | Isolated upgrade, real MySQL queue behavior, synthetic browser acceptance and tracked live checks. [Phase 07 report](PHASE_07_REPORT.md). |
 | 08 | Server-mediated Google Calendar/Meet and certificate generation after HR sign-off. | Authorized scoped meetings with real links in development, verifiable certificate PDF with ID, QR code and watermark, and audit and history checks. |
 | 09 | Finish same-origin frontend integration across public pages and all authorized role workflows. | End-to-end role routing, multi-role behavior, live metrics, existing branding and URL compatibility, responsive and accessible forms, and error/loading/empty states. |
 | 10 | Final security hardening, release verification and delivery. | Verify auth and RBAC, production isolation, secrets and logging, database grants, migration reproducibility, backups and restore on isolated infrastructure, deployment runbook and regression/browser baselines. Production actions require explicit scope. |
 
-Use [Master requirements](MASTER_REQUIREMENTS.md) for approved business behavior and [Project progress](PROJECT_PROGRESS.md) for verification and checkpoints. Phase 07 begins after the user's next manual implementation prompt.
+Use [Master requirements](MASTER_REQUIREMENTS.md) for approved business behavior and [Project progress](PROJECT_PROGRESS.md) for verification and checkpoints. Phase 08 begins after the user's next manual implementation prompt.

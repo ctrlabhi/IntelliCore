@@ -1,5 +1,9 @@
 # IntelliCore V2.0 security rules
 
+## Phase 07 controls
+
+Notification feed and mutating actions derive ownership from the authenticated account. Pending verified applicants receive only their own onboarding records. Related records are read through existing authorization after opening a notice. Announcement publication requires a validated audience, revision and current scope. Worker and email diagnostics omit recipient addresses and raw provider errors. Require an approved exact allowlist, verified TLS and explicit mode before real SMTP. Keep migration and worker credentials separate from the web process. [Background processing](BACKGROUND_PROCESSING.md) · [Email configuration](EMAIL_INTEGRATION.md).
+
 **Reconciled on 2026-11-25.** These rules apply to implementation, testing and operations. Historical context remains in [SECURITY.md](SECURITY.md), [Architecture decisions](ARCHITECTURE_DECISIONS.md), [Authentication](AUTHENTICATION.md), [RBAC](RBAC.md) and the phase reports.
 
 ## Firebase and credential boundaries

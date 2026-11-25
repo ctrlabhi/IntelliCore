@@ -67,6 +67,9 @@
 ## Communications, meetings and completion artifacts
 
 - Provide in-app and server-dispatched email notifications for application status, task reviews, leave decisions and company announcements. Persist delivery/notification records and use the SMTP dispatcher in Phase 07.
+- Commit business changes, applicable notices and email jobs together. Separate transport from the HTTP transaction, keep capture as the development default and publish company announcements in-app.
+- Author, preview, publish and schedule announcements within role and department scope. Revalidate audience, eligibility and preferences for delayed work. Protect read, archive, diagnostics and retry operations.
+- Preserve original lesson and review evidence when authorized staff record a learning correction or score amendment. Validate current scope, the recorded rubric and the required reason. [Notification and event rules](NOTIFICATION_MANAGEMENT.md).
 - Implement real Google Meet links through server-to-server Google Calendar integration for authorized HR and Team Leaders. Use appropriate domain and meeting scope.
 - On HR completion sign-off, generate an official verifiable certificate PDF with unique verification ID, QR code, domain track, completion date and an official digital watermark. Preserve enrollment and certificate history.
 

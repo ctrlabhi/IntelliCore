@@ -4,6 +4,7 @@ import prisma from '../../config/database.js';
 import { AppError } from '../../utils/errors.js';
 import { businessToday, lockUser, readPage, transaction } from '../../utils/phase04.js';
 import { recoveredTemplates } from '../learning/curriculumCatalog.js';
+import { emitNotification, emitNotifications } from '../notifications/notificationService.js';
 import { activeDepartment, audit, conflict, eligibleWhere, found, historicalWhere, isIntern, lockUsers,
   missing, own, person, scope, can } from './workAccess.js';
 
@@ -15,6 +16,8 @@ const department = { select: { id: true, name: true, code: true } };
 export const waitingForWork = ['ASSIGNED', 'IN_PROGRESS', 'REVISION_REQUESTED'];
 const stableTaskSort = (sort) => [{ dueAt: sort }, { id: 'asc' }];
 const taskSearch = (search) => search ? { OR: [{ title: { contains: search } }, { taskCode: { contains: search } }] } : {};
+const assignmentEvent = (event, assignment, version) => ({ event, type: 'TASK_ASSIGNMENT', resourceId: assignment.id,
+  recipientIds: [assignment.assignedTo], version });
 
 function visibleTasks(req) {
   const publishedHistory = { publishedAt: { not: null } };
@@ -113,6 +116,11 @@ export function editTask(req, id, { expectedRevision, confirmActiveChange, ...da
     const changed = Object.keys(data);
     await audit(tx, req, requestId, data.dueAt && +data.dueAt !== +before.dueAt ? 'TASK_DEADLINE_CHANGED' : 'TASK_UPDATED',
       'TASK', id, { changed, revision: after.revision, dueAt: after.dueAt }, { revision: before.revision, dueAt: before.dueAt });
+    if (before.status === 'PUBLISHED' && data.dueAt && +data.dueAt !== +before.dueAt) {
+      const assignments = await tx.taskAssignment.findMany({ where: { taskId: id, dueAt: null, status: { in: waitingForWork } },
+        select: { id: true, assignedTo: true } });
+      await emitNotifications(tx, assignments.map((row) => assignmentEvent('TASK_DEADLINE_CHANGED', row, after.revision)));
+    }
     return after;
   });
 }
@@ -183,9 +191,10 @@ export function assignTask(req, id, input, requestId, publish = false) {
     }
     const existing = await tx.taskAssignment.count({ where: { taskId: id, internshipId: { in: rows.map(({ internship }) => internship.id) } } });
     if (existing) throw conflict('An internship already has this assignment.', 'DUPLICATE_ASSIGNMENT');
-    await tx.taskAssignment.createMany({ data: rows.map(({ internship, dueAt }) => ({
+    const assignments = rows.map(({ internship, dueAt }) => ({ id: randomUUID(),
       taskId: id, internshipId: internship.id, assignedTo: internship.userId, assignedBy: req.user.id, assignedAt: now, dueAt
-    })) });
+    }));
+    await tx.taskAssignment.createMany({ data: assignments });
     const updated = publish ? await tx.task.update({ where: { id }, data: {
       status: 'PUBLISHED', publishedAt: now, revision: { increment: 1 }
     } }) : task;
@@ -193,6 +202,7 @@ export function assignTask(req, id, input, requestId, publish = false) {
     await audit(tx, req, requestId, 'TASK_ASSIGNED', 'TASK', id, {
       recipients: rows.map(({ internship, dueAt }) => ({ internshipId: internship.id, dueAt }))
     });
+    await emitNotifications(tx, assignments.map((row) => assignmentEvent('TASK_ASSIGNED', row)));
     return { task: updated, assignedCount: rows.length };
   });
 }
@@ -206,7 +216,10 @@ export function transitionTask(req, id, transition, requestId) {
       throw conflict('Review submitted work before archiving a closed task.');
     }
     if (transition === 'CANCELLED') {
-      await tx.taskAssignment.updateMany({ where: { taskId: id, status: { not: 'COMPLETED' } }, data: { status: 'CANCELLED' } });
+      const where = { taskId: id, status: { notIn: ['COMPLETED', 'CANCELLED'] } };
+      const affected = await tx.taskAssignment.findMany({ where, select: { id: true, assignedTo: true } });
+      await tx.taskAssignment.updateMany({ where, data: { status: 'CANCELLED' } });
+      await emitNotifications(tx, affected.map((row) => assignmentEvent('TASK_CANCELLED', row)));
     }
     const after = await tx.task.update({ where: { id }, data: { status: transition, revision: { increment: 1 },
       ...(transition === 'ARCHIVED' ? { archivedAt: new Date() } : {}) } });
@@ -227,6 +240,7 @@ export function extendAssignment(req, id, dueAt, requestId) {
     const after = await tx.taskAssignment.update({ where: { id }, data: { dueAt } });
     await audit(tx, req, requestId, 'TASK_ASSIGNMENT_DEADLINE_CHANGED', 'TASK_ASSIGNMENT', id,
       { dueAt }, { dueAt: before.dueAt ?? task.dueAt });
+    await emitNotification(tx, assignmentEvent('TASK_DEADLINE_CHANGED', after, dueAt.toISOString()));
     return after;
   });
 }
@@ -244,6 +258,7 @@ export function cancelAssignment(req, id, reason, requestId) {
     const after = await tx.taskAssignment.update({ where: { id }, data: { status: 'CANCELLED' } });
     await audit(tx, req, requestId, 'TASK_ASSIGNMENT_CANCELLED', 'TASK_ASSIGNMENT', id,
       { status: after.status, reason }, { status: before.status });
+    await emitNotification(tx, assignmentEvent('TASK_CANCELLED', after));
     return after;
   });
 }

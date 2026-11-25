@@ -185,19 +185,36 @@ function timeRemaining(row) {
 function reviewed(item) {
   if (!item.review) return null;
   const review = item.review;
+  const current = review.amendments?.[0];
   return node('div', node('p', label(review.decision) + ' · ' + inIndia(review.reviewedAt)
     + (review.score == null ? '' : ' · ' + review.score + '/' + review.maximumScore)),
-  node('p', review.feedback));
+  node('p', review.feedback),
+  current ? node('p', 'Amended score ' + current.score + '/' + review.maximumScore + ' · ' + inIndia(current.createdAt)) : null);
 }
 
-function historyRow(item, review, refresh) {
+function historyRow(item, review, amend, refresh) {
   return record('Submission v' + item.submissionVersion,
     node('p', inIndia(item.submittedAt) + ' · deadline ' + inIndia(item.deadlineAt) + (item.late ? ' · late submission' : '')),
     item.writtenResponse ? node('p', item.writtenResponse) : null,
     item.projectUrl ? node('p', link(item.projectUrl, 'Project link')) : null,
     item.repositoryUrl ? node('p', link(item.repositoryUrl, 'Repository link')) : null,
     ...item.additionalLinks.map((item) => node('p', link(item.url, item.title))), files(item.attachments), reviewed(item),
-    review ? reviewForm(item, refresh) : null);
+    review ? reviewForm(item, refresh) : null,
+    amend ? disclosure('Amend approved score', async () => [amendmentForm(item, refresh)]) : null);
+}
+
+function amendmentForm(item, refresh) {
+  const rubric = item.taskSnapshot.rubric;
+  const previous = item.review.amendments?.[0] ?? item.review;
+  return form([
+    field('reason', 'Reason for score amendment', { type: 'textarea', required: true, max: 1000 }),
+    ...rubric.map((row, index) => numeric('criterion' + index, row.criterion + ' (0–' + row.points + ')',
+      previous.criterionScores?.[index] ?? '', 0, row.points, true)),
+    !rubric.length ? numeric('score', 'Amended score', previous.score ?? '', 0, item.taskSnapshot.maximumScore, true) : null
+  ], 'Record score amendment', ({ reason, score, ...criteria }) => api.post(submissionPath(item) + '/review/amend', {
+    reason, expectedRevision: item.review.amendments?.[0]?.revision ?? 0,
+    ...(rubric.length ? { criterionScores: Object.values(criteria).map(Number) } : { score: Number(score) })
+  }), refresh);
 }
 
 function reviewForm(item, refresh) {
@@ -273,7 +290,9 @@ async function assignmentDetails(row, policy, refresh) {
   for (const item of history.filter((item) => item.status === 'SUBMITTED')) {
     const reviewAllowed = policy.review && !item.review && current.status === 'SUBMITTED'
       && item.id === history[0]?.id && ['PUBLISHED', 'CLOSED'].includes(current.task.status);
-    items.push(historyRow(item, reviewAllowed, refresh));
+    const amendAllowed = policy.amend && current.status === 'COMPLETED' && item.review?.decision === 'APPROVED'
+      && item.taskSnapshot.maximumScore;
+    items.push(historyRow(item, reviewAllowed, amendAllowed, refresh));
   }
   if (!items.length) items.push(node('p', 'This task is scheduled for ' + inIndia(current.task.availableFrom) + '.'));
   return items;
@@ -297,6 +316,7 @@ async function assignmentMonitor(row, policy, refresh) {
 export function mountTasks(root, context, departments, own, onChanged) {
   const manage = !own && supports(context, 'tasks:manage');
   const review = !own && supports(context, 'tasks:review');
+  const amend = review && context.permissions.includes('tasks:amend_score');
   const view = own ? context.permissions.includes('tasks:own') : supports(context, 'tasks:read');
   if (!view) return;
   const panel = section(root, 'phase06Tasks', own ? 'My tasks' : 'Tasks and assignments');
@@ -321,7 +341,7 @@ export function mountTasks(root, context, departments, own, onChanged) {
     if (review) queue.append(node('h4', 'Assignment and review queue'));
     else if (!own) queue.append(node('h4', 'Intern task progress'));
     listing(queue, own ? '/task-assignments/me' : '/task-assignments',
-      (row) => assignmentRow(row, { own, manage, review }, refresher),
+      (row) => assignmentRow(row, { own, manage, review, amend }, refresher),
       { states: assignmentStatuses, initialStatus: review ? 'SUBMITTED' : '',
         filters: [...(!own ? [departmentFilter(departments)] : []), field('overdue', 'Deadline state', {
           options: [['', 'All deadlines'], ['true', 'Overdue only']]

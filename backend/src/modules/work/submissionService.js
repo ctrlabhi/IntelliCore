@@ -4,10 +4,15 @@ import { AppError, ForbiddenError } from '../../utils/errors.js';
 import { readPage, transaction } from '../../utils/phase04.js';
 import { attachmentSummary, lockedTask, lockOwnAssignment, privateAssignmentWhere } from './taskService.js';
 import { audit, conflict, found, isIntern, scope } from './workAccess.js';
+import { emitForReviewers, emitNotification } from '../notifications/notificationService.js';
 
 const included = {
   attachments: { select: attachmentSummary, orderBy: { createdAt: 'asc' } },
-  review: { include: { reviewer: { select: { profile: { select: { fullName: true } } } } } }
+  review: { include: {
+    reviewer: { select: { profile: { select: { fullName: true } } } },
+    amendments: { orderBy: { revision: 'desc' }, take: 1,
+      select: { revision: true, score: true, criterionScores: true, createdAt: true } }
+  } }
 };
 const editable = ['IN_PROGRESS', 'REVISION_REQUESTED'];
 
@@ -72,6 +77,8 @@ export function submitDraft(req, id, expectedRevision, requestId) {
     await audit(tx, req, requestId, 'TASK_SUBMITTED', 'TASK_SUBMISSION', id, {
       assignmentId: assignment.id, version: draft.submissionVersion, deadlineAt, late: submitted.late
     });
+    await emitForReviewers(tx, { event: 'TASK_SUBMITTED', type: 'TASK_SUBMISSION', resourceId: id,
+      rule: 'TASK_REVIEW', departmentId: task.departmentId, actorId: req.user.id, now });
     return submitted;
   });
 }
@@ -101,6 +108,13 @@ export async function listReviews(req, id, query) {
   const submission = await submissionDetail(req, id);
   return readPage(prisma.taskReview, { where: { submissionId: submission.id },
     orderBy: [{ reviewedAt: query.sort }, { id: 'asc' }] }, query);
+}
+
+export async function listAmendments(req, id, query) {
+  const submission = await submissionDetail(req, id);
+  return readPage(prisma.taskScoreAmendment, { where: { review: { submissionId: submission.id } },
+    select: { id: true, revision: true, score: true, criterionScores: true, createdAt: true },
+    orderBy: { revision: query.sort } }, query);
 }
 
 export function evaluateScore(snapshot, { score, criterionScores }) {
@@ -147,6 +161,43 @@ export function reviewSubmission(req, id, input, requestId) {
       assignmentId: assignment.id, submissionId: id, version: submission.submissionVersion,
       score: review.score, maximumScore: review.maximumScore
     });
+    await emitNotification(tx, { event: approved ? 'TASK_APPROVED' : 'TASK_REVISION_REQUESTED', type: 'TASK_ASSIGNMENT',
+      resourceId: assignment.id, version: review.id, recipientIds: [assignment.assignedTo] });
     return review;
+  });
+}
+
+export function amendScore(req, id, input, requestId) {
+  const access = scope(req, 'tasks:review');
+  if (!req.permissions.includes('tasks:amend_score')) throw new ForbiddenError();
+  return transaction(async (tx) => {
+    const target = found(await tx.taskSubmission.findFirst({ where: { id, assignment: { task: access } },
+      select: { assignment: { select: { taskId: true, assignedTo: true, id: true, status: true } } } }), 'Submission');
+    if (target.assignment.assignedTo === req.user.id) throw new ForbiddenError('Self-review is unavailable.');
+    await lockedTask(tx, req, target.assignment.taskId, 'tasks:review');
+    const submission = found(await tx.taskSubmission.findUnique({ where: { id }, include: {
+      assignment: true, review: { include: { amendments: { orderBy: { revision: 'desc' }, take: 1 } } }
+    } }), 'Submission');
+    const review = submission.review;
+    if (review?.decision !== 'APPROVED' || submission.assignment.status !== 'COMPLETED') {
+      throw conflict('An approved submission is required for a score amendment.');
+    }
+    const previous = review.amendments[0];
+    const revision = (previous?.revision ?? 0) + 1;
+    if (input.expectedRevision !== revision - 1) throw conflict('Reload the current score before amending.');
+    const scored = evaluateScore(submission.taskSnapshot, input);
+    if (scored.score == null || scored.maximumScore == null) throw new AppError('Enter a valid score for this rubric.', 400, 'INVALID_SCORE');
+    if ((previous?.score ?? review.score) === scored.score
+      && JSON.stringify(previous?.criterionScores ?? review.criterionScores) === JSON.stringify(scored.criterionScores)) {
+      throw conflict('The proposed score is unchanged.');
+    }
+    const result = await tx.taskScoreAmendment.create({ data: { reviewId: review.id, amendedBy: req.user.id, revision,
+      score: scored.score, criterionScores: scored.criterionScores, reason: input.reason },
+    select: { id: true, score: true, revision: true, criterionScores: true, createdAt: true } });
+    await audit(tx, req, requestId, 'TASK_SCORE_AMENDED', 'TASK_REVIEW', review.id,
+      { amendmentId: result.id, score: result.score, revision }, { score: previous?.score ?? review.score });
+    await emitNotification(tx, { event: 'TASK_SCORE_AMENDED', type: 'TASK_ASSIGNMENT',
+      resourceId: submission.assignmentId, recipientIds: [submission.assignment.assignedTo], version: result.id });
+    return result;
   });
 }

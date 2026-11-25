@@ -8,6 +8,7 @@ import applicationRoutes from '../modules/internships/applicationRoutes.js';
 import internshipRoutes from '../modules/internships/internshipRoutes.js';
 import { attendanceRoutes, correctionRoutes, dailyWorkReportRoutes, leaveRoutes } from '../modules/attendance/phase05Routes.js';
 import { workRoutes } from '../modules/work/workRoutes.js';
+import { notificationRoutes } from '../modules/notifications/notificationRoutes.js';
 
 const router = Router();
 
@@ -108,6 +109,7 @@ router.use('/daily-work-reports', dailyWorkReportRoutes);
 router.use('/leave-requests', leaveRoutes);
 router.use('/attendance-corrections', correctionRoutes);
 router.use(workRoutes);
+router.use(notificationRoutes);
 
 export default router;
 

@@ -1,0 +1,22 @@
+.phase07 { min-width: 0; margin-block: 1rem; }
+.ic-workspace-page #phase07Workspace { grid-column: 1/-1; order: 9; }
+.phase07 :is(section,a) { scroll-margin-block-start: 5rem; }
+.phase07 :is(p,pre) { white-space: pre-wrap; overflow-wrap: anywhere; }
+.phase07 a, .phase07-notification-menu a { color: #9ad9ff; text-decoration: underline; text-underline-offset: .2em; }
+.phase07 :is(input[type="checkbox"], input[type="radio"]) { width: 1rem; height: 1rem; min-height: 0; }
+.phase07 label:has(input[type="checkbox"]) { display: flex; align-items: center; gap: .5rem; }
+.phase07-audience { flex: 1 1 100%; min-width: 0; max-height: 16rem; overflow: auto; border: 1px solid #49617a80; }
+#notificationButton { position: relative; }
+.ic-workspace-page #notificationButton { display: grid; place-items: center; min-width: 2.5rem; min-height: 2.5rem;
+  border: 0; background: transparent; cursor: pointer; }
+#notificationButton:focus-visible { outline: 2px solid #9ad9ff; outline-offset: 2px; }
+#notificationButton .notification-count { position: absolute; top: -.3rem; inset-inline-end: -.35rem; min-width: 1.2rem; font-size: .72rem;
+  padding: .1rem .2rem; border-radius: 1rem; background: #edb557; color: #112235; line-height: 1.15; text-align: center; }
+#notificationButton[hidden], #notificationButton .notification-count[hidden], .phase07-notification-menu[hidden] { display: none !important; }
+.phase07-notification-menu { position: fixed; z-index: 200; inset-block-start: 4.2rem; inset-inline-end: 1rem;
+  width: min(24rem, calc(100vw - 2rem)); max-height: 70vh; overflow: auto; padding: 1rem; border: 1px solid #55778e;
+  border-radius: .7rem; background: #102336; color: #eff7ff; box-shadow: 0 12px 32px #001020ad; text-align: start; }
+.phase07-notification-menu div { padding-block: .55rem; border-bottom: 1px solid #49617a80; }
+.phase07-notification-menu :is(small,a) { display: block; }
+.phase07-notification-menu a { margin-block-start: .25rem; }
+.phase07-notification-menu a:focus-visible { outline: 2px solid #9ad9ff; }

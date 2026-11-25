@@ -6,6 +6,7 @@
   "main": "backend/src/server.js",
   "scripts": {
     "start": "node backend/src/server.js",
+    "notifications:worker": "node backend/src/scripts/notificationWorker.js",
     "dev": "nodemon --watch backend/src backend/src/server.js",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -25,6 +26,7 @@
     "express-rate-limit": "^7.5.0",
     "firebase-admin": "^14.5.1",
     "helmet": "^8.0.0",
+    "nodemailer": "10.6.1",
     "pino": "^9.6.0",
     "pino-http": "^10.4.0",
     "swagger-jsdoc": "^6.2.8",

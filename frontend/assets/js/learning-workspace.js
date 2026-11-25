@@ -1,6 +1,6 @@
 
 import { api } from '/services/api.js';
-import { allItems, check, confirmed, departmentFilter, departmentSelect, disclosure, field, form, internName,
+import { allItems, check, confirmed, departmentFilter, departmentSelect, disclosure, field, form, inIndia, internName,
   label, link, listing, node, numeric, pct, record, section } from './work-controls.js';
 
 const trackPath = (track) => '/learning/tracks/' + track.id;
@@ -117,6 +117,7 @@ function ownEnrollment(item, refresh) {
         const path = '/learning/lessons/' + lesson.id;
         return [
           node('p', label(status) + (lesson.requiredForTrack ? ' · required' : ' · optional')),
+          lesson.progress.corrections?.length ? node('p', 'An authorized mentor previously corrected this progress.') : null,
           node('p', lesson.content),
           ...resourceRows('', lesson.resources, false, refresh),
           item.canUpdate && status !== 'COMPLETED' ? form([], status === 'NOT_STARTED' ? 'Start lesson' : 'Mark lesson complete',
@@ -126,6 +127,25 @@ function ownEnrollment(item, refresh) {
       !module.lessons.length ? node('p', 'No lessons in this module.') : null
     ].filter(Boolean))),
     !item.learning.modules.length ? node('p', 'This version has no published lessons.') : null);
+}
+
+async function staffProgress(item, canCorrect, refresh) {
+  const path = '/learning/enrollments/' + item.id;
+  const { data: current } = await api.get(path);
+  return current.learning.modules.map((module) => disclosure(module.title, async () =>
+    module.lessons.map((lesson) => {
+      const progress = lesson.progress;
+      return record(lesson.title, node('p', label(progress.status)),
+        progress.corrections?.length ? node('p', 'Latest correction ' + inIndia(progress.corrections[0].createdAt)) : null,
+        canCorrect && progress.status !== 'NOT_STARTED' ? form([
+          field('reason', 'Reason for progress correction', { type: 'textarea', max: 1000, required: true }),
+          check('confirm', 'Confirm changing this recorded lesson status', false, true)
+        ], progress.status === 'COMPLETED' ? 'Correct to in progress' : 'Correct to completed',
+        ({ reason }) => api.post(path + '/lessons/' + lesson.id + '/correct', {
+          expectedStatus: progress.status, status: progress.status === 'COMPLETED' ? 'IN_PROGRESS' : 'COMPLETED',
+          expectedCorrectionId: progress.corrections?.[0]?.id ?? null, reason
+        }), refresh) : null);
+    })));
 }
 
 export function mountLearning(root, context, departments, own, onChanged) {
@@ -158,7 +178,8 @@ export function mountLearning(root, context, departments, own, onChanged) {
       })), { states: ['DRAFT', 'PUBLISHED', 'ARCHIVED'], filters: [departmentFilter(departments)] });
     progress.append(node('h4', 'Intern learning progress'));
     listing(progress, '/learning/progress', (item) => record(internName(item.internship),
-      node('p', item.track.title + ' · v' + item.track.version), learningSummary(item.learning)),
+      node('p', item.track.title + ' · v' + item.track.version), learningSummary(item.learning),
+      disclosure('Inspect lesson progress', () => staffProgress(item, manage && context.permissions.includes('learning:correct_progress'), refresh))),
     { filters: [departmentFilter(departments)] });
   }
   panel.append(notice);

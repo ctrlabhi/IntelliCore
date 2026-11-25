@@ -1,5 +1,21 @@
 # IntelliCore REST API Specification
 
+## Phase 07 notifications, announcements and delivery
+
+The endpoints use the standard response envelope and explicit Firebase/MySQL authorization.
+
+| Group under `/api/v1` | Contracts |
+| --- | --- |
+| `/notifications` | GET own paginated list, unread count and detail. POST own read, archive and read-all. State, category and search filters are supported. |
+| `/notification-preferences/me` | GET and PATCH optional own email, reminder, learning and announcement alerts. |
+| `/announcements` | GET own received list and detail, scoped management list/detail, and authorized eligible recipients. POST draft, audience preview, publish, schedule, cancel and archive. PATCH editable draft revision. |
+| `/admin/email-outbox` | GET sanitized list, detail, local capture preview and attempts. POST audited retry or cancel under the operational grant. |
+| `/admin/notification-stats` and `/admin/notification-worker` | GET actual delivery-state counts and heartbeat, PATCH audited reminder windows. |
+| `/task-submissions/:id/review` | GET amendment history under `/amendments` and POST a revision-checked score amendment under `/amend`. |
+| `/learning/enrollments/:id` | GET scoped progress detail and POST `/lessons/:lessonId/correct`. Own detail uses `/learning/me/enrollments/:id`. |
+
+Preview fingerprints and draft revisions protect publication. Ambiguous SMTP retry requires explicit acknowledgment. Details and strict field schemas are in [Phase 07 OpenAPI](../backend/src/config/phase07OpenApi.js).
+
 **Base URL:** `http://localhost:3000/api/v1`  
 **Interactive Documentation (Swagger UI):** `http://localhost:3000/api-docs`  
 **OpenAPI Specification:** OpenAPI 3.0.3  

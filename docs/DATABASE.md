@@ -1,5 +1,17 @@
 # IntelliCore Database Architecture & Management
 
+## Phase 07 schema
+
+| Models | Purpose and constraints |
+| --- | --- |
+| Notification and NotificationPreference | One recipient per notice, unique event fingerprint, recipient/read/archive indexes and one preference row per user. |
+| EmailOutbox and EmailDeliveryAttempt | One eligible outbox job per notice, unique job fingerprint, claim/status/lease indexes and unique attempt sequence. |
+| Announcement and AnnouncementRecipient | Scoped drafts and schedules, immutable publication details and one receipt per announcement and user. |
+| NotificationWorkerState | Per-worker heartbeat and sanitized status. |
+| TaskScoreAmendment and LearningProgressCorrection | Append-only records with unique per-review or per-progress revision, original evidence and accountable actor. |
+
+The two additive Phase 07 migrations create nine tables. No legacy activity is backfilled. Separate database identities apply deployment, serve runtime queries, and process notification jobs. [Migration evidence](PHASE_07_REPORT.md#database-and-migration-verification).
+
 **Database Engine:** MySQL 8.4 LTS  
 **Character Set:** `utf8mb4`  
 **Collation:** `utf8mb4_unicode_ci`  

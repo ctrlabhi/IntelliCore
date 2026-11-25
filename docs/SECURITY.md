@@ -1,5 +1,9 @@
 # IntelliCore Security & Hardening Policy
 
+## Phase 07 notification and email controls
+
+Use authenticated ownership and current departmental scope for feed links, scheduled audiences and administrative changes. Store event metadata and delivery attempts without raw provider responses. Keep SMTP configuration on the worker, require explicit TLS and an approved allowlist, and preserve pending jobs when configuration is invalid. New Compose startup does not run application-schema migrations with runtime credentials. [Security rules](SECURITY_RULES.md) · [Email integration](EMAIL_INTEGRATION.md).
+
 **Standard:** OWASP Top 10 Compliance  
 **Framework:** Express.js 5 Security Baseline  
 **Scope:** Phase 1 Foundation & Architecture  

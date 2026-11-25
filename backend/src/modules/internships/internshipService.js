@@ -4,6 +4,7 @@ import { businessToday, lockDepartment, lockUser, readPage, transaction } from '
 import { departmentSummary } from '../departments/departmentService.js';
 import auditService from '../audit/auditService.js';
 import { syncAttendanceEligibility } from '../attendance/eligibility.js';
+import { emitNotification } from '../notifications/notificationService.js';
 import { activeEnrollments, assertNoOverlap, assertTeamLeader, effectiveStatus, ensureFound, statusFilter } from './internshipPolicy.js';
 
 const prisma = getPrismaClient();
@@ -55,7 +56,7 @@ async function editInternship(id, actor, requestId, action, buildUpdate, ownerOn
     const data = await buildUpdate(tx, before, status, today);
     const updated = await tx.internship.update({ where: { id }, data, select: internshipSelect });
     await syncAttendanceEligibility(tx, before.userId);
-    await auditService.createAuditLog(tx, {
+    const audit = await auditService.createAuditLog(tx, {
       actorUserId: actor.id, action, requestId, resourceType: 'INTERNSHIP', resourceId: id,
       beforeState: { status, commencementDate: before.commencementDate, expectedCompletionDate: before.expectedCompletionDate,
         positionTitle: before.positionTitle, assignedTeamLeaderId: before.assignedTeamLeaderId },
@@ -63,6 +64,12 @@ async function editInternship(id, actor, requestId, action, buildUpdate, ownerOn
         expectedCompletionDate: updated.expectedCompletionDate, positionTitle: updated.positionTitle,
         assignedTeamLeaderId: updated.assignedTeamLeaderId }
     });
+    const changedLeader = action === 'INTERNSHIP_TEAM_LEADER_UPDATED' && before.assignedTeamLeaderId !== updated.assignedTeamLeaderId;
+    const event = changedLeader ? 'TEAM_LEADER_CHANGED' : ({
+      INTERNSHIP_COMPLETION_APPROVED: 'INTERNSHIP_COMPLETED', INTERNSHIP_TERMINATED: 'INTERNSHIP_TERMINATED'
+    })[action];
+    if (event) await emitNotification(tx, { event, type: 'INTERNSHIP', resourceId: id,
+      recipientIds: [before.userId, ...(changedLeader ? [updated.assignedTeamLeaderId] : [])], version: audit.id });
     return presentInternship(updated, today);
   });
 }

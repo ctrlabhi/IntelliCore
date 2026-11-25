@@ -7,6 +7,7 @@ import { approvedLeave, dayIdentity } from './attendanceService.js';
 import { internshipIdentity, ownedHistoricalDate } from './eligibility.js';
 import { reportFields } from './reportService.js';
 import auditService from '../audit/auditService.js';
+import { emitForReviewers, emitNotification } from '../notifications/notificationService.js';
 
 const prisma = getPrismaClient();
 const statuses = ['PENDING', 'APPROVED', 'REJECTED'];
@@ -77,6 +78,8 @@ export function requestCorrection(userId, { internshipId, businessDate: date, re
     });
     await auditService.createAuditLog(tx, { actorUserId: userId, requestId, resourceType: 'ATTENDANCE_CORRECTION',
       resourceId: request.id, action: 'ATTENDANCE_CORRECTION_REQUESTED', afterState: { kind, status: request.status } });
+    await emitForReviewers(tx, { event: 'CORRECTION_REQUESTED', type: 'ATTENDANCE_CORRECTION', resourceId: request.id,
+      rule: 'CORRECTION_REVIEW', actorId: userId, now });
     return request;
   });
 }
@@ -145,6 +148,8 @@ export function decideCorrection(id, status, remarks, actor, requestId) {
       resourceId: id, action: `ATTENDANCE_CORRECTION_${status}`,
       beforeState: { status: current.status, ...current.originalValues },
       afterState: { status, kind: current.kind, attendanceId: attendance.id, ...afterAttendance } });
+    await emitNotification(tx, { event: 'CORRECTION_' + status, type: 'ATTENDANCE_CORRECTION',
+      resourceId: id, recipientIds: [current.requestedBy], now });
     return result;
   });
 }

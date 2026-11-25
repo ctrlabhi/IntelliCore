@@ -6,6 +6,7 @@ import { readPolicy, schedule } from './attendancePolicy.js';
 import { approvedLeave, dayIdentity } from './attendanceService.js';
 import { eligibleInternship, internshipIdentity } from './eligibility.js';
 import auditService from '../audit/auditService.js';
+import { emitForReviewers, emitNotification } from '../notifications/notificationService.js';
 
 const prisma = getPrismaClient();
 const reportText = z.string().trim().min(1).max(4000);
@@ -63,6 +64,8 @@ export function saveTodayReport(userId, draft, requestId) {
     const report = await tx.dailyWorkReport.update({ where, data: { status: 'SUBMITTED', submittedAt: now }, select: reportSelect });
     await auditService.createAuditLog(tx, { actorUserId: userId, requestId, action: 'DAILY_REPORT_SUBMITTED',
       resourceType: 'DAILY_WORK_REPORT', resourceId: report.id, afterState: { status: report.status, businessDate: date } });
+    await emitForReviewers(tx, { event: 'REPORT_SUBMITTED', type: 'DAILY_WORK_REPORT', resourceId: report.id,
+      rule: 'DEPARTMENT_REPORT', departmentId: internship.department.id, actorId: userId, now });
     return report;
   });
 }
@@ -101,6 +104,8 @@ export function reviewReport(id, remarks, actor, requestId) {
     });
     await auditService.createAuditLog(tx, { actorUserId: actor.id, requestId, resourceType: 'DAILY_WORK_REPORT',
       resourceId: id, action: 'DAILY_REPORT_REVIEWED', beforeState: { status: current.status }, afterState: { status: result.status } });
+    await emitNotification(tx, { event: 'REPORT_REVIEWED', type: 'DAILY_WORK_REPORT', resourceId: id,
+      recipientIds: [target.internship.userId] });
     return result;
   });
 }

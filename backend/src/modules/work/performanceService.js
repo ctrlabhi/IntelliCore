@@ -53,12 +53,19 @@ function taskFilter(query) {
 
 async function evaluationPage(internship, query) {
   const assignment = { ...assignmentWhere(internship, query), task: taskFilter(query) };
-  return readPage(prisma.taskReview, { where: { submission: { assignment } },
+  const result = await readPage(prisma.taskReview, { where: { submission: { assignment } },
     select: { id: true, decision: true, score: true, maximumScore: true, criterionScores: true,
       feedback: true, reviewedAt: true, reviewer: { select: { profile: { select: { fullName: true } } } },
+      amendments: { orderBy: { revision: 'desc' }, take: 1,
+        select: { revision: true, score: true, criterionScores: true, createdAt: true } },
       submission: { select: { submissionVersion: true, submittedAt: true, late: true,
         assignment: { select: { id: true, task: { select: { taskCode: true, title: true } } } } } } },
     orderBy: [{ reviewedAt: query.sort }, { id: 'asc' }] }, query);
+  return { ...result, items: result.items.map(({ amendments, ...review }) => {
+    const amendment = amendments[0];
+    return amendment ? { ...review, originalScore: review.score, score: amendment.score,
+      criterionScores: amendment.criterionScores, amendment } : review;
+  }) };
 }
 
 async function individual(internship, query, feedback) {

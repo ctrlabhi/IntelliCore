@@ -218,6 +218,7 @@ class AuthService {
       return '/pages/dashboards/hr/index.html';
     }
     if (workspaces.admin) return '/pages/dashboards/hr/index.html';
+    if (workspaces.operations && context.roles.includes('OPERATIONS_EXECUTIVE')) return '/pages/dashboards/hr/index.html';
     if (workspaces.teamLeader) {
       return '/pages/dashboards/team-leader/index.html';
     }

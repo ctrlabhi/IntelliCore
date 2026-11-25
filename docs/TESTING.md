@@ -1,5 +1,9 @@
 # IntelliCore Testing & Verification Guide
 
+## Phase 07 test layers
+
+Run the existing isolated MySQL setup with all eight versioned migrations applied by a dedicated migration account. The Phase 07 suite exercises transactional event persistence, isolated audiences, queue claim concurrency, lease recovery, retry limits, capture and both assessment changes. Unit tests mock the SMTP transport and cover its TLS and allowlist options, templates and failure classifications. Browser acceptance uses synthetic Firebase identities with real Express, MySQL and a dedicated capture worker. External SMTP and live Firebase require separate verification. [Phase 07 engineering report](PHASE_07_REPORT.md).
+
 **Testing Framework:** Vitest  
 **HTTP Assertion Library:** Supertest  
 **Environment:** Local Development  

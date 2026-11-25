@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="/assets/css/dashboard-background.css" />
   <link rel="stylesheet" href="/assets/css/phase04-dashboard.css">
   <link rel="stylesheet" href="/assets/css/phase06-dashboard.css">
+  <link rel="stylesheet" href="/assets/css/phase07-dashboard.css">
 </head>
 <body class="ic-workspace-page">
   <div class="scroll-progress-wrap" aria-hidden="true">
@@ -43,7 +44,7 @@
         <a href="#phase06Performance" class="nav-link phase04-disabled" data-phase06-link hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18v-5m7 5V6m7 12V9"/></svg>My Performance</a>
         <a href="#icCertificateEligibility" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.4 5 5.5.8-4 3.9.9 5.5-4.8-2.6-4.8 2.6.9-5.5-4-3.9 5.5-.8L12 3Z"/></svg>Certificates</a>
         <div class="ic-sidebar-group-label">UPDATES &amp; HELP</div>
-        <a href="#icNotifications" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12h4"/></svg>Announcements</a>
+        <a href="#phase07Center" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12h4"/></svg>Notifications</a>
         <a href="mailto:Info@IntelliCoreTechnologies.in" class="nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 4.4 1.6c-1.1 1.2-1.9 1.2-1.9 3.4m0 3h.01"/></svg>Support</a>
       </nav>
       <div class="ic-sidebar-foot"><span class="ic-sidebar-foot-dot"></span> Intern workspace</div>
@@ -86,7 +87,7 @@
       </ul>
       <p class="mobile-nav-group">UPDATES &amp; HELP</p>
       <ul class="mobile-nav-list">
-        <li><a href="#icNotifications" class="mobile-nav-link">Announcements <span>→</span></a></li>
+        <li><a href="#phase07Center" class="mobile-nav-link">Notifications <span>→</span></a></li>
         <li><a href="mailto:Info@IntelliCoreTechnologies.in" class="mobile-nav-link">Support <span>↗</span></a></li>
       </ul>
     </nav>
@@ -122,9 +123,10 @@
         <input id="icTaskSearch" type="search" placeholder="Search assigned tasks…" aria-label="Search assigned tasks">
       </label>
       <div class="ic-dashboard-user">
-        <a class="ic-dashboard-notifications" href="#icNotifications" aria-label="Open announcements">
+        <button class="ic-dashboard-notifications" id="notificationButton" type="button" aria-label="Notifications" hidden>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12h4"/></svg>
-        </a>
+          <span class="notification-count" aria-hidden="true" hidden></span>
+        </button>
         <span class="ic-dashboard-user-divider" aria-hidden="true"></span>
         <span class="ic-dashboard-avatar" id="icDashboardInitial" aria-hidden="true">I</span>
         <span class="ic-dashboard-user-copy"><strong id="icDashboardUserName">Intern</strong><small id="icDashboardUserRole">Intern</small></span>
@@ -215,6 +217,7 @@
     </section>
 
     <section id="phase06Work" class="phase04-disabled" aria-label="My tasks, learning and performance" hidden></section>
+    <section id="phase07Workspace" class="phase04-disabled" aria-label="Notifications and announcements" hidden></section>
     <section class="ic-training-section ic-workspace-panel phase04-disabled" id="icTrainingSection" aria-labelledby="icTrainingTitle" aria-live="polite" hidden>
       <div class="ic-panel-heading">
         <div><span class="ic-muted-label">YOUR INTERNSHIP</span><h2 id="icTrainingTitle">Task Overview</h2><p id="icTrainingIntro">Loading your internship profile…</p></div>

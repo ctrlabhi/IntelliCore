@@ -4,6 +4,7 @@ import { businessToday, lockUser, readPage, transaction } from '../../utils/phas
 import { dateRange, policiesForDates, schedule } from './attendancePolicy.js';
 import { eligibleForLeave, internAccount, internshipIdentity } from './eligibility.js';
 import auditService from '../audit/auditService.js';
+import { emitForReviewers, emitNotification } from '../notifications/notificationService.js';
 
 const prisma = getPrismaClient();
 export const leaveTypes = ['SICK_LEAVE', 'CASUAL_LEAVE', 'EMERGENCY_LEAVE', 'OTHER'];
@@ -47,6 +48,8 @@ export function submitLeave(userId, input, requestId) {
     const activity = await recordedActivity(tx, internshipId, working);
     await auditService.createAuditLog(tx, { actorUserId: userId, requestId, resourceType: 'LEAVE_REQUEST', resourceId: created.id,
       action: 'LEAVE_REQUESTED', afterState: { status: created.status, startDate, endDate, workingDays: working.length } });
+    await emitForReviewers(tx, { event: 'LEAVE_REQUESTED', type: 'LEAVE_REQUEST', resourceId: created.id,
+      rule: 'LEAVE_REVIEW', actorId: userId });
     return { ...created, hasRecordedActivity: activity.length > 0 };
   });
 }
@@ -107,6 +110,8 @@ export function decideLeave(id, decision, actor, requestId) {
     await auditService.createAuditLog(tx, { actorUserId: actor.id, requestId, resourceType: 'LEAVE_REQUEST', resourceId: id,
       action: `LEAVE_${decision.status}`, beforeState: { status: current.status, recordedActivity: activity },
       afterState: { status: result.status, reconciledActivity: result.reconciledActivity } });
+    if (!own) await emitNotification(tx, { event: 'LEAVE_' + result.status, type: 'LEAVE_REQUEST',
+      resourceId: id, recipientIds: [current.internship.userId], now });
     return result;
   });
 }

@@ -48,13 +48,14 @@ export class AuditService {
     afterState = null,
     requestId = null,
     result = 'SUCCESS'
-  }) {
+  }, select) {
     const db = client || prisma;
     try {
       const sanitizedBefore = beforeState ? JSON.stringify(sanitizeAuditPayload(beforeState)) : null;
       const sanitizedAfter = afterState ? JSON.stringify(sanitizeAuditPayload(afterState)) : null;
 
       const record = await db.auditLog.create({
+        select,
         data: {
           actorUserId,
           action,

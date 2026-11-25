@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { recoveredTracks } from '../backend/src/modules/learning/curriculumCatalog.js';
 import { workGrants, workPermissions } from '../backend/src/modules/work/workAccess.js';
+import { assessmentGrants, notificationGrants, notificationPermissions } from '../backend/src/modules/notifications/notificationAccess.js';
 
 const prisma = new PrismaClient();
 
@@ -220,7 +221,7 @@ async function seed() {
 
   // 2. Seed Permissions
   const permissionMap = new Map();
-  for (const perm of [...initialPermissions, ...workPermissions]) {
+  for (const perm of [...initialPermissions, ...workPermissions, ...notificationPermissions]) {
     const record = await prisma.permission.upsert({
       where: { code: perm.code },
       update: { description: perm.description },
@@ -289,23 +290,26 @@ async function seed() {
     console.log(`  ✓ Department verified: ${record.name} (${record.code})`);
   }
 
-  await seedWorkGrants(roleMap, permissionMap);
+  await seedVersionedGrants(roleMap, permissionMap, 'rbac.phase06.defaults', workGrants);
+  const noticeGrants = Object.fromEntries(initialRoles.map(({ code }) =>
+    [code, ['notifications:own', ...(notificationGrants[code] ?? [])]]));
+  await seedVersionedGrants(roleMap, permissionMap, 'rbac.phase07.defaults', noticeGrants);
+  await seedVersionedGrants(roleMap, permissionMap, 'rbac.phase07.assessments', assessmentGrants);
   await seedRecoveredTracks();
   console.log('✅ Idempotent seed completed successfully.');
 }
 
-async function seedWorkGrants(roleMap, permissionMap) {
-  const marker = 'rbac.phase06.defaults';
+async function seedVersionedGrants(roleMap, permissionMap, marker, assignments) {
   await prisma.$transaction(async (tx) => {
     await tx.systemSetting.createMany({ skipDuplicates: true, data: [{
-      key: marker, value: 'pending', category: 'rbac', description: 'Phase 06 default permissions installation'
+      key: marker, value: 'pending', category: 'rbac', description: 'Versioned default permissions installation'
     }] });
     await tx.$queryRaw`SELECT id FROM system_settings WHERE \`key\` = ${marker} FOR UPDATE`;
     const record = await tx.systemSetting.findUnique({ where: { key: marker } });
     if (record.value === 'installed') return;
     await tx.rolePermission.createMany({
       skipDuplicates: true,
-      data: Object.entries(workGrants).flatMap(([role, permissions]) =>
+      data: Object.entries(assignments).flatMap(([role, permissions]) =>
         permissions.map((code) => ({ roleId: roleMap.get(role), permissionId: permissionMap.get(code) })))
     });
     await tx.systemSetting.update({ where: { key: marker }, data: { value: 'installed' } });

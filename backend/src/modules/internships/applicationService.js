@@ -7,6 +7,7 @@ import { departmentSummary } from '../departments/departmentService.js';
 import auditService from '../audit/auditService.js';
 import { syncAttendanceEligibility } from '../attendance/eligibility.js';
 import { enrollApprovedInternship } from '../learning/learningService.js';
+import { emitForReviewers, emitNotification } from '../notifications/notificationService.js';
 import { assertNoOverlap, assertTeamLeader, editableApplications, ensureFound, openApplications } from './internshipPolicy.js';
 
 const prisma = getPrismaClient();
@@ -98,6 +99,15 @@ async function applyDecision(tx, application, data, actor, action, requestId) {
     actorUserId: actor.id, resourceType: 'INTERNSHIP_APPLICATION', resourceId: application.id, requestId, action,
     beforeState: { status: application.applicationStatus }, afterState: { status: updated.applicationStatus }
   });
+  if (action !== 'APPLICATION_WITHDRAWN') {
+    const version = (data.reviewedAt ?? data.submittedAt).toISOString();
+    const payload = { type: 'INTERNSHIP_APPLICATION', resourceId: application.id, version };
+    await emitNotification(tx, { ...payload, event: action, recipientIds: [application.applicantUserId] });
+    if (action === 'APPLICATION_SUBMITTED') {
+      await emitForReviewers(tx, { ...payload, event: 'APPLICATION_REVIEW_REQUIRED',
+        rule: 'APPLICATION_REVIEW', actorId: actor.id });
+    }
+  }
   return updated;
 }
 
@@ -176,6 +186,10 @@ export function approveApplication(id, input, actor, requestId) {
       afterState: { ...internship, departmentId, applicationId: id, assignedTeamLeaderId: input.assignedTeamLeaderId,
         accountStatus: 'ACTIVE' }
     });
+    await emitNotification(tx, { event: 'INTERNSHIP_ENROLLED', type: 'INTERNSHIP', resourceId: internship.id,
+      recipientIds: [user.id], now });
+    if (input.assignedTeamLeaderId) await emitNotification(tx, { event: 'TEAM_LEADER_CHANGED', type: 'INTERNSHIP',
+      resourceId: internship.id, recipientIds: [input.assignedTeamLeaderId], now });
     return result;
   }, { retryUnique: true });
 }

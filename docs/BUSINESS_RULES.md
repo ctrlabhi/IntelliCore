@@ -1,5 +1,11 @@
 # IntelliCore Business Rules Specification
 
+## Phase 07 notifications and assessment changes
+
+Successful business transitions create the matching operational notices and any preference-allowed email jobs. Optional delivery preferences never control Firebase verification or password resets. Announcement publication uses eligible recipient snapshots and role scope. Delayed jobs revalidate their recipients. Reminder timing uses the current IST policies and never manufactures business activity.
+
+Authorized department or organization staff can amend an approval score using its original rubric, or correct an observed lesson status. Both actions preserve the original assessment evidence and require a reason and audit entry. Review decisions, attendance and internship completion remain independent. [Notification rules](NOTIFICATION_MANAGEMENT.md).
+
 **Document Version:** 1.0.0  
 **Phase Target:** Approved for implementation starting in Phase 2  
 **Business Timezone:** Asia/Kolkata (`UTC+05:30`)  

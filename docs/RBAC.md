@@ -1,5 +1,11 @@
 # IntelliCore Role-Based Access Control (RBAC) Specification
 
+## Phase 07 notification and assessment permissions
+
+All eight system roles receive `notifications:own`. Verified pending applicants receive their own onboarding notifications only. Announcement grants include `announcements:manage_all` for Founder and Co-Founder, `announcements:manage_interns` for HR Manager, `announcements:manage_operations` for Operations Executive and `announcements:manage_department` for Team Leader. Admin organization-authoring requires an explicit grant. HR Executive and Intern receive their own announcements.
+
+The primary Founder receives `notifications:admin` and `notifications:operate`. ADMIN can receive read-only diagnostics with an explicit grant. Only the primary Founder can retry, cancel jobs or configure reminder windows. Founder, Co-Founder and Team Leader can use `tasks:amend_score` or `learning:correct_progress` in addition to their existing task-review or curriculum-management scope. Re-running the versioned seed preserves removals. [Announcement authorization](ANNOUNCEMENT_MANAGEMENT.md).
+
 For current controls, see [Security rules](SECURITY_RULES.md) and the [API specifications](API.md). Earlier tables preserve the Phase 02B baseline.
 
 ## Phase 06 work and learning permissions

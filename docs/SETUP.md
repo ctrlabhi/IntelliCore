@@ -38,6 +38,17 @@ Open PowerShell in the project root directory (`d:\IntelliCore\Website\IntelliCo
 
 ## 3. Starting the Application (`scripts/start.ps1`)
 
+Schema deployment runs separately from the web process. For a new development schema, prepare MySQL and the dedicated migration account, then build, migrate and seed before starting the application. For a populated database, verify its identity and ledger and complete the approved backup before applying changes. Use the schema-scoped migration credential in the ignored `.env`. The worker uses a separate table-scoped credential.
+
+```powershell
+docker compose up -d mysql
+docker compose build app
+docker compose --profile maintenance run --rm migrate
+docker compose run --rm --no-deps app node prisma/seed.js
+```
+
+An unfinished historical ledger entry requires inspection before deployment. The application entrypoint starts the web process with its runtime identity. The worker starts through the optional Compose profile after the schema is ready. [Worker setup](BACKGROUND_PROCESSING.md).
+
 To build container images and start all services in the background:
 
 ```powershell

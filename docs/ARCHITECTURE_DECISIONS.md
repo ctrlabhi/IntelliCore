@@ -1,5 +1,9 @@
 # Architecture Decision Records (ADRs)
 
+## ADR-006 Transactional notifications and isolated transport
+
+Business changes and their notices and outbox entries commit together in MySQL. Keep transport and scheduled work in a separately authorized process sharing the application image. Persist job claims, attempt history and auditable audience snapshots. Use capture by default and record SMTP ambiguity separately from successful acceptance. Keep app, worker and migration credentials apart. [Background processing](BACKGROUND_PROCESSING.md) · [Notification routes](API.md#phase-07-notifications-announcements-and-delivery).
+
 ## ADR-001: Split-Plane Authentication & Relational MySQL RBAC
 - **Status:** Approved & Implemented in Phase 2B
 - **Context:** IntelliCore requires secure authentication without storing passwords in MySQL, while demanding relational RBAC where role changes and account states are immediately authoritative without waiting for Firebase JWT refresh cycles.

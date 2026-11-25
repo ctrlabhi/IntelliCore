@@ -1,6 +1,6 @@
 # IntelliCore V2.0 master project context
 
-**Updated on 2026-11-25 (Asia/Kolkata).** Phase 06 extends checkpoint `05c8830` with tasks, private submissions, immutable curricula, learning progress and performance reporting. [Project progress](PROJECT_PROGRESS.md).
+**Updated on 2026-11-25 (Asia/Kolkata).** Phase 07 extends checkpoint `af38bcd` with in-app notifications, announcements, a transactional email outbox and a separate MySQL-backed worker. [Project progress](PROJECT_PROGRESS.md).
 
 ## Product and repository
 
@@ -56,6 +56,7 @@ In addition to health and Swagger routes, the following groups are mounted under
 | Phase 04 | `/departments`, `/internship-applications` and `/internships`. See the [Phase 04 API](API.md#phase-04-departments-applications-and-internships) for methods, resources and authorization. |
 | Phase 05 | `/attendance`, `/daily-work-reports`, `/leave-requests` and `/attendance-corrections`. [Phase 05 API](API.md#phase-05-attendance-leave-and-work-reports). |
 | Phase 06 | `/tasks`, `/task-assignments`, `/task-submissions`, `/attachments`, `/learning` and `/performance`. [Phase 06 API](API.md#phase-06-tasks-learning-and-performance). |
+| Phase 07 | `/notifications`, `/notification-preferences`, `/announcements`, authorized admin email and worker endpoints, and assessment corrections. [Phase 07 API](API.md#phase-07-notifications-announcements-and-delivery). |
 
 ## Source records
 

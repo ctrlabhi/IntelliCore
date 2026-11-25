@@ -24,6 +24,12 @@ const basicList = z.object({ ...pageFields, sort: z.enum(['asc', 'desc']).defaul
 const versionHeader = z.coerce.number().int().min(1).max(2147483647);
 const reviewPerformance = input.performanceQuery.extend({ limit: z.coerce.number().int().min(1).max(30).default(20) });
 const recipientsQuery = basicList.extend({ departmentId: uuid });
+const explanation = z.string().trim().min(8).max(1000);
+const scoreAmendment = z.object({ expectedRevision: z.number().int().nonnegative(), reason: explanation,
+  score: input.score.optional(), criterionScores: z.array(input.score).max(12).optional() }).strict();
+const lessonState = z.enum(['IN_PROGRESS', 'COMPLETED']);
+const progressCorrection = z.object({ expectedStatus: lessonState, status: lessonState,
+  expectedCorrectionId: uuid.nullable(), reason: explanation }).strict();
 const uploadRate = rateLimit({
   windowMs: 60_000, limit: 15, standardHeaders: 'draft-7', legacyHeaders: false,
   handler: (req, res) => sendError(res, 'Wait before uploading another attachment.', 429, 'UPLOAD_RATE_LIMIT')
@@ -114,7 +120,10 @@ submissionRoutes.post('/:id/submit', endpoint((req, requestId) => {
 }));
 submissionRoutes.post('/:id/attachments', ...upload('SUBMISSION'));
 submissionRoutes.get('/:id/reviews', endpoint((req) => submissions.listReviews(req, id(req), query(basicList, req))));
+submissionRoutes.get('/:id/review/amendments', endpoint((req) => submissions.listAmendments(req, id(req), query(basicList, req))));
 submissionRoutes.post('/:id/review', endpoint((req, requestId) => submissions.reviewSubmission(req, id(req), body(input.reviewFields, req), requestId), 201));
+submissionRoutes.post('/:id/review/amend', endpoint((req, requestId) =>
+  submissions.amendScore(req, id(req), body(scoreAmendment, req), requestId), 201));
 submissionRoutes.use(safeErrors);
 
 const attachmentRoutes = Router();
@@ -159,7 +168,11 @@ learningRoutes.post('/me/sync', endpoint((req, requestId) => {
 }));
 learningRoutes.get('/me', endpoint((req) => learning.ownLearning(req, query(basicList, req), true)));
 learningRoutes.get('/me/progress', endpoint((req) => learning.ownLearning(req, query(basicList, req), false)));
+learningRoutes.get('/me/enrollments/:id', endpoint((req) => learning.learningEnrollmentDetail(req, id(req), true)));
 learningRoutes.get('/progress', endpoint((req) => learning.listLearningProgress(req, query(input.enrollmentQuery, req))));
+learningRoutes.get('/enrollments/:id', endpoint((req) => learning.learningEnrollmentDetail(req, id(req))));
+learningRoutes.post('/enrollments/:id/lessons/:lessonId/correct', endpoint((req, requestId) =>
+  learning.correctLearningProgress(req, id(req), uuid.parse(req.params.lessonId), body(progressCorrection, req), requestId), 201));
 for (const operation of ['start', 'complete']) {
   learningRoutes.post('/lessons/:id/' + operation, endpoint((req) => learning.progressLesson(req, id(req),
     body(z.object({ enrollmentId: uuid }).strict(), req), operation === 'complete')));
