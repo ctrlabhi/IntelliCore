@@ -113,6 +113,10 @@ services:
       DATABASE_URL: ${MIGRATION_DATABASE_URL:-}
       SHADOW_DATABASE_URL: ${MIGRATION_SHADOW_DATABASE_URL:-}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-intellicore_db}
+    volumes:
+      - ./prisma:/app/prisma:ro
+      - ./backend/src:/app/backend/src:ro
+      - ./package.json:/app/package.json:ro
     depends_on:
       mysql:
         condition: service_healthy

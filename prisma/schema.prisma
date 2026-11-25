@@ -1210,3 +1210,30 @@ model CalendarAuthorization {
   @@index([organizerId])
   @@map("calendar_authorizations")
 }
+
+model AccountDeletionJob {
+  id                String    @id @default(uuid()) @db.VarChar(36)
+  userId            String    @map("user_id") @db.VarChar(36)
+  targetFirebaseUid String    @map("target_firebase_uid") @db.VarChar(128)
+  targetEmail       String    @map("target_email") @db.VarChar(191)
+  targetName        String?   @map("target_name") @db.VarChar(150)
+  status            String    @default("REQUESTED") @db.VarChar(30)
+  reason            String    @db.VarChar(500)
+  previewHash       String?   @map("preview_hash") @db.VarChar(64)
+  impactSummary     Json?     @map("impact_summary")
+  requestedBy       String    @map("requested_by") @db.VarChar(36)
+  requestedByEmail  String    @map("requested_by_email") @db.VarChar(191)
+  failedStep        String?   @map("failed_step") @db.VarChar(100)
+  errorMessage      String?   @map("error_message") @db.VarChar(1000)
+  retryCount        Int       @default(0) @map("retry_count")
+  completedAt       DateTime? @map("completed_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([targetFirebaseUid])
+  @@index([targetEmail])
+  @@index([status])
+  @@index([createdAt])
+  @@map("account_deletion_jobs")
+}

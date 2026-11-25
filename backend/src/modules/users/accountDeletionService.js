@@ -35,39 +35,8 @@ export function validatePreviewFreshness(previewTimestamp, maxAgeMs = 15 * 60 * 
 }
 
 export async function ensureDeletionJobsTable() {
-  if (tableInitialized) return;
-  try {
-    await prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS \`account_deletion_jobs\` (
-        \`id\` VARCHAR(36) NOT NULL,
-        \`user_id\` VARCHAR(36) NOT NULL,
-        \`target_firebase_uid\` VARCHAR(128) NOT NULL,
-        \`target_email\` VARCHAR(191) NOT NULL,
-        \`target_name\` VARCHAR(150) NULL,
-        \`status\` VARCHAR(30) NOT NULL DEFAULT 'REQUESTED',
-        \`reason\` VARCHAR(500) NOT NULL,
-        \`preview_hash\` VARCHAR(64) NULL,
-        \`impact_summary\` JSON NULL,
-        \`requested_by\` VARCHAR(36) NOT NULL,
-        \`requested_by_email\` VARCHAR(191) NOT NULL,
-        \`failed_step\` VARCHAR(100) NULL,
-        \`error_message\` VARCHAR(1000) NULL,
-        \`retry_count\` INT NOT NULL DEFAULT 0,
-        \`completed_at\` DATETIME(3) NULL,
-        \`created_at\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-        \`updated_at\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
-        PRIMARY KEY (\`id\`),
-        INDEX \`idx_deletion_jobs_user_id\` (\`user_id\`),
-        INDEX \`idx_deletion_jobs_target_uid\` (\`target_firebase_uid\`),
-        INDEX \`idx_deletion_jobs_target_email\` (\`target_email\`),
-        INDEX \`idx_deletion_jobs_status\` (\`status\`),
-        INDEX \`idx_deletion_jobs_created_at\` (\`created_at\`)
-      ) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-    `);
-    tableInitialized = true;
-  } catch (err) {
-    logger.warn({ err: err.message }, 'Could not ensure account_deletion_jobs table');
-  }
+  // Schema is managed exclusively via version-controlled migration (20261125180000_add_account_deletion_jobs).
+  // Zero runtime DDL operations permitted.
 }
 
 export class AccountDeletionService {
