@@ -26,7 +26,7 @@
   "crons": [
     {
       "path": "/api/internal/notification-tick",
-      "schedule": "* * * * *"
+      "schedule": "0 0 * * *"
     }
   ]
 }

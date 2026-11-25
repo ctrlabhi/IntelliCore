@@ -110,7 +110,7 @@ The background notification worker is integrated via Vercel Cron:
   "crons": [
     {
       "path": "/api/internal/notification-tick",
-      "schedule": "* * * * *"
+      "schedule": "0 0 * * *"
     }
   ]
   ```
