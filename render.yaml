@@ -1,0 +1,45 @@
+# ==============================================================================
+# IntelliCore V2.0 — Render Blueprint (Zero-Cost Free Web Service)
+# ==============================================================================
+# Runtime: Node.js 24 LTS | Monolith Express.js 5 Backend
+# Excludes Vercel. Connects to Remote Hostinger MariaDB via Strict TLS.
+# ==============================================================================
+
+services:
+  - type: web
+    name: intellicore-api
+    env: node
+    plan: free
+    region: singapore # Closest geographical region to Hostinger Mumbai server (srv1824.hstgr.io)
+    rootDir: .
+    buildCommand: npm install && npm run build:render
+    startCommand: node backend/src/server.js
+    healthCheckPath: /health
+    autoDeploy: false # Manual trigger for controlled deployment approval gate
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: APP_TIMEZONE
+        value: Asia/Kolkata
+      - key: APP_BASE_URL
+        sync: false # Set to e.g. https://intellicore-api.onrender.com or custom domain
+      - key: CORS_ORIGIN
+        value: https://www.intellicoretechnologies.in,https://intellicoretechnologies.in
+      - key: SWAGGER_ENABLED
+        value: "false"
+      - key: DB_SSL
+        value: "true"
+      - key: DATABASE_URL
+        sync: false # Set securely in Render dashboard (e.g. mysql://...:3306/...?...&sslaccept=strict&connection_limit=2)
+      - key: FIREBASE_PROJECT_ID
+        value: intellicore-dev
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false # Set securely in Render dashboard
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false # Set securely in Render dashboard
+      - key: FOUNDER_EMAIL
+        value: ctrlabhishek@gmail.com
+      - key: FOUNDER_FIREBASE_UID
+        value: svNt0UTSz9N59EzlaTWR7jsCu5c2
+      - key: LOG_LEVEL
+        value: info

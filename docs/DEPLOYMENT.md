@@ -49,7 +49,7 @@ IntelliCore V2.0 operates with strict boundary separation across four decoupled 
 | **Port** | `3306` | TCP connection verified |
 | **Database Name** | `u740799251_intellicore` | Verified via `information_schema.tables` |
 | **Database User** | `u740799251_intellicore` | Active grants on `u740799251\_intellicore.*` |
-| **TLS Encryption** | `sslaccept=strict` (Active) | Cipher: `ECDHE-ECDSA-AES256-GCM-SHA384` |
+| **TLS Encryption** | `sslaccept=strict` (Active) | Protocol: `TLSv1.2`, Cipher: `ECDHE-ECDSA-AES256-GCM-SHA384` |
 | **Certificate CN/SAN** | `*.hstgr.io`, `hstgr.io` | Let's Encrypt CA, valid through 2027 |
 | **Charset & Collation** | `utf8mb4` / `utf8mb4_unicode_ci` | Full Unicode and emoji support |
 
@@ -151,3 +151,44 @@ function getDefaultApiBaseUrl() {
 2. **Strict TLS 1.3 Validation**: Remote database connection strictly enforces `sslaccept=strict` with validated certificate CN `*.hstgr.io`. Insecure flags (`accept_invalid_certs`) are rejected in all environments.
 3. **Least Privilege Grants**: MySQL user `u740799251_intellicore` has grants restricted strictly to schema `u740799251_intellicore`.
 4. **Credential Isolation**: No production passwords, Firebase Admin credentials, or service account tokens are exposed in client-facing bundles or public documentation.
+
+---
+
+## 7. Zero-Cost Cloud Backend Deployment Blueprint (Render Free Web Service)
+
+### A. Deployment Settings
+- **Service Type**: Web Service (Node.js)
+- **Root Directory**: `.` (Repository root)
+- **Runtime**: Node.js 24 LTS (`engines: { "node": "24.x" }`)
+- **Build Command**: `npm install && npm run build:render` (`npx prisma generate`)
+- **Start Command**: `node backend/src/server.js` (listens on `0.0.0.0:${PORT}`)
+- **Health Check Path**: `/health` (HTTP 200)
+- **Auto-Deploy**: Disabled (manual approval gate)
+
+### B. Environment Variables to Configure in Render Dashboard
+| Variable | Value / Format | Security Mode |
+| :--- | :--- | :--- |
+| `NODE_ENV` | `production` | Plaintext |
+| `APP_TIMEZONE` | `Asia/Kolkata` | Plaintext |
+| `PORT` | Set automatically by Render (e.g. 10000) | Injected by platform |
+| `CORS_ORIGIN` | `https://www.intellicoretechnologies.in,https://intellicoretechnologies.in` | Plaintext |
+| `SWAGGER_ENABLED` | `false` | Plaintext |
+| `DB_SSL` | `true` | Plaintext |
+| `DATABASE_URL` | `mysql://u740799251_intellicore:<PASSWORD>@srv1824.hstgr.io:3306/u740799251_intellicore?sslaccept=strict&connection_limit=2` | Secret Store |
+| `FIREBASE_PROJECT_ID` | `intellicore-dev` | Plaintext |
+| `FIREBASE_CLIENT_EMAIL` | `<SERVICE_ACCOUNT_CLIENT_EMAIL>` | Secret Store |
+| `FIREBASE_PRIVATE_KEY` | `-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----` | Secret Store |
+| `FOUNDER_EMAIL` | `ctrlabhishek@gmail.com` | Plaintext |
+| `FOUNDER_FIREBASE_UID` | `svNt0UTSz9N59EzlaTWR7jsCu5c2` | Plaintext |
+
+---
+
+## 8. Controlled Deployment Approval Gate
+
+Before deploying to the public Render environment, the following owner actions and approval gates must be completed:
+
+1. **Database Password Rotation**: Rotate the MySQL password in Hostinger hPanel under Remote MySQL. Update `.env.production.local` locally and prepare the new value for Render's secret store.
+2. **Render Account Link**: Connect the GitHub repository `IntelliCore` to Render as a Free Web Service.
+3. **Environment Injection**: Paste the rotated `DATABASE_URL` and `FIREBASE_PRIVATE_KEY` into Render's Environment settings.
+4. **Owner Authorization**: Explicitly approve the cloud deployment action.
+

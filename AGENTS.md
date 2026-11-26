@@ -15,6 +15,7 @@ Read the linked architecture decisions, business rules, phase reports and releva
 ## Implementation boundaries
 
 - Follow the phase scope in the roadmap and the current user request. Phase 10 completes final security hardening, permanent account deletion, runtime recovery, quality assurance, and project delivery.
+- Public backend deployment targets zero-cost hosting (Render Free Web Service or local Docker) without Vercel or paid upgrades. Stop at the verified deployment approval gate before public cloud provisioning or DNS cutover.
 - Preserve the same-origin modular monolith, HTML/CSS/vanilla JavaScript, Node.js 24 LTS, Express 5, MySQL 8.4 LTS, Prisma, Docker Compose and phpMyAdmin. Preserve branding, responsive layouts and compatible public URLs. Use UTC for stored timestamps and Asia/Kolkata for business dates.
 - Keep Firebase authentication-only and use `intellicore-dev` for development identity. Keep production Firebase `intellicore-229` quarantined from local and test activity. Leave `legacy-firebase/` as historical reference. MySQL is authoritative for account state, RBAC and all business records.
 - Apply server-side account, role, permission and resource guards. Use strict input validation, Express response helpers and the existing routes/controllers/services layout. Keep related business changes and successful audit entries in the same transaction.

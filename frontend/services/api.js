@@ -21,13 +21,20 @@ export class ApiClientError extends Error {
 
 function getDefaultApiBaseUrl() {
   if (typeof window !== 'undefined') {
+    // 1. Explicit runtime override takes highest precedence (for separated frontend/backend hosting)
+    if (window.__INTELLICORE_API_BASE_URL__) {
+      return window.__INTELLICORE_API_BASE_URL__;
+    }
+    if (window.__ENV__ && window.__ENV__.API_BASE_URL) {
+      return window.__ENV__.API_BASE_URL;
+    }
     const host = window.location.hostname;
-    // When served from static GitHub Pages, bridge to Vercel API
+    // 2. When served from static GitHub Pages, bridge to cloud backend
     if (host.endsWith('github.io')) {
       return 'https://intellicore-six.vercel.app/api/v1';
     }
   }
-  // Same-origin modular monolith default (/api/v1 on Vercel and local)
+  // 3. Same-origin modular monolith default (/api/v1 on local Express)
   return '/api/v1';
 }
 

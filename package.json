@@ -7,6 +7,7 @@
   "scripts": {
     "start": "node backend/src/server.js",
     "build": "npm run build:vercel",
+    "build:render": "prisma generate",
     "build:vercel": "prisma generate && node scripts/build-vercel-assets.js",
     "notifications:worker": "node backend/src/scripts/notificationWorker.js",
     "dev": "nodemon --watch backend/src backend/src/server.js",

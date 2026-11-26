@@ -28,15 +28,21 @@ This report documents the verification, database integration, test suite executi
 
 ---
 
-## 3. MySQL Connectivity Results
+## 3. MySQL Connectivity & TLS Diagnostics
 - **Status**: **PASS**
 - **Target Host**: `srv1824.hstgr.io` (IP: `193.203.184.196`) on Port `3306`.
 - **Database / User**: `u740799251_intellicore`
-- **Ping / Liveness**: `SELECT 1` returned `{ alive: 1 }` (Latency: ~517-827 ms).
-- **TLS Handshake**: **PASS** (Strict TLS 1.3, Cipher `ECDHE-ECDSA-AES256-GCM-SHA384`, Certificate CN `*.hstgr.io`, Let's Encrypt CA).
-- **Grants**: Scoped user grants verified:
-  - `GRANT USAGE ON *.* TO u740799251_intellicore@% ...`
+- **Ping / Liveness**: `SELECT 1` returned `{ alive: 1 }` (Round-trip WAN Latency: 410–517 ms).
+- **Negotiated TLS Protocol & Cipher**: **PASS**
+  - **Ssl_version**: `TLSv1.2` (Negotiated protocol between client and MariaDB).
+  - **Ssl_cipher**: `ECDHE-ECDSA-AES256-GCM-SHA384` (Elliptic Curve Diffie-Hellman Ephemeral with ECDSA signature and AES-256-GCM authenticated encryption).
+  - **Cipher List**: MariaDB advertises TLS 1.3 ciphers (`TLS_AES_256_GCM_SHA384`, etc.), while this connection negotiated TLSv1.2.
+  - **Certificate Subject CN**: `*.hstgr.io` (Let's Encrypt CA, valid through Jan 10, 2027).
+  - **Verification Mode**: Strict CA verification (`sslaccept=strict`) with 0 certificate bypasses.
+- **Grants & Provider Limits**:
+  - `GRANT USAGE ON *.* TO u740799251_intellicore@% IDENTIFIED BY PASSWORD ... WITH MAX_CONNECTIONS_PER_HOUR 500 MAX_USER_CONNECTIONS 75 MAX_STATEMENT_TIME 120.000000`
   - `GRANT ALL PRIVILEGES ON u740799251\_intellicore.* TO u740799251_intellicore@%`
+  - Note on least-privilege: Hostinger shared hosting manages users via hPanel; database accounts lack `CREATE USER` and `GRANT OPTION`, preventing dynamic runtime-only user provisioning via SQL. Application-layer guards enforce RBAC.
 
 ---
 
@@ -93,7 +99,11 @@ This report documents the verification, database integration, test suite executi
 - **Identity Provider**: Firebase Auth (`intellicore-dev`).
 - **Plan**: Spark ($0/month, free tier).
 - **Verified Operations**: Google Sign-In, Email/Password sign-up and login, ID token validation via Firebase Admin SDK, session restoration, logout, and token expiry handling.
-- **Founder Bootstrap**: Verified primary Founder account `ctrlabhishek@gmail.com` (UID: `svNt0UTSz9N59EzlaTWR7jsCu5c2`) with `ACTIVE` status and `FOUNDER` role in remote MariaDB.
+- **Founder Bootstrap Investigation & Resolution**:
+  - *Previous Issue*: Multi-statement interactive transactions in `authService.bootstrapUser` timed out after 5000ms due to ~500ms WAN latency between clients/serverless and the Hostinger server in Mumbai.
+  - *Fix Applied*: Increased Prisma interactive transaction timeout in `b10c5eb` to `maxWait: 15000, timeout: 30000`.
+  - *Read-Only Verification*: Queried remote database directly via `scripts/diagnose-tls-connection.js`. Confirmed Founder record `ctrlabhishek@gmail.com` (User ID: `b6a09a5c-820f-4e9d-80f5-df3cbfe29ee1`, status `ACTIVE`, role `FOUNDER`, name `Abhishek Kumar`).
+  - *Local Acceptance Suite*: All 12 authentication and workspace criteria passed 100% in `scripts/verify-local-acceptance.js`.
 
 ---
 

@@ -3,9 +3,10 @@ import env from './config/env.js';
 import logger from './config/logger.js';
 import { disconnectDatabase, checkDatabaseConnection } from './config/database.js';
 
-const PORT = env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || env.PORT || 3000, 10);
+const HOST = '0.0.0.0';
 
-const server = app.listen(PORT, async () => {
+const server = app.listen(PORT, HOST, async () => {
   logger.info(`========================================================`);
   logger.info(`🚀 IntelliCore Modular Monolith v2.0.0 started`);
   logger.info(`🌐 Application URL:    ${env.APP_BASE_URL}`);

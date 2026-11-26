@@ -32,8 +32,9 @@ export function createApp() {
   app.use(requestLogger);
 
   // CORS configuration
+  const configuredOrigins = env.CORS_ORIGIN ? env.CORS_ORIGIN.split(',').map((s) => s.trim()) : [];
   const allowedOrigins = [
-    env.CORS_ORIGIN,
+    ...configuredOrigins,
     'https://intellicoretechnologies.in',
     'https://www.intellicoretechnologies.in',
     'https://intellicore-six.vercel.app',

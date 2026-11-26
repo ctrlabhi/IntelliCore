@@ -79,3 +79,22 @@ Technical work, attachments and published learning content use verified identity
 ## Phase 08 application protections
 
 Calendar consent binds a single-use state hash and PKCE challenge to an HttpOnly cookie. OAuth query strings are omitted from request logs. AES-GCM associates refresh credentials with organizer and calendar. Provider writes use an explicit development authorization flag and never supply attendees. Meet links use a strict canonical HTTPS format. Certificate status is an authenticated, audited app-only record. The external certificate document and email workflow remains outside IntelliCore. [Security rules](SECURITY_RULES.md).
+
+## Production Deployment Security & Credential Hardening
+
+1. **Database Credential Rotation Requirement:**
+   - Because the database password was historically shared during development conversations, it must be rotated in Hostinger hPanel under Remote MySQL prior to public production launch.
+   - The verified database connection currently authenticates with the credentials stored in `.env.production.local`. Owner rotation is required before production deployment.
+
+2. **Database Least-Privilege & Hostinger Provider Limitation:**
+   - In Hostinger shared hosting environments, MySQL accounts are provisioned via hPanel. The assigned account `u740799251_intellicore` possesses `ALL PRIVILEGES` on `u740799251\_intellicore.*` without `GRANT OPTION` or global `CREATE USER`.
+   - Separate runtime and migration credentials cannot be created via SQL queries. This is an accepted provider-level infrastructure limitation of shared web hosting. Application-layer security guards strictly enforce read-only and role-scoped access.
+
+3. **Backup File Quarantine:**
+   - Database backups (`backups/*.sql`) and environment files (`.env*`, `.env.production.local`) are strictly excluded by `.gitignore` and `.dockerignore`.
+   - Verified that `backups/hostinger-production-backup.sql` has never been committed to Git or packaged in public deployment bundles.
+
+4. **Strict TLS Validation:**
+   - Connections to `srv1824.hstgr.io:3306` strictly enforce `sslaccept=strict` with Let's Encrypt CA validation.
+   - Negotiated connection protocol: `TLSv1.2` with cipher `ECDHE-ECDSA-AES256-GCM-SHA384`. Insecure flags (`rejectUnauthorized: false`) are strictly prohibited.
+
