@@ -22,10 +22,12 @@ export class ApiClientError extends Error {
 function getDefaultApiBaseUrl() {
   if (typeof window !== 'undefined') {
     const host = window.location.hostname;
-    if (host === 'intellicoretechnologies.in' || host === 'www.intellicoretechnologies.in' || host.endsWith('github.io')) {
+    // When served from static GitHub Pages, bridge to Vercel API
+    if (host.endsWith('github.io')) {
       return 'https://intellicore-six.vercel.app/api/v1';
     }
   }
+  // Same-origin modular monolith default (/api/v1 on Vercel and local)
   return '/api/v1';
 }
 

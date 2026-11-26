@@ -135,9 +135,9 @@ export function createApp() {
   });
 
   app.get([
-    '/hr-dashboard.html', '/hr-dashboard', '/dashboards/hr',
+    '/hr-dashboard.html', '/hr-dashboard', '/dashboards/hr', '/dashboards/hr-manager',
     '/hr-executive-dashboard.html', '/hr-executive-dashboard', '/dashboards/hr-executive',
-    '/operations-dashboard.html', '/operations-dashboard', '/dashboards/operations',
+    '/operations-dashboard.html', '/operations-dashboard', '/dashboards/operations', '/dashboards/operations-executive',
     '/pages/dashboards/hr', '/pages/dashboards/hr/index.html'
   ], (req, res) => {
     res.sendFile(path.join(frontendDir, 'pages/dashboards/hr/index.html'));
