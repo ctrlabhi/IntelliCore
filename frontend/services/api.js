@@ -19,8 +19,18 @@ export class ApiClientError extends Error {
   }
 }
 
+function getDefaultApiBaseUrl() {
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'intellicoretechnologies.in' || host === 'www.intellicoretechnologies.in' || host.endsWith('github.io')) {
+      return 'https://intellicore-six.vercel.app/api/v1';
+    }
+  }
+  return '/api/v1';
+}
+
 class ApiClient {
-  constructor(baseUrl = '/api/v1', defaultTimeoutMs = 12000) {
+  constructor(baseUrl = getDefaultApiBaseUrl(), defaultTimeoutMs = 12000) {
     this.baseUrl = baseUrl.replace(/\/$/, '');
     this.defaultTimeoutMs = defaultTimeoutMs;
     this.tokenProvider = null;

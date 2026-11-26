@@ -33,13 +33,17 @@ export function createApp() {
 
   // CORS configuration
   const allowedOrigins = [
-    env.CORS_ORIGIN || 'http://localhost:3000',
+    env.CORS_ORIGIN,
+    'https://intellicoretechnologies.in',
+    'https://www.intellicoretechnologies.in',
+    'https://intellicore-six.vercel.app',
+    'https://ctrlabhi.github.io',
     'http://127.0.0.1:3000',
     'http://localhost:3000'
-  ];
+  ].filter(Boolean);
   app.use(cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app') || origin.endsWith('.github.io')) {
         return callback(null, true);
       }
       return callback(null, allowedOrigins[0]);
@@ -151,8 +155,13 @@ export function createApp() {
     res.sendFile(path.join(frontendDir, 'pages/notes.html'));
   });
 
-  // 6. Public Landing Page (Root & /frontend)
-  app.get(['/', '/index.html', '/frontend', '/frontend/index.html'], (req, res) => {
+  // 6. Redirect legacy /frontend URLs to clean root /
+  app.get(['/frontend', '/frontend/', '/frontend/index.html'], (req, res) => {
+    return res.redirect(301, '/');
+  });
+
+  // Public Landing Page (Root)
+  app.get(['/', '/index.html'], (req, res) => {
     res.sendFile(path.join(frontendDir, 'index.html'));
   });
 

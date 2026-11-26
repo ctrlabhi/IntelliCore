@@ -8,10 +8,15 @@
   <meta name="keywords" content="IntelliCore, IT internship, web development internship, data analyst internship, business analyst internship, digital marketing internship, software development, India">
   <meta name="theme-color" content="#050813">
   <script>
-    if (window.location.pathname.endsWith('/frontend/') || window.location.pathname.endsWith('/frontend')) {
-      const cleanUrl = window.location.href.replace(/\/frontend\/?(\?|#|$)/, '/$1');
-      window.history.replaceState(null, '', cleanUrl);
-    }
+    // Permanently redirect legacy /frontend/ URLs to clean root /
+    (function() {
+      var path = window.location.pathname;
+      if (path.indexOf('/frontend') !== -1) {
+        var clean = path.replace(/\/frontend\/?/i, '/') || '/';
+        var target = clean + window.location.search + window.location.hash;
+        window.location.replace(target);
+      }
+    })();
   </script>
   <meta property="og:type" content="website">
   <meta property="og:title" content="IntelliCore">
@@ -26,7 +31,7 @@
     "@type": "Organization",
     "name": "IntelliCore",
     "url": "https://intellicoretechnologies.in/",
-    "logo": "https://intellicoretechnologies.in/frontend/assets/images/favicon.png",
+    "logo": "https://intellicoretechnologies.in/assets/images/favicon.png",
     "email": "Info@IntelliCoreTechnologies.in",
     "sameAs": [
       "https://www.linkedin.com/company/intellicoretechnologies"

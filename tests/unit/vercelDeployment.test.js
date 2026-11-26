@@ -12,9 +12,12 @@ const token = 'test-fixture';
 describe('Vercel runtime integration', () => {
   it('exports the same Express application routing and security on the Vercel entry point', async () => {
     const home = await request(app).get('/');
+    const frontendRedirect = await request(app).get('/frontend');
     const notes = await request(app).get('/pages/notes.html');
     const dashboard = await request(app).get('/dashboards/intern');
     expect(home.status).toBe(200);
+    expect(frontendRedirect.status).toBe(301);
+    expect(frontendRedirect.headers.location).toBe('/');
     expect(notes.text).toContain('IntelliCore Notes AI');
     expect(dashboard.status).toBe(200);
     expect(home.headers['content-security-policy']).toContain("frame-ancestors 'self'");

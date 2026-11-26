@@ -352,11 +352,32 @@ try {
 
     try {
       await authService.loginWithGoogle();
-      setMessage('Google authentication successful! Redirecting...', 'success');
+      setMessage('Verifying workspace authorization...', 'info');
+
+      // 10-second timeout guard to ensure user is never indefinitely stuck
+      const authTimeout = setTimeout(() => {
+        const ctx = authService.getContext();
+        if (!ctx.isAuthenticated) {
+          setLoading(false);
+          setMessage('Workspace verification timed out. Please retry signing in.', 'error');
+        }
+      }, 10000);
+
+      const checkAndRedirect = () => {
+        const ctx = authService.getContext();
+        if (ctx.isAuthenticated) {
+          clearTimeout(authTimeout);
+          setMessage('Authentication successful! Opening workspace...', 'success');
+          const target = authService.determineDashboardRoute(ctx);
+          if (target) {
+            window.location.href = target;
+          }
+        }
+      };
+      checkAndRedirect();
     } catch (err) {
       console.error('[Auth] Google OAuth error:', err);
       setMessage(mapAuthError(err), 'error');
-    } finally {
       setLoading(false);
     }
   });
@@ -440,7 +461,8 @@ try {
 
     if (status === 'ACTIVE' || context.workspaces?.onboarding) {
       const targetRoute = authService.determineDashboardRoute(context);
-      if (targetRoute && modal?.classList.contains('is-open')) {
+      if (targetRoute && (modal?.classList.contains('is-open') || isSubmitting)) {
+        setMessage('Authentication successful! Opening workspace...', 'success');
         window.location.href = targetRoute;
       }
     } else if (status === 'SUSPENDED') {
