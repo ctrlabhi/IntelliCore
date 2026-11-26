@@ -155,25 +155,38 @@ export function createApp() {
     res.sendFile(path.join(frontendDir, 'pages/notes.html'));
   });
 
-  // 6. Redirect all legacy /frontend URLs to clean paths permanently (HTTP 301)
+  // 6. Redirect all legacy /frontend URLs to safe, clean paths permanently (HTTP 301)
+  // Protected against Open-Redirect (CWE-601) by strictly sanitizing and restricting to safe same-origin internal paths.
   app.use('/frontend', (req, res) => {
-    const rawPath = req.url.split('?')[0];
-    const search = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+    const rawOriginal = (req.originalUrl || '').split('?')[0];
+    const pathOnly = rawOriginal.replace(/^\/frontend/i, '') || '/';
+    // Collapse any double or multiple leading slashes (e.g. //evil.com -> /evil.com) and replace backslashes
+    const normalized = pathOnly.replace(/\\/g, '/').replace(/^\/+/, '/');
+    const search = req.originalUrl.includes('?') ? req.originalUrl.slice(req.originalUrl.indexOf('?')) : '';
+
+    // Disallow scheme prefixes, protocol-relative targets, or any non-slash start
+    if (!normalized.startsWith('/') || normalized.startsWith('//') || /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(normalized)) {
+      return res.redirect(301, '/' + search);
+    }
+
     let target = '/';
-    if (rawPath === '/' || rawPath === '/index.html' || rawPath === '') {
+    if (normalized === '/' || normalized === '/index.html') {
       target = '/';
-    } else if (rawPath.startsWith('/pages/dashboards/founder') || rawPath.startsWith('/dashboards/founder')) {
+    } else if (normalized.startsWith('/pages/dashboards/founder') || normalized.startsWith('/dashboards/founder')) {
       target = '/dashboards/founder';
-    } else if (rawPath.startsWith('/pages/dashboards/hr') || rawPath.startsWith('/dashboards/hr')) {
+    } else if (normalized.startsWith('/pages/dashboards/hr') || normalized.startsWith('/dashboards/hr')) {
       target = '/dashboards/hr';
-    } else if (rawPath.startsWith('/pages/dashboards/team-leader') || rawPath.startsWith('/dashboards/team-leader')) {
+    } else if (normalized.startsWith('/pages/dashboards/team-leader') || normalized.startsWith('/dashboards/team-leader')) {
       target = '/dashboards/team-leader';
-    } else if (rawPath.startsWith('/pages/dashboards/intern') || rawPath.startsWith('/dashboards/intern')) {
+    } else if (normalized.startsWith('/pages/dashboards/intern') || normalized.startsWith('/dashboards/intern')) {
       target = '/dashboards/intern';
-    } else if (rawPath.includes('notes.html') || rawPath === '/notes') {
+    } else if (normalized.includes('notes.html') || normalized === '/notes') {
       target = '/notes.html';
+    } else if (/^\/(assets|services|Photos|images)\//i.test(normalized)) {
+      target = normalized;
     } else {
-      target = rawPath;
+      // Safe default for any unmapped paths
+      target = '/';
     }
     return res.redirect(301, target + search);
   });
