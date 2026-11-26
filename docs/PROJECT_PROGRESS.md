@@ -170,5 +170,18 @@ The official Vercel Express builder generated a 46 MiB Node.js 24 function in an
 | Regression Test Suite | PASS | Vitest test suite passed 100%: 19 test files, 133 tests green. Zero regressions. |
 | Deployment & Checkpoint | PASS | Git checkpoint `2ee5bd9` pushed to `origin/main`. Changes mirrored between `frontend/` and root `pages/` and `assets/`. |
 
+## Production Database & Vercel Cloud Acceptance on 2026-11-26
+
+| Check | Result | Evidence |
+| :--- | :--- | :--- |
+| Direct Hostinger database verification | PASS | Queried MariaDB 11.8.9 at `193.203.184.196:3306` directly via Node MySQL client. Server hostname identified as `in-mum-web1824.main-hosting.eu`. DNS verified `srv1824.hstgr.io` resolves to `193.203.184.196`. TLS 1.3 handshake verified (`Authorized: true`, cipher `TLS_AES_256_GCM_SHA384`, certificate subject CN `*.hstgr.io`). Strict TLS validation (`sslaccept=strict`) succeeds without certificate mismatch or insecure flags. `npm run db:verify` passed cleanly with 517ms latency. |
+| Production database migrations | PASS | All 11 Prisma migrations deployed sequentially to empty remote database `u740799251_intellicore`: `20261124000000_init`, `20261124090525_add_auth_rbac_models`, `20261124133504_add_staff_and_audit_models`, `20261124141807_add_internship_and_department_models`, `20261125000000_add_attendance_leave_and_reports`, `20261125120000_add_tasks_learning_and_performance`, `20261125143000_add_notifications_and_email_outbox`, `20261125143100_add_assessment_correction_history`, `20261125160000_add_meetings_and_internship_followups`, `20261125180000_add_account_deletion_jobs`, `20261125190000_add_notification_cron_state`. All 49 tables created and recorded in `_prisma_migrations`. |
+| Foundation seeding & Founder bootstrap | PASS | Seeded system settings, 45 granular permissions, 8 RBAC roles, role-permission matrix, and 9 business departments via `prisma/seed.js`. Bootstrapped primary Founder account (`ctrlabhishek@gmail.com`) via `scripts/bootstrapFounder.js`, creating active user, profile, and FOUNDER role mapping. |
+| Express readiness probe with remote database | PASS | `GET /ready` returns HTTP 200 `{"status":"READY","database":"CONNECTED"}` against the remote Hostinger database. |
+| CWE-601 Open-Redirect hardening | PASS | Sanitized Express `/frontend` route in `backend/src/app.js` to strip multiple leading slashes, reject scheme prefixes, and restrict redirection to safe internal paths. Added unit test in `tests/unit/vercelDeployment.test.js`. |
+| Vercel `DATABASE_URL` configuration | PASS | Configured secret `DATABASE_URL` with `sslaccept=strict&connection_limit=2` in Vercel project settings (`abhishek-kumars-projects-299c681c/intellicore`) targeting both `production` and `preview` environments. |
+| Git checkpoints | PASS | Commits `8541c94`, `911f6ba`, and `2e3ded4` pushed to `origin/main`. |
+
 Related source-level findings are recorded in [Security rules](SECURITY_RULES.md#open-control-verification).
+
 
