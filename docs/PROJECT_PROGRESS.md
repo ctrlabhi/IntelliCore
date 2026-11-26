@@ -180,7 +180,9 @@ The official Vercel Express builder generated a 46 MiB Node.js 24 function in an
 | Express readiness probe with remote database | PASS | `GET /ready` returns HTTP 200 `{"status":"READY","database":"CONNECTED"}` against the remote Hostinger database. |
 | CWE-601 Open-Redirect hardening | PASS | Sanitized Express `/frontend` route in `backend/src/app.js` to strip multiple leading slashes, reject scheme prefixes, and restrict redirection to safe internal paths. Added unit test in `tests/unit/vercelDeployment.test.js`. |
 | Vercel `DATABASE_URL` configuration | PASS | Configured secret `DATABASE_URL` with `sslaccept=strict&connection_limit=2` in Vercel project settings (`abhishek-kumars-projects-299c681c/intellicore`) targeting both `production` and `preview` environments. |
-| Git checkpoints | PASS | Commits `8541c94`, `911f6ba`, and `2e3ded4` pushed to `origin/main`. |
+| Vercel `FIREBASE_SERVICE_ACCOUNT_JSON` configuration | PASS | Configured secret `FIREBASE_SERVICE_ACCOUNT_JSON` with minified `intellicore-dev` credentials in Vercel project settings targeting both `production` and `preview` environments to enable serverless token validation. |
+| Express readiness probe decoupling | PASS | Updated `/ready` probe in `backend/src/routes/health.js` so database readiness returns HTTP 200 independently of optional cloud blob tokens. Live verification on `https://intellicore-six.vercel.app/ready` confirmed HTTP 200 with `status: READY` and `database: CONNECTED`. |
+| Git checkpoints | PASS | Commits `8541c94`, `911f6ba`, `2e3ded4`, `5d72596`, `207f5ba`, and current checkpoint pushed to `origin/main`. |
 
 Related source-level findings are recorded in [Security rules](SECURITY_RULES.md#open-control-verification).
 
