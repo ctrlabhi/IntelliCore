@@ -78,7 +78,7 @@ try {
     const code = err?.code || '';
     const msg = err?.message || '';
     if (code === 'auth/unauthorized-domain' || msg.includes('auth/unauthorized-domain')) {
-      return 'This address is not authorized for Google sign-in. Ask the workspace administrator to verify the deployment domain.';
+      return 'Domain authorization is updating. If this persists, please use email/password sign-in or check Firebase Console authorized domains.';
     }
     if (code === 'auth/user-not-found' || code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
       return 'Invalid email or password. Please verify your credentials and try again.';
