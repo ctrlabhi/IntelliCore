@@ -1032,14 +1032,14 @@
     .desktop-nav {
       display: flex;
       align-items: center;
-      gap: 0.18rem;
+      gap: 0.35rem;
     }
 
     .nav-link {
-      font-size: 0.84rem;
+      font-size: 0.85rem;
       font-weight: 600;
       color: var(--text-secondary);
-      padding: 0.45rem 0.65rem;
+      padding: 0.45rem 0.68rem;
       border-radius: var(--radius-sm);
       transition: color var(--transition-fast), background var(--transition-fast);
       white-space: nowrap;
@@ -4109,8 +4109,8 @@ body.ic-modal-open{overflow:hidden}
 .brand-text { display:flex; flex-direction:column; gap:6px; min-width:0; }
 .brand-name { font-size:clamp(1.15rem,1.8vw,2rem); font-weight:850; letter-spacing:-.03em; line-height:1; white-space:nowrap; }
 .brand-sublabel { color:#21e3f5; font-size:clamp(.63rem,.8vw,.92rem); font-weight:750; letter-spacing:.01em; line-height:1.2; white-space:nowrap; text-transform:none; }
-.desktop-nav { gap:clamp(.55rem,1.35vw,1.45rem); }
-.desktop-nav .nav-link { font-size:clamp(.72rem,.9vw,.92rem); white-space:nowrap; }
+.desktop-nav { gap:clamp(.45rem,1.15vw,1.25rem); }
+.desktop-nav .nav-link { font-size:clamp(.78rem,.88vw,.92rem); white-space:nowrap; }
 .ic-final-footer { padding-top:clamp(2.4rem,5vw,5rem)!important; background:radial-gradient(ellipse at 12% 35%,rgba(0,125,190,.10),transparent 42%),linear-gradient(135deg,#03101c,#020914 65%,#031322); border-top:1px solid rgba(0,210,255,.45); }
 .ic-footer-grid { grid-template-columns:minmax(230px,1.15fr) minmax(150px,.72fr) minmax(260px,1.05fr) minmax(300px,1.25fr); gap:clamp(1.3rem,2.4vw,2.7rem); padding:0 0 clamp(2.5rem,4.4vw,4.4rem); }
 .ic-footer-grid > .ic-footer-column { border-left:1px solid rgba(62,116,158,.25); padding-left:clamp(1.2rem,2.3vw,2.5rem); }
@@ -4171,18 +4171,18 @@ body.ic-modal-open{overflow:hidden}
  .brand-sublabel { font-size:.52rem; }
 }
 @media (min-width:1151px) and (max-width:1360px) {
-  .header-inner { gap:.5rem; }
+  .header-inner { gap:.65rem; }
   .brand-logo { gap:8px; }
   .brand-emblem { width:48px !important; height:48px !important; }
-  .brand-name { font-size:1.15rem; }
+  .brand-name { font-size:1.18rem; }
   .brand-sublabel { font-size:.58rem; }
-  .desktop-nav { gap:0; }
+  .desktop-nav { gap:clamp(0.25rem, 0.6vw, 0.65rem); }
   .desktop-nav .nav-link {
-    padding:.38rem .34rem;
-    font-size:.68rem;
+    padding:.42rem .52rem;
+    font-size:.8rem;
   }
-  .header-actions { gap:.35rem; }
-  .contact-us-btn { padding-inline:.7rem; }
+  .header-actions { gap:.5rem; }
+  .contact-us-btn { padding-inline:.85rem; }
 }
 @media(max-width:390px) {
  .ic-footer-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.5rem 1rem; }

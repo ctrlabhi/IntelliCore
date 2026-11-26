@@ -5,8 +5,8 @@
  * Phase: MASTER-PHASE-02C (Authentication Acceptance & Security Hardening)
  */
 
-import { authService } from '/services/auth.js';
-import { api } from '/services/api.js';
+import { authService } from '../../services/auth.js';
+import { api } from '../../services/api.js';
 import { mountPhase04 } from './phase04-dashboard.js';
 import { mountAttendance, stopAttendance } from './phase05-dashboard.js';
 import { mountWork } from './phase06-dashboard.js';

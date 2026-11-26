@@ -14,6 +14,10 @@ import dotenv from 'dotenv';
 // Prioritize .env.production.local if present
 const prodEnvPath = path.resolve(process.cwd(), '.env.production.local');
 if (fs.existsSync(prodEnvPath)) {
+  const prodEnv = dotenv.parse(fs.readFileSync(prodEnvPath));
+  if (!prodEnv.DATABASE_URL && (prodEnv.DB_HOST || prodEnv.DB_NAME)) {
+    delete process.env.DATABASE_URL;
+  }
   dotenv.config({ path: prodEnvPath, override: true });
 }
 

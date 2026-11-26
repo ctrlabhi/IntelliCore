@@ -6,7 +6,7 @@
  * Drives the modal login, signup, password reset, Google sign-in, and dashboard routing.
  */
 
-import { authService } from '/services/auth.js';
+import { authService } from '../../services/auth.js';
 
 // Standardize local origin from 127.0.0.1 to localhost for canonical Firebase Authorized Domain alignment
 if (window.location.hostname === '127.0.0.1' && window.location.port === '3000') {
@@ -403,9 +403,13 @@ try {
 
   // Global Auth State Observer & Router
   authService.onAuthStateChanged((context) => {
+    const mobileTrigger = $('mobileLoginTrigger');
     if (!context.isAuthenticated) {
       if (loginTrigger) {
         loginTrigger.innerHTML = 'Login <span>↗</span>';
+      }
+      if (mobileTrigger) {
+        mobileTrigger.innerHTML = 'Login to Workspace <span>↗</span>';
       }
       return;
     }
@@ -419,16 +423,20 @@ try {
       return;
     }
 
-    if (loginTrigger) {
-      loginTrigger.innerHTML = 'Workspace <span>→</span>';
-      loginTrigger.addEventListener('click', (e) => {
+    const attachWorkspaceRedirect = (btn) => {
+      if (!btn) return;
+      btn.innerHTML = 'Workspace <span>→</span>';
+      btn.addEventListener('click', (e) => {
         e.preventDefault();
         const route = authService.determineDashboardRoute(context);
         if (route) {
           window.location.href = route;
         }
       }, { once: true });
-    }
+    };
+
+    attachWorkspaceRedirect(loginTrigger);
+    attachWorkspaceRedirect(mobileTrigger);
 
     if (status === 'ACTIVE' || context.workspaces?.onboarding) {
       const targetRoute = authService.determineDashboardRoute(context);

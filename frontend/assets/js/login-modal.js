@@ -4,14 +4,7 @@
   const modal = $('loginModal');
   if (!modal) return;
 
-  const script = document.currentScript.src;
-  // The repository-root Pages site serves the public homepage from the frontend directory.
-  const home = new URL('../../', script);
-  if (home.pathname.endsWith('/frontend/')) {
-    $('loginTrigger')?.remove();
-    modal.remove();
-    return;
-  }
+  const script = document.currentScript ? document.currentScript.src : window.location.href;
 
   function openModal() {
     modal.classList.add('is-open');
@@ -26,10 +19,15 @@
     modal.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('ic-modal-open');
   }
-  $('loginTrigger')?.addEventListener('click', event => {
-    event.preventDefault();
-    openModal();
+
+  // Connect desktop, mobile, and any other login triggers
+  document.querySelectorAll('.login-trigger, #loginTrigger, #mobileLoginTrigger').forEach(btn => {
+    btn.addEventListener('click', event => {
+      event.preventDefault();
+      openModal();
+    });
   });
+
   $('closeLoginModal')?.addEventListener('click', closeModal);
   modal.addEventListener('click', event => {
     if (event.target === modal) closeModal();
@@ -38,7 +36,7 @@
     if (event.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
   });
   if (new URLSearchParams(window.location.search).get('auth') === 'login') openModal();
-  import(new URL('./auth.js?v=20261028-google-mobile-redirect', script).href).catch((error) => {
+  import(new URL('./auth.js?v=20261126-restore', script).href).catch((error) => {
     console.error('IntelliCore workspace sign-in could not load.', error);
   });
 })();

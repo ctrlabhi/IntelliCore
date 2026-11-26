@@ -109,7 +109,7 @@
       const rocketRunner = document.getElementById('rocketRunner');
       const siteHeader = document.getElementById('siteHeader');
       const navLinks = document.querySelectorAll('.desktop-nav .nav-link');
-      const trackedSections = ['about', 'services', 'partnership', 'vision', 'journey', 'tracks', 'gains', 'expectations', 'team', 'faq']
+      const trackedSections = ['about', 'services', 'partnership', 'vision', 'journey', 'tracks', 'gains', 'expectations', 'team']
         .map(id => document.getElementById(id))
         .filter(Boolean);
 

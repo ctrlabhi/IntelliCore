@@ -151,12 +151,13 @@ export function createApp() {
     res.sendFile(path.join(frontendDir, 'pages/notes.html'));
   });
 
-  // 6. Public Landing Page (Root)
-  app.get(['/', '/index.html'], (req, res) => {
+  // 6. Public Landing Page (Root & /frontend)
+  app.get(['/', '/index.html', '/frontend', '/frontend/index.html'], (req, res) => {
     res.sendFile(path.join(frontendDir, 'index.html'));
   });
 
-  // 7. General static fallback for frontend root
+  // 7. General static fallback for frontend root and /frontend mount
+  app.use('/frontend', express.static(frontendDir));
   app.use(express.static(frontendDir));
 
   // ---------------------------------------------------------------------------
