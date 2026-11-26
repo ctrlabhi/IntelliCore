@@ -111,16 +111,24 @@ IntelliCore V2.0 operates with strict boundary separation across four decoupled 
 - **Database Use**: Port 3306 remains 100% active and approved for remote MariaDB connectivity.
 
 ### C. Zero-Cost Commercial Hosting Evaluation
-1. **Render Free Web Service**:
+1. **Existing Vercel Project (Primary Active Backend)**:
+   - **URL**: `https://intellicore-six.vercel.app`
+   - **Project**: `intellicore` (Owner: `abhishek-kumars-projects-299c681c`)
+   - **Deployment Status**: READY at commit `b10c5eb`.
+   - **Database Connection**: Remote MariaDB on `srv1824.hstgr.io:3306` via `DATABASE_URL` with `sslaccept=strict&connection_limit=2` (Verified HTTP 200 CONNECTED).
+   - **Firebase Integration**: Serverless Firebase Admin initialized via `FIREBASE_SERVICE_ACCOUNT_JSON`.
+   - **Cost**: $0.00 / month (Vercel Hobby plan).
+   - **Licensing Constraint**: Vercel Hobby tier is restricted by Terms of Service to non-commercial personal projects. For commercial business scale, Render Free or self-hosted Docker remains the zero-cost commercial alternative.
+
+2. **Render Free Web Service (Prepared Alternative)**:
    - Genuinely free tier available (750 instance hours/month).
    - Node.js 24 LTS and Express 5 compatible.
    - Outbound MySQL connectivity on port 3306 with TLS supported.
    - Automatic free Let's Encrypt SSL (`*.onrender.com` or custom domain `api.intellicoretechnologies.in`).
    - Ephemeral disk (file attachments must be served via cloud object storage or API streaming).
-2. **Koyeb Free Tier**:
-   - 1 free Nano instance (512 MB RAM), zero-sleep option.
-   - Node.js Docker runtime supported.
-3. **Local Docker Compose**:
+   - Configuration prepared in `render.yaml` on branch `release/backend-render`.
+
+3. **Local Docker Compose (Development & Self-Hosting)**:
    - Self-hosted on local infrastructure using `docker-compose up -d`.
    - Node.js 24 backend container, MySQL 8.4 container, phpMyAdmin on port 8080. Zero third-party fees.
 
@@ -135,19 +143,25 @@ Only authorized origins are permitted to make credentialed requests to `/api/v1/
 - `https://ctrlabhi.github.io`
 - `http://localhost:3000` / `http://127.0.0.1:3000` (Development)
 
-### B. Frontend API Dispatch (`frontend/services/api.js`)
+### B. Frontend API Dispatch (`frontend/services/api.js` & `services/api.js`)
 The frontend client dynamically resolves the API origin:
 ```javascript
 function getDefaultApiBaseUrl() {
   if (typeof window !== 'undefined') {
+    // 1. Explicit manual override
     if (window.__INTELLICORE_API_BASE_URL__) {
       return window.__INTELLICORE_API_BASE_URL__;
     }
+    if (window.__ENV__ && window.__ENV__.API_BASE_URL) {
+      return window.__ENV__.API_BASE_URL;
+    }
     const host = window.location.hostname;
-    if (host.endsWith('github.io')) {
-      return 'https://api.intellicoretechnologies.in/api/v1';
+    // 2. When served from static GitHub Pages or live custom domain, bridge to cloud backend
+    if (host.endsWith('github.io') || host.includes('intellicoretechnologies.in')) {
+      return 'https://intellicore-six.vercel.app/api/v1';
     }
   }
+  // 3. Fallback to same-origin path for local development Express modular monolith
   return '/api/v1';
 }
 ```

@@ -29,8 +29,8 @@ function getDefaultApiBaseUrl() {
       return window.__ENV__.API_BASE_URL;
     }
     const host = window.location.hostname;
-    // 2. When served from static GitHub Pages, bridge to cloud backend
-    if (host.endsWith('github.io')) {
+    // 2. When served from static GitHub Pages or live custom domain, bridge to cloud backend
+    if (host.endsWith('github.io') || host.includes('intellicoretechnologies.in')) {
       return 'https://intellicore-six.vercel.app/api/v1';
     }
   }

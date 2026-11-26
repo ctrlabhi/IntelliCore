@@ -217,6 +217,22 @@ Related source-level findings are recorded in [Security rules](SECURITY_RULES.md
 | GoDaddy products & hosting capability inspection | PASS | Opened `https://account.godaddy.com/products` via autonomous browser agent. Confirmed account holder Abhishek Kumar (Customer # 752159874) holds domain `intellicoretechnologies.in` only; 0 active hosting/cPanel/VPS plans. Concluded GoDaddy hosting is absent at $0 cost; proceeding with Render Free Web Service. |
 | Dedicated backend release branch | PASS | Created branch `release/backend-render` and pushed to GitHub `origin`. Main branch preserved at commit `b10c5eb` ensuring zero disturbance to GitHub Pages. |
 
+## Vercel Backend Recovery, Live Probes & Acceptance on 2026-11-26
+
+| Check | Result | Evidence |
+| :--- | :--- | :--- |
+| Owner decision reconciliation | PASS | Suspended Render registration and deployment per updated owner directive. Evaluated existing Vercel project `intellicore` (`https://intellicore-six.vercel.app`) on Vercel Hobby tier. |
+| Vercel project & deployment status | PASS | Verified project `intellicore` under team `abhishek-kumars-projects-299c681c` deployed from `https://github.com/ctrlabhi/IntelliCore` at commit `b10c5eb` (Status: `READY`). Domains: `intellicore-six.vercel.app` and `intellicore-git-main-abhishek-kumars-projects-299c681c.vercel.app`. |
+| Cloud secret configuration | PASS | Confirmed server-side environment secrets configured in Vercel project settings: `DATABASE_URL` (with `sslaccept=strict&connection_limit=2`) and `FIREBASE_SERVICE_ACCOUNT_JSON` (`intellicore-dev`). |
+| Live HTTPS liveness & readiness probes | PASS | Executed `scripts/probe-live-vercel.js`. `GET /health` returned HTTP 200 `{"status":"UP","service":"intellicore-api","version":"2.0.0"}`; `GET /ready` returned HTTP 200 `{"status":"READY","database":"CONNECTED"}` confirming active cloud-to-Hostinger MariaDB connectivity. |
+| Live security & authorization probes | PASS | Probed live endpoints: `GET /api/v1/auth/config` returned HTTP 200 with client Firebase config; `GET /api/v1/auth/me` and `GET /api/v1/users` returned HTTP 401 UNAUTHENTICATED; `GET /.env` and `GET /prisma/schema.prisma` returned HTTP 403 Forbidden. |
+| Universal frontend API client routing | PASS | Updated `frontend/services/api.js` and `services/api.js` to dynamically bridge to `https://intellicore-six.vercel.app/api/v1` when served from `github.io` or `intellicoretechnologies.in`, while preserving local `/api/v1` default on monolithic Express and respecting `window.__INTELLICORE_API_BASE_URL__`. |
+| Automated regression suite | PASS | Vitest v3.2.7 passed 100%: 33 test files, 233 tests green on isolated MySQL. Zero regressions. |
+| Local acceptance & authentication suite | PASS | Executed `scripts/verify-local-acceptance.js`. All 12 criteria passed 100% across authentication, profile sync, session restoration, Founder workspace, pending intern isolation, sensitive file guards, and 401 error envelopes. |
+| Dedicated release branch & zero disturbance | PASS | Work isolated on branch `release/backend-vercel`. Live GitHub Pages publishing branch `main` preserved 100% untouched at commit `b10c5eb`. |
+| Cost constraint compliance | PASS | Verified $0.00 additional expenditure across GoDaddy, Hostinger, Firebase Spark, and Vercel Hobby. |
+
+
 
 
 
