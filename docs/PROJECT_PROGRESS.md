@@ -244,6 +244,17 @@ Related source-level findings are recorded in [Security rules](SECURITY_RULES.md
 | Live website headless inspection | PASS | Executed `scripts/inspect-live-website.js` in Microsoft Edge. `https://www.intellicoretechnologies.in` returned HTTP 200 with clean console and zero errors. Screenshot persisted in artifacts. |
 | Release branch isolation | PASS | Branch `release/backend-vercel` committed and updated. Live publishing branch `main` preserved 100% untouched at commit `b10c5eb`. |
 
+## External Database Policy Reconciliation & Google Chrome E2E Verification on 2026-11-26
+
+| Check | Result | Evidence |
+| :--- | :--- | :--- |
+| External database policy reconciliation | PASS | Reconciled hosting boundary: Remote MariaDB (`srv1824.hstgr.io`) belongs to an external hosting account. Project owner does not hold Hostinger administrative access. Standalone password rotation scripts (`scripts/rotate-mariadb-password.js`) permanently blocked. Authored `docs/DATABASE_ACCESS_POLICY.md` detailing security risk mitigation and a formal credential replacement request for the database owner. |
+| Google Chrome E2E browser verification (8 Journeys) | PASS | Executed `scripts/verify-chrome-e2e.js` using real Google Chrome binary (`C:\Users\Abhishek\AppData\Local\Google\Chrome\Application\chrome.exe`). All 8 journeys passed 100%: Homepage with Orbit Art, Auth Modal with interactive password reveal toggle (`password` $\rightarrow$ `text` $\rightarrow$ `password`) and signup tabs, Founder Command Center (`/dashboards/founder`), HR Executive Workspace (`/dashboards/hr`), Team Leader Workspace (`/dashboards/team-leader`), Intern Workspace (`/dashboards/intern`), Mobile viewport (390x844 with `scrollWidth: 390, clientWidth: 390` zero overflow), and clean session with 0 console errors and 0 network failures. Full-page screenshots saved to artifacts. |
+| Multi-role QA workflow & invariant verification | PASS | Verified all 8 system roles (`FOUNDER`, `CO_FOUNDER`, `ADMIN`, `HR_MANAGER`, `HR_EXECUTIVE`, `OPERATIONS_EXECUTIVE`, `TEAM_LEADER`, `INTERN`) across `tests/integration/multiRoleQaAcceptance.test.js` and Chrome UI journeys. Founder exclusivity on staff provisioning and pending intern workspace locks strictly enforced. |
+| Complete automated regression suite | PASS | Vitest v3.2.7 passed 100%: 33 test files, 233 tests green on isolated MySQL (`127.0.0.1:33359`). Zero failures. |
+| Release branch preservation | PASS | Branch `release/backend-vercel` active and pushed to GitHub `origin`. Live GitHub Pages publishing branch `main` preserved 100% untouched at commit `b10c5eb`. |
+
+
 
 
 

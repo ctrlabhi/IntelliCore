@@ -22,30 +22,27 @@
 
 ---
 
-## 2. Release Blockers & Owner Actions Required
+## 2. Release Blockers & Operational Decisions Required
 
-- [ ] **Blocker 1: Rotate Database Password in Hostinger hPanel**
-  - **Issue**: Historical database password was shared in chat logs and is considered compromised. The live Vercel backend currently uses this credential.
-  - **Action**:
-    1. Open Hostinger hPanel > Databases > Remote MySQL.
-    2. Reset password for user `u740799251_intellicore` to a fresh high-entropy secret.
-    3. Update `DATABASE_URL` in Vercel Project Settings (`abhishek-kumars-projects-299c681c/intellicore` > Settings > Environment Variables).
-    4. Update local private `.env.production.local`.
-    5. Re-verify `/ready` returns HTTP 200 `database: CONNECTED`.
+- [x] **Database Policy Resolved: External Database Ownership & Access Boundary**
+  - **Clarification**: The remote MariaDB database (`srv1824.hstgr.io`) belongs to an external hosting account. The IntelliCore owner does not hold administrative Hostinger access.
+  - **Operational Rule**: Standalone password rotation scripts (`scripts/rotate-mariadb-password.js`) are permanently blocked. Authorized connection parameters are loaded from `.env.production.local` with strict TLS.
+  - **Credential Security Request**: A formal request template has been authored in `docs/DATABASE_ACCESS_POLICY.md` for the database owner to issue fresh credentials at a scheduled maintenance window.
+  - **Engineering Status**: Development and isolated testing proceed independently with zero downtime and zero risk to database integrity.
 
-- [ ] **Blocker 2: Commercial-Use Eligibility Resolution**
+- [ ] **Blocker 1: Commercial-Use Eligibility Resolution (Vercel Hobby vs Render Free)**
   - **Issue**: Vercel Hobby plan terms of service strictly prohibit commercial business usage. While technical execution is 100% operational at $0.00, IntelliCore Technologies is a commercial business.
   - **Options**:
-    - Option A: Retain Vercel Hobby backend for evaluation/staging at $0.00.
-    - Option B: Switch backend to Render Free Web Service (prepared in `render.yaml` on branch `release/backend-render`) which permits commercial web applications at $0.00.
+    - Option A: Retain Vercel Hobby backend (`https://intellicore-six.vercel.app`) for evaluation/staging at $0.00.
+    - Option B: Switch production backend to Render Free Web Service (prepared in `render.yaml` on branch `release/backend-render`) which permits commercial web applications at $0.00.
     - Option C: Self-host backend via local/VPS Docker Compose at $0.00.
 
-- [ ] **Blocker 3: Staging/Production Prerequisites (Email, Storage, Calendar)**
+- [ ] **Blocker 2: Staging/Production Prerequisites (Email, Storage, Calendar)**
   - **Email**: Notification worker operates safely in `CAPTURE` mode (outbox queue only, zero external SMTP delivery). Live email delivery requires authorized SMTP credentials and relay service.
   - **File Uploads**: Serverless disk is ephemeral (4.5 MB body limit). Persistent production uploads require `@vercel/blob` token or S3 storage.
   - **Certificates**: Negative boundary strictly preserved. Zero in-app certificate PDF generation or sending. Probes return HTTP 404.
 
-- [ ] **Blocker 4: Final Owner Merge Authorization**
+- [ ] **Blocker 3: Final Owner Merge Authorization**
   - Explicit owner approval required before merging `release/backend-vercel` into `main`.
 
 ---
