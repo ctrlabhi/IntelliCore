@@ -56,7 +56,7 @@ const envSchema = z.object({
   NOTIFICATION_DATABASE_URL: z.string().optional(),
 
   // Storage
-  STORAGE_PROVIDER: z.enum(['local', 'vercel-blob', 's3']).default('local'),
+  STORAGE_PROVIDER: z.enum(['local', 'vercel-blob', 's3', 'database']).default('local'),
   BLOB_READ_WRITE_TOKEN: z.string().optional(),
 
   // Background Worker & Vercel Cron

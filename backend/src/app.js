@@ -156,6 +156,10 @@ export function createApp() {
     res.sendFile(path.join(frontendDir, 'pages/notes.html'));
   });
 
+  app.get(['/verify.html', '/verify', '/pages/verify.html'], (req, res) => {
+    res.sendFile(path.join(frontendDir, 'pages/verify.html'));
+  });
+
   // 6. Redirect all legacy /frontend URLs to safe, clean paths permanently (HTTP 301)
   // Protected against Open-Redirect (CWE-601) by strictly sanitizing and restricting to safe same-origin internal paths.
   app.use('/frontend', (req, res) => {

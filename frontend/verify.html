@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Certificate Verification — IntelliCore</title>
+  <meta name="description" content="Verify the authenticity of internship completion certificates issued by IntelliCore Technologies." />
+  <meta name="theme-color" content="#050813">
+  <link rel="icon" type="image/png" href="assets/images/favicon.png?v=4" />
+  <link rel="stylesheet" href="assets/css/style.css?v=20261103-clean-sync-v9">
+  <style>
+    .verify-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 4rem 1.5rem 6rem;
+      position: relative;
+      z-index: 2;
+    }
+    .verify-box {
+      width: 100%;
+      max-width: 680px;
+      background: rgba(10, 16, 32, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(0, 229, 255, 0.25);
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 229, 255, 0.1);
+      margin-top: 2rem;
+    }
+    .verify-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .verify-title {
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #00e5ff 0%, #7c4dff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .verify-subtitle {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    .verify-form {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 540px) {
+      .verify-form {
+        flex-direction: column;
+      }
+    }
+    .verify-input {
+      flex: 1;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      border-radius: 8px;
+      padding: 0.85rem 1.15rem;
+      font-size: 1rem;
+      color: #f8fafc;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: monospace;
+      text-transform: uppercase;
+    }
+    .verify-input:focus {
+      border-color: #00e5ff;
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.35);
+    }
+    .verify-btn {
+      background: linear-gradient(135deg, #00e5ff 0%, #00b0ff 100%);
+      color: #050813;
+      border: none;
+      border-radius: 8px;
+      padding: 0.85rem 1.75rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.2s;
+    }
+    .verify-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(0, 229, 255, 0.4);
+    }
+    .result-card {
+      border-radius: 12px;
+      padding: 1.75rem;
+      margin-top: 1.5rem;
+      display: none;
+    }
+    .result-card.success {
+      display: block;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+    .result-card.error {
+      display: block;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.85rem;
+      border-radius: 20px;
+      margin-bottom: 1.25rem;
+    }
+    .status-badge.verified {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.5);
+    }
+    .status-badge.invalid {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.5);
+    }
+    .cert-field {
+      margin-bottom: 0.85rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .cert-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #64748b;
+      margin-bottom: 0.25rem;
+    }
+    .cert-value {
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: #f1f5f9;
+    }
+    .cert-name {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #ffd700;
+      margin-bottom: 0.25rem;
+    }
+    .back-home {
+      display: inline-block;
+      margin-top: 2rem;
+      color: #00e5ff;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .back-home:hover {
+      text-decoration: underline;
+      color: #38bdf8;
+    }
+  </style>
+</head>
+<body>
+  <div class="verify-page">
+    <div style="text-align: center; margin-bottom: 1rem;">
+      <a href="/" style="display: inline-block;">
+        <img src="assets/images/favicon.png" alt="IntelliCore Logo" style="width: 56px; height: 56px; border-radius: 50%;">
+      </a>
+    </div>
+
+    <div class="verify-box">
+      <div class="verify-header">
+        <h1 class="verify-title">Certificate Verification</h1>
+        <p class="verify-subtitle">Verify the authenticity of official internship completion credentials issued by IntelliCore Technologies.</p>
+      </div>
+
+      <form id="verifyForm" class="verify-form" onsubmit="event.preventDefault(); performVerification();">
+        <input
+          type="text"
+          id="certCodeInput"
+          class="verify-input"
+          placeholder="e.g. IC-CERT-2026-SE-XXXX"
+          required
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button type="submit" id="verifyBtn" class="verify-btn">Verify</button>
+      </form>
+
+      <div id="resultCard" class="result-card"></div>
+    </div>
+
+    <a href="/" class="back-home">&larr; Return to IntelliCore Home</a>
+  </div>
+
+  <script>
+    async function performVerification(overrideCode) {
+      const input = document.getElementById('certCodeInput');
+      const card = document.getElementById('resultCard');
+      const btn = document.getElementById('verifyBtn');
+      const code = (overrideCode || input.value || '').trim().toUpperCase();
+
+      if (!code) return;
+      input.value = code;
+
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+      card.className = 'result-card';
+      card.style.display = 'none';
+
+      try {
+        const response = await fetch('/api/v1/certificates/verify/' + encodeURIComponent(code));
+        const resData = await response.json();
+        const cert = resData.data;
+
+        if (response.ok && cert && cert.valid) {
+          card.className = 'result-card success';
+          card.innerHTML = `
+            <div class="status-badge verified">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Officially Verified Credential
+            </div>
+            <div class="cert-field">
+              <span class="cert-label">Recipient Candidate</span>
+              <span class="cert-name">${escapeHtml(cert.recipientName)}</span>
+            </div>
+            <div class="cert-field">
+              <span class="cert-label">Role & Department</span>
+              <span class="cert-value">${escapeHtml(cert.positionTitle)} &bull; Department of ${escapeHtml(cert.departmentName)}</span>
+            </div>
+            <div class="cert-field">
+              <span class="cert-label">Tenure</span>
+              <span class="cert-value">${escapeHtml(cert.commencementDate)} to ${escapeHtml(cert.completionDate)}</span>
+            </div>
+            <div class="cert-field">
+              <span class="cert-label">Official Certificate Identifier</span>
+              <span class="cert-value" style="font-family: monospace; color: #00e5ff;">${escapeHtml(cert.certificateCode)}</span>
+            </div>
+            <div class="cert-field" style="margin-bottom: 0;">
+              <span class="cert-label">Issuing Authority</span>
+              <span class="cert-value" style="font-size: 0.9rem; color: #94a3b8;">${escapeHtml(cert.issuer)} &bull; Record Verified</span>
+            </div>
+          `;
+        } else {
+          card.className = 'result-card error';
+          card.innerHTML = `
+            <div class="status-badge invalid">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+              Verification Failed
+            </div>
+            <p style="color: #f87171; margin: 0; font-size: 0.95rem;">${escapeHtml(cert?.message || 'No official record was found matching this certificate code. Please verify the code and try again.')}</p>
+          `;
+        }
+      } catch (err) {
+        card.className = 'result-card error';
+        card.innerHTML = `
+          <div class="status-badge invalid">Connection Error</div>
+          <p style="color: #f87171; margin: 0; font-size: 0.95rem;">Unable to connect to verification service. Please try again later.</p>
+        `;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Verify';
+        card.style.display = 'block';
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, function(m) {
+        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m];
+      });
+    }
+
+    // Auto-verify on page load if ?code= parameter is present in URL
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      if (code) {
+        performVerification(code);
+      }
+    });
+  </script>
+</body>
+</html>

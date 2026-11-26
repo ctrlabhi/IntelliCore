@@ -109,9 +109,13 @@ export class StorageService {
   }
 }
 
+import databaseStorage from './databaseStorageAdapter.js';
+
 export const storageService =
-  env.STORAGE_PROVIDER === 'vercel-blob' || process.env.VERCEL === '1'
-    ? new VercelBlobStorage()
-    : new StorageService();
+  env.STORAGE_PROVIDER === 'database'
+    ? databaseStorage
+    : env.STORAGE_PROVIDER === 'vercel-blob' || process.env.VERCEL === '1'
+      ? new VercelBlobStorage()
+      : new StorageService();
 export default storageService;
 
