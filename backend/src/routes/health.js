@@ -63,10 +63,7 @@ router.get('/health', (req, res) => {
 router.get('/ready', async (req, res) => {
   const isDbConnected = await checkDatabaseConnection();
 
-  const hostedConfigReady = process.env.VERCEL !== '1'
-    || (firebase.getStatus().isInitialized && Boolean(process.env.BLOB_READ_WRITE_TOKEN));
-
-  if (isDbConnected && hostedConfigReady) {
+  if (isDbConnected) {
     return res.status(200).json({
       status: 'READY',
       database: 'CONNECTED',
@@ -76,8 +73,7 @@ router.get('/ready', async (req, res) => {
 
   return res.status(503).json({
     status: 'NOT_READY',
-    database: isDbConnected ? 'CONNECTED' : 'DISCONNECTED',
-    ...(!hostedConfigReady && { configuration: 'INCOMPLETE' }),
+    database: 'DISCONNECTED',
     timestamp: new Date().toISOString()
   });
 });
