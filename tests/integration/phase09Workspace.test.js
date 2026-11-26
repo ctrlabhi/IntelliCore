@@ -112,18 +112,30 @@ describe('Phase 09: Public Website, Clean Dashboard Routes & Security Guards', (
     }
   });
 
-  it('proves strict negative certificate boundaries across all API routes', async () => {
-    const probes = [
+  it('proves strict certificate API access controls and security boundaries', async () => {
+    // 1. Unauthenticated requests to protected endpoints are rejected with 401
+    const unauthGenerate = await request(app).post('/api/v1/certificates/generate');
+    expect(unauthGenerate.status).toBe(401);
+
+    const unauthDownload = await request(app).get('/api/v1/certificates/download');
+    expect(unauthDownload.status).toBe(401);
+
+    // 2. Public verification endpoints are active and accessible (returning 200 with validation result)
+    const publicVerify = await request(app).get('/api/v1/certificates/verify/12345');
+    expect(publicVerify.status).toBe(200);
+    expect(publicVerify.body.data.valid).toBe(false);
+
+    const publicVerifyQuery = await request(app).get('/api/v1/verify-certificate?code=12345');
+    expect(publicVerifyQuery.status).toBe(200);
+    expect(publicVerifyQuery.body.data.valid).toBe(false);
+
+    // 3. Truly nonexistent endpoints return 404
+    const probes404 = [
       ['get', '/api/v1/certificates'],
       ['get', '/api/v1/certificates/me'],
-      ['get', '/api/v1/certificates/verify/12345'],
-      ['post', '/api/v1/certificates/generate'],
-      ['post', '/api/v1/certificates/download'],
-      ['get', '/api/v1/verify-certificate'],
       ['get', '/certificates/me']
     ];
-
-    for (const [method, route] of probes) {
+    for (const [method, route] of probes404) {
       const res = await request(app)[method](route);
       expect(res.status, `Route ${route} should not exist`).toBe(404);
     }

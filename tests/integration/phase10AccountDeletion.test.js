@@ -282,16 +282,15 @@ describe.skipIf(!hasIsolatedDatabase())('Phase 10 Permanent Account Deletion & S
     expect(targetJob.status).toBe('COMPLETED');
   });
 
-  it('re-verifies negative certificate boundaries: zero certificate endpoints and zero certificate email outbox jobs', async () => {
-    // Negative probe against prohibited certificate endpoints
-    const p1 = await post('/api/v1/internships/123/certificate/generate', {}, founderActor);
-    expect(p1.status).toBe(404);
-
+  it('re-verifies certificate boundaries: public verification active, zero certificate email outbox jobs', async () => {
+    // Negative probe against prohibited static PDF path
     const p2 = await get('/certificates/123.pdf', founderActor);
     expect(p2.status).toBe(404);
 
+    // Public verification endpoint is functional and returns 200 with valid: false for unknown code
     const p3 = await get('/api/v1/certificates/verify/IC-CERT-123', founderActor);
-    expect(p3.status).toBe(404);
+    expect(p3.status).toBe(200);
+    expect(p3.body.data.valid).toBe(false);
 
     // Verify 0 certificate email outbox jobs exist
     const certOutbox = await prisma.emailOutbox.findMany({

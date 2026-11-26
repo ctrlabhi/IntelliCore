@@ -1,8 +1,10 @@
 import { randomUUID } from 'node:crypto';
-import prisma from '../../config/database.js';
+import { getPrismaClient } from '../../config/database.js';
 import { AppError, NotFoundError } from '../../utils/errors.js';
 import { buildCertificatePdf } from './certificatePdf.js';
 import env from '../../config/env.js';
+
+const getPrisma = () => getPrismaClient();
 
 /**
  * Service to manage Certificate Approval, Generation, Download & Public Verification
@@ -13,13 +15,13 @@ export class CertificateService {
    */
   async approveAndIssueCertificate(req, internshipId, { notes = 'Approved for completion certificate' } = {}) {
     // 1. Verify caller has HR or Founder authority
-    const isHrOrFounder = req.roles.some((r) => ['FOUNDER', 'CO_FOUNDER', 'HR_MANAGER', 'HR_EXECUTIVE'].includes(r));
+    const isHrOrFounder = req.roles?.some((r) => ['FOUNDER', 'CO_FOUNDER', 'HR_MANAGER', 'HR_EXECUTIVE'].includes(r));
     if (!isHrOrFounder) {
       throw new AppError('Only HR personnel and Founders can approve and issue certificates.', 403, 'FORBIDDEN');
     }
 
     // 2. Fetch internship with user and department
-    const internship = await prisma.internship.findUnique({
+    const internship = await getPrisma().internship.findUnique({
       where: { id: internshipId },
       include: {
         user: { include: { profile: true } },
@@ -33,7 +35,7 @@ export class CertificateService {
 
     // Generate unique verifiable certificate code
     const year = new Date().getFullYear();
-    const cleanCode = internship.internshipCode.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    const cleanCode = (internship.internshipCode || 'INT').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
     const uniqueSuffix = randomUUID().substring(0, 6).toUpperCase();
     const certificateCode = `IC-CERT-${year}-${cleanCode}-${uniqueSuffix}`;
 
@@ -58,7 +60,7 @@ export class CertificateService {
     };
 
     // Store in CertificateDispatch history and SystemSetting for persistent zero-cost indexing
-    await prisma.$transaction(async (tx) => {
+    await getPrisma().$transaction(async (tx) => {
       // 1. Ensure internship is marked completed
       if (internship.internshipStatus !== 'COMPLETED') {
         await tx.internship.update({
@@ -115,10 +117,20 @@ export class CertificateService {
   }
 
   /**
+   * Alias for Certificate Generation
+   */
+  async generateCertificate(req, { internshipId, notes = 'Certificate generated' } = {}) {
+    if (!internshipId) {
+      throw new AppError('Internship ID is required for certificate generation.', 400, 'INVALID_INPUT');
+    }
+    return this.approveAndIssueCertificate(req, internshipId, { notes });
+  }
+
+  /**
    * Retrieve Certificate Metadata for Internship
    */
   async getCertificateMetadata(internshipId) {
-    const setting = await prisma.systemSetting.findUnique({
+    const setting = await getPrisma().systemSetting.findUnique({
       where: { key: `internship_cert:${internshipId}` }
     });
     if (!setting) return null;
@@ -130,11 +142,27 @@ export class CertificateService {
   }
 
   /**
-   * On-Demand Certificate PDF Generation and Download Stream
+   * Retrieve Certificate Metadata by Code
+   */
+  async getCertificateByCode(certificateCode) {
+    if (!certificateCode) return null;
+    const cleanCode = certificateCode.trim().toUpperCase();
+    const setting = await getPrisma().systemSetting.findUnique({
+      where: { key: `cert:${cleanCode}` }
+    });
+    if (!setting) return null;
+    try {
+      return JSON.parse(setting.value);
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * On-Demand Certificate PDF Generation and Download Stream by Internship ID
    */
   async generateCertificatePdf(req, internshipId) {
-    // 1. Verify caller access (intern themselves or staff)
-    const internship = await prisma.internship.findUnique({
+    const internship = await getPrisma().internship.findUnique({
       where: { id: internshipId },
       include: {
         user: { include: { profile: true } },
@@ -144,16 +172,14 @@ export class CertificateService {
 
     if (!internship) throw new NotFoundError('Internship record not found.');
 
-    const isOwner = req.user.id === internship.userId;
-    const isStaff = req.roles.some((r) => ['FOUNDER', 'CO_FOUNDER', 'HR_MANAGER', 'HR_EXECUTIVE', 'TEAM_LEADER'].includes(r));
+    const isOwner = req.user?.id === internship.userId;
+    const isStaff = req.roles?.some((r) => ['FOUNDER', 'CO_FOUNDER', 'HR_MANAGER', 'HR_EXECUTIVE', 'TEAM_LEADER'].includes(r));
     if (!isOwner && !isStaff) {
       throw new AppError('Access denied to this certificate.', 403, 'FORBIDDEN');
     }
 
-    // 2. Fetch or generate metadata
     let metadata = await this.getCertificateMetadata(internship.id);
     if (!metadata) {
-      // If HR/Founder downloads an unapproved completed internship, generate metadata on the fly
       if (isStaff) {
         metadata = await this.approveAndIssueCertificate(req, internship.id, { notes: 'Auto-approved upon export' });
       } else {
@@ -161,7 +187,36 @@ export class CertificateService {
       }
     }
 
-    // 3. Build vector PDF buffer
+    const pdfBuffer = buildCertificatePdf({
+      recipientName: metadata.recipientName,
+      positionTitle: metadata.positionTitle,
+      departmentName: metadata.departmentName,
+      commencementDate: metadata.commencementDate,
+      completionDate: metadata.completionDate,
+      certificateCode: metadata.certificateCode,
+      verificationUrl: metadata.verificationUrl
+    });
+
+    return {
+      pdfBuffer,
+      filename: `IntelliCore_Certificate_${metadata.certificateCode}.pdf`,
+      metadata
+    };
+  }
+
+  /**
+   * On-Demand Certificate PDF Generation by Certificate Code
+   */
+  async generateCertificatePdfByCode(req, certificateCode) {
+    const metadata = await this.getCertificateByCode(certificateCode);
+    if (!metadata) {
+      throw new NotFoundError('Certificate not found with this identifier.');
+    }
+
+    if (metadata.internshipId) {
+      return this.generateCertificatePdf(req, metadata.internshipId);
+    }
+
     const pdfBuffer = buildCertificatePdf({
       recipientName: metadata.recipientName,
       positionTitle: metadata.positionTitle,
@@ -188,7 +243,7 @@ export class CertificateService {
     }
 
     const cleanCode = certificateCode.trim().toUpperCase();
-    const setting = await prisma.systemSetting.findUnique({
+    const setting = await getPrisma().systemSetting.findUnique({
       where: { key: `cert:${cleanCode}` }
     });
 

@@ -117,5 +117,8 @@ router.use('/attendance-corrections', correctionRoutes);
 router.use(workRoutes);
 router.use(notificationRoutes);
 
+import certificateRoutes from '../modules/certificates/certificateRoutes.js';
+router.use(certificateRoutes);
+
 export default router;
 

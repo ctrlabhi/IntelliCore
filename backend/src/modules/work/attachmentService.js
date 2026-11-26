@@ -125,6 +125,16 @@ export async function attachFile(req, targetId, purpose, expectedRevision, reque
       if (await tx.fileAttachment.count({ where: parent }) >= env.TASK_MAX_ATTACHMENTS) {
         throw conflict('This record has reached its attachment limit.', 'ATTACHMENT_LIMIT');
       }
+      // Enforce cumulative user storage quota (20MB default)
+      const userQuotaLimit = (env.MAX_USER_STORAGE_MB || 20) * 1024 * 1024;
+      const userStorage = await tx.fileAttachment.aggregate({
+        _sum: { fileSize: true },
+        where: { ownerUserId: req.user.id }
+      });
+      const currentUsage = userStorage._sum.fileSize || 0;
+      if (currentUsage + metadata.fileSize > userQuotaLimit) {
+        throw new AppError('Storage quota exceeded for your account (20MB limit).', 413, 'STORAGE_QUOTA_EXCEEDED');
+      }
       if (!stored) {
         await storage.savePrivate(storageKey, bytes);
         stored = true;

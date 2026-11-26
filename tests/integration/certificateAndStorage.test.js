@@ -16,6 +16,14 @@ const db = vi.hoisted(() => {
     department: { findUnique: vi.fn(), findMany: vi.fn(), count: vi.fn() },
     staffProfile: { findUnique: vi.fn(), create: vi.fn() },
     internship: { findUnique: vi.fn(), findMany: vi.fn(), update: vi.fn() },
+    fileAttachment: {
+      findUnique: vi.fn(async ({ where }) => {
+        return null; // For orphaned cleanup testing
+      }),
+      aggregate: vi.fn().mockResolvedValue({ _sum: { fileSize: 0 } }),
+      count: vi.fn().mockResolvedValue(0),
+      create: vi.fn()
+    },
     certificateDispatch: { findUnique: vi.fn(), create: vi.fn(), findMany: vi.fn(), count: vi.fn().mockResolvedValue(0) },
     systemSetting: {
       findUnique: vi.fn(async ({ where }) => {
@@ -108,13 +116,13 @@ function mockAuth(roleCode, { isPrimaryFounder = false } = {}) {
   return { token: `Bearer mock-token-${roleCode}`, userId, email };
 }
 
-describe('Certificate Generation, Public Verification & Zero-Cost Document Storage', () => {
+describe('Certificate APIs & Hardened Database Storage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('DatabaseStorageAdapter (Zero-Cost Document Storage)', () => {
-    it('persists chunks, streams data accurately, and removes cleanly', async () => {
+  describe('Hardened DatabaseStorageAdapter (Integrity, Quota & Cleanup)', () => {
+    it('persists chunks, verifies SHA-256 integrity, and retrieves accurately', async () => {
       const adapter = new DatabaseStorageAdapter();
       const storageKey = randomUUID();
       const payload = Buffer.from('IntelliCore Secure Document Storage Test Content ' + 'X'.repeat(50000));
@@ -144,6 +152,18 @@ describe('Certificate Generation, Public Verification & Zero-Cost Document Stora
         'Invalid private attachment identifier.'
       );
     });
+
+    it('cleans up orphaned blobs that are not in file_attachments', async () => {
+      const adapter = new DatabaseStorageAdapter();
+      const orphanedKey = randomUUID();
+      await adapter.savePrivate(orphanedKey, Buffer.from('orphaned content'));
+
+      const result = await adapter.cleanupOrphanedBlobs();
+      expect(result.cleaned).toBeGreaterThanOrEqual(1);
+
+      // Verify blob is gone
+      await expect(adapter.openPrivate(orphanedKey)).rejects.toThrow('Attachment unavailable.');
+    });
   });
 
   describe('Pure Node.js Vector Certificate PDF Generator', () => {
@@ -168,8 +188,8 @@ describe('Certificate Generation, Public Verification & Zero-Cost Document Stora
     });
   });
 
-  describe('Certificate Service & Architecture Boundaries', () => {
-    it('allows HR Manager to approve certificate and creates verifiable metadata via service', async () => {
+  describe('Active Certificate Endpoints & Public Verification APIs', () => {
+    it('allows HR Manager to approve and generate certificates via POST /api/v1/certificates/approve', async () => {
       const hrAuth = mockAuth('HR_MANAGER');
       const targetInternshipId = randomUUID();
 
@@ -190,31 +210,60 @@ describe('Certificate Generation, Public Verification & Zero-Cost Document Stora
         internshipStatus: 'COMPLETED'
       });
 
-      const certService = (await import('../../backend/src/modules/certificates/certificateService.js')).default;
-      const req = {
-        roles: ['HR_MANAGER'],
-        user: { id: hrAuth.userId }
-      };
+      // 1. Approve certificate
+      const approveRes = await request(app)
+        .post('/api/v1/certificates/approve')
+        .set('Authorization', hrAuth.token)
+        .send({ internshipId: targetInternshipId, notes: 'Outstanding sprint delivery.' });
 
-      const certData = await certService.approveAndIssueCertificate(req, targetInternshipId, {
-        notes: 'Outstanding performance across all sprints.'
-      });
+      expect(approveRes.status).toBe(201);
+      expect(approveRes.body.success).toBe(true);
+      const certCode = approveRes.body.data.certificateCode;
+      expect(certCode).toMatch(/^IC-CERT-\d{4}-INT2026001-[A-Z0-9]+$/);
+      expect(approveRes.body.data.recipientName).toBe('Alex Rivera');
 
-      expect(certData.recipientName).toBe('Alex Rivera');
-      expect(certData.certificateCode).toMatch(/^IC-CERT-\d{4}-INT2026001-[A-Z0-9]+$/);
+      // 2. Public verification by code (GET /api/v1/certificates/verify/:code)
+      const verifyRes = await request(app).get(`/api/v1/certificates/verify/${certCode}`);
+      expect(verifyRes.status).toBe(200);
+      expect(verifyRes.body.success).toBe(true);
+      expect(verifyRes.body.data.valid).toBe(true);
+      expect(verifyRes.body.data.status).toBe('OFFICIALLY_VERIFIED');
+      expect(verifyRes.body.data.recipientName).toBe('Alex Rivera');
 
-      // Verify metadata is now publicly verifiable via service
-      const verifyResult = await certService.verifyCertificatePublic(certData.certificateCode);
-      expect(verifyResult.valid).toBe(true);
-      expect(verifyResult.status).toBe('OFFICIALLY_VERIFIED');
-      expect(verifyResult.recipientName).toBe('Alex Rivera');
+      // 3. Public verification via query parameter (GET /api/v1/verify-certificate?code=...)
+      const verifyQueryRes = await request(app).get(`/api/v1/verify-certificate?code=${certCode}`);
+      expect(verifyQueryRes.status).toBe(200);
+      expect(verifyQueryRes.body.data.valid).toBe(true);
+
+      // 4. Download PDF certificate (GET /api/v1/certificates/:code/download)
+      const downloadRes = await request(app)
+        .get(`/api/v1/certificates/${certCode}/download`)
+        .set('Authorization', hrAuth.token);
+      expect(downloadRes.status).toBe(200);
+      expect(downloadRes.headers['content-type']).toBe('application/pdf');
+      expect(downloadRes.headers['content-disposition']).toContain('.pdf');
+
+      // 5. Read metadata (GET /api/v1/certificates/:code)
+      const metaRes = await request(app)
+        .get(`/api/v1/certificates/${certCode}`)
+        .set('Authorization', hrAuth.token);
+      expect(metaRes.status).toBe(200);
+      expect(metaRes.body.data.certificateCode).toBe(certCode);
     });
 
-    it('returns invalid status for unknown certificate codes', async () => {
-      const certService = (await import('../../backend/src/modules/certificates/certificateService.js')).default;
-      const verifyResult = await certService.verifyCertificatePublic('IC-CERT-NONEXISTENT-999');
-      expect(verifyResult.valid).toBe(false);
-      expect(verifyResult.message).toBe('No verified certificate found with this identifier.');
+    it('rejects unauthenticated certificate approval with 401', async () => {
+      const res = await request(app)
+        .post('/api/v1/certificates/approve')
+        .send({ internshipId: randomUUID() });
+      expect(res.status).toBe(401);
+    });
+
+    it('returns 404 for unknown subroutes under /api/v1/certificates', async () => {
+      const auth = mockAuth('FOUNDER', { isPrimaryFounder: true });
+      const res = await request(app)
+        .get('/api/v1/certificates/unknown-subroute-999')
+        .set('Authorization', auth.token);
+      expect(res.status).toBe(404);
     });
 
     it('serves the public certificate verification page at /verify and /verify.html', async () => {
@@ -225,24 +274,6 @@ describe('Certificate Generation, Public Verification & Zero-Cost Document Stora
       const resVerifyHtml = await request(app).get('/verify.html');
       expect(resVerifyHtml.status).toBe(200);
       expect(resVerifyHtml.text.includes('Certificate Verification')).toBe(true);
-    });
-
-    it('strictly preserves negative certificate boundaries across all API routes (returns 404)', async () => {
-      const auth = mockAuth('FOUNDER', { isPrimaryFounder: true });
-      const forbiddenPaths = [
-        '/api/v1/certificates',
-        '/api/v1/certificates/me',
-        '/api/v1/certificates/verify/12345',
-        '/api/v1/certificates/generate',
-        '/api/v1/certificates/download',
-        '/api/v1/verify-certificate',
-        '/certificates/me'
-      ];
-
-      for (const p of forbiddenPaths) {
-        const res = await request(app).get(p).set('Authorization', auth.token);
-        expect(res.status).toBe(404);
-      }
     });
   });
 });

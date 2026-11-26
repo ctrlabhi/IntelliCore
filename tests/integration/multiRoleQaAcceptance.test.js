@@ -18,13 +18,16 @@ const db = vi.hoisted(() => ({
   leaveRequest: { findUnique: vi.fn(), findMany: vi.fn(), update: vi.fn() },
   certificateDispatch: { findUnique: vi.fn(), create: vi.fn(), findMany: vi.fn() },
   emailOutbox: { create: vi.fn(), findMany: vi.fn() },
+  systemSetting: { findUnique: vi.fn(), upsert: vi.fn(), create: vi.fn(), deleteMany: vi.fn() },
   auditLog: { create: vi.fn() },
   $transaction: vi.fn((fn) => (typeof fn === 'function' ? fn(db) : Promise.all(fn)))
 }));
 
 vi.mock('../../backend/src/config/database.js', () => ({
   getPrismaClient: () => db,
-  checkDatabaseConnection: () => Promise.resolve(true)
+  checkDatabaseConnection: () => Promise.resolve(true),
+  default: db,
+  prisma: db
 }));
 
 const PRIMARY_FOUNDER_UID = env.FOUNDER_FIREBASE_UID;
@@ -166,11 +169,9 @@ describe('IntelliCore V2.0 Multi-Role QA Acceptance & Invariants Verification', 
   // 3. Negative Invariants Verification
   // ---------------------------------------------------------------------------
   describe('Negative Invariants & Security Boundaries', () => {
-    it('strictly forbids certificate PDF generation/download routes (returns 404)', async () => {
+    it('strictly forbids prohibited legacy static certificate routes (returns 404)', async () => {
       const auth = mockAuth('FOUNDER', { isPrimaryFounder: true });
       const paths = [
-        '/api/v1/certificates/generate',
-        '/api/v1/certificates/download',
         '/api/v1/certificates/qr-code',
         '/certificates/download.pdf',
         '/api/v1/internships/int-101/certificate/pdf'
