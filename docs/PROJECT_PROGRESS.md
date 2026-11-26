@@ -232,6 +232,19 @@ Related source-level findings are recorded in [Security rules](SECURITY_RULES.md
 | Dedicated release branch & zero disturbance | PASS | Work isolated on branch `release/backend-vercel`. Live GitHub Pages publishing branch `main` preserved 100% untouched at commit `b10c5eb`. |
 | Cost constraint compliance | PASS | Verified $0.00 additional expenditure across GoDaddy, Hostinger, Firebase Spark, and Vercel Hobby. |
 
+## MariaDB Password Rotation Feasibility & Real Authentication Acceptance on 2026-11-26
+
+| Check | Result | Evidence |
+| :--- | :--- | :--- |
+| MariaDB self-service password rotation capability | PASS | Executed read-only audit `scripts/check-password-rotation-capabilities.js`. Server is MariaDB `11.8.9-MariaDB-log` with `readOnly: 0`. User `u740799251_intellicore` holds `USAGE` on `*.*` and `ALL PRIVILEGES` on `u740799251\_intellicore.*`. MariaDB 11.8 natively supports self-service password rotation via `SET PASSWORD = PASSWORD(?)` without administrative `GRANT OPTION`. |
+| Coordinated rotation runbook & safety gate | PASS | Authored `scripts/rotate-mariadb-password.js` with dry-run safety gate (`--execute-authorized-rotation`), 32-character high-entropy secret generation, zero plaintext logging, fresh TLS verification, old password rejection check, and atomic `.env.production.local` update. Halted at approval gate pending explicit owner authorization. |
+| Real Firebase Auth & backend integration suite | PASS | Executed `scripts/test-real-authentication.js`. All 11/11 checks passed 100% against real Google `intellicore-dev` project and isolated MySQL (port 33359): real candidate creation, token exchange via Google Identity Toolkit, real email verification and password reset OOB triggers, backend identity onboarding (`/api/v1/auth/bootstrap`), MySQL profile persistence, session restoration (`/api/v1/auth/me`), profile update (`/api/v1/users/me/profile`), RBAC denial (HTTP 403 `ACCOUNT_STATUS_RESTRICTED`), Founder Google auth mapping, and complete teardown. |
+| Hosting terms of service audit | PASS | Audited Vercel Hobby terms (Section 4.1): strictly personal/non-commercial. IntelliCore Technologies cannot use Vercel Hobby for production business operations. Vercel Hobby preserved for staging/testing. Render Free Web Service (prepared in `render.yaml`) identified as compliant zero-cost production alternative. GitHub Pages audited and confirmed compliant for static organizational landing and UI hosting. |
+| Operational features status audit | PASS | Confirmed: Email in safe `CAPTURE` mode (outbox queue only; live SMTP requires authorized relay); persistent uploads use `@vercel/blob` on serverless; certificates maintain strict negative boundary (HTTP 404); background jobs execute via bounded `/api/internal/notification-tick`; attendance and meeting workflows fully functional. |
+| Live website headless inspection | PASS | Executed `scripts/inspect-live-website.js` in Microsoft Edge. `https://www.intellicoretechnologies.in` returned HTTP 200 with clean console and zero errors. Screenshot persisted in artifacts. |
+| Release branch isolation | PASS | Branch `release/backend-vercel` committed and updated. Live publishing branch `main` preserved 100% untouched at commit `b10c5eb`. |
+
+
 
 
 
