@@ -43,10 +43,10 @@ export async function readPage(model, { where, select, orderBy }, { page, limit 
   return { items, pagination: { total, page, limit, totalPages: Math.ceil(total / limit) } };
 }
 
-export async function transaction(work, { retryUnique = false } = {}) {
+export async function transaction(work, { retryUnique = false, maxWait = 15000, timeout = 30000 } = {}) {
   for (let attempt = 0; attempt < 4; attempt += 1) {
     try {
-      return await getPrismaClient().$transaction(work, { isolationLevel: 'ReadCommitted' });
+      return await getPrismaClient().$transaction(work, { isolationLevel: 'ReadCommitted', maxWait, timeout });
     } catch (error) {
       const contention = error.code === 'P2034'
         || (error.code === 'P2010' && ['1205', '1213'].includes(String(error.meta?.code)));

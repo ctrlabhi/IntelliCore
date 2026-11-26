@@ -161,7 +161,7 @@ export class AuthService {
 
       logger.info({ userId: newUser.id, email: normalizedEmail }, 'New self-registered user initialized with PENDING status');
       return this.formatUserContext(newUser);
-    }, { isolationLevel: 'ReadCommitted' });
+    }, { isolationLevel: 'ReadCommitted', maxWait: 15000, timeout: 30000 });
   }
 
   /**
