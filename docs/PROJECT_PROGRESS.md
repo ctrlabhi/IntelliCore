@@ -159,5 +159,16 @@ The official Vercel Express builder generated a 46 MiB Node.js 24 function in an
 | Production Firebase (`intellicore-229`) | Currently quarantined. Production deployment requires promotion of verified rules and indices to `intellicore-229`. |
 
 
+## Dashboard Welcome Section Visual Unification on 2026-11-26
+
+| Check | Result | Evidence |
+| :--- | :--- | :--- |
+| Visual Unification Reference | PASS | Standardized all 4 workspace dashboards (`founder`, `hr`, `team-leader`, `intern`) using the "Welcome to IntelliCore" Hero Section on `frontend/index.html` as the visual benchmark. |
+| Design System Consistency | PASS | Unified Orbit Art component (dual rotating orbits, revolving light dots, glowing logo drop-shadow, and 3 revolving chips `Learn`, `Grow`, `Build`), Live Clock Card (calendar SVG, IST date, cyan digital time with AM/PM period, dynamic greeting), cosmic radial+linear gradient background, and sweeping ambient rings (`::before`, `::after`). |
+| Content & Dynamic Preservation | PASS | Strictly preserved every dashboard's unique headings, titles, role descriptions, access badges, user avatars, and DOM IDs (`welcomeName`, `mobileWelcomeName`, `icInternWelcomeName`, `welcomeCopy`, `roleScope`, `domainLabel`). Zero content overwrites. |
+| Responsiveness & Viewport Scaling | PASS | Automated headless browser verification across Desktop (1440x900), Tablet (768x1024), and Mobile (390x844). Verified 3-column horizontal proportional scaling without layout breaks or horizontal overflow (`scrollWidth <= clientWidth`). |
+| Regression Test Suite | PASS | Vitest test suite passed 100%: 19 test files, 133 tests green. Zero regressions. |
+| Deployment & Checkpoint | PASS | Git checkpoint `2ee5bd9` pushed to `origin/main`. Changes mirrored between `frontend/` and root `pages/` and `assets/`. |
+
 Related source-level findings are recorded in [Security rules](SECURITY_RULES.md#open-control-verification).
 
