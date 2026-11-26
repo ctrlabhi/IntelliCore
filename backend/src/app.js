@@ -155,9 +155,27 @@ export function createApp() {
     res.sendFile(path.join(frontendDir, 'pages/notes.html'));
   });
 
-  // 6. Redirect legacy /frontend URLs to clean root /
-  app.get(['/frontend', '/frontend/', '/frontend/index.html'], (req, res) => {
-    return res.redirect(301, '/');
+  // 6. Redirect all legacy /frontend URLs to clean paths permanently (HTTP 301)
+  app.use('/frontend', (req, res) => {
+    const rawPath = req.url.split('?')[0];
+    const search = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+    let target = '/';
+    if (rawPath === '/' || rawPath === '/index.html' || rawPath === '') {
+      target = '/';
+    } else if (rawPath.startsWith('/pages/dashboards/founder') || rawPath.startsWith('/dashboards/founder')) {
+      target = '/dashboards/founder';
+    } else if (rawPath.startsWith('/pages/dashboards/hr') || rawPath.startsWith('/dashboards/hr')) {
+      target = '/dashboards/hr';
+    } else if (rawPath.startsWith('/pages/dashboards/team-leader') || rawPath.startsWith('/dashboards/team-leader')) {
+      target = '/dashboards/team-leader';
+    } else if (rawPath.startsWith('/pages/dashboards/intern') || rawPath.startsWith('/dashboards/intern')) {
+      target = '/dashboards/intern';
+    } else if (rawPath.includes('notes.html') || rawPath === '/notes') {
+      target = '/notes.html';
+    } else {
+      target = rawPath;
+    }
+    return res.redirect(301, target + search);
   });
 
   // Public Landing Page (Root)
@@ -165,8 +183,7 @@ export function createApp() {
     res.sendFile(path.join(frontendDir, 'index.html'));
   });
 
-  // 7. General static fallback for frontend root and /frontend mount
-  app.use('/frontend', express.static(frontendDir));
+  // 7. General static fallback for assets
   app.use(express.static(frontendDir));
 
   // ---------------------------------------------------------------------------

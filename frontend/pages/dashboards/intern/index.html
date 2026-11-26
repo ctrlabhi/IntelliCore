@@ -7,6 +7,11 @@
   <meta name="robots" content="noindex, nofollow" />
   <meta name="theme-color" content="#030914" />
   <title>Intern Dashboard | IntelliCore</title>
+  <script>
+    if (window.location.pathname.indexOf('/frontend') !== -1) {
+      window.location.replace('/dashboards/intern' + window.location.search + window.location.hash);
+    }
+  </script>
   <meta name="description"
     content="Your IntelliCore intern dashboard for your internship profile, assigned work, attendance, and progress." />
   <link rel="icon" type="image/png" href="/assets/images/favicon.png">

@@ -6,6 +6,11 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#030914">
   <title>TL Dashboard | IntelliCore</title>
+  <script>
+    if (window.location.pathname.indexOf('/frontend') !== -1) {
+      window.location.replace('/dashboards/team-leader' + window.location.search + window.location.hash);
+    }
+  </script>
   <link rel="icon" type="image/png" href="/assets/images/favicon.png">
   <link rel="stylesheet" href="/assets/css/founder-dashboard.css">
   <link rel="stylesheet" href="/assets/css/tl-dashboard.css">
