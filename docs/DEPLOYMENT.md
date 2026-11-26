@@ -96,12 +96,21 @@ IntelliCore V2.0 operates with strict boundary separation across four decoupled 
 
 ## 4. Backend Hosting Evaluation & Architecture
 
-### A. Hostinger Shared Hosting Assessment
+### A. GoDaddy Account & Products Inspection
+- **Status**: **Domain Registration Only (No Hosting Included)**.
+- **Verification Evidence**: Inspected `https://account.godaddy.com/products` via autonomous browser agent:
+  - Account: **Abhishek Kumar**, Customer # `752159874`.
+  - Registered Products: Domain **`intellicoretechnologies.in`** only.
+  - Active Hosting / cPanel / VPS: **0 active subscriptions**.
+  - Node.js Support: None provisioned. GoDaddy hosts only DNS management records pointing to GitHub Pages (`185.199.108.153`, etc.) and Zoho Mail (`mx.zoho.in`, etc.).
+- **Conclusion**: GoDaddy hosting is not provisioned on this account. Proceeding with the approved zero-cost cloud backend alternative (Render Free Web Service).
+
+### B. Hostinger Shared Hosting Assessment
 - **Status**: **Incompatible for Node.js Application Execution**.
 - **Reason**: The existing Hostinger shared hosting node (`in-mum-web1824.main-hosting.eu`) operates LiteSpeed Web Server with PHP 8.1-8.4. It lacks a persistent Node.js application daemon manager, long-running process supervisors (PM2/systemd), and does not support native Rust binaries (`query-engine-debian-openssl-3.0.x`) required by Prisma ORM.
 - **Database Use**: Port 3306 remains 100% active and approved for remote MariaDB connectivity.
 
-### B. Zero-Cost Commercial Hosting Evaluation
+### C. Zero-Cost Commercial Hosting Evaluation
 1. **Render Free Web Service**:
    - Genuinely free tier available (750 instance hours/month).
    - Node.js 24 LTS and Express 5 compatible.
