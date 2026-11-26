@@ -7,11 +7,17 @@
   <meta name="description" content="IntelliCore — Intelligence at the Core, Innovation at the Fore. Emerging IT Startup delivering innovative technology solutions and industry-backed internship training." />
   <meta name="keywords" content="IntelliCore, IT internship, web development internship, data analyst internship, business analyst internship, digital marketing internship, software development, India">
   <meta name="theme-color" content="#050813">
+  <script>
+    if (window.location.pathname.endsWith('/frontend/') || window.location.pathname.endsWith('/frontend')) {
+      const cleanUrl = window.location.href.replace(/\/frontend\/?(\?|#|$)/, '/$1');
+      window.history.replaceState(null, '', cleanUrl);
+    }
+  </script>
   <meta property="og:type" content="website">
   <meta property="og:title" content="IntelliCore">
   <meta property="og:description" content="Explore 8 internship tracks and professional IT solutions designed for real-world growth.">
   <meta property="og:url" content="https://intellicoretechnologies.in/">
-  <meta property="og:image" content="https://intellicoretechnologies.in/frontend/assets/images/favicon.png">
+  <meta property="og:image" content="https://intellicoretechnologies.in/assets/images/favicon.png">
   <link rel="icon" type="image/png" href="assets/images/favicon.png?v=4" />
   <link rel="stylesheet" href="assets/css/style.css?v=20261103-clean-sync-v9">
   <script type="application/ld+json">
