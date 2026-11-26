@@ -30,13 +30,17 @@
 
 ---
 
-### B. Backend API Rollback (Render Free Web Service)
+### B. Backend API Rollback (Vercel & Render)
 1. **Trigger**: If the deployed cloud backend fails health probes or experiences unhandled runtime exceptions:
-2. **Procedure**:
+2. **Procedure for Vercel Backend (`https://intellicore-six.vercel.app`)**:
+   - In Vercel Dashboard > `intellicore` > **Deployments**:
+   - Locate the previous known-good deployment (e.g. commit `b10c5eb`).
+   - Click the three dots menu `...` > **Promote to Production** (instant zero-downtime rollback).
+   - If an immediate halt of external traffic is required: remove `DATABASE_URL` or redeploy a paused maintenance build.
+3. **Procedure for Render Free Alternative**:
    - In Render Dashboard > `intellicore-api` > **Deploys**:
-   - Click **Rollback** next to the previous known-good deployment.
-   - Alternatively, click **Settings > Suspend Web Service** to immediately halt traffic without deleting the configuration.
-3. **Local Failover**:
+   - Click **Rollback** next to the previous deployment, or click **Settings > Suspend Web Service**.
+4. **Local Failover**:
    - Start local backend container if needed:
      ```bash
      docker compose up -d app
