@@ -1,4 +1,9 @@
+@import url("unified-welcome.css");
+html,
 body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
   isolation: isolate;
 }
 
@@ -13,37 +18,7 @@ body {
   pointer-events: none;
 }
 
-@media (min-width: 761px) {
-  .welcome-banner,
-  .ic-workspace-page .ic-workspace-hero {
-    min-height: 0;
-    padding: 4px 12px 12px !important;
-    gap: 12px;
-  }
-
-  .welcome-copy h1,
-  .ic-workspace-page .ic-workspace-hero h1 {
-    margin-top: 0 !important;
-    margin-bottom: 4px !important;
-  }
-
-  .welcome-meta,
-  .ic-workspace-page .ic-workspace-hero-meta {
-    margin-top: 4px;
-  }
-
-  .welcome-art,
-  .ic-workspace-page .ic-hero-orbit {
-    height: 112px;
-    flex-basis: 145px;
-  }
-
-  .welcome-date,
-  .ic-workspace-page .ic-live-clock {
-    gap: 2px;
-    padding: 6px 9px;
-  }
-}
+/* min-width: 761px welcome styles handled by unified-welcome.css */
 
 .dashboard-shell,
 .auth-state {
@@ -51,89 +26,7 @@ body {
   z-index: 1;
 }
 
-.welcome-art,
-.ic-hero-orbit {
-  isolation: isolate;
-}
-
-.welcome-art .orbit,
-.ic-hero-orbit .ic-orbit-ring {
-  transform-origin: center;
-}
-
-.welcome-art .orbit-a,
-.ic-hero-orbit .ring-one {
-  animation: dashboard-rope-wave 12s ease-in-out infinite;
-}
-
-.welcome-art .orbit-b,
-.ic-hero-orbit .ring-two {
-  animation: dashboard-rope-wave-reverse 15s ease-in-out infinite;
-}
-
-.welcome-chip-track {
-  position: absolute;
-  z-index: 3;
-  top: 50%;
-  left: 50%;
-  width: 146px;
-  height: 146px;
-  margin: -73px 0 0 -73px;
-  border-radius: 50%;
-  animation: dashboard-chip-orbit 64s linear infinite;
-  pointer-events: none;
-}
-
-.welcome-chip-track .welcome-chip,
-.welcome-chip-track .orbit-chip {
-  position: absolute;
-  display: grid;
-  place-items: center;
-  width: max-content;
-  min-width: 0;
-  height: 20px;
-  padding: 0 4px;
-  border: 1px solid rgba(151, 218, 255, .32);
-  border-radius: 999px;
-  background: rgba(10, 32, 68, .94);
-  box-shadow: 0 5px 14px rgba(0, 0, 0, .24), inset 0 0 8px rgba(48, 171, 255, .08);
-  color: #e6f7ff;
-  font-size: 10px;
-  font-weight: 750;
-  line-height: 1;
-  white-space: nowrap;
-  animation: dashboard-chip-counter-orbit 64s linear infinite;
-  will-change: transform;
-}
-
-.welcome-chip-track .welcome-chip > span,
-.welcome-chip-track .orbit-chip > span {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.welcome-chip-track svg {
-  width: 13px;
-  height: 13px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.welcome-chip-track .chip-learn,
-.welcome-chip-track .chip-one { top: 0; left: 50%; }
-.welcome-chip-track .chip-grow,
-.welcome-chip-track .chip-two { right: 0; bottom: 0; }
-.welcome-chip-track .chip-build,
-.welcome-chip-track .chip-three { bottom: 0; left: 0; }
-
-.welcome-chip-track .welcome-chip,
-.welcome-chip-track .orbit-chip {
-  transform: translate(-50%, -50%);
-}
+/* welcome-art & chip animation handled by unified-welcome.css */
 
 .sidebar .nav-link > svg {
   width: 16px;
@@ -303,45 +196,7 @@ body {
     min-height: 40px;
   }
 
-  .welcome-banner {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(132px, .8fr);
-    gap: 12px;
-    align-items: center;
-  }
-
-  .welcome-copy {
-    grid-column: 1 / -1;
-  }
-
-  .welcome-art {
-    position: relative;
-    inset: auto;
-    grid-column: 1;
-    grid-row: 2;
-    justify-self: center;
-    width: 145px;
-    height: 112px;
-    flex: 0 1 145px;
-    margin: 0;
-    opacity: 1;
-  }
-
-  .welcome-chip-track {
-    width: 130px;
-    height: 130px;
-    margin: -65px 0 0 -65px;
-  }
-
-  .welcome-date {
-    grid-column: 2;
-    grid-row: 2;
-    justify-self: stretch;
-    width: 100%;
-    min-width: 0;
-    margin: 0;
-    padding: 9px 6px;
-  }
+  /* tablet grid override removed */
 }
 
 @media (max-width: 480px) {
@@ -376,61 +231,8 @@ body {
     padding-bottom: max(24px, env(safe-area-inset-bottom));
   }
 
-  .welcome-banner {
-    grid-template-columns: minmax(0, 1fr) minmax(125px, .9fr);
-    padding: 14px;
-  }
-
-  .welcome-copy h1 {
-    font-size: clamp(22px, 6vw, 27px);
-    overflow-wrap: anywhere;
-  }
-
-  .welcome-copy p {
-    font-size: 11px;
-    line-height: 1.55;
-  }
-
-  .welcome-art {
-    width: 132px;
-    height: 108px;
-    flex-basis: 132px;
-  }
-
-  .welcome-chip-track {
-    width: 116px;
-    height: 116px;
-    margin: -58px 0 0 -58px;
-  }
-
-  .welcome-art .orbit-a {
-    width: 118px;
-    height: 74px;
-  }
-
-  .welcome-art .orbit-b {
-    width: 82px;
-    height: 102px;
-  }
-
-  .welcome-art .welcome-logo {
-    width: 62px;
-    height: 62px;
-  }
-
-  .welcome-date > span {
-    font-size: 12px;
-  }
-
-  .welcome-date strong {
-    font-size: 18px;
-  }
-
-  .welcome-date small {
-    font-size: 14px;
-  }
-
-  .stat-card {
+  /* mobile grid override removed */
+.stat-card {
     min-width: 0;
   }
 
@@ -461,14 +263,7 @@ body {
     gap: 4px;
   }
 
-  .welcome-banner {
-    grid-template-columns: minmax(0, 1fr) minmax(112px, .8fr);
-    padding: 11px;
-  }
-
-  .welcome-art {
-    transform: scale(.9);
-  }
+  /* 360px grid override removed */
 }
 
 @media (max-width: 760px) {
@@ -636,214 +431,7 @@ body {
     display: none;
   }
 
-  .welcome-banner {
-    min-width: 0;
-  }
-
-  .welcome-copy {
-    min-width: 0;
-    max-width: 100%;
-  }
-
-  .welcome-copy h1 {
-    max-width: 100%;
-    font-size: clamp(17px, 5vw, 21px);
-    letter-spacing: -.7px;
-    line-height: 1.2;
-    overflow-wrap: anywhere;
-  }
-
-  .welcome-copy p {
-    max-width: 100%;
-  }
-
-  .welcome-date {
-    max-width: 100%;
-  }
+  /* mid welcome cleanup */
 }
 
-@media (max-width: 760px) {
-  .welcome-banner {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
-    align-content: center;
-    min-height: 0;
-    padding: 12px 14px !important;
-  }
-
-  .welcome-copy {
-    grid-column: 1;
-    grid-row: 1;
-    width: 100%;
-  }
-
-  .welcome-copy h1 {
-    margin: 0;
-    font-size: clamp(22px, 6vw, 28px);
-    line-height: 1.12;
-  }
-
-  .welcome-copy p,
-  .welcome-meta,
-  .welcome-art,
-  .ic-workspace-hero-copy p,
-  .ic-workspace-hero-meta,
-  .ic-workspace-page .ic-hero-orbit {
-    display: none !important;
-  }
-
-  .ic-workspace-hero {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
-    align-content: center;
-    min-height: 0 !important;
-    padding: 12px 14px !important;
-  }
-
-  .mobile-welcome-greeting,
-  .mobile-welcome-name,
-  .ic-mobile-welcome-greeting,
-  .ic-mobile-welcome-name {
-    display: block;
-  }
-
-  .mobile-welcome-greeting,
-  .ic-mobile-welcome-greeting {
-    color: #f4f7ff !important;
-  }
-
-  .welcome-copy h1 > .mobile-welcome-title {
-    display: block;
-    color: #f4f7ff !important;
-  }
-  .mobile-welcome-title > span { display: block; color: #1ccfff !important; }
-  .desktop-welcome-title { display: none; }
-
-  .ic-workspace-hero-copy {
-    grid-column: 1;
-    grid-row: 1;
-    width: 100%;
-    max-width: 100% !important;
-    padding: 0 !important;
-  }
-
-  .ic-workspace-page .ic-workspace-hero-copy,
-  .ic-workspace-page .ic-workspace-hero-copy h1 {
-    text-align: center;
-  }
-
-  .ic-workspace-hero-copy h1 .ic-mobile-welcome-greeting { color: #fff; }
-  .ic-workspace-hero-copy h1 .ic-mobile-welcome-name { color: #1ccfff; }
-
-  .welcome-date,
-  .ic-live-clock {
-    position: static !important;
-    grid-column: 1;
-    grid-row: 2;
-    display: flex !important;
-    align-items: center !important;
-    justify-self: start;
-    gap: 8px !important;
-    width: fit-content !important;
-    min-width: 0 !important;
-    max-width: 100%;
-    margin: 0 !important;
-    padding: 0 !important;
-    transform: none !important;
-    border: 0 !important;
-    background: transparent !important;
-    text-align: left !important;
-    box-shadow: none !important;
-  }
-
-  .ic-workspace-page .ic-live-clock {
-    justify-self: center;
-    align-items: center !important;
-    justify-content: center;
-    text-align: center !important;
-  }
-
-  .welcome-date .live-date-label,
-  .ic-live-clock .live-date-label {
-    display: none !important;
-  }
-
-  .welcome-date strong,
-  .ic-live-clock strong {
-    align-self: auto !important;
-    color: #7ddcff !important;
-    font-size: 15px !important;
-    font-weight: 800;
-    letter-spacing: .3px;
-  }
-
-  .welcome-date small,
-  .ic-live-clock small {
-    color: #a9bfd8 !important;
-    font-size: 12px !important;
-  }
-}
-
-@media (max-width: 380px) {
-  .welcome-banner,
-  .ic-workspace-hero { padding: 10px 12px !important; }
-  .welcome-copy h1 { font-size: 22px; }
-  .welcome-date strong,
-  .ic-live-clock strong { font-size: 14px !important; }
-}
-
-@media (max-width: 480px) {
-  .dashboard-shell .welcome-banner {
-    display: flex !important;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 0;
-    padding: 16px 12px !important;
-    text-align: center;
-  }
-  .dashboard-shell .welcome-copy {
-    width: 100%;
-    min-width: 0;
-    flex: none;
-    text-align: center;
-  }
-  .dashboard-shell .welcome-copy h1 {
-    margin: 0 auto 4px;
-    font-size: 23px;
-    line-height: 1.2;
-    text-align: center;
-  }
-  .dashboard-shell .mobile-welcome-title {
-    display: block;
-    color: #f4f7ff !important;
-  }
-  .dashboard-shell .mobile-welcome-title > .mobile-welcome-name {
-    display: block;
-    color: #1ccfff !important;
-  }
-  .dashboard-shell .mobile-welcome-name > span {
-    display: inline !important;
-    color: inherit !important;
-  }
-  .dashboard-shell .welcome-copy p {
-    max-width: 34ch;
-    margin: 0 auto;
-    text-align: center;
-  }
-  .dashboard-shell .welcome-meta {
-    justify-content: center;
-  }
-  .dashboard-shell .welcome-date {
-    align-self: center;
-    align-items: center;
-    justify-content: center;
-    width: max-content;
-    min-width: 150px;
-    margin: 0 auto !important;
-    text-align: center;
-  }
-}
+/* Mobile welcome overrides replaced by unified-welcome.css */

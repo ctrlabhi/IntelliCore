@@ -1,0 +1,648 @@
+/* ==========================================================================
+   INTELLICORE UNIFIED DASHBOARD WELCOME HERO SYSTEM
+   Visual Reference: "Welcome to IntelliCore" Hero Section on index.html
+   Consistent Orbit Art, Live Clock Card, Cosmic Glassmorphism, Typography,
+   Gradients, Ambient Rings, and Responsive Proportional Scaling across all Dashboards.
+   ========================================================================== */
+
+/* Keyframe Animations */
+@keyframes welcomeOrbitA {
+  from { transform: rotate(-25deg); }
+  to { transform: rotate(335deg); }
+}
+
+@keyframes welcomeOrbitB {
+  from { transform: rotate(38deg); }
+  to { transform: rotate(-322deg); }
+}
+
+@keyframes orbitDotRevolveA {
+  0% { left: 50%; top: -4px; }
+  25% { left: 100%; top: 50%; }
+  50% { left: 50%; top: 100%; }
+  75% { left: 0%; top: 50%; }
+  100% { left: 50%; top: -4px; }
+}
+
+@keyframes orbitDotRevolveB {
+  0% { left: 50%; top: -4px; }
+  25% { left: 100%; top: 50%; }
+  50% { left: 50%; top: 100%; }
+  75% { left: 0%; top: 50%; }
+  100% { left: 50%; top: -4px; }
+}
+
+@keyframes welcomeLogoFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.025); }
+}
+
+@keyframes chipCircularOrbit {
+  0% {
+    transform: rotate(0deg) translateY(calc(-1 * var(--chip-orbit-r, 80px))) rotate(0deg) translate(-50%, -50%);
+  }
+  25% {
+    transform: rotate(90deg) translateY(calc(-1 * var(--chip-orbit-r, 80px))) rotate(-90deg) translate(-50%, -50%);
+  }
+  50% {
+    transform: rotate(180deg) translateY(calc(-1 * var(--chip-orbit-r, 80px))) rotate(-180deg) translate(-50%, -50%);
+  }
+  75% {
+    transform: rotate(270deg) translateY(calc(-1 * var(--chip-orbit-r, 80px))) rotate(-270deg) translate(-50%, -50%);
+  }
+  100% {
+    transform: rotate(360deg) translateY(calc(-1 * var(--chip-orbit-r, 80px))) rotate(-360deg) translate(-50%, -50%);
+  }
+}
+
+/* 1. Container: Cosmic Glassmorphic Card */
+.welcome-banner {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  min-height: 0 !important;
+  margin: 0 0 1rem !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 20px !important;
+  padding: 16px 24px !important;
+  text-align: left !important;
+  border: 1px solid rgba(19, 123, 195, 0.35) !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+  background: radial-gradient(ellipse at 58% 50%, rgba(0, 116, 195, 0.15), transparent 42%),
+              linear-gradient(110deg, #061328, #07152a 54%, #06182c) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37) !important;
+  scroll-margin-top: 65px;
+}
+
+/* Ambient Cosmic Background Rings */
+.welcome-banner::before,
+.welcome-banner::after {
+  content: "" !important;
+  position: absolute !important;
+  border-radius: 50% !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+
+.welcome-banner::before {
+  border: 1px solid rgba(0, 160, 255, 0.16) !important;
+  width: 540px !important;
+  height: 185px !important;
+  right: max(29.5%, 385px) !important;
+  top: -95px !important;
+  transform: rotate(-22deg) !important;
+  box-shadow: none !important;
+}
+
+.welcome-banner::after {
+  border: 1px solid rgba(125, 175, 255, 0.13) !important;
+  width: 390px !important;
+  height: 140px !important;
+  right: max(32.5%, 420px) !important;
+  top: -65px !important;
+  transform: rotate(24deg) !important;
+  box-shadow: none !important;
+}
+
+/* 2. Column 1: Left Welcome Copy */
+.welcome-copy {
+  position: relative !important;
+  z-index: 2 !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  text-align: left !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+.welcome-copy h1 {
+  display: block !important;
+  margin: 0 0 6px !important;
+  font-size: clamp(23px, 3vw, 32px) !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.035em !important;
+  color: #f0f6fc !important;
+}
+
+.welcome-copy h1 span,
+.welcome-copy h1 .mobile-welcome-name,
+.welcome-copy h1 .mobile-welcome-name span,
+.welcome-copy h1 .desktop-welcome-title span {
+  color: #1ccfff !important;
+  text-shadow: 0 0 14px rgba(28, 207, 255, 0.35) !important;
+}
+
+.welcome-copy h1 .mobile-welcome-greeting,
+.welcome-copy h1 .desktop-welcome-title {
+  color: #f0f6fc !important;
+}
+
+.desktop-welcome-title {
+  display: inline !important;
+}
+
+.mobile-welcome-title {
+  display: none !important;
+}
+
+.welcome-copy p {
+  margin: 0 !important;
+  color: #a8bdd5 !important;
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+  letter-spacing: 0.01em !important;
+}
+
+.welcome-meta {
+  margin-top: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  color: #78a4c7 !important;
+  font-size: 9px !important;
+}
+
+.access-pill {
+  border: 1px solid rgba(0, 211, 160, 0.3) !important;
+  border-radius: 9px !important;
+  background: rgba(0, 211, 160, 0.1) !important;
+  color: #14d7ad !important;
+  padding: 2px 8px !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+}
+
+.welcome-meta-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  color: #78a4c7 !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+}
+
+/* 3. Column 2: Center Orbit Art Component */
+.welcome-art {
+  --chip-orbit-r: 80px !important;
+  width: 216px !important;
+  height: 164px !important;
+  flex: 0 0 216px !important;
+  min-width: 216px !important;
+  max-width: 216px !important;
+  position: relative !important;
+  display: grid !important;
+  place-items: center !important;
+  align-self: center !important;
+  margin: auto 0 !important;
+  z-index: 2 !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.welcome-art .orbit-a,
+.welcome-art .orbit {
+  position: absolute !important;
+  border: 1px solid rgba(0, 210, 255, 0.45) !important;
+  box-shadow: 0 0 6px rgba(0, 205, 255, 0.18), inset 0 0 4px rgba(0, 205, 255, 0.08) !important;
+  width: 196px !important;
+  height: 126px !important;
+  border-radius: 50% !important;
+  transform: rotate(-25deg);
+  animation: welcomeOrbitA 16s linear infinite !important;
+}
+
+.welcome-art .orbit-b {
+  position: absolute !important;
+  width: 126px !important;
+  height: 196px !important;
+  border-radius: 50% !important;
+  transform: rotate(38deg);
+  border: 1px solid rgba(167, 124, 255, 0.45) !important;
+  box-shadow: 0 0 6px rgba(167, 124, 255, 0.18), inset 0 0 4px rgba(167, 124, 255, 0.08) !important;
+  animation: welcomeOrbitB 12s linear infinite !important;
+}
+
+.welcome-art .orbit-a::after {
+  content: "" !important;
+  position: absolute !important;
+  width: 7px !important;
+  height: 7px !important;
+  border-radius: 50% !important;
+  background: #5edcff !important;
+  box-shadow: 0 0 5px rgba(94, 220, 255, 0.7) !important;
+  transform: translate(-50%, -50%) !important;
+  animation: orbitDotRevolveA 10s linear infinite !important;
+  will-change: left, top;
+}
+
+.welcome-art .orbit-b::after {
+  content: "" !important;
+  position: absolute !important;
+  width: 7px !important;
+  height: 7px !important;
+  border-radius: 50% !important;
+  background: #c084fc !important;
+  box-shadow: 0 0 5px rgba(192, 132, 252, 0.7) !important;
+  transform: translate(-50%, -50%) !important;
+  animation: orbitDotRevolveB 8s linear infinite !important;
+  will-change: left, top;
+}
+
+.welcome-art .welcome-logo {
+  position: relative !important;
+  z-index: 2 !important;
+  width: 74px !important;
+  height: 74px !important;
+  object-fit: contain !important;
+  filter: drop-shadow(0 0 18px rgba(0, 194, 255, 0.85)) !important;
+  animation: welcomeLogoFloat 4s ease-in-out infinite !important;
+}
+
+.welcome-art .welcome-chip-track {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 3 !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  pointer-events: none !important;
+  animation: none !important;
+}
+
+.welcome-chip {
+  display: inline-flex !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform-origin: 0 0 !important;
+  z-index: 3 !important;
+  padding: 4px 11px !important;
+  border-radius: 999px !important;
+  font-size: 10px !important;
+  font-weight: 750 !important;
+  letter-spacing: 0.02em !important;
+  white-space: nowrap !important;
+  background: rgba(6, 22, 46, 0.94) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35) !important;
+  pointer-events: none !important;
+  animation: chipCircularOrbit 15s linear infinite !important;
+  will-change: transform;
+}
+
+.welcome-chip.chip-learn {
+  color: #6fe4ff !important;
+  border: 1px solid rgba(0, 210, 255, 0.5) !important;
+  box-shadow: 0 4px 14px rgba(0, 210, 255, 0.22) !important;
+  animation-delay: 0s !important;
+}
+
+.welcome-chip.chip-grow {
+  color: #6effcd !important;
+  border: 1px solid rgba(0, 225, 165, 0.5) !important;
+  box-shadow: 0 4px 14px rgba(0, 225, 165, 0.22) !important;
+  animation-delay: -10s !important;
+}
+
+.welcome-chip.chip-build {
+  color: #a5cfff !important;
+  border: 1px solid rgba(90, 160, 255, 0.5) !important;
+  box-shadow: 0 4px 14px rgba(90, 160, 255, 0.22) !important;
+  animation-delay: -5s !important;
+}
+
+/* 4. Column 3: Right Live Clock Card */
+.welcome-date {
+  position: relative !important;
+  z-index: 2 !important;
+  width: 142px !important;
+  min-width: 142px !important;
+  max-width: 160px !important;
+  flex: 0 0 142px !important;
+  margin: 0 !important;
+  padding: 12px 14px !important;
+  border: 1px solid rgba(41, 127, 178, 0.3) !important;
+  border-radius: 10px !important;
+  background: rgba(3, 17, 33, 0.52) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  align-items: center !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.welcome-date .live-date-label {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  width: 100% !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.welcome-date .live-date-label svg {
+  width: 16px !important;
+  height: 16px !important;
+  flex-shrink: 0 !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 1.7 !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+}
+
+.welcome-date .live-date-label > span,
+.welcome-date > span {
+  font-size: 12px !important;
+  color: #9eb8d2 !important;
+  white-space: nowrap !important;
+  line-height: 1.15 !important;
+}
+
+.welcome-date strong {
+  align-self: center !important;
+  font-size: 21px !important;
+  letter-spacing: 0.6px !important;
+  color: #1ccfff !important;
+  text-shadow: 0 0 10px rgba(28, 207, 255, 0.35) !important;
+  line-height: 1.15 !important;
+  white-space: nowrap !important;
+  margin: 0 !important;
+}
+
+.welcome-date .live-time-period {
+  display: inline-block !important;
+  margin-left: 3px !important;
+  font-size: 0.48em !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  vertical-align: super !important;
+  letter-spacing: 0.04em !important;
+  color: #1ccfff !important;
+}
+
+.welcome-date small {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #b0c5d9 !important;
+  line-height: 1.15 !important;
+  white-space: nowrap !important;
+}
+
+/* 5. Tablet Responsiveness (481px to 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .welcome-banner {
+    padding: 12px 16px !important;
+    gap: 10px !important;
+    border-radius: 13px !important;
+  }
+
+  .welcome-banner::before {
+    width: clamp(200px, 45vw, 360px) !important;
+    height: clamp(80px, 18vw, 140px) !important;
+    right: 25% !important;
+    top: clamp(-50px, -10vw, -70px) !important;
+  }
+
+  .welcome-banner::after {
+    width: clamp(140px, 32vw, 250px) !important;
+    height: clamp(60px, 14vw, 105px) !important;
+    right: 30% !important;
+    top: clamp(-35px, -7vw, -50px) !important;
+  }
+
+  .welcome-copy h1 {
+    font-size: clamp(18px, 3vw, 24px) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .welcome-copy p {
+    font-size: clamp(9px, 1.5vw, 11px) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .desktop-welcome-title {
+    display: none !important;
+  }
+
+  .mobile-welcome-title {
+    display: inline !important;
+  }
+
+  .welcome-art {
+    --chip-orbit-r: 50px !important;
+    width: 135px !important;
+    height: 110px !important;
+    flex: 0 0 135px !important;
+    min-width: 135px !important;
+    max-width: 135px !important;
+  }
+
+  .welcome-art .orbit-a,
+  .welcome-art .orbit {
+    width: 120px !important;
+    height: 76px !important;
+  }
+
+  .welcome-art .orbit-b {
+    width: 76px !important;
+    height: 120px !important;
+  }
+
+  .welcome-art .welcome-logo {
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  .welcome-chip {
+    font-size: 7.5px !important;
+    padding: 2px 6px !important;
+  }
+
+  .welcome-date {
+    width: 114px !important;
+    min-width: 114px !important;
+    flex: 0 0 114px !important;
+    padding: 8px 8px !important;
+    gap: 3px !important;
+  }
+
+  .welcome-date .live-date-label svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  .welcome-date .live-date-label > span,
+  .welcome-date > span {
+    font-size: 8.5px !important;
+  }
+
+  .welcome-date strong {
+    font-size: 15px !important;
+  }
+
+  .welcome-date small {
+    font-size: 10px !important;
+  }
+}
+
+/* 6. Mobile Responsiveness (<= 480px) */
+@media (max-width: 480px) {
+  .welcome-banner {
+    padding: clamp(6px, 1.8vw, 10px) clamp(6px, 1.8vw, 10px) !important;
+    gap: clamp(3.5px, 1.1vw, 6px) !important;
+    border-radius: clamp(10px, 2.8vw, 12px) !important;
+    margin-bottom: 0.85rem !important;
+  }
+
+  .welcome-banner::before {
+    width: clamp(160px, 45vw, 240px) !important;
+    height: clamp(70px, 18vw, 110px) !important;
+    right: 25% !important;
+    top: -50px !important;
+  }
+
+  .welcome-banner::after {
+    width: clamp(120px, 32vw, 180px) !important;
+    height: clamp(50px, 14vw, 85px) !important;
+    right: 30% !important;
+    top: -35px !important;
+  }
+
+  .welcome-copy h1 {
+    font-size: clamp(13px, 3.75vw, 16.5px) !important;
+    margin: 0 0 clamp(2px, 0.6vw, 4px) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .desktop-welcome-title {
+    display: none !important;
+  }
+
+  .mobile-welcome-title {
+    display: inline !important;
+  }
+
+  .welcome-copy p {
+    font-size: clamp(6.8px, 1.95vw, 8.6px) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .welcome-art {
+    --chip-orbit-r: clamp(25px, 6.8vw, 32px) !important;
+    width: clamp(66px, 18vw, 84px) !important;
+    height: clamp(60px, 16vw, 76px) !important;
+    flex: 0 0 clamp(66px, 18vw, 84px) !important;
+    min-width: clamp(66px, 18vw, 84px) !important;
+    max-width: clamp(66px, 18vw, 84px) !important;
+  }
+
+  .welcome-art .orbit-a,
+  .welcome-art .orbit {
+    width: clamp(58px, 15.5vw, 74px) !important;
+    height: clamp(36px, 10vw, 46px) !important;
+    border: 1px solid rgba(0, 210, 255, 0.45) !important;
+    box-shadow: 0 0 4px rgba(0, 205, 255, 0.18), inset 0 0 3px rgba(0, 205, 255, 0.08) !important;
+  }
+
+  .welcome-art .orbit-b {
+    width: clamp(36px, 10vw, 46px) !important;
+    height: clamp(58px, 15.5vw, 74px) !important;
+    border: 1px solid rgba(167, 124, 255, 0.45) !important;
+    box-shadow: 0 0 4px rgba(167, 124, 255, 0.18), inset 0 0 3px rgba(167, 124, 255, 0.08) !important;
+  }
+
+  .welcome-art .orbit-a::after,
+  .welcome-art .orbit-b::after {
+    width: clamp(4px, 1.2vw, 5px) !important;
+    height: clamp(4px, 1.2vw, 5px) !important;
+  }
+
+  .welcome-art .welcome-logo {
+    width: clamp(24px, 6.2vw, 30px) !important;
+    height: clamp(24px, 6.2vw, 30px) !important;
+  }
+
+  .welcome-chip {
+    font-size: clamp(5.2px, 1.4vw, 6.6px) !important;
+    padding: clamp(1px, 0.3vw, 1.8px) clamp(2.5px, 0.8vw, 4px) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) !important;
+  }
+
+  .welcome-chip.chip-grow {
+    animation-delay: -5s !important;
+  }
+
+  .welcome-chip.chip-build {
+    animation-delay: -10s !important;
+  }
+
+  .welcome-date {
+    width: clamp(86px, 24vw, 106px) !important;
+    min-width: clamp(86px, 24vw, 106px) !important;
+    max-width: clamp(86px, 24vw, 106px) !important;
+    flex: 0 0 clamp(86px, 24vw, 106px) !important;
+    padding: clamp(5px, 1.3vw, 7px) clamp(3px, 0.9vw, 5px) !important;
+    gap: clamp(1px, 0.4vw, 2.5px) !important;
+    border-radius: clamp(7px, 1.8vw, 10px) !important;
+  }
+
+  .welcome-date .live-date-label svg {
+    width: clamp(8.5px, 2.4vw, 11px) !important;
+    height: clamp(8.5px, 2.4vw, 11px) !important;
+  }
+
+  .welcome-date .live-date-label > span,
+  .welcome-date > span {
+    font-size: clamp(6px, 1.6vw, 7.8px) !important;
+  }
+
+  .welcome-date strong {
+    font-size: clamp(11.5px, 3.2vw, 15px) !important;
+    text-shadow: 0 0 6px rgba(28, 207, 255, 0.35) !important;
+  }
+
+  .welcome-date small {
+    font-size: clamp(7px, 1.9vw, 9px) !important;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .welcome-banner::before,
+  .welcome-banner::after,
+  .welcome-art .orbit-a,
+  .welcome-art .orbit-b,
+  .welcome-art .orbit-a::after,
+  .welcome-art .orbit-b::after,
+  .welcome-art .welcome-logo,
+  .welcome-chip {
+    animation: none !important;
+  }
+}
