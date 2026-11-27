@@ -17,7 +17,10 @@ describe('Vercel runtime integration', () => {
     const openRedirectAttempt2 = await request(app).get('/frontend/https://evil.com');
     const notes = await request(app).get('/pages/notes.html');
     const dashboard = await request(app).get('/dashboards/intern');
+    const robots = await request(app).get('/robots.txt');
+    const sitemap = await request(app).get('/sitemap.xml');
     expect(home.status).toBe(200);
+    expect(home.text).toContain('rel="canonical" href="https://www.intellicoretechnologies.in/"');
     expect(frontendRedirect.status).toBe(301);
     expect(frontendRedirect.headers.location).toBe('/');
     expect(openRedirectAttempt1.status).toBe(301);
@@ -26,6 +29,10 @@ describe('Vercel runtime integration', () => {
     expect(openRedirectAttempt2.headers.location).toBe('/');
     expect(notes.text).toContain('IntelliCore Notes AI');
     expect(dashboard.status).toBe(200);
+    expect(robots.status).toBe(200);
+    expect(robots.text).toContain('Sitemap: https://www.intellicoretechnologies.in/sitemap.xml');
+    expect(sitemap.status).toBe(200);
+    expect(sitemap.text).toContain('https://www.intellicoretechnologies.in/');
     expect(home.headers['content-security-policy']).toContain("frame-ancestors 'self'");
     expect((await request(app).get('/api/internal/notification-tick')).status).toBe(404);
   });

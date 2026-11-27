@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Certificate Verification — IntelliCore</title>
   <meta name="description" content="Verify the authenticity of internship completion certificates issued by IntelliCore Technologies." />
+  <link rel="canonical" href="https://www.intellicoretechnologies.in/verify" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Certificate Verification — IntelliCore" />
+  <meta property="og:description" content="Verify the authenticity of internship completion certificates issued by IntelliCore Technologies." />
+  <meta property="og:url" content="https://www.intellicoretechnologies.in/verify" />
   <meta name="theme-color" content="#050813">
   <link rel="icon" type="image/png" href="/assets/images/favicon.png?v=4" />
   <link rel="stylesheet" href="/assets/css/style.css?v=20261103-clean-sync-v9">
@@ -216,7 +221,7 @@
       try {
         const host = window.location.hostname;
         const apiBase = window.__INTELLICORE_API_BASE_URL__
-          || ((host.endsWith('github.io') || host.includes('intellicoretechnologies.in')) ? 'https://intellicore-six.vercel.app/api/v1' : '/api/v1');
+          || (host.endsWith('github.io') ? 'https://intellicore-six.vercel.app/api/v1' : '/api/v1');
         const response = await fetch(apiBase.replace(/\/$/, '') + '/certificates/verify/' + encodeURIComponent(code));
         const resData = await response.json();
         const cert = resData.data;

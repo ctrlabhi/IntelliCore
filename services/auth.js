@@ -20,7 +20,7 @@ import {
   onAuthStateChanged,
   updateProfile as updateFirebaseProfile
 } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js';
-import { firebaseConfig } from './firebase.js';
+import { firebaseConfig as defaultFirebaseConfig } from './firebase.js';
 import { api } from './api.js';
 import { signOutWithAttendance } from './attendance-logout.js';
 
@@ -33,12 +33,28 @@ class AuthService {
     this.appUserContext = null;
     this.listeners = new Set();
     this.isInitializing = true;
-    this.init();
+    this.readyPromise = this.init();
   }
 
-  init() {
+  async resolveFirebaseConfig() {
+    if (typeof window !== 'undefined' && window.__INTELLICORE_FIREBASE_CONFIG__) {
+      return window.__INTELLICORE_FIREBASE_CONFIG__;
+    }
     try {
-      this.app = initializeApp(firebaseConfig);
+      const response = await api.get('/auth/config', { timeoutMs: 5000 });
+      if (response?.data?.projectId && response?.data?.apiKey) {
+        return { isConfigured: true, ...response.data };
+      }
+    } catch (err) {
+      console.warn('[AuthService] Falling back to static Firebase config:', err.message);
+    }
+    return defaultFirebaseConfig;
+  }
+
+  async init() {
+    try {
+      const effectiveConfig = await this.resolveFirebaseConfig();
+      this.app = initializeApp(effectiveConfig);
       this.auth = getAuth(this.app);
       this.googleProvider = new GoogleAuthProvider();
       this.googleProvider.setCustomParameters({ prompt: 'select_account' });
@@ -121,6 +137,7 @@ class AuthService {
   }
 
   async loginWithGoogle() {
+    await this.readyPromise;
     if (!this.auth || !this.googleProvider) {
       throw new Error('Authentication service is initializing. Please try again.');
     }
@@ -129,6 +146,7 @@ class AuthService {
   }
 
   async loginWithEmail(email, password) {
+    await this.readyPromise;
     if (!this.auth) {
       throw new Error('Authentication service is unavailable.');
     }
@@ -137,6 +155,7 @@ class AuthService {
   }
 
   async registerWithEmail(email, password, fullName) {
+    await this.readyPromise;
     if (!this.auth) {
       throw new Error('Authentication service is unavailable.');
     }
@@ -157,6 +176,7 @@ class AuthService {
   }
 
   async sendPasswordReset(email) {
+    await this.readyPromise;
     if (!this.auth) {
       throw new Error('Authentication service is unavailable.');
     }
@@ -164,6 +184,7 @@ class AuthService {
   }
 
   async resendVerificationEmail() {
+    await this.readyPromise;
     if (!this.auth?.currentUser) {
       throw new Error('No signed-in user found to resend verification.');
     }
@@ -171,6 +192,7 @@ class AuthService {
   }
 
   async refreshIdentity() {
+    await this.readyPromise;
     const user = this.auth?.currentUser;
     if (!user) throw new Error('Sign in to refresh your verification status.');
     await reload(user);
@@ -183,6 +205,7 @@ class AuthService {
   }
 
   async logout() {
+    await this.readyPromise;
     if (!this.auth) return;
     const context = this.getContext();
     const attendanceApplies = context.status === 'ACTIVE' && context.roles.length === 1 && context.roles[0] === 'INTERN';

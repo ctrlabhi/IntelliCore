@@ -8,6 +8,8 @@ export async function buildPublicAssets(destination = output) {
   await mkdir(destination, { recursive: true });
   await Promise.all(['assets', 'services'].map((directory) =>
     cp(new URL(directory, frontend), new URL(directory, destination), { recursive: true })));
+  await Promise.all(['robots.txt', 'sitemap.xml'].map((fileName) =>
+    copyFile(new URL(fileName, frontend), new URL(fileName, destination))));
 
   // The Express application owns the HTML routes. These files preserve older static URLs.
   const legacy = [

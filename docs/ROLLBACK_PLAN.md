@@ -72,3 +72,41 @@
 ## 3. Communication & Incident Logging
 - Any rollback action must be documented immediately in `docs/PROJECT_PROGRESS.md`.
 - No destructive commands (`DROP DATABASE`, `TRUNCATE TABLE`, `docker compose down -v`) are ever permitted.
+
+---
+
+## 4. Pre-Vercel Cutover Backup & GoDaddy DNS Rollback Snapshot (2026-11-27)
+
+### A. Pre-Migration Production Baseline
+- **GitHub Pages Live Branch (`main`)**: `b10c5eb` (untouched)
+- **Vercel Pre-Migration Production Deployment**: Deployment ID `3tocvLQH2DJ1FcJx3bkFmV4FAGp9` (`intellicore-six.vercel.app`, commit `b10c5eb`, ready at `2026-11-26T09:01Z`)
+- **Database Backup**: `backups/pre-vercel-migration-20261127.sql` (`126.95 KB`, exported from `srv1824.hstgr.io:3306` / `u740799251_intellicore` via `--ssl-mode=REQUIRED --single-transaction`; 49 tables, 11 migrations, 1 `FOUNDER` user)
+
+### B. GoDaddy Authoritative Zone Snapshot (`intellicoretechnologies.in`, NS: `ns13.domaincontrol.com`, `ns14.domaincontrol.com`)
+Use these exact records to restore GitHub Pages static hosting if DNS rollback is required (`~10–60 min` propagation based on TTL):
+
+| Type | Name | Value | Priority | TTL | Category |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `A` | `@` | `185.199.108.153` | — | `600s` | GitHub Pages Apex |
+| `A` | `@` | `185.199.109.153` | — | `600s` | GitHub Pages Apex |
+| `A` | `@` | `185.199.110.153` | — | `600s` | GitHub Pages Apex |
+| `A` | `@` | `185.199.111.153` | — | `600s` | GitHub Pages Apex |
+| `CNAME` | `www` | `ctrlabhi.github.io.` | — | `3600s` | GitHub Pages `www` |
+| `CNAME` | `rsend` | `rsend-apne1.forge.rmta.net.` | — | `3600s` | Mail Relay / Sending (Preserve) |
+| `CNAME` | `send` | `send.forge.rmta.net.` | — | `3600s` | Mail Relay / Sending (Preserve) |
+| `CNAME` | `_domainconnect` | `_domainconnect.gd.domaincontrol.com.` | — | `3600s` | GoDaddy Domain Connect (Preserve) |
+| `MX` | `@` | `mx.zoho.in.` | `10` | `600s` | Zoho Mail (Never Modify) |
+| `MX` | `@` | `mx2.zoho.in.` | `20` | `600s` | Zoho Mail (Never Modify) |
+| `MX` | `@` | `mx3.zoho.in.` | `50` | `600s` | Zoho Mail (Never Modify) |
+| `TXT` | `@` | `google-site-verification=jX4AO8NUl7Cqy3rH2jIPYJaABONn1sySlpIZ6q5FlOo` | — | `3600s` | Google Search Console (Never Modify) |
+| `TXT` | `@` | `v=spf1 include:dc-8e814c8572._spfm.intellicoretechnologies.in ~all` | — | `3600s` | SPF Root (Never Modify) |
+| `TXT` | `@` | `zoho-verification=zb92602805.zmverify.zoho.in` | — | `600s` | Zoho Verification (Never Modify) |
+| `TXT` | `dc-8e814c8572._spfm` | `v=spf1 include:zoho.in ~all` | — | `3600s` | SPF Macro (Never Modify) |
+| `TXT` | `resend._domainkey` | `p=MIGfMA0GCSqGSIb3...IDAQAB` | — | `3600s` | DKIM Key (Never Modify) |
+| `TXT` | `zoho._domainkey` | `v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3...IDAQAB` (2 records) | — | `3600s` / `600s` | Zoho DKIM (Never Modify) |
+| `TXT` | `_dmarc` | `v=DMARC1; p=quarantine; adkim=r; aspf=r; rua=mailto:dmarc_rua@onsecureserver.net;` | — | `3600s` | DMARC Policy (Never Modify) |
+
+### C. DNS Cutover Rollback Steps
+1. Delete the Vercel `A` (`@`) and `CNAME` (`www`) records in GoDaddy DNS Management.
+2. Restore the 4 GitHub Pages `A` (`@` -> `185.199.108–111.153`, TTL `600s`) and `CNAME` (`www` -> `ctrlabhi.github.io.`, TTL `3600s`) records above (and remove any temporary Vercel `_vercel` verification TXT if no longer needed).
+3. Remove `intellicoretechnologies.in` and `www.intellicoretechnologies.in` from Vercel Project Domains if reverting permanently to GitHub Pages, while leaving all `MX`, `SPF`, `DKIM`, `DMARC`, and Google Search Console `TXT` records untouched.

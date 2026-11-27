@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /dashboards/
+Disallow: /pages/dashboards/
+Disallow: /api/
+Disallow: /api-docs/
+Sitemap: https://www.intellicoretechnologies.in/sitemap.xml
