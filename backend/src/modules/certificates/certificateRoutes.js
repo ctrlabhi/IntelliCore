@@ -92,11 +92,11 @@ router.get(
   requireStatus(['ACTIVE', 'PENDING']),
   endpoint(async (req) => {
     if (req.params.id) {
-      const metadata = await certificateService.getCertificateMetadata(id(req));
+      const metadata = await certificateService.getCertificateMetadata(id(req), req);
       if (!metadata) throw new NotFoundError('No certificate issued for this internship yet.');
       return metadata;
     }
-    const metadata = await certificateService.getCertificateByCode(req.params.code);
+    const metadata = await certificateService.getCertificateByCode(req.params.code, req);
     if (!metadata) throw new NotFoundError('Certificate record not found.');
     return metadata;
   })
@@ -126,7 +126,7 @@ router.get(
       } else if (req.query.code) {
         result = await certificateService.generateCertificatePdfByCode(req, req.query.code.toString());
       } else if (req.query.internshipId) {
-        result = await certificateService.generateCertificatePdf(req, req.query.internshipId.toString());
+        result = await certificateService.generateCertificatePdf(req, uuid.parse(req.query.internshipId.toString()));
       } else {
         return res.status(400).json({ success: false, message: 'Provide either certificate code or internshipId.' });
       }

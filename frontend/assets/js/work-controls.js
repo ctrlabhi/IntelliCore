@@ -55,7 +55,7 @@ export function link(url, title) {
   }
 }
 
-export function files(items = []) {
+export function files(items = [], deleteOptions = null) {
   return items.length ? node('ul', ...items.map((item) => {
     const status = node('span');
     status.setAttribute('role', 'status');
@@ -78,7 +78,25 @@ export function files(items = []) {
         control.disabled = false;
       }
     });
-    return node('li', control, status);
+    let removeBtn = null;
+    if (deleteOptions && deleteOptions.expectedRevision != null) {
+      removeBtn = node('button', 'Delete');
+      removeBtn.type = 'button';
+      removeBtn.addEventListener('click', async () => {
+        removeBtn.disabled = true;
+        status.textContent = ' Deleting…';
+        try {
+          await api.delete('/attachments/' + item.id, {
+            headers: { 'x-expected-revision': String(deleteOptions.expectedRevision) }
+          });
+          await deleteOptions.onDeleted?.();
+        } catch (error) {
+          status.textContent = ' ' + error.message;
+          removeBtn.disabled = false;
+        }
+      });
+    }
+    return node('li', control, removeBtn, status);
   })) : null;
 }
 

@@ -5,9 +5,9 @@ import logger from '../../config/logger.js';
 import { AppError, NotFoundError, ForbiddenError, ConflictError, BadRequestError } from '../../utils/errors.js';
 import { isProtectedFounder } from '../../utils/founder.js';
 import firebaseService from '../../integrations/firebase/firebaseService.js';
-import { StorageService } from '../../integrations/storage/storageService.js';
+import storageService from '../../integrations/storage/storageService.js';
 
-const storage = new StorageService();
+const storage = storageService;
 
 let tableInitialized = false;
 

@@ -7,7 +7,7 @@ import { AppError } from '../../utils/errors.js';
 import { endpoint, pageFields, uuid } from '../../utils/phase04.js';
 import { sendError } from '../../utils/response.js';
 import logger from '../../config/logger.js';
-import { attachFile, attachmentLimitBytes, downloadAttachment } from './attachmentService.js';
+import { attachFile, attachmentLimitBytes, downloadAttachment, removeAttachment } from './attachmentService.js';
 import { own, scope } from './workAccess.js';
 import * as input from './workInput.js';
 import * as tasks from './taskService.js';
@@ -129,6 +129,8 @@ submissionRoutes.use(safeErrors);
 const attachmentRoutes = Router();
 attachmentRoutes.use(...signedIn);
 attachmentRoutes.get('/:id/download', (req, res) => downloadAttachment(req, res, id(req)));
+attachmentRoutes.delete('/:id', endpoint((req, requestId) =>
+  removeAttachment(req, id(req), versionHeader.parse(req.get('x-expected-revision') ?? req.body?.expectedRevision), requestId)));
 attachmentRoutes.use(safeErrors);
 
 const learningRoutes = Router();

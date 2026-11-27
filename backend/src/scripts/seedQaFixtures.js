@@ -376,9 +376,9 @@ async function seedQa() {
       deliverables: 'Updated CSS stylesheet and JS auth controller with unit tests.',
       resources: [{ title: 'Design Specs', url: 'https://specs.intellicore.test/auth-modal' }],
       rubric: [
-        { name: 'UI Responsiveness', maxScore: 40 },
-        { name: 'Accessibility & Contrast', maxScore: 30 },
-        { name: 'Code Quality', maxScore: 30 }
+        { criterion: 'UI Responsiveness', points: 40 },
+        { criterion: 'Accessibility & Contrast', points: 30 },
+        { criterion: 'Code Quality', points: 30 }
       ],
       taskType: 'INDIVIDUAL',
       priority: 'HIGH',
@@ -428,7 +428,7 @@ async function seedQa() {
       decision: 'APPROVED',
       score: 95,
       maximumScore: 100,
-      criterionScores: { 'UI Responsiveness': 38, 'Accessibility & Contrast': 29, 'Code Quality': 28 },
+      criterionScores: [38, 29, 28],
       feedback: 'Outstanding work on responsive breakpoints and accessibility tokens.',
       reviewedAt: new Date('2026-11-25T12:00:00Z')
     }

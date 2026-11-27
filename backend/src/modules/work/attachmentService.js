@@ -6,7 +6,7 @@ import prisma from '../../config/database.js';
 import env from '../../config/env.js';
 import logger from '../../config/logger.js';
 import { AppError } from '../../utils/errors.js';
-import { transaction } from '../../utils/phase04.js';
+import { transaction, lockUser } from '../../utils/phase04.js';
 import storage from '../../integrations/storage/storageService.js';
 import { attachmentSummary, lockedTask, ownAssignmentWhere, privateAssignmentWhere } from './taskService.js';
 import { lockOwnDraft } from './submissionService.js';
@@ -118,6 +118,7 @@ export async function attachFile(req, targetId, purpose, expectedRevision, reque
       if (forTask) {
         const task = await lockedTask(tx, req, targetId, 'tasks:manage');
         if (task.status !== 'DRAFT' || task.revision !== expectedRevision) throw conflict('Reload the task draft before attaching a file.');
+        await lockUser(tx, req.user.id);
       } else {
         await lockOwnDraft(tx, req, targetId, expectedRevision);
       }
@@ -187,4 +188,57 @@ export async function downloadAttachment(req, res, id) {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.attachment(item.originalFilename).type(item.mimeType).setHeader('Content-Length', item.fileSize);
   await pipeline(stream, res);
+}
+
+export async function removeAttachment(req, id, expectedRevision, requestId) {
+  const result = await transaction(async (tx) => {
+    const item = found(await tx.fileAttachment.findUnique({
+      where: { id },
+      select: { id: true, attachmentPurpose: true, taskId: true, submissionId: true, ownerUserId: true, storageKey: true, fileSize: true }
+    }), 'Attachment');
+
+    let updated;
+    if (item.attachmentPurpose === 'TASK_RESOURCE' && item.taskId) {
+      scope(req, 'tasks:manage');
+      const task = await lockedTask(tx, req, item.taskId, 'tasks:manage');
+      await lockUser(tx, item.ownerUserId);
+      if (task.status !== 'DRAFT' || task.revision !== expectedRevision) {
+        throw conflict('Reload the task draft before deleting this attachment.');
+      }
+      await tx.fileAttachment.delete({ where: { id: item.id } });
+      updated = await tx.task.update({
+        where: { id: task.id },
+        data: { revision: { increment: 1 } },
+        select: { revision: true }
+      });
+    } else if (item.attachmentPurpose === 'SUBMISSION' && item.submissionId) {
+      own(req, 'tasks');
+      await lockOwnDraft(tx, req, item.submissionId, expectedRevision);
+      await lockUser(tx, item.ownerUserId);
+      await tx.fileAttachment.delete({ where: { id: item.id } });
+      updated = await tx.taskSubmission.update({
+        where: { id: item.submissionId },
+        data: { revision: { increment: 1 } },
+        select: { revision: true }
+      });
+    } else {
+      throw found(null, 'Attachment');
+    }
+
+    await audit(tx, req, requestId, 'TASK_ATTACHMENT_REMOVED', 'FILE_ATTACHMENT', item.id, {
+      targetId: item.taskId ?? item.submissionId,
+      purpose: item.attachmentPurpose,
+      fileSize: item.fileSize
+    });
+
+    return { deletedId: item.id, revision: updated.revision, storageKey: item.storageKey };
+  });
+
+  try {
+    await storage.removePrivate(result.storageKey);
+  } catch (err) {
+    logger.warn({ action: 'ATTACHMENT_REMOVAL_STORAGE_CLEANUP_FAILED', attachmentId: result.deletedId, err: err.message }, 'Attachment metadata deleted, physical storage cleanup deferred.');
+  }
+
+  return { deletedId: result.deletedId, revision: result.revision };
 }

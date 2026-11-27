@@ -452,4 +452,80 @@ describe.skipIf(!hasIsolatedDatabase())('Phase 06 HTTP against isolated MySQL an
       env.FOUNDER_EMAIL = originalEmail;
     }
   });
+
+  it('enforces cumulative user storage quota under concurrent uploads and supports draft attachment deletion', async () => {
+    const dept = await department();
+    const [lead, owner, stranger] = await Promise.all([mentor(dept), intern(dept), intern(dept)]);
+    const taskA = await createTask(dept, {}, lead.account);
+    const taskB = await createTask(dept, {}, lead.account);
+
+    // Fill 16 MB (4 x 4 MB valid plain-text attachments across taskA)
+    const fourMb = Buffer.alloc(4 * 1024 * 1024, 'A');
+    let revA = taskA.revision;
+    const uploadedTaskIds = [];
+    for (let i = 0; i < 4; i += 1) {
+      const res = data(await upload('/tasks/' + taskA.id, revA, lead.account, fourMb, `chunk-${i}.txt`), 201);
+      revA = res.revision;
+      uploadedTaskIds.push(res.id);
+      draftFiles.push(res.id);
+    }
+
+    // Fire 2 concurrent 3 MB uploads across taskA and taskB (16 + 3 = 19 MB ok; 19 + 3 = 22 MB > 20 MB quota)
+    const threeMb = Buffer.alloc(3 * 1024 * 1024, 'B');
+    const concurrent = await Promise.all([
+      upload('/tasks/' + taskA.id, revA, lead.account, threeMb, 'race-a.txt'),
+      upload('/tasks/' + taskB.id, taskB.revision, lead.account, threeMb, 'race-b.txt')
+    ]);
+    expect(concurrent.map((r) => r.status).sort()).toEqual([201, 413]);
+    const rejected = concurrent.find((r) => r.status === 413);
+    expect(rejected.body.error.code).toBe('STORAGE_QUOTA_EXCEEDED');
+    const winner = concurrent.find((r) => r.status === 201);
+    draftFiles.push(winner.body.data.id);
+
+    const usedAfterRace = await prisma.fileAttachment.aggregate({
+      _sum: { fileSize: true },
+      where: { ownerUserId: lead.account.id }
+    });
+    expect(usedAfterRace._sum.fileSize).toBe(19 * 1024 * 1024);
+
+    // Stranger intern (403) and unrelated department mentor (404) cannot delete lead's draft attachment
+    const targetDeleteId = uploadedTaskIds[0];
+    const latestTaskA = data(await get('/tasks/' + taskA.id, lead.account));
+    const otherLead = await mentor(await department());
+    expect((await http('delete', '/attachments/' + targetDeleteId, stranger.account)
+      .set('X-Expected-Revision', String(latestTaskA.revision))).status).toBe(403);
+    expect((await http('delete', '/attachments/' + targetDeleteId, otherLead.account)
+      .set('X-Expected-Revision', String(latestTaskA.revision))).status).toBe(404);
+
+    // Delete one 4 MB draft attachment and confirm quota reclamation
+    const delRes = data(await http('delete', '/attachments/' + targetDeleteId, lead.account)
+      .set('X-Expected-Revision', String(latestTaskA.revision)));
+    expect(delRes.deletedId).toBe(targetDeleteId);
+    expect((await get('/attachments/' + targetDeleteId + '/download', lead.account)).status).toBe(404);
+
+    // Verify 3 MB upload now succeeds within reclaimed quota (15 + 3 = 18 MB <= 20 MB)
+    const latestTaskB = data(await get('/tasks/' + taskB.id, lead.account));
+    const afterReclaim = data(await upload('/tasks/' + taskB.id, latestTaskB.revision, lead.account, threeMb, 'after-reclaim.txt'), 201);
+    draftFiles.push(afterReclaim.id);
+
+    // Verify intern draft attachment upload -> download -> deletion, and lock after submission
+    await publish(taskB, [{ internshipId: owner.internship.id }], lead.account);
+    const assign = await prisma.taskAssignment.findFirstOrThrow({ where: { taskId: taskB.id } });
+    data(await post('/task-assignments/' + assign.id + '/start', {}, owner.account));
+    const draft = data(await post('/task-assignments/' + assign.id + '/submissions', {}, owner.account), 201);
+    const draftPath = '/task-submissions/' + draft.id;
+    const f1 = data(await upload(draftPath, draft.revision, owner.account, Buffer.from('Draft one'), 'draft1.txt'), 201);
+    draftFiles.push(f1.id);
+    expect((await get('/attachments/' + f1.id + '/download', owner.account)).text).toBe('Draft one');
+    const delDraftFile = data(await http('delete', '/attachments/' + f1.id, owner.account)
+      .set('X-Expected-Revision', String(f1.revision)));
+    expect(delDraftFile.deletedId).toBe(f1.id);
+
+    // Re-attach, submit, and ensure submitted attachments cannot be deleted
+    const f2 = data(await upload(draftPath, delDraftFile.revision, owner.account, Buffer.from('Final evidence'), 'final.txt'), 201);
+    draftFiles.push(f2.id);
+    const submitted = data(await post(draftPath + '/submit', { expectedRevision: f2.revision }, owner.account));
+    expect((await http('delete', '/attachments/' + f2.id, owner.account)
+      .set('X-Expected-Revision', String(submitted.revision))).status).toBe(409);
+  });
 });

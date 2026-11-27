@@ -77,7 +77,7 @@ if (sidebar) {
 document.querySelectorAll('[data-founder-action]').forEach((button) => {
   button.addEventListener('click', () => {
     const action = button.getAttribute('data-founder-action');
-    if (action === 'Assign staff access') {
+    if (action === 'Assign staff access' || action === 'Manage roles') {
       window.location.hash = '#roleAssignments';
       $('roleCandidate')?.focus();
     } else if (action === 'Review approvals' || action === 'View domains') {
@@ -87,6 +87,15 @@ document.querySelectorAll('[data-founder-action]').forEach((button) => {
       window.location.hash = '#phase06Tasks';
       const create = document.querySelector('#phase06Tasks > details');
       if (create) create.open = true;
+    } else if (action === 'Send announcement') {
+      const target = document.getElementById('phase07ManageAnnouncements') || document.getElementById('phase07Announcements');
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const create = target.querySelector('details');
+        if (create) create.open = true;
+      } else {
+        showToast('Announcements workspace is loading.');
+      }
     } else {
       showToast(`${action} workflow activated.`);
     }

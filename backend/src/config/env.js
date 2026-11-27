@@ -35,6 +35,7 @@ const envSchema = z.object({
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
   UPLOAD_DIR: z.string().default('./backend/uploads'),
   MAX_UPLOAD_SIZE_MB: z.coerce.number().default(25),
+  MAX_USER_STORAGE_MB: z.coerce.number().int().min(1).max(1000).default(20),
   TASK_MAX_FILE_SIZE_MB: z.coerce.number().int().min(1).max(10).catch(5),
   TASK_MAX_ATTACHMENTS: z.coerce.number().int().min(1).max(20).catch(5),
 

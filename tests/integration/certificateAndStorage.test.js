@@ -25,6 +25,7 @@ const db = vi.hoisted(() => {
       create: vi.fn()
     },
     certificateDispatch: { findUnique: vi.fn(), create: vi.fn(), findMany: vi.fn(), count: vi.fn().mockResolvedValue(0) },
+    auditLog: { create: vi.fn() },
     systemSetting: {
       findUnique: vi.fn(async ({ where }) => {
         const val = store.get(where.key);
@@ -243,12 +244,47 @@ describe('Certificate APIs & Hardened Database Storage', () => {
       expect(downloadRes.headers['content-type']).toBe('application/pdf');
       expect(downloadRes.headers['content-disposition']).toContain('.pdf');
 
-      // 5. Read metadata (GET /api/v1/certificates/:code)
+      // 5. Read metadata (GET /api/v1/certificates/:code and /internships/:id/certificate)
       const metaRes = await request(app)
         .get(`/api/v1/certificates/${certCode}`)
         .set('Authorization', hrAuth.token);
       expect(metaRes.status).toBe(200);
       expect(metaRes.body.data.certificateCode).toBe(certCode);
+
+      // Verify no fake CertificateDispatch record was written during PDF certificate approval
+      expect(db.certificateDispatch.create).not.toHaveBeenCalled();
+      expect(db.auditLog.create).toHaveBeenCalled();
+    });
+
+    it('enforces resource ownership on certificate metadata lookup and blocks terminated internships', async () => {
+      const hrAuth = mockAuth('HR_MANAGER');
+      const terminatedId = randomUUID();
+      db.internship.findUnique.mockResolvedValue({
+        id: terminatedId,
+        internshipCode: 'INT-TERM-01',
+        internshipStatus: 'TERMINATED',
+        userId: 'intern-term-01',
+        user: { id: 'intern-term-01', email: 'term@example.com', profile: { fullName: 'Terminated User' } },
+        department: { name: 'Engineering' }
+      });
+
+      const termRes = await request(app)
+        .post('/api/v1/certificates/approve')
+        .set('Authorization', hrAuth.token)
+        .send({ internshipId: terminatedId });
+      expect(termRes.status).toBe(409);
+      expect(termRes.body.error.code).toBe('INVALID_INTERNSHIP_STATE');
+
+      // Non-owner intern cannot read another intern's certificate metadata
+      mockAuth('INTERN');
+      db.internship.findUnique.mockResolvedValue({
+        id: 'other-intern-int-01',
+        userId: 'completely-different-user'
+      });
+      const forbiddenRes = await request(app)
+        .get(`/api/v1/internships/${randomUUID()}/certificate`)
+        .set('Authorization', 'Bearer mock-token-INTERN');
+      expect(forbiddenRes.status).toBe(403);
     });
 
     it('rejects unauthenticated certificate approval with 401', async () => {

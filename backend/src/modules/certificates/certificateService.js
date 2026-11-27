@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { getPrismaClient } from '../../config/database.js';
 import { AppError, NotFoundError } from '../../utils/errors.js';
 import { buildCertificatePdf } from './certificatePdf.js';
+import auditService from '../audit/auditService.js';
 import env from '../../config/env.js';
 
 const getPrisma = () => getPrismaClient();
@@ -33,6 +34,10 @@ export class CertificateService {
       throw new NotFoundError('Internship record not found.');
     }
 
+    if (['TERMINATED', 'WITHDRAWN'].includes(internship.internshipStatus)) {
+      throw new AppError('Certificates cannot be issued for terminated or withdrawn internships.', 409, 'INVALID_INTERNSHIP_STATE');
+    }
+
     // Generate unique verifiable certificate code
     const year = new Date().getFullYear();
     const cleanCode = (internship.internshipCode || 'INT').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
@@ -59,7 +64,7 @@ export class CertificateService {
       notes
     };
 
-    // Store in CertificateDispatch history and SystemSetting for persistent zero-cost indexing
+    // Store certificate metadata in SystemSetting and record audit trail atomically
     await getPrisma().$transaction(async (tx) => {
       // 1. Ensure internship is marked completed
       if (internship.internshipStatus !== 'COMPLETED') {
@@ -74,23 +79,7 @@ export class CertificateService {
         });
       }
 
-      // 2. Count existing sequence for this internship
-      const count = await tx.certificateDispatch.count({ where: { internshipId: internship.id } });
-
-      // 3. Create dispatch history entry
-      await tx.certificateDispatch.create({
-        data: {
-          internshipId: internship.id,
-          actorId: req.user.id,
-          requestKey: randomUUID(),
-          sequence: count + 1,
-          status: 'SENT',
-          declaredSentAt: new Date(),
-          note: JSON.stringify(certMetadata)
-        }
-      });
-
-      // 4. Save metadata in SystemSetting for instant public O(1) lookup
+      // 2. Save metadata in SystemSetting for instant public O(1) lookup
       await tx.systemSetting.upsert({
         where: { key: `cert:${certificateCode}` },
         update: { value: JSON.stringify(certMetadata) },
@@ -101,7 +90,7 @@ export class CertificateService {
         }
       });
 
-      // Also map by internship ID for easy lookup
+      // 3. Also map by internship ID for easy lookup
       await tx.systemSetting.upsert({
         where: { key: `internship_cert:${internship.id}` },
         update: { value: JSON.stringify(certMetadata) },
@@ -110,6 +99,15 @@ export class CertificateService {
           value: JSON.stringify(certMetadata),
           description: `Active certificate code for internship ${internship.id}`
         }
+      });
+
+      // 4. Write transactional audit trail without polluting manual email dispatch declarations
+      await auditService.createAuditLog(tx, {
+        actorUserId: req.user.id,
+        action: 'CERTIFICATE_APPROVED',
+        resourceType: 'INTERNSHIP',
+        resourceId: internship.id,
+        afterState: { certificateCode, internshipCode: internship.internshipCode, notes }
       });
     });
 
@@ -127,9 +125,21 @@ export class CertificateService {
   }
 
   /**
-   * Retrieve Certificate Metadata for Internship
+   * Retrieve Certificate Metadata for Internship (with resource ownership/role check when req is provided)
    */
-  async getCertificateMetadata(internshipId) {
+  async getCertificateMetadata(internshipId, req = null) {
+    if (req) {
+      const internship = await getPrisma().internship.findUnique({
+        where: { id: internshipId },
+        select: { id: true, userId: true }
+      });
+      if (!internship) throw new NotFoundError('Internship record not found.');
+      const isOwner = req.user?.id === internship.userId;
+      const isStaff = req.roles?.some((r) => ['FOUNDER', 'CO_FOUNDER', 'ADMIN', 'HR_MANAGER', 'HR_EXECUTIVE', 'TEAM_LEADER'].includes(r));
+      if (!isOwner && !isStaff) {
+        throw new AppError('Access denied to this certificate.', 403, 'FORBIDDEN');
+      }
+    }
     const setting = await getPrisma().systemSetting.findUnique({
       where: { key: `internship_cert:${internshipId}` }
     });
@@ -144,7 +154,7 @@ export class CertificateService {
   /**
    * Retrieve Certificate Metadata by Code
    */
-  async getCertificateByCode(certificateCode) {
+  async getCertificateByCode(certificateCode, req = null) {
     if (!certificateCode) return null;
     const cleanCode = certificateCode.trim().toUpperCase();
     const setting = await getPrisma().systemSetting.findUnique({
@@ -152,8 +162,21 @@ export class CertificateService {
     });
     if (!setting) return null;
     try {
-      return JSON.parse(setting.value);
-    } catch {
+      const data = JSON.parse(setting.value);
+      if (req && data.internshipId) {
+        const internship = await getPrisma().internship.findUnique({
+          where: { id: data.internshipId },
+          select: { userId: true }
+        });
+        const isOwner = internship && req.user?.id === internship.userId;
+        const isStaff = req.roles?.some((r) => ['FOUNDER', 'CO_FOUNDER', 'ADMIN', 'HR_MANAGER', 'HR_EXECUTIVE', 'TEAM_LEADER'].includes(r));
+        if (!isOwner && !isStaff) {
+          throw new AppError('Access denied to this certificate.', 403, 'FORBIDDEN');
+        }
+      }
+      return data;
+    } catch (err) {
+      if (err instanceof AppError) throw err;
       return null;
     }
   }

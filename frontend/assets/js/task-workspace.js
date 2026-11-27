@@ -83,14 +83,14 @@ function createTaskForm(departments, refresh) {
   return element;
 }
 
-function taskContent(task) {
+function taskContent(task, deleteOptions = null) {
   return [
     task.description ? node('p', task.description) : null,
     task.instructions ? node('div', node('strong', 'Instructions'), node('p', task.instructions)) : null,
     task.deliverables ? node('div', node('strong', 'Expected deliverables'), node('p', task.deliverables)) : null,
     task.rubric?.length ? node('ul', ...task.rubric.map((row) => node('li', row.criterion + ' · ' + row.points + ' points'))) : null,
     task.resources?.length ? node('ul', ...task.resources.map((row) => node('li', link(row.url, row.title)))) : null,
-    files(task.attachments)
+    files(task.attachments, deleteOptions)
   ].filter(Boolean);
 }
 
@@ -167,7 +167,8 @@ function taskRow(item, manage, refresh) {
       if (task.status !== 'DRAFT') listing(assignments, taskPath(task) + '/assignments',
         (row) => record(internName(row.internship), node('p', label(row.status) + ' · due ' + inIndia(row.effectiveDueAt))),
         { states: assignmentStatuses });
-      return [node('p', task.department.name + ' · ' + label(task.priority)), ...taskContent(task), assignments,
+      const deleteOptions = manage && task.status === 'DRAFT' ? { expectedRevision: task.revision, onDeleted: refresh } : null;
+      return [node('p', task.department.name + ' · ' + label(task.priority)), ...taskContent(task, deleteOptions), assignments,
         ...(manage ? taskAdmin(task, refresh) : [])];
     }));
 }
@@ -250,7 +251,7 @@ function draftForm(draft, refresh) {
     })
   ];
   return record('Submission draft v' + draft.submissionVersion,
-    form(editable(), 'Save draft', save, refresh), files(draft.attachments),
+    form(editable(), 'Save draft', save, refresh), files(draft.attachments, { expectedRevision: draft.revision, onDeleted: refresh }),
     uploadForm(path + '/attachments', draft.revision, refresh),
     form([check('ready', 'Submit the saved draft for review', false, true)], 'Submit assignment',
       () => api.post(path + '/submit', { expectedRevision: draft.revision }), refresh));

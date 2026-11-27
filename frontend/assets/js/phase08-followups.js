@@ -117,6 +117,64 @@ function promotionPanel(item, options, refresh) {
   });
 }
 
+function officialCertificatePanel(item, canApprove, refresh) {
+  return disclosure('Official completion certificate', async () => {
+    let metadata = null;
+    try {
+      const { data } = await api.get(base(item, '/certificate'));
+      metadata = data;
+    } catch (err) {
+      if (err?.status !== 404) throw err;
+    }
+
+    const elements = [];
+    if (metadata && metadata.certificateCode) {
+      const codeEl = node('p', 'Certificate code · ' + metadata.certificateCode);
+      const status = node('span');
+      status.setAttribute('role', 'status');
+
+      const downloadBtn = node('button', 'Download certificate PDF');
+      downloadBtn.type = 'button';
+      downloadBtn.addEventListener('click', async () => {
+        downloadBtn.disabled = true;
+        status.textContent = ' Preparing PDF…';
+        try {
+          const blob = await api.get(base(item, '/certificate/download'), { responseType: 'blob' });
+          const url = URL.createObjectURL(blob);
+          const anchor = node('a');
+          anchor.href = url;
+          anchor.download = `IntelliCore_Certificate_${metadata.certificateCode}.pdf`;
+          anchor.click();
+          setTimeout(() => URL.revokeObjectURL(url), 60000);
+          status.textContent = ' PDF ready.';
+        } catch (err) {
+          status.textContent = ' ' + (err.message || 'Download failed.');
+        } finally {
+          downloadBtn.disabled = false;
+        }
+      });
+
+      const verifyLink = node('a', 'Verify publicly ↗');
+      verifyLink.href = '/verify?code=' + encodeURIComponent(metadata.certificateCode);
+      verifyLink.target = '_blank';
+      verifyLink.rel = 'noopener noreferrer';
+
+      elements.push(codeEl, node('div', downloadBtn, ' ', verifyLink, status));
+    } else {
+      elements.push(node('p', canApprove
+        ? 'No completion certificate has been approved and issued yet.'
+        : 'Pending Human Resources approval for official completion certificate.'));
+      if (canApprove) {
+        elements.push(form([
+          field('notes', 'Approval remarks', { max: 500, value: 'Approved for completion certificate' })
+        ], 'Approve and issue certificate', (input) => api.post(base(item, '/certificate/approve'),
+          input.notes?.trim() ? { notes: input.notes.trim() } : {}), refresh));
+      }
+    }
+    return elements;
+  });
+}
+
 function timelineEntry(item, options, refresh) {
   const who = item.user?.profile?.fullName;
   return record((who && !options.own ? who + ' · ' : '') + (item.effectiveDesignation ?? item.positionTitle),
@@ -126,6 +184,7 @@ function timelineEntry(item, options, refresh) {
     item.continuationOf && node('p', 'Continuation of an earlier approved period'),
     item.certificateEmailStatus && node('p', item.certificateEmailStatus.message),
     item.dispatchStatus && node('p', 'Certificate email · ' + displayStatus({ status: item.dispatchStatus })),
+    options.certificates && item.internshipStatus === 'COMPLETED' && officialCertificatePanel(item, options.canApproveCertificates, refresh),
     options.certificates && item.internshipStatus === 'COMPLETED' && certificatePanel(item, options.canManage, refresh),
     extensionPanel(item, options, refresh), promotionPanel(item, options, refresh));
 }
@@ -133,12 +192,13 @@ function timelineEntry(item, options, refresh) {
 export async function mountFollowups(root, context, own = false) {
   const permission = (value) => context.permissions.includes('internships:' + value);
   const canManage = permission('manage_followups');
+  const canApproveCertificates = ['FOUNDER', 'CO_FOUNDER', 'HR_MANAGER', 'HR_EXECUTIVE'].some((role) => context.roles.includes(role));
   const founder = context.roles.includes('FOUNDER') && context.permissions.includes('staff:create');
   const executive = permission('read_followups');
   const leader = context.roles.includes('TEAM_LEADER') && permission('read_department');
   if (!(own || executive || leader)) return;
   const panel = section(root, 'phase08Internships', own ? 'My internship timeline' : 'Internship follow-up');
-  const options = { context, own, founder, canManage, certificates: own || executive, today: indiaDate.format(new Date()), departments: [] };
+  const options = { context, own, founder, canManage, canApproveCertificates, certificates: own || executive, today: indiaDate.format(new Date()), departments: [] };
   try { if (canManage) options.departments = await allItems('/departments'); }
   catch (error) { panel.append(node('p', error.message)); }
   let refreshCompleted = () => {};

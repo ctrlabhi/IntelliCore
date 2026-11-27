@@ -179,7 +179,7 @@
         <p class="verify-subtitle">Verify the authenticity of official internship completion credentials issued by IntelliCore Technologies.</p>
       </div>
 
-      <form id="verifyForm" class="verify-form" onsubmit="event.preventDefault(); performVerification();">
+      <form id="verifyForm" class="verify-form">
         <input
           type="text"
           id="certCodeInput"
@@ -214,7 +214,10 @@
       card.style.display = 'none';
 
       try {
-        const response = await fetch('/api/v1/certificates/verify/' + encodeURIComponent(code));
+        const host = window.location.hostname;
+        const apiBase = window.__INTELLICORE_API_BASE_URL__
+          || ((host.endsWith('github.io') || host.includes('intellicoretechnologies.in')) ? 'https://intellicore-six.vercel.app/api/v1' : '/api/v1');
+        const response = await fetch(apiBase.replace(/\/$/, '') + '/certificates/verify/' + encodeURIComponent(code));
         const resData = await response.json();
         const cert = resData.data;
 
@@ -276,8 +279,15 @@
       });
     }
 
-    // Auto-verify on page load if ?code= parameter is present in URL
+    // Attach CSP-compliant submit listener and auto-verify on page load if ?code= parameter is present in URL
     window.addEventListener('DOMContentLoaded', () => {
+      const verifyForm = document.getElementById('verifyForm');
+      if (verifyForm) {
+        verifyForm.addEventListener('submit', (event) => {
+          event.preventDefault();
+          performVerification();
+        });
+      }
       const params = new URLSearchParams(window.location.search);
       const code = params.get('code');
       if (code) {
